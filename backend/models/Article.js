@@ -76,6 +76,11 @@ const ArticleSchema = new mongoose.Schema(
       default: Date.now,
       index: { expires: '7d' },
     },
+    publishedAt: {
+      type: Date,
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,

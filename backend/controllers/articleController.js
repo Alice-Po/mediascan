@@ -32,10 +32,19 @@ export const getArticles = async (req, res) => {
 
     // Récupérer les articles
     const articles = await Article.find(query)
-      .sort({ publishedAt: -1 })
+      .sort({ pubDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate('sourceId');
+      .populate('sourceId', 'name faviconUrl url');
+
+    // Log pour vérifier l'ordre des articles
+    console.log(
+      'Articles sorted by date:',
+      articles.map((a) => ({
+        title: a.title.substring(0, 30),
+        pubDate: a.pubDate,
+      }))
+    );
 
     console.log(`Found ${articles.length} articles matching query`);
 
