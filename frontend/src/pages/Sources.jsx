@@ -114,7 +114,6 @@ const Sources = () => {
   // Gérer la sélection d'une suggestion
   const handleSuggestionSelect = async (source) => {
     try {
-      console.log('Selecting source:', source);
       await addOrEnableSource(source._id);
       setSearchTerm('');
       setSuggestions([]);

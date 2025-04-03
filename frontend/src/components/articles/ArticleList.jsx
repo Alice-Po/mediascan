@@ -9,14 +9,6 @@ import { saveArticle, unsaveArticle } from '../../api/articlesApi';
 const ArticleList = () => {
   const { articles, loadingArticles, hasMoreArticles, loadMoreArticles } = useContext(AppContext);
 
-  useEffect(() => {
-    console.log('ArticleList rendered with:', {
-      articlesCount: articles?.length,
-      loadingArticles,
-      hasMoreArticles,
-    });
-  }, [articles, loadingArticles, hasMoreArticles]);
-
   // Référence pour l'élément observé pour l'infinite scroll
   const observer = useRef();
 

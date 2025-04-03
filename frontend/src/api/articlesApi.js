@@ -12,9 +12,7 @@ import api from './index';
  */
 export const fetchArticles = async (params) => {
   try {
-    console.log('Calling articles API with params:', params);
     const response = await api.get('/articles', { params });
-    console.log('Articles API response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching articles:', error);

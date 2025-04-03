@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { CATEGORIES, ORIENTATIONS } from '../config/constants.js';
 
 const SourceSchema = new mongoose.Schema(
   {
@@ -24,40 +25,25 @@ const SourceSchema = new mongoose.Schema(
     categories: [
       {
         type: String,
-        enum: [
-          'politique',
-          'économie',
-          'société',
-          'culture',
-          'sport',
-          'sciences',
-          'technologie',
-          'environnement',
-          'santé',
-          'international',
-        ],
+        enum: CATEGORIES,
       },
     ],
     orientation: {
       political: {
         type: String,
-        enum: ['gauche', 'centre-gauche', 'centre', 'centre-droite', 'droite', 'non-spécifié'],
-        default: 'non-spécifié',
+        enum: ORIENTATIONS.political,
       },
       type: {
         type: String,
-        enum: ['mainstream', 'alternatif', 'non-spécifié'],
-        default: 'non-spécifié',
+        enum: ORIENTATIONS.type,
       },
       structure: {
         type: String,
-        enum: ['institutionnel', 'indépendant', 'non-spécifié'],
-        default: 'non-spécifié',
+        enum: ORIENTATIONS.structure,
       },
       scope: {
         type: String,
-        enum: ['généraliste', 'spécialisé', 'non-spécifié'],
-        default: 'non-spécifié',
+        enum: ORIENTATIONS.scope,
       },
     },
     defaultEnabled: {

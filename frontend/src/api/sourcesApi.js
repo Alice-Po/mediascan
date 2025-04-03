@@ -6,19 +6,13 @@ import api from './index';
  */
 export const fetchUserSources = async () => {
   try {
-    console.log('Fetching user sources...');
     const response = await api.get('/sources/user');
-    console.log('User sources API response:', {
-      status: response.status,
-      data: response.data,
-    });
 
     // S'assurer que les sources sont marquées comme enabled
     const sources = Array.isArray(response.data)
       ? response.data.map((source) => ({ ...source, enabled: true }))
       : [];
 
-    console.log('Processed user sources:', sources);
     return sources;
   } catch (error) {
     console.error('Error fetching user sources:', error);
@@ -32,9 +26,7 @@ export const fetchUserSources = async () => {
  */
 export const fetchAllSources = async () => {
   try {
-    console.log('Calling fetchAllSources API');
     const response = await api.get('/sources');
-    console.log('API response:', response);
     return response.data;
   } catch (error) {
     console.error('Error fetching sources:', error);
@@ -67,9 +59,7 @@ export const addUserSource = async (source) => {
  */
 export const updateUserSource = async (sourceId, data) => {
   try {
-    console.log('Updating source:', { sourceId, data });
     const response = await api.put(`/sources/user/${sourceId}`, data);
-    console.log('Update response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error updating source:', error);

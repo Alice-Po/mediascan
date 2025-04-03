@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { CATEGORIES } from '../config/constants.js';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -23,18 +24,7 @@ const UserSchema = new mongoose.Schema(
     interests: [
       {
         type: String,
-        enum: [
-          'politique',
-          'économie',
-          'société',
-          'culture',
-          'sport',
-          'sciences',
-          'tech',
-          'environnement',
-          'santé',
-          'international',
-        ],
+        enum: CATEGORIES,
       },
     ],
     activeSources: [

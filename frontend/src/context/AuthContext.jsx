@@ -42,14 +42,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log('AuthContext state updated:', {
-      isAuthenticated,
-      hasUser: !!user,
-      userId: user?._id,
-    });
-  }, [isAuthenticated, user]);
-
   const login = async (credentials) => {
     try {
       const data = await apiLogin(credentials);
@@ -66,10 +58,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const data = await apiRegister(userData);
-      console.log('Register response:', data);
       localStorage.setItem('token', data.token);
       setUser(data.user);
-      console.log('User set in context:', data.user);
       setError(null);
       return data;
     } catch (err) {
@@ -84,13 +74,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Ajoutons un effet pour surveiller les changements d'utilisateur
-  useEffect(() => {
-    console.log('AuthContext: user changed:', user);
-  }, [user]);
-
   const updateUser = (userData) => {
-    console.log('Updating user with:', userData);
     setUser(userData);
   };
 

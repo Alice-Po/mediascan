@@ -53,31 +53,17 @@ function AppProvider({ children }) {
     let mounted = true;
 
     const initializeSources = async () => {
-      console.log('Initializing sources with auth state:', {
-        hasUser: !!user,
-        userId: user?._id,
-        activeSources: user?.activeSources?.length,
-      });
-
       if (!user) {
-        console.log('No user, skipping source initialization');
         setLoadingSources(false);
         return;
       }
 
       try {
         setLoadingSources(true);
-        console.log('Starting to fetch sources for user:', user._id);
-
         const [userSourcesData, allSourcesData] = await Promise.all([
           fetchUserSources(),
           fetchAllSources(),
         ]);
-
-        console.log('Sources fetched:', {
-          userSourcesData,
-          allSourcesData,
-        });
 
         const formattedUserSources = Array.isArray(userSourcesData)
           ? userSourcesData.map((source) => ({ ...source, enabled: true }))
@@ -90,8 +76,6 @@ function AppProvider({ children }) {
         const activeSourceIds = formattedUserSources
           .filter((source) => source.enabled)
           .map((source) => source._id);
-
-        console.log('Setting initial filters with sources:', activeSourceIds);
 
         setFilters((prev) => ({
           ...prev,
@@ -117,14 +101,7 @@ function AppProvider({ children }) {
     let mounted = true;
 
     const loadArticles = async () => {
-      console.log('Loading articles with filters:', {
-        user: user?._id,
-        filters,
-        sourceCount: filters.sources?.length,
-      });
-
       if (!user || !filters.sources?.length) {
-        console.log('Skipping article load - no user or sources');
         setArticles([]);
         setLoadingArticles(false);
         return;
@@ -132,21 +109,10 @@ function AppProvider({ children }) {
 
       try {
         setLoadingArticles(true);
-        console.log('Fetching articles with params:', {
-          page: 1,
-          limit: 20,
-          ...filters,
-        });
-
         const data = await fetchArticles({
           page: 1,
           limit: 20,
           ...filters,
-        });
-
-        console.log('Articles response:', {
-          articleCount: data.articles?.length,
-          hasMore: data.hasMore,
         });
 
         if (!mounted) return;
@@ -226,8 +192,6 @@ function AppProvider({ children }) {
   // Fonction pour ajouter/activer une source
   const addOrEnableSource = async (sourceId) => {
     try {
-      console.log('Adding/enabling source:', sourceId);
-
       // Appeler l'API pour activer la source
       await updateUserSource(sourceId, { enabled: true });
 
@@ -235,7 +199,6 @@ function AppProvider({ children }) {
       const sourceToAdd = allSources.find((source) => source._id === sourceId);
 
       if (!sourceToAdd) {
-        console.error('Source not found:', sourceId);
         return;
       }
 
@@ -258,8 +221,6 @@ function AppProvider({ children }) {
         ...prev,
         sources: [...prev.sources, sourceId],
       }));
-
-      console.log('Source added/enabled successfully');
     } catch (error) {
       console.error('Error adding/enabling source:', error);
       throw error;
@@ -282,8 +243,6 @@ function AppProvider({ children }) {
         ...prev,
         sources: prev.sources.filter((id) => id !== sourceId),
       }));
-
-      console.log('Source disabled:', sourceId);
     } catch (error) {
       console.error('Error disabling source:', error);
       setError('Erreur lors de la désactivation de la source');

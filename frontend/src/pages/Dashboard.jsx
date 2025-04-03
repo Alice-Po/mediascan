@@ -54,10 +54,6 @@ const Dashboard = () => {
     };
   }, []); // Pas de dépendances car ces événements ne changent pas
 
-  useEffect(() => {
-    console.log('Dashboard mounted with user:', user);
-  }, [user]);
-
   if (loadingArticles) {
     return (
       <div className="flex justify-center items-center h-screen">

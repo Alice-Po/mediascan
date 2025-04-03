@@ -19,9 +19,6 @@ import Onboarding from '../pages/auth/Onboarding';
 const AppRoutes = () => {
   const { loading } = useAuth();
 
-  // Ajout d'un log pour debug
-  console.log('AppRoutes rendering, loading:', loading);
-
   if (loading) {
     return <div>Chargement...</div>;
   }
