@@ -71,13 +71,36 @@ const ProfileIcon = () => (
   </svg>
 );
 
+// Ajouter une icône pour la déconnexion
+const LogoutIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+    />
+  </svg>
+);
+
 const Navbar = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Rediriger vers la page de connexion
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
   };
 
   // Déterminer si on est sur desktop ou mobile
@@ -85,7 +108,7 @@ const Navbar = () => {
     return window.innerWidth < 768; // 768px est le breakpoint standard pour md dans Tailwind
   };
 
-  // Navigation items
+  // Navigation items (sans le bouton de déconnexion)
   const navItems = [
     { to: '/', label: 'Accueil', icon: <HomeIcon /> },
     { to: '/sources', label: 'Mes sources', icon: <SourcesIcon /> },
@@ -95,8 +118,8 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Navigation desktop (en haut) */}
-      <nav className="hidden md:block bg-white shadow-sm">
+      {/* Navigation desktop */}
+      <nav className="hidden md:block bg-white shadow-sm fixed w-full top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -109,7 +132,7 @@ const Navbar = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-md text-sm font-medium ${
+                    `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       isActive
                         ? 'text-primary bg-primary-light bg-opacity-10'
                         : 'text-gray-700 hover:text-primary'
@@ -121,7 +144,7 @@ const Navbar = () => {
               ))}
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary"
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-red-600 transition-colors"
               >
                 Déconnexion
               </button>
@@ -130,16 +153,18 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Navigation mobile (en bas) */}
-      <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-10">
-        <div className="grid grid-cols-4">
+      {/* Navigation mobile */}
+      <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-50">
+        <div className="grid grid-cols-5">
+          {' '}
+          {/* Changé de 4 à 5 colonnes */}
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-2 ${
-                  isActive ? 'text-primary' : 'text-gray-500'
+                `flex flex-col items-center justify-center py-2 transition-colors ${
+                  isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
                 }`
               }
             >
@@ -147,6 +172,16 @@ const Navbar = () => {
               <span className="text-xs mt-1">{item.label}</span>
             </NavLink>
           ))}
+          {/* Bouton de déconnexion mobile */}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center py-2 text-gray-500 hover:text-red-600 transition-colors"
+          >
+            <div className="h-6 w-6">
+              <LogoutIcon />
+            </div>
+            <span className="text-xs mt-1">Déconnexion</span>
+          </button>
         </div>
       </nav>
     </>
