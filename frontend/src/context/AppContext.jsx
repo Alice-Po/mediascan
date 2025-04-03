@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
+import { updateUserSource } from '../api/sourcesApi';
 
 // Création du contexte et du hook dans des constantes nommées
 const AppContext = createContext(null);
@@ -223,15 +224,27 @@ function AppProvider({ children }) {
   };
 
   // Fonction pour désactiver une source
-  const disableSource = (sourceId) => {
-    setUserSources((prev) =>
-      prev.map((source) => (source.id === sourceId ? { ...source, enabled: false } : source))
-    );
+  const disableSource = async (sourceId) => {
+    try {
+      // Appeler l'API pour désactiver la source
+      await updateUserSource(sourceId, { enabled: false });
 
-    setFilters((prev) => ({
-      ...prev,
-      sources: prev.sources.filter((id) => id !== sourceId),
-    }));
+      // Mettre à jour userSources
+      setUserSources((prev) =>
+        prev.map((source) => (source._id === sourceId ? { ...source, enabled: false } : source))
+      );
+
+      // Mettre à jour les filtres
+      setFilters((prev) => ({
+        ...prev,
+        sources: prev.sources.filter((id) => id !== sourceId),
+      }));
+
+      console.log('Source disabled:', sourceId);
+    } catch (error) {
+      console.error('Error disabling source:', error);
+      setError('Erreur lors de la désactivation de la source');
+    }
   };
 
   // Valeur du contexte

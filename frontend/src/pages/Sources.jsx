@@ -545,7 +545,10 @@ const Sources = () => {
                           {source.orientation.political}
                         </span>
                         <button
-                          onClick={() => disableSource(source._id)}
+                          onClick={() => {
+                            console.log('Disabling source:', source._id);
+                            disableSource(source._id);
+                          }}
                           className="text-sm text-gray-400 hover:text-red-600 transition-colors"
                           title="Retirer cette source"
                         >

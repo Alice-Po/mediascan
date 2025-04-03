@@ -67,9 +67,12 @@ export const addUserSource = async (source) => {
  */
 export const updateUserSource = async (sourceId, data) => {
   try {
+    console.log('Updating source:', { sourceId, data });
     const response = await api.put(`/sources/user/${sourceId}`, data);
+    console.log('Update response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Error updating source:', error);
     throw error;
   }
 };
