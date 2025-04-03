@@ -1,0 +1,43 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+// Layouts
+import MainLayout from '../layouts/MainLayout';
+import AuthLayout from '../layouts/AuthLayout';
+
+// Pages
+import Dashboard from '../pages/Dashboard';
+import Sources from '../pages/Sources';
+import Saved from '../pages/Saved';
+import Diversity from '../pages/Diversity';
+import Profile from '../pages/Profile';
+import Login from '../pages/auth/Login';
+import Register from '../pages/auth/Register';
+import Onboarding from '../pages/auth/Onboarding';
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Routes publiques */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Routes protégées */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="sources" element={<Sources />} />
+          <Route path="saved" element={<Saved />} />
+          <Route path="diversity" element={<Diversity />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
+        <Route path="onboarding" element={<Onboarding />} />
+      </Route>
+
+      {/* Redirection par défaut */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
+export default AppRoutes;

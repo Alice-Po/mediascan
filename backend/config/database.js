@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
+import 'dotenv/config';
 
 // URI de connexion MongoDB
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/news_aggregator';
+const MONGODB_URI = process.env.MONGODB_URI;
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
 
 // Options de connexion
 const options = {

@@ -11,6 +11,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Intercepteur pour ajouter le token d'authentification
@@ -64,6 +65,11 @@ api.interceptors.response.use(
       }
     }
 
+    console.error('Erreur API:', error);
+    if (error.response) {
+      // La requête a été faite et le serveur a répondu avec un code d'état
+      console.error("Données d'erreur:", error.response.data);
+    }
     return Promise.reject(error);
   }
 );

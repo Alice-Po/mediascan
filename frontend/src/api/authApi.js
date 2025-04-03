@@ -6,11 +6,12 @@ import api from './index';
  * @param {string} password - Mot de passe de l'utilisateur
  * @returns {Promise} Données de l'utilisateur et token
  */
-export const login = async (email, password) => {
+export const login = async (credentials) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/auth/login', credentials);
     return response.data;
   } catch (error) {
+    console.error('Erreur de connexion:', error);
     throw error;
   }
 };

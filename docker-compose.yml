@@ -15,8 +15,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=news_aggregator
     restart: always
-    networks:
-      - app-network
 
   # Service d'administration MongoDB (optionnel mais pratique)
   mongo-express:
@@ -33,17 +31,10 @@ services:
       - ME_CONFIG_BASICAUTH_USERNAME=dev
       - ME_CONFIG_BASICAUTH_PASSWORD=devpassword
       - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
-      - ME_CONFIG_MONGODB_URL=mongodb://admin:password@mongodb:27017/
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:password@localhost:27017/
     restart: always
-    networks:
-      - app-network
 
 # Définition des volumes persistants
 volumes:
   mongodb_data:
     name: news-aggregator-mongodb-data
-
-# Définition du réseau interne
-networks:
-  app-network:
-    driver: bridge
