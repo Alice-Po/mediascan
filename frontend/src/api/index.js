@@ -14,61 +14,25 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Intercepteur pour ajouter le token d'authentification
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Log pour debug
+api.interceptors.request.use((request) => {
+  console.log('Request:', request);
+  const token = localStorage.getItem('token');
+  if (token) {
+    request.headers.Authorization = `Bearer ${token}`;
+  }
+  return request;
+});
 
 // Intercepteur pour gérer les erreurs de token expiré
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Si l'erreur est 401 (non autorisé) et qu'il ne s'agit pas déjà d'une tentative de rafraîchissement
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // Essayer de rafraîchir le token
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          // Si pas de refresh token, déconnecter l'utilisateur
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-          return Promise.reject(error);
-        }
-
-        const response = await axios.post(`${API_URL}/auth/refresh`, {
-          refreshToken,
-        });
-
-        // Mettre à jour le token dans le localStorage
-        localStorage.setItem('token', response.data.token);
-
-        // Réessayer la requête originale avec le nouveau token
-        originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // Si le rafraîchissement échoue, déconnecter l'utilisateur
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
-    console.error('Erreur API:', error);
-    if (error.response) {
-      // La requête a été faite et le serveur a répondu avec un code d'état
-      console.error("Données d'erreur:", error.response.data);
+  (error) => {
+    console.error('Response Error:', error.response || error);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

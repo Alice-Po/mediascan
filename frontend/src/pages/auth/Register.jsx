@@ -84,11 +84,10 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(formData.name, formData.email, formData.password);
-      // La redirection est gérée dans le contexte d'authentification
-    } catch (error) {
-      // L'erreur est gérée dans le contexte d'authentification
-      console.error("Erreur lors de l'inscription:", error);
+      await register(formData);
+      navigate('/onboarding'); // ou '/' selon votre logique
+    } catch (err) {
+      console.error("Erreur lors de l'inscription:", err);
     } finally {
       setLoading(false);
     }

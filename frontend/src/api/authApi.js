@@ -18,16 +18,15 @@ export const login = async (credentials) => {
 
 /**
  * Inscription d'un nouvel utilisateur
- * @param {string} name - Nom de l'utilisateur
- * @param {string} email - Adresse email de l'utilisateur
- * @param {string} password - Mot de passe de l'utilisateur
+ * @param {Object} userData - Données d'inscription (name, email, password)
  * @returns {Promise} Données de l'utilisateur et token
  */
-export const register = async (name, email, password) => {
+export const register = async (userData) => {
   try {
-    const response = await api.post('/auth/register', { name, email, password });
+    const response = await api.post('/auth/register', userData);
     return response.data;
   } catch (error) {
+    console.error("Erreur d'inscription:", error);
     throw error;
   }
 };

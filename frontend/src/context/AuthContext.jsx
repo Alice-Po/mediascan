@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, getUserProfile } from '../api/authApi';
+import { login as apiLogin, register as apiRegister, getUserProfile } from '../api/authApi';
 
 // Création du contexte
 export const AuthContext = createContext(null);
@@ -52,6 +52,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (userData) => {
+    try {
+      const data = await apiRegister(userData);
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+      setError(null);
+      return data;
+    } catch (err) {
+      setError(err.message || "Erreur lors de l'inscription");
+      throw err;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -62,6 +75,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    register,
     logout,
   };
 
