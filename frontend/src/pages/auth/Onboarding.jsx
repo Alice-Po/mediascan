@@ -78,12 +78,18 @@ const Onboarding = () => {
 
   // Toggle pour une catégorie
   const toggleCategory = (category) => {
+    console.log('Toggle catégorie:', category);
+    console.log('Catégories actuelles:', selectedCategories);
+
     if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter((c) => c !== category));
+      const newCategories = selectedCategories.filter((c) => c !== category);
+      console.log('Nouvelles catégories après suppression:', newCategories);
+      setSelectedCategories(newCategories);
     } else {
-      // Limiter à 10 choix maximum
       if (selectedCategories.length < 10) {
-        setSelectedCategories([...selectedCategories, category]);
+        const newCategories = [...selectedCategories, category];
+        console.log('Nouvelles catégories après ajout:', newCategories);
+        setSelectedCategories(newCategories);
       }
     }
   };
@@ -144,33 +150,52 @@ const Onboarding = () => {
     setError(null);
 
     try {
-      // Filtrer les sources recommandées en fonction des catégories sélectionnées
-      const recommendedSourceIds = allSources
-        .filter((source) =>
-          source.categories.some((category) => selectedCategories.includes(category))
-        )
-        .map((source) => source.id);
-
-      // Envoyer les données d'onboarding
-      const userData = await completeOnboarding({
-        categories: selectedCategories,
-        sources: selectedSources.length > 0 ? selectedSources : recommendedSourceIds,
+      console.log('État final avant envoi:', {
+        selectedCategories,
+        selectedSources,
+        recommendedSources: recommendedSources.map((s) => ({
+          id: s._id,
+          name: s.name,
+          categories: s.categories,
+        })),
       });
 
-      console.log('Onboarding response:', userData);
+      const sourcesToSend =
+        selectedSources.length > 0 ? selectedSources : recommendedSources.map((s) => s._id);
 
-      // Mise à jour de l'utilisateur dans le contexte
+      const dataToSend = {
+        categories: selectedCategories,
+        sources: sourcesToSend,
+      };
+
+      console.log('Données à envoyer au serveur:', dataToSend);
+
+      const userData = await completeOnboarding(dataToSend);
+      console.log('Réponse du serveur:', userData);
+
+      // Vérifier que les données sont bien dans la réponse
+      if (userData.user) {
+        console.log('Données utilisateur mises à jour:', {
+          interests: userData.user.interests,
+          activeSources: userData.user.activeSources,
+        });
+      }
+
       updateUser({
         ...user,
         ...userData.user,
         onboardingCompleted: true,
       });
 
-      // Rediriger vers le dashboard
       navigate('/');
     } catch (err) {
+      console.error('Erreur complète:', err);
+      console.error("Détails de l'erreur:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
       setError("Erreur lors de la finalisation de l'onboarding");
-      console.error(err);
     } finally {
       setLoading(false);
     }

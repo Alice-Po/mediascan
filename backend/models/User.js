@@ -54,6 +54,10 @@ const UserSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -70,6 +74,12 @@ UserSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     // Hashe le mot de passe avec le salt
     this.password = await bcrypt.hash(this.password, salt);
+    console.log('Sauvegarde utilisateur:', {
+      id: this._id,
+      interests: this.interests,
+      activeSources: this.activeSources,
+      onboardingCompleted: this.onboardingCompleted,
+    });
     next();
   } catch (error) {
     next(error);

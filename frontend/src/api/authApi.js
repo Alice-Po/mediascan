@@ -53,9 +53,16 @@ export const refreshToken = async () => {
  */
 export const completeOnboarding = async (preferences) => {
   try {
+    console.log('Envoi des préférences onboarding:', preferences);
     const response = await api.post('/auth/onboarding', preferences);
+    console.log('Réponse onboarding API:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Erreur API onboarding:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
     throw error;
   }
 };

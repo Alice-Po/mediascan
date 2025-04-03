@@ -234,26 +234,35 @@ export const completeOnboarding = async (req, res) => {
     const userId = req.user._id;
     const { categories, sources } = req.body;
 
+    console.log('Données onboarding reçues:', {
+      userId,
+      categories,
+      sources,
+    });
+
     // Validation des données
     if (!categories || !Array.isArray(categories)) {
+      console.log('Validation échouée - catégories:', categories);
       return res.status(400).json({
         success: false,
         message: 'Les catégories sont requises et doivent être un tableau',
       });
     }
 
-    // Mise à jour de l'utilisateur
+    // Mise à jour de l'utilisateur avec les bons champs
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         $set: {
-          categories,
-          sources,
+          interests: categories,
+          activeSources: sources,
           onboardingCompleted: true,
         },
       },
       { new: true }
     ).select('-password');
+
+    console.log('Utilisateur mis à jour:', updatedUser);
 
     res.status(200).json({
       success: true,
@@ -261,7 +270,7 @@ export const completeOnboarding = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Erreur lors de l'onboarding:", error);
+    console.error('Erreur onboarding backend:', error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de la complétion de l'onboarding",

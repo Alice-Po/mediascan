@@ -23,6 +23,7 @@ function AppProvider({ children }) {
   const [userSources, setUserSources] = useState([]);
   const [allSources, setAllSources] = useState([]);
   const [loadingSources, setLoadingSources] = useState(true);
+  const [error, setError] = useState(null);
 
   // State pour les articles
   const [articles, setArticles] = useState([]);
@@ -48,16 +49,23 @@ function AppProvider({ children }) {
     let mounted = true;
 
     const initializeSources = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {
+        setLoadingSources(false);
+        return;
+      }
 
       try {
         setLoadingSources(true);
+        console.log('Chargement des sources...');
+
         const [userSourcesData, allSourcesData] = await Promise.all([
           fetchUserSources(),
           fetchAllSources(),
         ]);
 
         if (!mounted) return;
+
+        console.log('Sources chargées:', { userSourcesData, allSourcesData });
 
         setUserSources(userSourcesData);
         setAllSources(allSourcesData);
@@ -73,6 +81,9 @@ function AppProvider({ children }) {
         }
       } catch (err) {
         console.error('Erreur lors du chargement des sources:', err);
+        if (mounted) {
+          setError('Erreur lors du chargement des sources');
+        }
       } finally {
         if (mounted) {
           setLoadingSources(false);
@@ -85,7 +96,7 @@ function AppProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated]); // Dépendance uniquement à isAuthenticated
+  }, [isAuthenticated]);
 
   // Charger les articles quand les filtres changent
   useEffect(() => {
@@ -218,6 +229,7 @@ function AppProvider({ children }) {
     loadMoreArticles,
     addOrEnableSource,
     disableSource,
+    error,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

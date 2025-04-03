@@ -6,7 +6,8 @@ import { addUserSource, updateUserSource, deleteUserSource } from '../api/source
  * Page de gestion des sources
  */
 const Sources = () => {
-  const { userSources, allSources, loadingSources } = useContext(AppContext);
+  const { userSources, allSources, loadingSources, addOrEnableSource, disableSource } =
+    useContext(AppContext);
 
   // State pour la recherche et l'ajout de sources
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +26,7 @@ const Sources = () => {
   });
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Liste des catégories disponibles
   const categories = [
@@ -245,17 +247,33 @@ const Sources = () => {
     }
   };
 
-  // Afficher un message de chargement
+  // Log pour debug
+  useEffect(() => {
+    console.log('Sources component:', {
+      userSources,
+      allSources,
+      loadingSources,
+    });
+  }, [userSources, allSources, loadingSources]);
+
   if (loadingSources) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="sources-page">
+    <div className="container mx-auto px-4">
       {/* Barre de recherche et bouton d'ajout */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
         <div className="flex items-center mb-4">
