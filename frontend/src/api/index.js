@@ -24,16 +24,15 @@ api.interceptors.request.use((request) => {
   return request;
 });
 
-// Intercepteur pour gérer les erreurs de token expiré
+// Intercepteur pour les erreurs
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Response Error:', error.response || error);
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
-    }
+    console.error('Erreur API:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
     return Promise.reject(error);
   }
 );

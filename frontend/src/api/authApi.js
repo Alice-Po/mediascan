@@ -8,11 +8,13 @@ import api from './index';
  */
 export const login = async (credentials) => {
   try {
+    console.log('Tentative de connexion avec:', credentials);
     const response = await api.post('/auth/login', credentials);
+    console.log('Réponse du serveur:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Erreur de connexion:', error);
-    throw error;
+    console.error('Erreur détaillée:', error.response?.data || error.message);
+    throw error.response?.data || error;
   }
 };
 

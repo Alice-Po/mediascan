@@ -21,6 +21,9 @@ const Login = () => {
   // State pour l'état de chargement
   const [loading, setLoading] = useState(false);
 
+  // State pour l'état d'erreur
+  const [error, setError] = useState(null);
+
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,19 +62,26 @@ const Login = () => {
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
+    setError(null);
 
     try {
-      await login(formData.email, formData.password);
-      // La redirection est gérée dans le contexte d'authentification
-    } catch (error) {
-      // L'erreur est gérée dans le contexte d'authentification
-      console.error('Erreur lors de la connexion:', error);
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log('Connexion réussie:', result);
+      navigate('/');
+    } catch (err) {
+      console.error('Erreur lors de la connexion:', err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Une erreur s'est produite lors de la connexion"
+      );
     } finally {
       setLoading(false);
     }
@@ -92,9 +102,7 @@ const Login = () => {
         {/* Formulaire */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Message d'erreur */}
-          {authError && (
-            <div className="bg-red-100 text-red-700 p-3 rounded-md text-sm">{authError}</div>
-          )}
+          {error && <div className="bg-red-100 text-red-700 p-3 rounded-md text-sm">{error}</div>}
 
           <div className="rounded-md shadow-sm -space-y-px">
             {/* Email */}
