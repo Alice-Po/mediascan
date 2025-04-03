@@ -5,6 +5,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { fetchAllSources } from './services/rssFetcher.js';
+import config from './config/config.js';
+
 dotenv.config();
 
 // Configuration ES modules
@@ -13,7 +17,6 @@ const __dirname = dirname(__filename);
 
 // Import des configurations et services
 import connectDB from './config/database.js';
-import { fetchAllSources } from './services/rssFetcher.js';
 
 // Import des routes
 import authRoutes from './routes/authRoutes.js';
@@ -27,20 +30,20 @@ const PORT = process.env.PORT || 5000;
 // Initialisation de l'application Express
 const app = express();
 
-// Connexion à la base de données
-connectDB();
-
 // Middleware
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL
+        : ['http://localhost:5173', 'http://127.0.0.1:5173'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   })
 );
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -66,7 +69,7 @@ app.use((err, req, res, next) => {
 // Planification des tâches (CRON)
 // Récupération des articles RSS toutes les 30 minutes
 cron.schedule('*/30 * * * *', async () => {
-  console.log('Exécution de la tâche planifiée: récupération des flux RSS');
+  console.log('Exécution du service: récupération des flux RSS');
   try {
     await fetchAllSources();
     console.log('Récupération des flux RSS terminée avec succès');
@@ -75,10 +78,23 @@ cron.schedule('*/30 * * * *', async () => {
   }
 });
 
-// Démarrage du serveur
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
+// Exécuter la récupération des flux RSS au démarrage
+fetchAllSources().catch((error) => {
+  console.error('Erreur lors de la récupération initiale des flux RSS:', error);
 });
+
+// Initialiser les jobs après la connexion à la base de données
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });
 
 // Gestion de l'arrêt propre du serveur
 process.on('SIGTERM', () => {

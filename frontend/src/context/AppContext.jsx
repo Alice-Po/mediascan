@@ -79,38 +79,29 @@ function AppProvider({ children }) {
           allSourcesData,
         });
 
-        // S'assurer que les sources sont dans le bon format et marquées comme enabled
         const formattedUserSources = Array.isArray(userSourcesData)
           ? userSourcesData.map((source) => ({ ...source, enabled: true }))
           : [];
 
-        const formattedAllSources = Array.isArray(allSourcesData.data) ? allSourcesData.data : [];
-
-        console.log('Formatted sources:', {
-          formattedUserSources,
-          formattedAllSources,
-        });
-
         setUserSources(formattedUserSources);
-        setAllSources(formattedAllSources);
+        setAllSources(allSourcesData.data);
 
-        // Initialiser les filtres avec les sources actives
-        if (user.activeSources?.length > 0) {
-          console.log('Setting filters with active sources:', user.activeSources);
-          setFilters((prev) => ({
-            ...prev,
-            sources: user.activeSources,
-          }));
-        }
+        // Initialiser les filtres avec les IDs des sources actives
+        const activeSourceIds = formattedUserSources
+          .filter((source) => source.enabled)
+          .map((source) => source._id);
+
+        console.log('Setting initial filters with sources:', activeSourceIds);
+
+        setFilters((prev) => ({
+          ...prev,
+          sources: activeSourceIds,
+        }));
       } catch (err) {
         console.error('Error loading sources:', err);
-        if (mounted) {
-          setError('Erreur lors du chargement des sources');
-        }
+        setError('Erreur lors du chargement des sources');
       } finally {
-        if (mounted) {
-          setLoadingSources(false);
-        }
+        setLoadingSources(false);
       }
     };
 
@@ -126,23 +117,41 @@ function AppProvider({ children }) {
     let mounted = true;
 
     const loadArticles = async () => {
+      console.log('Loading articles with filters:', {
+        user: user?._id,
+        filters,
+        sourceCount: filters.sources?.length,
+      });
+
       if (!user || !filters.sources?.length) {
-        setArticles([]); // S'assurer qu'on retourne un tableau vide
+        console.log('Skipping article load - no user or sources');
+        setArticles([]);
         setLoadingArticles(false);
         return;
       }
 
       try {
         setLoadingArticles(true);
+        console.log('Fetching articles with params:', {
+          page: 1,
+          limit: 20,
+          ...filters,
+        });
+
         const data = await fetchArticles({
           page: 1,
           limit: 20,
           ...filters,
         });
 
+        console.log('Articles response:', {
+          articleCount: data.articles?.length,
+          hasMore: data.hasMore,
+        });
+
         if (!mounted) return;
 
-        setArticles(data.articles || []); // S'assurer qu'on a toujours un tableau
+        setArticles(data.articles || []);
         setHasMoreArticles(data.hasMore);
         setArticlesPage(1);
       } catch (err) {

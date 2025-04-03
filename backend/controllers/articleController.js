@@ -9,98 +9,43 @@ import config from '../config/config.js';
 // @access  Private
 export const getArticles = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = config.limits.maxArticlesPerPage,
-      categories,
-      orientation,
-      sources,
-      search,
-    } = req.query;
+    console.log('Getting articles with query:', req.query);
 
-    // Conversion des paramètres
-    const pageNum = parseInt(page, 10);
-    const limitNum = Math.min(parseInt(limit, 10), config.limits.maxArticlesPerPage);
-    const skip = (pageNum - 1) * limitNum;
+    const { page = 1, limit = 20, sources, categories } = req.query;
 
-    // Construction du filtre
-    const filter = {};
+    // Vérifier que l'utilisateur a des sources actives
+    const user = await User.findById(req.user._id).populate('activeSources');
+    console.log('User active sources:', user.activeSources);
 
-    // Récupération des sources actives de l'utilisateur
-    const user = await User.findById(req.user._id);
-    const userSourceIds = user.activeSources;
+    // Construire la requête
+    const query = {};
 
-    // Filtre par sources
-    if (sources) {
-      const sourceArray = sources.split(',');
-      // Intersection avec les sources actives de l'utilisateur
-      filter.sourceId = { $in: sourceArray.filter((id) => userSourceIds.includes(id)) };
-    } else {
-      // Par défaut, uniquement les sources actives de l'utilisateur
-      filter.sourceId = { $in: userSourceIds };
+    // Si des sources sont spécifiées dans la requête, les utiliser
+    // Sinon, utiliser toutes les sources actives de l'utilisateur
+    if (sources && sources.length) {
+      query.sourceId = { $in: sources.split(',') };
+    } else if (user.activeSources.length) {
+      query.sourceId = { $in: user.activeSources.map((s) => s._id) };
     }
 
-    // Filtre par catégories
-    if (categories) {
-      const categoriesArray = categories.split(',');
-      filter.categories = { $in: categoriesArray };
-    }
+    console.log('Article query:', query);
 
-    // Filtre par orientation
-    if (orientation) {
-      const orientationObj = JSON.parse(orientation);
+    // Récupérer les articles
+    const articles = await Article.find(query)
+      .sort({ publishedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate('sourceId');
 
-      for (const [key, value] of Object.entries(orientationObj)) {
-        if (value) {
-          filter[`orientation.${key}`] = value;
-        }
-      }
-    }
+    console.log(`Found ${articles.length} articles matching query`);
 
-    // Filtre par recherche texte
-    if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { contentSnippet: { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    // Exécution de la requête
-    const articles = await Article.find(filter)
-      .sort({ pubDate: -1 })
-      .skip(skip)
-      .limit(limitNum)
-      .populate('sourceId', 'name faviconUrl url');
-
-    // Comptage total des articles (pour la pagination)
-    const total = await Article.countDocuments(filter);
-
-    // Enregistrement de l'événement analytique (application de filtres)
-    if (categories || orientation || sources || search) {
-      await Analytics.create({
-        userId: req.user._id,
-        eventType: 'filterApply',
-        metadata: {
-          filters: {
-            categories: categories ? categories.split(',') : null,
-            orientation: orientation ? JSON.parse(orientation) : null,
-            sources: sources ? sources.split(',') : null,
-            search: search || null,
-          },
-        },
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      count: articles.length,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      currentPage: pageNum,
-      data: articles,
+    res.json({
+      articles,
+      hasMore: articles.length === parseInt(limit),
+      total: await Article.countDocuments(query),
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération des articles:', error);
+    console.error('Error in getArticles:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération des articles',

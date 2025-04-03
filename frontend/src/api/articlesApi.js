@@ -10,11 +10,14 @@ import api from './index';
  * @param {Array} filters.orientation - Orientations (format: "type:valeur")
  * @returns {Promise} Articles filtrés et informations de pagination
  */
-export const fetchArticles = async (filters = {}) => {
+export const fetchArticles = async (params) => {
   try {
-    const response = await api.get('/articles', { params: filters });
+    console.log('Calling articles API with params:', params);
+    const response = await api.get('/articles', { params });
+    console.log('Articles API response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Error fetching articles:', error);
     throw error;
   }
 };

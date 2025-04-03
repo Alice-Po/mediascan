@@ -30,7 +30,7 @@ const UserSchema = new mongoose.Schema(
           'culture',
           'sport',
           'sciences',
-          'technologie',
+          'tech',
           'environnement',
           'santé',
           'international',

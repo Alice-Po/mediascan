@@ -1,4 +1,4 @@
-export default {
+const config = {
   // Configuration JWT
   jwt: {
     secret: process.env.JWT_SECRET || 'news-aggregator-secret-dev-key',
@@ -10,7 +10,7 @@ export default {
   limits: {
     maxUserSources: 10,
     articleRetentionDays: 7,
-    maxArticlesPerPage: 20,
+    maxArticlesPerPage: 50,
   },
 
   // Catégories disponibles
@@ -34,4 +34,8 @@ export default {
     structure: ['institutionnel', 'indépendant', 'non-spécifié'],
     scope: ['généraliste', 'spécialisé', 'non-spécifié'],
   },
+
+  mongoUri: process.env.MONGODB_URI,
 };
+
+export default config;
