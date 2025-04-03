@@ -212,15 +212,46 @@ function AppProvider({ children }) {
   };
 
   // Fonction pour ajouter/activer une source
-  const addOrEnableSource = (sourceId) => {
-    setUserSources((prev) =>
-      prev.map((source) => (source.id === sourceId ? { ...source, enabled: true } : source))
-    );
+  const addOrEnableSource = async (sourceId) => {
+    try {
+      console.log('Adding/enabling source:', sourceId);
 
-    setFilters((prev) => ({
-      ...prev,
-      sources: [...prev.sources, sourceId],
-    }));
+      // Appeler l'API pour activer la source
+      await updateUserSource(sourceId, { enabled: true });
+
+      // Trouver la source dans allSources
+      const sourceToAdd = allSources.find((source) => source._id === sourceId);
+
+      if (!sourceToAdd) {
+        console.error('Source not found:', sourceId);
+        return;
+      }
+
+      // Ajouter la source aux sources actives de l'utilisateur
+      setUserSources((prev) => {
+        // Vérifier si la source existe déjà
+        const exists = prev.some((source) => source._id === sourceId);
+        if (exists) {
+          // Mettre à jour enabled à true si la source existe
+          return prev.map((source) =>
+            source._id === sourceId ? { ...source, enabled: true } : source
+          );
+        }
+        // Ajouter la nouvelle source si elle n'existe pas
+        return [...prev, { ...sourceToAdd, enabled: true }];
+      });
+
+      // Mettre à jour les filtres pour inclure la nouvelle source
+      setFilters((prev) => ({
+        ...prev,
+        sources: [...prev.sources, sourceId],
+      }));
+
+      console.log('Source added/enabled successfully');
+    } catch (error) {
+      console.error('Error adding/enabling source:', error);
+      throw error;
+    }
   };
 
   // Fonction pour désactiver une source

@@ -27,6 +27,9 @@ const Sources = () => {
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Liste des catégories disponibles
   const categories = [
@@ -59,21 +62,81 @@ const Sources = () => {
           source.categories.some((cat) => cat.toLowerCase().includes(searchTerm.toLowerCase()))
       );
 
-  // Suggestions de sources à ajouter
-  const sourceSuggestions = !searchTerm
-    ? []
-    : allSources
+  // Gérer la recherche et les suggestions
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setSelectedIndex(-1);
+
+    if (value.trim()) {
+      const filtered = allSources
         .filter(
           (source) =>
-            !userSources.some((userSource) => userSource.id === source.id) &&
-            source.name.toLowerCase().includes(searchTerm.toLowerCase())
+            source.name.toLowerCase().includes(value.toLowerCase()) &&
+            !userSources.some((us) => us._id === source._id && us.enabled)
         )
-        .slice(0, 5);
-
-  // Gérer le changement dans le champ de recherche
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+        .slice(0, 5); // Limiter à 5 suggestions
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   };
+
+  // Gérer la navigation au clavier
+  const handleKeyDown = (e) => {
+    if (!showSuggestions) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0) {
+          handleSuggestionSelect(suggestions[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Gérer la sélection d'une suggestion
+  const handleSuggestionSelect = async (source) => {
+    try {
+      console.log('Selecting source:', source);
+      await addOrEnableSource(source._id);
+      setSearchTerm('');
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedIndex(-1);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la source:", error);
+      setError("Erreur lors de l'ajout de la source");
+    }
+  };
+
+  // Fermer les suggestions quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowSuggestions(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   // Gérer l'activation/désactivation d'une source
   const handleToggleSource = async (sourceId, enabled) => {
@@ -275,7 +338,7 @@ const Sources = () => {
 
   return (
     <div className="container mx-auto px-4">
-      {/* Barre de recherche et bouton d'ajout */}
+      {/* Barre de recherche avec autocomplétion */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
         <div className="flex items-center mb-4">
           <div className="relative flex-grow">
@@ -285,11 +348,22 @@ const Sources = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               value={searchTerm}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (suggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
             />
             {searchTerm && (
               <button
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                onClick={() => setSearchTerm('')}
+                onClick={() => {
+                  setSearchTerm('');
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -305,6 +379,34 @@ const Sources = () => {
                 </svg>
               </button>
             )}
+            {/* Liste des suggestions */}
+            {showSuggestions && suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto">
+                {suggestions.map((source, index) => (
+                  <li
+                    key={source._id}
+                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center ${
+                      index === selectedIndex ? 'bg-gray-100' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSuggestionSelect(source);
+                    }}
+                  >
+                    {source.faviconUrl && (
+                      <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />
+                    )}
+                    <div>
+                      <div className="font-medium">{source.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {source.categories.slice(0, 2).join(', ')}
+                        {source.categories.length > 2 && '...'}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <button
             className="ml-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
@@ -313,34 +415,6 @@ const Sources = () => {
             {showAddForm ? 'Annuler' : 'Ajouter'}
           </button>
         </div>
-
-        {/* Suggestions de sources à ajouter */}
-        {searchTerm && sourceSuggestions.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Suggestions</h3>
-            <ul className="space-y-2">
-              {sourceSuggestions.map((source) => (
-                <li
-                  key={source._id}
-                  className="flex items-center justify-between bg-gray-50 p-2 rounded-md"
-                >
-                  <div className="flex items-center">
-                    {source.faviconUrl && (
-                      <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />
-                    )}
-                    <span>{source.name}</span>
-                  </div>
-                  <button
-                    className="px-2 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600"
-                    onClick={() => handleAddSuggestion(source._id)}
-                  >
-                    Ajouter
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {/* Formulaire d'ajout de source personnalisée */}
         {showAddForm && (
