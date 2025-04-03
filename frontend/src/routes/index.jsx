@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
-
+import { useAuth } from '../context/AuthContext';
 // Pages
 import Dashboard from '../pages/Dashboard';
 import Sources from '../pages/Sources';
@@ -16,6 +16,14 @@ import Register from '../pages/auth/Register';
 import Onboarding from '../pages/auth/Onboarding';
 
 const AppRoutes = () => {
+  const { loading } = useAuth();
+
+  // Ajout d'un log pour debug
+  console.log('AppRoutes rendering, loading:', loading);
+
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
   return (
     <Routes>
       {/* Routes publiques */}
@@ -24,6 +32,9 @@ const AppRoutes = () => {
 
       {/* Routes protégées */}
       <Route element={<AuthLayout />}>
+        {/* Route d'onboarding */}
+        <Route path="/onboarding" element={<Onboarding />} />
+
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="sources" element={<Sources />} />
@@ -31,7 +42,6 @@ const AppRoutes = () => {
           <Route path="diversity" element={<Diversity />} />
           <Route path="profile" element={<Profile />} />
         </Route>
-        <Route path="onboarding" element={<Onboarding />} />
       </Route>
 
       {/* Redirection par défaut */}

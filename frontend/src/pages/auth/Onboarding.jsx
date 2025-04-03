@@ -8,6 +8,8 @@ import { completeOnboarding } from '../../api/authApi';
  * Page d'onboarding pour les nouveaux utilisateurs
  */
 const Onboarding = () => {
+  console.log('Onboarding component rendering');
+
   const { user, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -48,15 +50,30 @@ const Onboarding = () => {
   useEffect(() => {
     const loadSources = async () => {
       try {
+        console.log('Fetching sources...');
         const sources = await fetchAllSources();
-        setAllSources(sources);
+        console.log('Received sources:', sources);
+        // Vérifier que sources est bien un tableau
+        if (Array.isArray(sources)) {
+          setAllSources(sources);
+        } else if (sources.data && Array.isArray(sources.data)) {
+          setAllSources(sources.data);
+        } else {
+          console.error('Sources received is not an array:', sources);
+          setAllSources([]);
+        }
       } catch (err) {
+        console.error('Erreur lors du chargement des sources:', err);
         setError('Erreur lors du chargement des sources');
-        console.error(err);
+        setAllSources([]);
       }
     };
 
     loadSources();
+  }, []);
+
+  useEffect(() => {
+    console.log('Onboarding mounted with user:', user);
   }, []);
 
   // Toggle pour une catégorie
@@ -140,9 +157,13 @@ const Onboarding = () => {
   };
 
   // Filtrer les sources recommandées basées sur les catégories sélectionnées
-  const recommendedSources = allSources
-    .filter((source) => source.categories.some((category) => selectedCategories.includes(category)))
-    .slice(0, 10); // Limiter à 10 sources recommandées
+  const recommendedSources = Array.isArray(allSources)
+    ? allSources
+        .filter((source) =>
+          source.categories.some((category) => selectedCategories.includes(category))
+        )
+        .slice(0, 10)
+    : [];
 
   return (
     <div className="max-w-lg mx-auto p-4">

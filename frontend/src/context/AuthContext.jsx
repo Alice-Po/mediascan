@@ -55,11 +55,14 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const data = await apiRegister(userData);
+      console.log('Register response:', data);
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      console.log('User set in context:', data.user);
       setError(null);
       return data;
     } catch (err) {
+      console.error('Register error:', err);
       setError(err.message || "Erreur lors de l'inscription");
       throw err;
     }
@@ -69,6 +72,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
   };
+
+  // Ajoutons un effet pour surveiller les changements d'utilisateur
+  useEffect(() => {
+    console.log('AuthContext: user changed:', user);
+  }, [user]);
 
   const value = {
     user,
