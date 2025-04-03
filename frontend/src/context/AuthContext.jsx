@@ -19,6 +19,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Calculer isAuthenticated en fonction de la présence de l'utilisateur
+  const isAuthenticated = !!user;
+
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté au chargement
     const token = localStorage.getItem('token');
@@ -38,6 +41,14 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    console.log('AuthContext state updated:', {
+      isAuthenticated,
+      hasUser: !!user,
+      userId: user?._id,
+    });
+  }, [isAuthenticated, user]);
 
   const login = async (credentials) => {
     try {
@@ -87,6 +98,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
+    isAuthenticated,
     login,
     register,
     logout,

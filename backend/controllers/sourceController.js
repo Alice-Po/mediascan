@@ -49,26 +49,41 @@ export const getAllSources = async (req, res) => {
 // @access  Private
 export const getUserSources = async (req, res) => {
   try {
-    // Récupération de l'utilisateur avec ses sources actives
-    const user = await User.findById(req.user._id).populate('activeSources');
+    const userId = req.user._id;
+    console.log('Getting sources for user:', userId);
+
+    // Récupérer l'utilisateur avec ses sources actives
+    const user = await User.findById(userId).populate('activeSources').select('activeSources');
+
+    console.log('Found user sources:', {
+      userId,
+      activeSources: user?.activeSources,
+      sourceCount: user?.activeSources?.length,
+    });
 
     if (!user) {
+      console.log('User not found:', userId);
       return res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé',
       });
     }
 
-    res.status(200).json({
-      success: true,
-      count: user.activeSources.length,
-      data: user.activeSources,
-    });
+    // Marquer les sources comme enabled
+    const enabledSources = user.activeSources.map((source) => ({
+      ...source.toObject(),
+      enabled: true,
+    }));
+
+    console.log('Sending enabled sources:', enabledSources);
+
+    // Retourner les sources actives
+    res.status(200).json(enabledSources);
   } catch (error) {
-    console.error("Erreur lors de la récupération des sources de l'utilisateur:", error);
+    console.error('Error in getUserSources:', error);
     res.status(500).json({
       success: false,
-      message: "Erreur lors de la récupération des sources de l'utilisateur",
+      message: 'Erreur lors de la récupération des sources',
       error: error.message,
     });
   }

@@ -6,9 +6,22 @@ import api from './index';
  */
 export const fetchUserSources = async () => {
   try {
+    console.log('Fetching user sources...');
     const response = await api.get('/sources/user');
-    return response.data;
+    console.log('User sources API response:', {
+      status: response.status,
+      data: response.data,
+    });
+
+    // S'assurer que les sources sont marquées comme enabled
+    const sources = Array.isArray(response.data)
+      ? response.data.map((source) => ({ ...source, enabled: true }))
+      : [];
+
+    console.log('Processed user sources:', sources);
+    return sources;
   } catch (error) {
+    console.error('Error fetching user sources:', error);
     throw error;
   }
 };

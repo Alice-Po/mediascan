@@ -82,7 +82,7 @@ const Sources = () => {
 
       // Mettre à jour le state local (dans un vrai scénario, on mettrait à jour le context global)
       const updatedSources = userSources.map((source) =>
-        source.id === sourceId ? { ...source, enabled: !enabled } : source
+        source._id === sourceId ? { ...source, enabled: !enabled } : source
       );
       // Dans une application réelle, on mettrait à jour le context AppContext
     } catch (error) {
@@ -97,7 +97,7 @@ const Sources = () => {
         await deleteUserSource(sourceId);
 
         // Mettre à jour le state local (dans un vrai scénario, on mettrait à jour le context global)
-        const updatedSources = userSources.filter((source) => source.id !== sourceId);
+        const updatedSources = userSources.filter((source) => source._id !== sourceId);
         // Dans une application réelle, on mettrait à jour le context AppContext
       } catch (error) {
         console.error('Erreur lors de la suppression de la source:', error);
@@ -249,8 +249,9 @@ const Sources = () => {
 
   // Log pour debug
   useEffect(() => {
-    console.log('Sources component:', {
+    console.log('Sources component data:', {
       userSources,
+      userSourcesEnabled: userSources.filter((source) => source.enabled),
       allSources,
       loadingSources,
     });
@@ -320,7 +321,7 @@ const Sources = () => {
             <ul className="space-y-2">
               {sourceSuggestions.map((source) => (
                 <li
-                  key={source.id}
+                  key={source._id}
                   className="flex items-center justify-between bg-gray-50 p-2 rounded-md"
                 >
                   <div className="flex items-center">
@@ -331,7 +332,7 @@ const Sources = () => {
                   </div>
                   <button
                     className="px-2 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600"
-                    onClick={() => handleAddSuggestion(source.id)}
+                    onClick={() => handleAddSuggestion(source._id)}
                   >
                     Ajouter
                   </button>
@@ -501,116 +502,74 @@ const Sources = () => {
         )}
       </div>
 
-      {/* Liste des sources */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">Mes sources</h2>
-
-        {filteredSources.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
-            {searchTerm
-              ? 'Aucune source ne correspond à votre recherche.'
-              : "Vous n'avez pas encore de sources."}
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {filteredSources.map((source) => (
-              <li
-                key={source.id}
-                className={`flex items-center justify-between p-3 rounded-md ${
-                  source.enabled ? 'bg-white' : 'bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center">
-                  {/* Favicon et nom */}
-                  <div className="flex items-center">
-                    {source.faviconUrl && (
-                      <img src={source.faviconUrl} alt="" className="w-6 h-6 mr-3" />
-                    )}
-                    <div>
-                      <h3 className="font-medium">{source.name}</h3>
-                      <p className="text-xs text-gray-500">
-                        {source.categories.slice(0, 3).join(', ')}
-                        {source.categories.length > 3 && '...'}
-                      </p>
+      {/* Sources actives */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Mes sources</h2>
+        <div className="bg-white rounded-lg shadow-sm">
+          {userSources.filter((source) => source.enabled).length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">Vous n'avez pas encore de sources actives</p>
+              <a href="/onboarding" className="text-primary hover:text-primary-dark underline">
+                Ajouter des sources
+              </a>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {userSources
+                .filter((source) => source.enabled)
+                .map((source) => (
+                  <li key={source._id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        {source.faviconUrl && (
+                          <img src={source.faviconUrl} alt="" className="w-6 h-6" />
+                        )}
+                        <div>
+                          <h3 className="font-medium text-gray-900">{source.name}</h3>
+                          <p className="text-sm text-gray-500">
+                            {source.categories.slice(0, 3).join(', ')}
+                            {source.categories.length > 3 && '...'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            source.orientation.political === 'gauche'
+                              ? 'bg-red-100 text-red-700'
+                              : source.orientation.political === 'centre'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}
+                        >
+                          {source.orientation.political}
+                        </span>
+                        <button
+                          onClick={() => disableSource(source._id)}
+                          className="text-sm text-gray-400 hover:text-red-600 transition-colors"
+                          title="Retirer cette source"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center space-x-2">
-                  {/* Indicateur d'orientation */}
-                  <span
-                    className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      source.orientation.political === 'gauche'
-                        ? 'bg-red-100 text-red-700'
-                        : source.orientation.political === 'centre'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-blue-100 text-blue-700'
-                    }`}
-                  >
-                    {source.orientation.political}
-                  </span>
-
-                  {/* Toggle d'activation */}
-                  <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                    <input
-                      type="checkbox"
-                      id={`toggle-${source.id}`}
-                      className="opacity-0 absolute"
-                      checked={source.enabled}
-                      onChange={() => handleToggleSource(source.id, source.enabled)}
-                    />
-                    <label
-                      htmlFor={`toggle-${source.id}`}
-                      className={`block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ease-in-out ${
-                        source.enabled ? 'bg-primary' : 'bg-gray-300'
-                      }`}
-                    >
-                      <span
-                        className={`block h-6 w-6 rounded-full transform transition-transform duration-200 ease-in-out ${
-                          source.enabled ? 'translate-x-4 bg-white' : 'translate-x-0 bg-white'
-                        }`}
-                      ></span>
-                    </label>
-                  </div>
-
-                  {/* Bouton de suppression (uniquement pour les sources personnalisées) */}
-                  {source.isUserAdded && (
-                    <button
-                      onClick={() => handleDeleteSource(source.id)}
-                      className="p-1 rounded-full text-red-500 hover:bg-red-50"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Limite de sources personnalisées */}
-        <div className="mt-6 bg-gray-50 p-3 rounded-md">
-          <p className="text-sm text-gray-500">
-            Vous pouvez ajouter jusqu'à 10 sources personnalisées en version gratuite.
-            <br />
-            <span className="font-medium">
-              {userSources.filter((source) => source.isUserAdded).length}/10 sources utilisées
-            </span>
-          </p>
+                  </li>
+                ))}
+            </ul>
+          )}
         </div>
-      </div>
+      </section>
     </div>
   );
 };

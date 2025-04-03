@@ -17,7 +17,7 @@ function useApp() {
 
 // Provider dans une fonction nommée
 function AppProvider({ children }) {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   // State pour les sources
   const [userSources, setUserSources] = useState([]);
@@ -49,38 +49,57 @@ function AppProvider({ children }) {
     let mounted = true;
 
     const initializeSources = async () => {
-      if (!isAuthenticated) {
+      console.log('Initializing sources with auth state:', {
+        hasUser: !!user,
+        userId: user?._id,
+        activeSources: user?.activeSources?.length,
+      });
+
+      if (!user) {
+        console.log('No user, skipping source initialization');
         setLoadingSources(false);
         return;
       }
 
       try {
         setLoadingSources(true);
-        console.log('Chargement des sources...');
+        console.log('Starting to fetch sources for user:', user._id);
 
         const [userSourcesData, allSourcesData] = await Promise.all([
           fetchUserSources(),
           fetchAllSources(),
         ]);
 
-        if (!mounted) return;
+        console.log('Sources fetched:', {
+          userSourcesData,
+          allSourcesData,
+        });
 
-        console.log('Sources chargées:', { userSourcesData, allSourcesData });
+        // S'assurer que les sources sont dans le bon format et marquées comme enabled
+        const formattedUserSources = Array.isArray(userSourcesData)
+          ? userSourcesData.map((source) => ({ ...source, enabled: true }))
+          : [];
 
-        setUserSources(userSourcesData);
-        setAllSources(allSourcesData);
+        const formattedAllSources = Array.isArray(allSourcesData.data) ? allSourcesData.data : [];
 
-        // Initialiser les filtres une seule fois avec les sources actives
-        if (filters.sources.length === 0) {
-          const activeSources = userSourcesData.filter((s) => s.enabled).map((s) => s.id);
+        console.log('Formatted sources:', {
+          formattedUserSources,
+          formattedAllSources,
+        });
 
+        setUserSources(formattedUserSources);
+        setAllSources(formattedAllSources);
+
+        // Initialiser les filtres avec les sources actives
+        if (user.activeSources?.length > 0) {
+          console.log('Setting filters with active sources:', user.activeSources);
           setFilters((prev) => ({
             ...prev,
-            sources: activeSources,
+            sources: user.activeSources,
           }));
         }
       } catch (err) {
-        console.error('Erreur lors du chargement des sources:', err);
+        console.error('Error loading sources:', err);
         if (mounted) {
           setError('Erreur lors du chargement des sources');
         }
@@ -96,14 +115,14 @@ function AppProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated]);
+  }, [user]);
 
   // Charger les articles quand les filtres changent
   useEffect(() => {
     let mounted = true;
 
     const loadArticles = async () => {
-      if (!isAuthenticated || !filters.sources?.length) {
+      if (!user || !filters.sources?.length) {
         setArticles([]);
         setLoadingArticles(false);
         return;
@@ -136,7 +155,7 @@ function AppProvider({ children }) {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated, JSON.stringify(filters)]);
+  }, [user, JSON.stringify(filters)]);
 
   // Fonction pour charger plus d'articles
   const loadMoreArticles = async () => {
