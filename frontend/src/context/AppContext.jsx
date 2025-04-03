@@ -26,9 +26,9 @@ function AppProvider({ children }) {
   const [loadingSources, setLoadingSources] = useState(true);
   const [error, setError] = useState(null);
 
-  // State pour les articles
+  // State pour les articles avec un tableau vide par défaut
   const [articles, setArticles] = useState([]);
-  const [loadingArticles, setLoadingArticles] = useState(true);
+  const [loadingArticles, setLoadingArticles] = useState(false);
   const [articlesPage, setArticlesPage] = useState(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
 
@@ -44,6 +44,9 @@ function AppProvider({ children }) {
     },
     searchTerm: '',
   });
+
+  // Ajout du state pour les thématiques
+  const [userInterests, setUserInterests] = useState([]);
 
   // Charger les sources initiales
   useEffect(() => {
@@ -124,7 +127,7 @@ function AppProvider({ children }) {
 
     const loadArticles = async () => {
       if (!user || !filters.sources?.length) {
-        setArticles([]);
+        setArticles([]); // S'assurer qu'on retourne un tableau vide
         setLoadingArticles(false);
         return;
       }
@@ -139,7 +142,7 @@ function AppProvider({ children }) {
 
         if (!mounted) return;
 
-        setArticles(data.articles);
+        setArticles(data.articles || []); // S'assurer qu'on a toujours un tableau
         setHasMoreArticles(data.hasMore);
         setArticlesPage(1);
       } catch (err) {
@@ -278,6 +281,15 @@ function AppProvider({ children }) {
     }
   };
 
+  // Mettre à jour les thématiques quand l'utilisateur change
+  useEffect(() => {
+    if (user?.interests) {
+      setUserInterests(user.interests);
+    } else {
+      setUserInterests([]);
+    }
+  }, [user]);
+
   // Valeur du contexte
   const value = {
     userSources,
@@ -293,6 +305,7 @@ function AppProvider({ children }) {
     addOrEnableSource,
     disableSource,
     error,
+    userInterests,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

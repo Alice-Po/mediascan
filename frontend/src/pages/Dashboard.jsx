@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
 import ArticleFilters from '../components/articles/ArticleFilters';
 import ArticleList from '../components/articles/ArticleList';
+import InterestsList from '../components/InterestsList';
 
 /**
  * Page principale du Dashboard
@@ -75,12 +76,9 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Tableau de bord</h1>
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl mb-4">Bienvenue, {user?.name}</h2>
-        <p className="text-gray-600">
-          Vos thématiques : {user?.categories?.join(', ') || 'Aucune thématique sélectionnée'}
-        </p>
+        <InterestsList />
         {/* Filtres */}
         <ArticleFilters />
 

@@ -33,7 +33,7 @@ const ArticleList = () => {
   // Fonction pour gérer la sauvegarde/désauvegarde d'un article
   const handleSave = async (articleId) => {
     try {
-      const article = articles.find((a) => a.id === articleId);
+      const article = articles.find((a) => a._id === articleId);
 
       if (article.isSaved) {
         await unsaveArticle(articleId);
@@ -96,14 +96,14 @@ const ArticleList = () => {
             if (articles.length === index + 1) {
               // Dernier article, on lui ajoute la ref pour l'infinite scroll
               return (
-                <div ref={lastArticleRef} key={article.id}>
+                <div ref={lastArticleRef} key={article._id}>
                   <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
                 </div>
               );
             } else {
               return (
                 <ArticleCard
-                  key={article.id}
+                  key={article._id}
                   article={article}
                   onSave={handleSave}
                   onShare={handleShare}
