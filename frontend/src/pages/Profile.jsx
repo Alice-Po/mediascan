@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, deleteAccount } from '../api/authApi';
 import { resetAnalytics } from '../api/analyticsApi';
+import { CATEGORIES } from '../constants';
 
 /**
  * Page de profil utilisateur
@@ -13,13 +14,15 @@ const Profile = () => {
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    interests: user?.interests || [],
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
-  // State pour le mode édition
-  const [isEditing, setIsEditing] = useState(false);
+  // Séparer les états d'édition
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingInterests, setIsEditingInterests] = useState(false);
 
   // State pour les confirmations
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -30,14 +33,32 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // Ajouter un useEffect pour gérer le timer du message
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 3000); // Le message disparaît après 3 secondes
+
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   // Charger les données de profil complètes
   useEffect(() => {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        const profileData = await getUserProfile();
+        const response = await getUserProfile();
+        console.log('Profile data loaded:', response);
+
+        // Extraire l'objet user de la réponse
+        const userData = response.user;
+
         setProfileData({
-          ...profileData,
+          name: userData.name || '',
+          email: userData.email || '',
+          interests: userData.interests || [],
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
@@ -96,49 +117,43 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Soumettre le formulaire
+  // Gérer la sélection/désélection d'une thématique
+  const handleInterestToggle = (category) => {
+    const updatedInterests = profileData.interests.includes(category)
+      ? profileData.interests.filter((i) => i !== category)
+      : [...profileData.interests, category];
+
+    setProfileData((prev) => ({
+      ...prev,
+      interests: updatedInterests,
+    }));
+  };
+
+  // Modifier handleSubmit pour inclure les intérêts
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     setMessage(null);
 
     try {
-      // Préparer les données à mettre à jour
       const updateData = {
         name: profileData.name,
+        interests: profileData.interests,
       };
 
-      // Ajouter les champs de mot de passe si présents
       if (profileData.newPassword) {
         updateData.currentPassword = profileData.currentPassword;
         updateData.newPassword = profileData.newPassword;
       }
 
       const updatedProfile = await updateUserProfile(updateData);
-
-      // Mettre à jour le contexte utilisateur
-      updateUser({
-        name: updatedProfile.name,
-        email: updatedProfile.email,
-      });
-
-      setMessage({ type: 'success', text: 'Profil mis à jour avec succès!' });
-      setIsEditing(false);
-
-      // Réinitialiser les champs de mot de passe
-      setProfileData({
-        ...profileData,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
+      updateUser(updatedProfile);
+      setIsEditingProfile(false);
+      setIsEditingInterests(false);
+      setMessage({ type: 'success', text: 'Profil mis à jour avec succès' });
     } catch (err) {
-      console.error('Erreur lors de la mise à jour du profil:', err);
       setMessage({
         type: 'error',
         text: err.response?.data?.message || 'Erreur lors de la mise à jour du profil',
@@ -188,7 +203,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-page space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Message de notification */}
       {message && (
         <div
@@ -203,11 +218,11 @@ const Profile = () => {
       {/* Profil utilisateur */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium text-gray-800">Mon profil</h2>
-          {!isEditing && (
+          <h2 className="text-lg font-medium text-gray-800">Profil</h2>
+          {!isEditingProfile && (
             <button
-              onClick={() => setIsEditing(true)}
-              className="px-3 py-1 text-sm text-primary border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+              onClick={() => setIsEditingProfile(true)}
+              className="text-sm text-primary hover:text-primary-dark"
             >
               Modifier
             </button>
@@ -227,11 +242,11 @@ const Profile = () => {
                 name="name"
                 value={profileData.name}
                 onChange={handleChange}
-                disabled={!isEditing}
+                disabled={!isEditingProfile}
                 className={`w-full px-3 py-2 border ${
                   errors.name ? 'border-red-300' : 'border-gray-300'
                 } rounded-md ${
-                  !isEditing ? 'bg-gray-50' : 'bg-white'
+                  !isEditingProfile ? 'bg-gray-50' : 'bg-white'
                 } focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -253,12 +268,9 @@ const Profile = () => {
               <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié.</p>
             </div>
 
-            {/* Section de changement de mot de passe (visible uniquement en mode édition) */}
-            {isEditing && (
-              <div className="border-t border-gray-200 pt-4 mt-4">
-                <h3 className="text-md font-medium text-gray-800 mb-3">Changer de mot de passe</h3>
-
-                {/* Mot de passe actuel */}
+            {/* Section de changement de mot de passe (visibles uniquement en mode édition) */}
+            {isEditingProfile && (
+              <div className="space-y-4">
                 <div className="mb-3">
                   <label
                     htmlFor="currentPassword"
@@ -281,7 +293,6 @@ const Profile = () => {
                   )}
                 </div>
 
-                {/* Nouveau mot de passe */}
                 <div className="mb-3">
                   <label
                     htmlFor="newPassword"
@@ -304,7 +315,6 @@ const Profile = () => {
                   )}
                 </div>
 
-                {/* Confirmation du nouveau mot de passe */}
                 <div>
                   <label
                     htmlFor="confirmPassword"
@@ -329,12 +339,12 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Boutons d'action (visibles uniquement en mode édition) */}
-            {isEditing && (
+            {/* Boutons d'action */}
+            {isEditingProfile && (
               <div className="flex justify-end space-x-2 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => setIsEditingProfile(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   disabled={loading}
                 >
@@ -356,6 +366,76 @@ const Profile = () => {
             )}
           </div>
         </form>
+      </div>
+
+      {/* Ajouter la section des thématiques d'intérêt */}
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-gray-800">Thématiques d'intérêt</h2>
+          {!isEditingInterests && (
+            <button
+              onClick={() => setIsEditingInterests(true)}
+              className="text-sm text-primary hover:text-primary-dark"
+            >
+              Modifier
+            </button>
+          )}
+        </div>
+
+        {isEditingInterests ? (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {CATEGORIES.map((category) => (
+                <label
+                  key={category}
+                  className={`flex items-center p-3 rounded-md border cursor-pointer transition-colors
+                    ${
+                      profileData.interests.includes(category)
+                        ? 'bg-primary-light border-primary text-primary'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={profileData.interests.includes(category)}
+                    onChange={() => handleInterestToggle(category)}
+                    className="hidden"
+                  />
+                  <span className="text-sm capitalize">{category}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <button
+                onClick={() => setIsEditingInterests(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-primary text-black rounded-md hover:bg-primary-dark"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {profileData.interests.length > 0 ? (
+              profileData.interests.map((interest) => (
+                <span
+                  key={interest}
+                  className="px-3 py-1 bg-primary-light text-primary text-sm rounded-full capitalize"
+                >
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">Aucune thématique sélectionnée</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Paramètres de confidentialité */}

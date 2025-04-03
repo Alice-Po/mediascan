@@ -74,8 +74,10 @@ export const completeOnboarding = async (preferences) => {
 export const getUserProfile = async () => {
   try {
     const response = await api.get('/auth/profile');
+    console.log('API response:', response.data);
     return response.data;
   } catch (error) {
+    console.error('Error fetching user profile:', error);
     throw error;
   }
 };

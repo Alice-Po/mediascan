@@ -6,13 +6,13 @@ import AppRoutes from './routes/index';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <Router>
           <AppRoutes />
-        </AppProvider>
-      </AuthProvider>
-    </Router>
+        </Router>
+      </AppProvider>
+    </AuthProvider>
   );
 }
 
