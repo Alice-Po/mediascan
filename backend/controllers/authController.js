@@ -225,3 +225,47 @@ export const refreshToken = async (req, res) => {
     });
   }
 };
+
+// @desc    Complétion de l'onboarding
+// @route   POST /api/auth/onboarding
+// @access  Private
+export const completeOnboarding = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { categories, sources } = req.body;
+
+    // Validation des données
+    if (!categories || !Array.isArray(categories)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Les catégories sont requises et doivent être un tableau',
+      });
+    }
+
+    // Mise à jour de l'utilisateur
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          categories,
+          sources,
+          onboardingCompleted: true,
+        },
+      },
+      { new: true }
+    ).select('-password');
+
+    res.status(200).json({
+      success: true,
+      message: 'Onboarding complété avec succès',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'onboarding:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la complétion de l'onboarding",
+      error: error.message,
+    });
+  }
+};

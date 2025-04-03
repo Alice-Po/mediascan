@@ -76,16 +76,18 @@ const Register = () => {
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
-
     try {
-      await register(formData);
-      navigate('/onboarding'); // ou '/' selon votre logique
+      const result = await register(formData);
+      console.log('Registration successful:', result);
+
+      // Attendons un peu pour laisser le temps au contexte de se mettre à jour
+      setTimeout(() => {
+        console.log('Navigating to onboarding, user:', result.user);
+        navigate('/onboarding');
+      }, 100);
     } catch (err) {
       console.error("Erreur lors de l'inscription:", err);
     } finally {

@@ -5,6 +5,7 @@ import {
   getProfile,
   updateProfile,
   refreshToken,
+  completeOnboarding,
 } from '../controllers/authController.js';
 import { protect, logAuthEvent } from '../middleware/authMiddleware.js';
 
@@ -18,5 +19,6 @@ router.post('/refresh', refreshToken);
 // Routes protégées (nécessitant une authentification)
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
+router.post('/onboarding', protect, completeOnboarding);
 
 export default router;

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
-import { useAuth } from '../context/AuthContext';
+
 // Pages
 import Dashboard from '../pages/Dashboard';
 import Sources from '../pages/Sources';

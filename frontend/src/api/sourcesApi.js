@@ -19,9 +19,12 @@ export const fetchUserSources = async () => {
  */
 export const fetchAllSources = async () => {
   try {
+    console.log('Calling fetchAllSources API');
     const response = await api.get('/sources');
+    console.log('API response:', response);
     return response.data;
   } catch (error) {
+    console.error('Error fetching sources:', error);
     throw error;
   }
 };

@@ -3,9 +3,22 @@ import { AuthContext } from './AuthContext';
 import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
 
-export const AppContext = createContext();
+// Création du contexte et du hook dans des constantes nommées
+const AppContext = createContext(null);
 
-export const AppProvider = ({ children }) => {
+// Hook personnalisé dans une fonction nommée
+function useApp() {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useApp doit être utilisé à l'intérieur d'un AppProvider");
+  }
+  return context;
+}
+
+// Provider dans une fonction nommée
+function AppProvider({ children }) {
+  const { isAuthenticated } = useContext(AuthContext);
+
   // State pour les sources
   const [userSources, setUserSources] = useState([]);
   const [allSources, setAllSources] = useState([]);
@@ -17,65 +30,69 @@ export const AppProvider = ({ children }) => {
   const [articlesPage, setArticlesPage] = useState(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
 
-  // State pour les filtres
+  // State pour les filtres avec une structure complète
   const [filters, setFilters] = useState({
     categories: [],
+    sources: [],
     orientation: {
       political: [],
       type: [],
       structure: [],
       scope: [],
     },
-    sources: [], // IDs des sources actives
+    searchTerm: '',
   });
 
-  const { isAuthenticated } = useContext(AuthContext);
-
-  // Charger les sources de l'utilisateur
+  // Charger les sources initiales
   useEffect(() => {
-    const loadUserSources = async () => {
+    let mounted = true;
+
+    const initializeSources = async () => {
       if (!isAuthenticated) return;
 
       try {
         setLoadingSources(true);
-        const sources = await fetchUserSources();
-        setUserSources(sources);
+        const [userSourcesData, allSourcesData] = await Promise.all([
+          fetchUserSources(),
+          fetchAllSources(),
+        ]);
 
-        // Initialiser les filtres avec toutes les sources activées
-        setFilters((prev) => ({
-          ...prev,
-          sources: sources.filter((s) => s.enabled).map((s) => s.id),
-        }));
+        if (!mounted) return;
+
+        setUserSources(userSourcesData);
+        setAllSources(allSourcesData);
+
+        // Initialiser les filtres une seule fois avec les sources actives
+        if (filters.sources.length === 0) {
+          const activeSources = userSourcesData.filter((s) => s.enabled).map((s) => s.id);
+
+          setFilters((prev) => ({
+            ...prev,
+            sources: activeSources,
+          }));
+        }
       } catch (err) {
         console.error('Erreur lors du chargement des sources:', err);
       } finally {
-        setLoadingSources(false);
+        if (mounted) {
+          setLoadingSources(false);
+        }
       }
     };
 
-    loadUserSources();
-  }, [isAuthenticated]);
+    initializeSources();
 
-  // Charger toutes les sources disponibles
-  useEffect(() => {
-    const loadAllSources = async () => {
-      if (!isAuthenticated) return;
-
-      try {
-        const sources = await fetchAllSources();
-        setAllSources(sources);
-      } catch (err) {
-        console.error('Erreur lors du chargement de toutes les sources:', err);
-      }
+    return () => {
+      mounted = false;
     };
+  }, [isAuthenticated]); // Dépendance uniquement à isAuthenticated
 
-    loadAllSources();
-  }, [isAuthenticated]);
-
-  // Charger les articles en fonction des filtres
+  // Charger les articles quand les filtres changent
   useEffect(() => {
+    let mounted = true;
+
     const loadArticles = async () => {
-      if (!isAuthenticated || filters.sources.length === 0) {
+      if (!isAuthenticated || !filters.sources?.length) {
         setArticles([]);
         setLoadingArticles(false);
         return;
@@ -86,12 +103,10 @@ export const AppProvider = ({ children }) => {
         const data = await fetchArticles({
           page: 1,
           limit: 20,
-          sources: filters.sources,
-          categories: filters.categories,
-          orientation: Object.entries(filters.orientation).flatMap(([key, values]) =>
-            values.map((v) => `${key}:${v}`)
-          ),
+          ...filters,
         });
+
+        if (!mounted) return;
 
         setArticles(data.articles);
         setHasMoreArticles(data.hasMore);
@@ -99,14 +114,18 @@ export const AppProvider = ({ children }) => {
       } catch (err) {
         console.error('Erreur lors du chargement des articles:', err);
       } finally {
-        setLoadingArticles(false);
+        if (mounted) {
+          setLoadingArticles(false);
+        }
       }
     };
 
-    if (isAuthenticated) {
-      loadArticles();
-    }
-  }, [isAuthenticated, filters]);
+    loadArticles();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, JSON.stringify(filters)]);
 
   // Fonction pour charger plus d'articles
   const loadMoreArticles = async () => {
@@ -136,25 +155,28 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Fonction pour mettre à jour les filtres
-  const updateFilters = (newFilters) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-    }));
-  };
-
   // Fonction pour réinitialiser les filtres
   const resetFilters = () => {
-    setFilters({
-      categories: [],
-      orientation: {
-        political: [],
-        type: [],
-        structure: [],
-        scope: [],
-      },
-      sources: userSources.filter((s) => s.enabled).map((s) => s.id),
+    setFilters((prev) => {
+      if (
+        prev.categories.length === 0 &&
+        prev.sources.length === 0 &&
+        !prev.searchTerm &&
+        (!prev.orientation || Object.values(prev.orientation).every((arr) => arr.length === 0))
+      ) {
+        return prev;
+      }
+      return {
+        categories: [],
+        sources: [],
+        orientation: {
+          political: [],
+          type: [],
+          structure: [],
+          scope: [],
+        },
+        searchTerm: '',
+      };
     });
   };
 
@@ -191,7 +213,7 @@ export const AppProvider = ({ children }) => {
     loadingArticles,
     hasMoreArticles,
     filters,
-    updateFilters,
+    setFilters,
     resetFilters,
     loadMoreArticles,
     addOrEnableSource,
@@ -199,4 +221,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-};
+}
+
+// Export des constantes et fonctions nommées
+export { AppContext, useApp, AppProvider };

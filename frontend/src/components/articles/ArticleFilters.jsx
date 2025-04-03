@@ -5,7 +5,7 @@ import { AppContext } from '../../context/AppContext';
  * Composant de filtres pour les articles
  */
 const ArticleFilters = () => {
-  const { filters, updateFilters, resetFilters, userSources } = useContext(AppContext);
+  const { filters, setFilters, userSources } = useContext(AppContext);
 
   // State local pour afficher/masquer les filtres sur mobile
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,41 +33,48 @@ const ArticleFilters = () => {
   };
 
   // Toggle pour un filter de catégorie
-  const toggleCategoryFilter = (category) => {
-    const newCategories = filters.categories.includes(category)
-      ? filters.categories.filter((c) => c !== category)
-      : [...filters.categories, category];
-
-    updateFilters({ categories: newCategories });
+  const handleCategoryChange = (category) => {
+    setFilters((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
+    }));
   };
 
   // Toggle pour un filtre d'orientation
-  const toggleOrientationFilter = (type, value) => {
-    const currentValues = filters.orientation[type] || [];
-    const newValues = currentValues.includes(value)
-      ? currentValues.filter((v) => v !== value)
-      : [...currentValues, value];
-
-    updateFilters({
+  const handleOrientationChange = (type, value) => {
+    setFilters((prev) => ({
+      ...prev,
       orientation: {
-        ...filters.orientation,
-        [type]: newValues,
+        ...(prev.orientation || {}), // Fournir un objet vide si null
+        [type]: value,
       },
-    });
+    }));
   };
 
   // Toggle pour un filtre de source
-  const toggleSourceFilter = (sourceId) => {
-    const newSources = filters.sources.includes(sourceId)
-      ? filters.sources.filter((id) => id !== sourceId)
-      : [...filters.sources, sourceId];
-
-    updateFilters({ sources: newSources });
+  const handleSourceChange = (sourceId) => {
+    setFilters((prev) => ({
+      ...prev,
+      sources: prev.sources.includes(sourceId)
+        ? prev.sources.filter((id) => id !== sourceId)
+        : [...prev.sources, sourceId],
+    }));
   };
 
   // Toggle pour l'affichage des filtres (mobile)
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  // Gérer la recherche
+  const handleSearch = (e) => {
+    const { value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      searchTerm: value,
+    }));
   };
 
   return (
@@ -106,7 +113,7 @@ const ArticleFilters = () => {
               {categories.map((category) => (
                 <button
                   key={category}
-                  onClick={() => toggleCategoryFilter(category)}
+                  onClick={() => handleCategoryChange(category)}
                   className={`px-2 py-1 rounded-full text-xs ${
                     filters.categories.includes(category)
                       ? 'bg-primary text-white'
@@ -139,7 +146,7 @@ const ArticleFilters = () => {
                   {values.map((value) => (
                     <button
                       key={`${type}-${value}`}
-                      onClick={() => toggleOrientationFilter(type, value)}
+                      onClick={() => handleOrientationChange(type, value)}
                       className={`px-2 py-1 rounded-full text-xs ${
                         filters.orientation[type]?.includes(value)
                           ? 'bg-primary text-white'
@@ -164,7 +171,7 @@ const ArticleFilters = () => {
                     type="checkbox"
                     id={`source-${source.id}`}
                     checked={filters.sources.includes(source.id)}
-                    onChange={() => toggleSourceFilter(source.id)}
+                    onChange={() => handleSourceChange(source.id)}
                     className="mr-2"
                   />
                   <label
@@ -184,7 +191,7 @@ const ArticleFilters = () => {
           {/* Actions des filtres */}
           <div className="flex justify-end">
             <button
-              onClick={resetFilters}
+              onClick={() => setFilters((prev) => ({ ...prev, searchTerm: '' }))}
               className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
             >
               Réinitialiser
