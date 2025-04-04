@@ -16,11 +16,15 @@ const Saved = () => {
     const loadSavedArticles = async () => {
       try {
         setLoading(true);
-        const articles = await fetchSavedArticles();
+        const response = await fetchSavedArticles();
+        console.log('Saved articles response:', response); // Debug log
+
+        // S'assurer que nous utilisons le bon chemin pour accéder aux articles
+        const articles = response.articles || [];
         setSavedArticles(articles);
       } catch (err) {
-        console.error('Erreur lors du chargement des articles sauvegardés:', err);
-        setError('Impossible de charger vos articles sauvegardés.');
+        console.error('Error loading saved articles:', err);
+        setError('Erreur lors du chargement des articles sauvegardés');
       } finally {
         setLoading(false);
       }
@@ -33,8 +37,10 @@ const Saved = () => {
   const handleUnsave = async (articleId) => {
     try {
       await unsaveArticle(articleId);
+
       // Mettre à jour la liste des articles sauvegardés
-      setSavedArticles(savedArticles.filter((article) => article.id !== articleId));
+      // Utiliser _id au lieu de id
+      setSavedArticles(savedArticles.filter((article) => article._id !== articleId));
     } catch (err) {
       console.error("Erreur lors de la désauvegarde de l'article:", err);
       setError('Impossible de désauvegarder cet article.');
@@ -73,51 +79,27 @@ const Saved = () => {
     return <div className="bg-red-100 text-red-700 p-4 rounded-md">{error}</div>;
   }
 
-  return (
-    <div className="saved-articles">
-      {/* En-tête */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-        <h2 className="text-lg font-medium text-gray-800 mb-2">Articles sauvegardés</h2>
-        <p className="text-gray-600 text-sm">
-          Retrouvez ici tous les articles que vous avez sauvegardés pour une lecture ultérieure.
-        </p>
+  if (!savedArticles.length) {
+    return (
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold mb-2">Aucun article sauvegardé</h2>
+        <p className="text-gray-600">Les articles que vous sauvegardez apparaîtront ici.</p>
       </div>
+    );
+  }
 
-      {/* Liste des articles sauvegardés */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        {savedArticles.length === 0 ? (
-          <div className="text-center py-8">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16 mx-auto text-gray-300 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-              />
-            </svg>
-            <p className="text-gray-500 mb-2">Vous n'avez pas encore d'articles sauvegardés.</p>
-            <p className="text-gray-400 text-sm">
-              Cliquez sur l'icône de marque-page sur un article pour le sauvegarder ici.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {savedArticles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={{ ...article, isSaved: true }}
-                onSave={handleUnsave}
-                onShare={handleShare}
-              />
-            ))}
-          </div>
-        )}
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Articles sauvegardés</h1>
+      <div className="space-y-4">
+        {savedArticles.map((article) => (
+          <ArticleCard
+            key={article._id}
+            article={{ ...article, isSaved: true }} // S'assurer que isSaved est true
+            onSave={handleUnsave}
+            onShare={handleShare}
+          />
+        ))}
       </div>
     </div>
   );

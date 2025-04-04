@@ -12,10 +12,12 @@ export const getArticles = async (req, res) => {
     console.log('Getting articles with query:', req.query);
 
     const { page = 1, limit = 20, sources, categories } = req.query;
+    const userId = req.user._id;
 
     // Récupérer l'utilisateur avec ses sources actives et ses intérêts
-    const user = await User.findById(req.user._id).populate('activeSources');
-    console.log('User interests:', user.interests);
+    const user = await User.findById(userId)
+      .populate('activeSources')
+      .select('activeSources interests savedArticles');
 
     // Construire la requête
     const query = {};
@@ -38,11 +40,17 @@ export const getArticles = async (req, res) => {
     console.log('Article query:', query);
 
     // Récupérer les articles
-    const articles = await Article.find(query)
+    let articles = await Article.find(query)
       .sort({ pubDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
       .populate('sourceId', 'name faviconUrl url');
+
+    // Convertir les articles en objets simples et ajouter le flag isSaved
+    articles = articles.map((article) => ({
+      ...article.toObject(),
+      isSaved: user.savedArticles.includes(article._id),
+    }));
 
     // Log pour vérifier les articles filtrés
     console.log(
@@ -233,36 +241,18 @@ export const unsaveArticle = async (req, res) => {
     const articleId = req.params.id;
     const userId = req.user._id;
 
-    // Vérification que l'article existe
-    const article = await Article.findById(articleId);
+    // Retirer l'article des favoris de l'utilisateur
+    await User.findByIdAndUpdate(userId, {
+      $pull: { savedArticles: articleId },
+    });
 
-    if (!article) {
-      return res.status(404).json({
-        success: false,
-        message: 'Article non trouvé',
-      });
-    }
-
-    // Recherche si l'utilisateur a déjà interagi avec cet article
-    const userInteractionIndex = article.userInteractions.findIndex(
-      (interaction) => interaction.userId.toString() === userId.toString()
-    );
-
-    if (userInteractionIndex !== -1) {
-      // Mise à jour de l'interaction existante
-      article.userInteractions[userInteractionIndex].isSaved = false;
-      article.userInteractions[userInteractionIndex].savedDate = null;
-    }
-
-    await article.save();
-
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
-      userId,
-      eventType: 'articleUnsave',
-      metadata: {
-        articleId: article._id,
-        sourceId: article.sourceId,
+    // Mettre à jour les interactions de l'article
+    await Article.findByIdAndUpdate(articleId, {
+      $pull: {
+        userInteractions: {
+          userId,
+          type: 'save',
+        },
       },
     });
 
@@ -275,7 +265,7 @@ export const unsaveArticle = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Erreur lors de la désauvegarde de l'article:", error);
+    console.error('Error in unsaveArticle:', error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de la désauvegarde de l'article",
@@ -290,43 +280,39 @@ export const unsaveArticle = async (req, res) => {
 export const getSavedArticles = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { page = 1, limit = config.limits.maxArticlesPerPage } = req.query;
 
-    // Conversion des paramètres
-    const pageNum = parseInt(page, 10);
-    const limitNum = Math.min(parseInt(limit, 10), config.limits.maxArticlesPerPage);
-    const skip = (pageNum - 1) * limitNum;
-
-    // Construction du filtre pour les articles sauvegardés
-    const filter = {
-      userInteractions: {
-        $elemMatch: {
-          userId: userId,
-          isSaved: true,
-        },
+    // Récupérer l'utilisateur avec ses articles sauvegardés
+    const user = await User.findById(userId).populate({
+      path: 'savedArticles',
+      populate: {
+        path: 'sourceId',
+        select: 'name faviconUrl url',
       },
-    };
+    });
 
-    // Exécution de la requête
-    const articles = await Article.find(filter)
-      .sort({ 'userInteractions.savedDate': -1 })
-      .skip(skip)
-      .limit(limitNum)
-      .populate('sourceId', 'name faviconUrl url');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé',
+      });
+    }
 
-    // Comptage total des articles sauvegardés
-    const total = await Article.countDocuments(filter);
+    // S'assurer que savedArticles existe
+    const savedArticles = user.savedArticles || [];
 
-    res.status(200).json({
+    // Ajouter le flag isSaved à true pour tous les articles
+    const articles = savedArticles.map((article) => ({
+      ...article.toObject(),
+      isSaved: true,
+    }));
+
+    res.json({
       success: true,
-      count: articles.length,
-      total,
-      totalPages: Math.ceil(total / limitNum),
-      currentPage: pageNum,
-      data: articles,
+      articles,
+      total: articles.length,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération des articles sauvegardés:', error);
+    console.error('Error in getSavedArticles:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération des articles sauvegardés',
