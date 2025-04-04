@@ -36,17 +36,19 @@ export const fetchAllSources = async () => {
 
 /**
  * Ajouter une source à l'utilisateur
- * @param {string|Object} source - ID de la source ou objet source personnalisée
+ * @param {Object} sourceData - Données de la source
  * @returns {Promise} Source ajoutée
  */
-export const addUserSource = async (source) => {
+export const addUserSource = async (sourceData) => {
   try {
-    const response = await api.post(
-      '/sources/user',
-      typeof source === 'string' ? { sourceId: source } : source
-    );
+    console.log('Adding source with data:', sourceData); // Debug log
+    const response = await api.post('/sources/user', {
+      ...sourceData,
+      isUserAdded: true, // Ajouter ce flag
+    });
     return response.data;
   } catch (error) {
+    console.error('Error details:', error.response?.data); // Debug log
     throw error;
   }
 };

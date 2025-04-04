@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { addUserSource, updateUserSource, deleteUserSource } from '../api/sourcesApi';
+import api from '../api';
 
 /**
  * Page de gestion des sources
@@ -76,6 +77,7 @@ const Sources = () => {
             !userSources.some((us) => us._id === source._id && us.enabled)
         )
         .slice(0, 5); // Limiter à 5 suggestions
+
       setSuggestions(filtered);
       setShowSuggestions(true);
     } else {
@@ -234,55 +236,72 @@ const Sources = () => {
     }
   };
 
-  // Valider le formulaire d'ajout
-  const validateCustomSource = () => {
-    const errors = {};
+  // Modifier la fonction validateRssUrl pour utiliser l'instance API
+  const validateRssUrl = async (rssUrl) => {
+    try {
+      // Utiliser l'instance api au lieu de fetch
+      const response = await api.post('/sources/validate-rss', {
+        url: rssUrl,
+      });
 
+      if (!response.data.isValid) {
+        throw new Error(response.data.error);
+      }
+      return { isValid: true };
+    } catch (error) {
+      return {
+        isValid: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  };
+
+  // Modifier la fonction handleCustomSourceSubmit
+  const handleCustomSourceSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setFormErrors({});
+
+    // Validation de base
+    const errors = {};
     if (!customSource.name.trim()) {
       errors.name = 'Le nom est requis';
     }
-
     if (!customSource.url.trim()) {
-      errors.url = "L'URL est requise";
-    } else if (
-      !customSource.url.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
-    ) {
-      errors.url = 'URL invalide';
+      errors.url = "L'URL du site est requise";
     }
-
     if (!customSource.rssUrl.trim()) {
       errors.rssUrl = "L'URL du flux RSS est requise";
-    } else if (
-      !customSource.rssUrl.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
-    ) {
-      errors.rssUrl = 'URL du flux RSS invalide';
     }
-
     if (customSource.categories.length === 0) {
       errors.categories = 'Sélectionnez au moins une catégorie';
     }
 
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Soumettre le formulaire d'ajout
-  const handleCustomSourceSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateCustomSource()) {
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
     try {
-      await addUserSource({
-        ...customSource,
-        isUserAdded: true,
-      });
+      // Valider l'URL RSS
+      const rssValidation = await validateRssUrl(customSource.rssUrl);
+      if (!rssValidation.isValid) {
+        setFormErrors({
+          rssUrl: `Erreur de validation du flux RSS : ${rssValidation.error}. 
+          Vérifiez que :
+          - L'URL est accessible
+          - Le flux est au format RSS/XML valide
+          - Vous avez les droits d'accès au flux
+          - Le flux n'est pas protégé par un pare-feu`,
+        });
+        setLoading(false);
+        return;
+      }
 
-      // Réinitialiser le formulaire
+      // Ajouter la source
+      await addUserSource(customSource);
+      setShowAddForm(false);
       setCustomSource({
         name: '',
         url: '',
@@ -295,14 +314,17 @@ const Sources = () => {
           scope: 'généraliste',
         },
       });
-
-      setShowAddForm(false);
-
-      // Dans une application réelle, on mettrait à jour le context AppContext
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la source personnalisée:", error);
+      console.error('Error adding source:', error);
       setFormErrors({
-        submit: "Erreur lors de l'ajout de la source. Vérifiez l'URL du flux RSS.",
+        submit:
+          error.response?.data?.message ||
+          `Erreur lors de l'ajout de la source : ${error.message}. 
+          Si l'erreur persiste, vérifiez que :
+          - Le flux RSS est accessible et à jour
+          - Le format du flux est compatible
+          - L'URL ne contient pas de caractères spéciaux
+          - Le serveur distant autorise l'accès au flux`,
       });
     } finally {
       setLoading(false);
@@ -337,23 +359,17 @@ const Sources = () => {
 
   return (
     <div className="container mx-auto px-4">
-      {/* Barre de recherche avec autocomplétion */}
+      {/* Barre de recherche et suggestions */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center">
           <div className="relative flex-grow">
             <input
               type="text"
-              placeholder="Rechercher une source..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (suggestions.length > 0) {
-                  setShowSuggestions(true);
-                }
-              }}
+              placeholder="Rechercher une source..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             {searchTerm && (
               <button
@@ -378,34 +394,6 @@ const Sources = () => {
                 </svg>
               </button>
             )}
-            {/* Liste des suggestions */}
-            {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto">
-                {suggestions.map((source, index) => (
-                  <li
-                    key={source._id}
-                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center ${
-                      index === selectedIndex ? 'bg-gray-100' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSuggestionSelect(source);
-                    }}
-                  >
-                    {source.faviconUrl && (
-                      <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />
-                    )}
-                    <div>
-                      <div className="font-medium">{source.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {source.categories.slice(0, 2).join(', ')}
-                        {source.categories.length > 2 && '...'}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
           <button
             className="ml-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
@@ -415,165 +403,226 @@ const Sources = () => {
           </button>
         </div>
 
-        {/* Formulaire d'ajout de source personnalisée */}
-        {showAddForm && (
-          <form
-            onSubmit={handleCustomSourceSubmit}
-            className="border border-gray-200 rounded-md p-4 mb-4"
-          >
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              Ajouter une source personnalisée
-            </h3>
-
-            {formErrors.submit && (
-              <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">{formErrors.submit}</div>
-            )}
-
-            <div className="space-y-4">
-              {/* Nom de la source */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom de la source <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={customSource.name}
-                  onChange={handleCustomSourceChange}
-                  className={`w-full px-3 py-2 border ${
-                    formErrors.name ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                  placeholder="Le Monde, Libération, etc."
-                />
-                {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
-              </div>
-
-              {/* URL de la source */}
-              <div>
-                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-                  URL du site <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="url"
-                  name="url"
-                  value={customSource.url}
-                  onChange={handleCustomSourceChange}
-                  className={`w-full px-3 py-2 border ${
-                    formErrors.url ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                  placeholder="https://www.lemonde.fr"
-                />
-                {formErrors.url && <p className="text-red-500 text-xs mt-1">{formErrors.url}</p>}
-              </div>
-
-              {/* URL du flux RSS */}
-              <div>
-                <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                  URL du flux RSS <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="rssUrl"
-                  name="rssUrl"
-                  value={customSource.rssUrl}
-                  onChange={handleCustomSourceChange}
-                  className={`w-full px-3 py-2 border ${
-                    formErrors.rssUrl ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                  placeholder="https://www.lemonde.fr/rss/une.xml"
-                />
-                {formErrors.rssUrl && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.rssUrl}</p>
-                )}
-              </div>
-
-              {/* Catégories */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Catégories <span className="text-red-500">*</span>
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => handleCategoryChange(category)}
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${
-                        customSource.categories.includes(category)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-                {formErrors.categories && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.categories}</p>
-                )}
-              </div>
-
-              {/* Orientation */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(orientationOptions).map(([type, options]) => (
-                  <div key={type}>
-                    <label
-                      htmlFor={`orientation.${type}`}
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      {type === 'political'
-                        ? 'Orientation politique'
-                        : type === 'type'
-                        ? 'Type de média'
-                        : type === 'structure'
-                        ? 'Structure'
-                        : 'Portée'}
-                    </label>
-                    <select
-                      id={`orientation.${type}`}
-                      name={`orientation.${type}`}
-                      value={customSource.orientation[type]}
-                      onChange={handleCustomSourceChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      {options.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+        {/* Suggestions */}
+        {showSuggestions && searchTerm.trim() && (
+          <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+            {suggestions.length > 0 ? (
+              <ul className="max-h-60 overflow-auto">
+                {suggestions.map((source, index) => (
+                  <li
+                    key={source._id}
+                    className={`px-4 py-2 hover:bg-gray-50 cursor-pointer ${
+                      index === selectedIndex ? 'bg-gray-50' : ''
+                    }`}
+                    onClick={() => handleSuggestionSelect(source)}
+                  >
+                    <div className="flex items-center">
+                      {source.faviconUrl && (
+                        <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-2" />
+                      )}
+                      <span>{source.name}</span>
+                    </div>
+                  </li>
                 ))}
-              </div>
-
-              {/* Boutons d'action */}
-              <div className="flex justify-end space-x-2">
+              </ul>
+            ) : (
+              <div className="p-4 space-y-2">
+                <p className="text-gray-500">Aucune source trouvée pour "{searchTerm}"</p>
                 <button
-                  type="button"
-                  onClick={toggleAddForm}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  onClick={() => {
+                    setShowAddForm(true);
+                    setShowSuggestions(false);
+                    setCustomSource((prev) => ({
+                      ...prev,
+                      name: searchTerm,
+                    }));
+                  }}
+                  className="text-primary hover:text-primary-dark flex items-center"
                 >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    loading ? 'bg-primary-light' : 'bg-primary hover:bg-primary-dark'
-                  }`}
-                >
-                  {loading ? (
-                    <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></span>
-                  ) : null}
-                  Ajouter
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Ajouter une nouvelle source
                 </button>
               </div>
-            </div>
-          </form>
+            )}
+          </div>
         )}
       </div>
+
+      {/* Formulaire d'ajout de source personnalisée */}
+      {showAddForm && (
+        <form
+          onSubmit={handleCustomSourceSubmit}
+          className="border border-gray-200 rounded-md p-4 mb-4"
+        >
+          <h3 className="text-lg font-medium text-gray-800 mb-4">
+            Ajouter une source personnalisée
+          </h3>
+
+          {formErrors.submit && (
+            <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">{formErrors.submit}</div>
+          )}
+
+          <div className="space-y-4">
+            {/* Nom de la source */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Nom de la source <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={customSource.name}
+                onChange={handleCustomSourceChange}
+                className={`w-full px-3 py-2 border ${
+                  formErrors.name ? 'border-red-300' : 'border-gray-300'
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                placeholder="Le Monde, Libération, etc."
+              />
+              {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
+            </div>
+
+            {/* URL de la source */}
+            <div>
+              <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+                URL du site <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="url"
+                name="url"
+                value={customSource.url}
+                onChange={handleCustomSourceChange}
+                className={`w-full px-3 py-2 border ${
+                  formErrors.url ? 'border-red-300' : 'border-gray-300'
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                placeholder="https://www.lemonde.fr"
+              />
+              {formErrors.url && <p className="text-red-500 text-xs mt-1">{formErrors.url}</p>}
+            </div>
+
+            {/* URL du flux RSS */}
+            <div>
+              <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                URL du flux RSS <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="rssUrl"
+                name="rssUrl"
+                value={customSource.rssUrl}
+                onChange={handleCustomSourceChange}
+                className={`w-full px-3 py-2 border ${
+                  formErrors.rssUrl ? 'border-red-300' : 'border-gray-300'
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                placeholder="https://www.lemonde.fr/rss/une.xml"
+              />
+              {formErrors.rssUrl && (
+                <div className="mt-1 text-sm text-red-600 whitespace-pre-line">
+                  {formErrors.rssUrl}
+                </div>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                Assurez-vous que l'URL pointe vers un flux RSS valide et accessible publiquement.
+                Exemple : https://www.lemonde.fr/rss/une.xml
+              </p>
+            </div>
+
+            {/* Catégories */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Catégories <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => handleCategoryChange(category)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      customSource.categories.includes(category)
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              {formErrors.categories && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.categories}</p>
+              )}
+            </div>
+
+            {/* Orientation */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(orientationOptions).map(([type, options]) => (
+                <div key={type}>
+                  <label
+                    htmlFor={`orientation.${type}`}
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    {type === 'political'
+                      ? 'Orientation politique'
+                      : type === 'type'
+                      ? 'Type de média'
+                      : type === 'structure'
+                      ? 'Structure'
+                      : 'Portée'}
+                  </label>
+                  <select
+                    id={`orientation.${type}`}
+                    name={`orientation.${type}`}
+                    value={customSource.orientation[type]}
+                    onChange={handleCustomSourceChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    {options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={toggleAddForm}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-4 py-2 rounded-md text-white ${
+                  loading ? 'bg-primary-light' : 'bg-primary hover:bg-primary-dark'
+                }`}
+              >
+                {loading ? (
+                  <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></span>
+                ) : null}
+                Ajouter
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
 
       {/* Sources actives */}
       <section>

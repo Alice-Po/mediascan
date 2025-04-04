@@ -94,80 +94,54 @@ export const getUserSources = async (req, res) => {
 // @access  Private
 export const addUserSource = async (req, res) => {
   try {
+    console.log('Received source data:', req.body); // Debug log
+
+    // Validation des données requises
     const { name, url, rssUrl, categories, orientation } = req.body;
 
-    // Validation des données
-    if (!name || !url || !rssUrl) {
+    if (!name || !url || !rssUrl || !categories || !orientation) {
       return res.status(400).json({
         success: false,
-        message: "Veuillez fournir le nom, l'URL du site et l'URL du flux RSS",
-      });
-    }
-
-    // Vérification du nombre maximum de sources personnalisées
-    const userAddedSourcesCount = await Source.countDocuments({
-      addedBy: req.user._id,
-      isUserAdded: true,
-    });
-
-    if (userAddedSourcesCount >= config.limits.maxUserSources) {
-      return res.status(403).json({
-        success: false,
-        message: `Vous avez atteint la limite de ${config.limits.maxUserSources} sources personnalisées`,
-      });
-    }
-
-    // Vérification de la validité du flux RSS
-    const rssValidation = await validateRSS(rssUrl);
-
-    if (!rssValidation.isValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'Flux RSS invalide',
-        error: rssValidation.error,
+        message: 'Toutes les informations sont requises',
       });
     }
 
     // Création de la source
-    const source = await Source.create({
+    const source = new Source({
       name,
       url,
       rssUrl,
-      categories: categories || [],
-      orientation: orientation || {
-        political: 'non-spécifié',
-        type: 'non-spécifié',
-        structure: 'non-spécifié',
-        scope: 'non-spécifié',
-      },
+      categories,
+      orientation,
       isUserAdded: true,
       addedBy: req.user._id,
-      defaultEnabled: true,
     });
 
-    // Ajout de la source aux sources actives de l'utilisateur
-    await User.findByIdAndUpdate(req.user._id, { $addToSet: { activeSources: source._id } });
+    // Sauvegarde de la source
+    const savedSource = await source.save();
+    console.log('Saved source:', savedSource); // Debug log
 
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
-      userId: req.user._id,
-      eventType: 'sourceAdd',
-      metadata: {
-        sourceId: source._id,
-      },
+    // Ajout de la source aux sources actives de l'utilisateur
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { activeSources: savedSource._id },
     });
 
     res.status(201).json({
       success: true,
-      message: 'Source ajoutée avec succès',
-      data: source,
+      data: savedSource,
     });
   } catch (error) {
-    console.error("Erreur lors de l'ajout de la source:", error);
+    console.error('Error in addUserSource:', error); // Debug log détaillé
     res.status(500).json({
       success: false,
       message: "Erreur lors de l'ajout de la source",
       error: error.message,
+      details: error.errors
+        ? Object.keys(error.errors).map((key) => ({
+            field: key,
+            message: error.errors[key].message,
+          }))
+        : null,
     });
   }
 };
@@ -180,9 +154,10 @@ export const toggleUserSource = async (req, res) => {
     const sourceId = req.params.id;
     const { enabled } = req.body;
 
+    console.log('Toggling source:', { sourceId, enabled });
+
     // Vérification que la source existe
     const source = await Source.findById(sourceId);
-
     if (!source) {
       return res.status(404).json({
         success: false,
@@ -191,7 +166,6 @@ export const toggleUserSource = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-
     if (enabled) {
       // Activation de la source
       if (!user.activeSources.includes(sourceId)) {
@@ -202,22 +176,14 @@ export const toggleUserSource = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, { $pull: { activeSources: sourceId } });
     }
 
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
-      userId: req.user._id,
-      eventType: 'sourcesModify',
-      metadata: {
-        sourceId: sourceId,
-        action: enabled ? 'enable' : 'disable',
-      },
-    });
+    console.log('Source updated successfully');
 
     res.status(200).json({
       success: true,
       message: enabled ? 'Source activée avec succès' : 'Source désactivée avec succès',
     });
   } catch (error) {
-    console.error('Erreur lors de la modification de la source:', error);
+    console.error('Error in toggleUserSource:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la modification de la source',
@@ -272,6 +238,36 @@ export const deleteUserSource = async (req, res) => {
       success: false,
       message: 'Erreur lors de la suppression de la source',
       error: error.message,
+    });
+  }
+};
+
+// @desc    Valider un flux RSS
+// @route   POST /api/sources/validate-rss
+// @access  Private
+export const validateRssUrl = async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    // Utiliser le parser RSS existant pour vérifier l'URL
+    const feed = await parser.parseURL(url);
+
+    if (!feed) {
+      throw new Error('Flux RSS invalide');
+    }
+
+    res.json({
+      isValid: true,
+      feed: {
+        title: feed.title,
+        description: feed.description,
+      },
+    });
+  } catch (error) {
+    console.error('Erreur validation RSS:', error);
+    res.status(400).json({
+      isValid: false,
+      error: "Impossible de lire le flux RSS. Vérifiez que l'URL est correcte et accessible.",
     });
   }
 };
