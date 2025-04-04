@@ -55,9 +55,11 @@ export const markArticleAsRead = async (articleId) => {
  */
 export const saveArticle = async (articleId) => {
   try {
+    console.log('Calling save API for article:', articleId); // Debug log
     const response = await api.post(`/articles/${articleId}/save`);
     return response.data;
   } catch (error) {
+    console.error('Error in saveArticle API call:', error.response?.data);
     throw error;
   }
 };

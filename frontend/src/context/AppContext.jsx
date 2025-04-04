@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
 import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
@@ -258,6 +258,15 @@ function AppProvider({ children }) {
     }
   }, [user]);
 
+  // Fonction pour mettre à jour l'état d'un article
+  const updateArticle = useCallback((articleId, updates) => {
+    setArticles((prevArticles) =>
+      prevArticles.map((article) =>
+        article._id === articleId ? { ...article, ...updates } : article
+      )
+    );
+  }, []);
+
   // Valeur du contexte
   const value = {
     userSources,
@@ -274,6 +283,8 @@ function AppProvider({ children }) {
     disableSource,
     error,
     userInterests,
+    setArticles,
+    updateArticle,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

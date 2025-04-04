@@ -7,7 +7,8 @@ import { saveArticle, unsaveArticle } from '../../api/articlesApi';
  * Composant d'affichage de la liste des articles
  */
 const ArticleList = () => {
-  const { articles, loadingArticles, hasMoreArticles, loadMoreArticles } = useContext(AppContext);
+  const { articles, loadingArticles, hasMoreArticles, loadMoreArticles, updateArticle } =
+    useContext(AppContext);
 
   // Référence pour l'élément observé pour l'infinite scroll
   const observer = useRef();
@@ -33,7 +34,9 @@ const ArticleList = () => {
   // Fonction pour gérer la sauvegarde/désauvegarde d'un article
   const handleSave = async (articleId) => {
     try {
+      console.log('Trying to save article:', articleId);
       const article = articles.find((a) => a._id === articleId);
+      if (!article) return;
 
       if (article.isSaved) {
         await unsaveArticle(articleId);
@@ -41,9 +44,8 @@ const ArticleList = () => {
         await saveArticle(articleId);
       }
 
-      // Dans un vrai scénario, on mettrait à jour le state global
-      // Pour l'instant, on fait une mise à jour simple dans le state local
-      article.isSaved = !article.isSaved;
+      // Mettre à jour l'état de l'article dans le contexte
+      updateArticle(articleId, { isSaved: !article.isSaved });
     } catch (error) {
       console.error("Erreur lors de la sauvegarde de l'article:", error);
     }

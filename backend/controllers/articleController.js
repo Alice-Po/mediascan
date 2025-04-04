@@ -174,9 +174,10 @@ export const saveArticle = async (req, res) => {
     const articleId = req.params.id;
     const userId = req.user._id;
 
-    // Vérification que l'article existe
-    const article = await Article.findById(articleId);
+    console.log('Saving article:', { articleId, userId }); // Debug log
 
+    // Vérifier que l'article existe
+    const article = await Article.findById(articleId);
     if (!article) {
       return res.status(404).json({
         success: false,
@@ -184,47 +185,38 @@ export const saveArticle = async (req, res) => {
       });
     }
 
-    // Mise à jour des interactions de l'utilisateur avec l'article
-    let updated = false;
-
-    // Recherche si l'utilisateur a déjà interagi avec cet article
-    const userInteractionIndex = article.userInteractions.findIndex(
-      (interaction) => interaction.userId.toString() === userId.toString()
+    // Ajouter l'article aux favoris (addToSet évite les doublons)
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { savedArticles: articleId },
+      },
+      { new: true } // Pour retourner le document mis à jour
     );
 
-    if (userInteractionIndex !== -1) {
-      // Mise à jour de l'interaction existante
-      article.userInteractions[userInteractionIndex].isSaved = true;
-      article.userInteractions[userInteractionIndex].savedDate = new Date();
-    } else {
-      // Création d'une nouvelle interaction
-      article.userInteractions.push({
-        userId,
-        isSaved: true,
-        savedDate: new Date(),
-      });
-    }
+    console.log('Updated user:', updatedUser); // Debug log
 
-    await article.save();
-
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
-      userId,
-      eventType: 'articleSave',
-      metadata: {
-        articleId: article._id,
-        sourceId: article.sourceId,
-        orientation: article.orientation,
-        category: article.categories[0] || null,
+    // Mettre à jour les interactions de l'article
+    await Article.findByIdAndUpdate(articleId, {
+      $addToSet: {
+        userInteractions: {
+          userId,
+          type: 'save',
+          date: new Date(),
+        },
       },
     });
 
     res.status(200).json({
       success: true,
       message: 'Article sauvegardé',
+      data: {
+        isSaved: true,
+        articleId,
+      },
     });
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde de l'article:", error);
+    console.error('Error in saveArticle:', error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de la sauvegarde de l'article",
@@ -276,7 +268,11 @@ export const unsaveArticle = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Article désauvegardé',
+      message: 'Article retiré des favoris',
+      data: {
+        isSaved: false,
+        articleId,
+      },
     });
   } catch (error) {
     console.error("Erreur lors de la désauvegarde de l'article:", error);

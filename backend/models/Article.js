@@ -58,16 +58,14 @@ const ArticleSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
         },
-        isRead: {
-          type: Boolean,
-          default: false,
+        type: {
+          type: String,
+          enum: ['save', 'read', 'share'],
         },
-        isSaved: {
-          type: Boolean,
-          default: false,
+        date: {
+          type: Date,
+          default: Date.now,
         },
-        readDate: Date,
-        savedDate: Date,
       },
     ],
     // TTL index pour la suppression automatique après 7 jours (version gratuite)
@@ -78,8 +76,10 @@ const ArticleSchema = new mongoose.Schema(
     },
     publishedAt: {
       type: Date,
-      required: true,
       index: true,
+      default: function () {
+        return this.pubDate;
+      },
     },
   },
   {

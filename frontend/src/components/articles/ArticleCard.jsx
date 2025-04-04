@@ -57,8 +57,11 @@ const formatRelativeTime = (date) => {
 const ArticleCard = ({ article, onSave, onShare }) => {
   // Gérer le clic sur le bouton de sauvegarde
   const handleSaveClick = (e) => {
+    console.log('Save button clicked', e); // Ajouter ce log
     e.stopPropagation(); // Empêcher la navigation vers l'article
-    onSave(article.id);
+    if (onSave && article && article._id) {
+      onSave(article._id);
+    }
   };
 
   // Gérer le clic sur le bouton de partage
@@ -133,18 +136,15 @@ const ArticleCard = ({ article, onSave, onShare }) => {
             <div className="flex space-x-2">
               <button
                 onClick={handleSaveClick}
-                className={`p-1 rounded-full transition-colors ${
-                  article.isSaved
-                    ? 'text-primary bg-primary-light bg-opacity-10'
-                    : 'text-gray-500 hover:text-primary hover:bg-primary-light hover:bg-opacity-10'
-                }`}
+                className="p-1 hover:bg-gray-100 rounded-full"
+                aria-label={article.isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
               >
                 <BookmarkIcon filled={article.isSaved} />
               </button>
-
               <button
                 onClick={handleShareClick}
-                className="p-1 rounded-full text-gray-500 hover:text-primary hover:bg-primary-light hover:bg-opacity-10 transition-colors"
+                className="p-1 hover:bg-gray-100 rounded-full"
+                aria-label="Partager l'article"
               >
                 <ShareIcon />
               </button>
