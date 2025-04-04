@@ -1,42 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { fetchDiversityData, resetAnalytics } from '../api/analyticsApi';
+import { fetchDiversityData, fetchUserAnalytics, resetAnalytics } from '../api/analyticsApi';
 import {
   Radar,
   RadarChart,
+  PieChart,
+  BarChart,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-
+import InformationAnalytics from '../components/analytics/InformationAnalytics';
 /**
  * Page de la dimension pédagogique (diversité d'information)
  */
 const Diversity = () => {
-  // State pour les données de diversité
+  // State pour les données
   const [diversityData, setDiversityData] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [period, setPeriod] = useState('30days');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resetConfirm, setResetConfirm] = useState(false);
 
-  // Charger les données de diversité
+  // Charger les données
   useEffect(() => {
-    const loadDiversityData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchDiversityData();
-        setDiversityData(data);
+        const [diversity, analytics] = await Promise.all([
+          fetchDiversityData(),
+          fetchUserAnalytics(period),
+        ]);
+        setDiversityData(diversity);
+        setAnalyticsData(analytics);
       } catch (err) {
-        console.error('Erreur lors du chargement des données de diversité:', err);
-        setError("Impossible de charger vos données de diversité d'information.");
+        console.error('Erreur lors du chargement des données:', err);
+        setError("Impossible de charger vos données d'analyse.");
       } finally {
         setLoading(false);
       }
     };
 
-    loadDiversityData();
-  }, []);
+    loadData();
+  }, [period]);
 
   // Réinitialiser les données analytiques
   const handleReset = async () => {
@@ -68,28 +76,28 @@ const Diversity = () => {
   };
 
   // Préparer les données pour le graphique radar
-  const prepareRadarData = () => {
-    if (!diversityData) return [];
+  const prepareRadarData = (data) => {
+    if (!data) return [];
 
     return [
       {
         subject: 'Politique',
-        A: diversityData.political.score * 100,
+        A: data.political.score * 100,
         fullMark: 100,
       },
       {
         subject: 'Type',
-        A: diversityData.type.score * 100,
+        A: data.type.score * 100,
         fullMark: 100,
       },
       {
         subject: 'Structure',
-        A: diversityData.structure.score * 100,
+        A: data.structure.score * 100,
         fullMark: 100,
       },
       {
         subject: 'Portée',
-        A: diversityData.scope.score * 100,
+        A: data.scope.score * 100,
         fullMark: 100,
       },
     ];
@@ -124,89 +132,79 @@ const Diversity = () => {
   }
 
   return (
-    <div className="diversity-page space-y-6">
+    <div className="container mx-auto px-4 py-8 space-y-8">
       {/* En-tête */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h2 className="text-lg font-medium text-gray-800 mb-2">Ma diversité d'information</h2>
-        <p className="text-gray-600 text-sm">
-          Découvrez votre niveau de diversité d'information à travers différentes dimensions. Cela
-          vous permet de prendre conscience de votre consommation médiatique et de l'équilibrer.
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h1 className="text-2xl font-bold mb-4">Ma diététique informationnelle</h1>
+        <p className="text-gray-600">
+          Découvrez et analysez vos habitudes de consommation d'information à travers différentes
+          dimensions.
         </p>
       </div>
 
-      {/* Graphique de diversité */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-md font-medium text-gray-800 mb-4">Profil de diversité</h3>
+      {/* Sélecteur de période */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Période d'analyse</h2>
+          <select
+            value={period}
+            onChange={(e) => setPeriod(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option value="7days">7 derniers jours</option>
+            <option value="30days">30 derniers jours</option>
+            <option value="90days">90 derniers jours</option>
+          </select>
+        </div>
 
-        {!diversityData || diversityData.totalArticlesRead === 0 ? (
-          <div className="text-center py-8">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16 mx-auto text-gray-300 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-            <p className="text-gray-500 mb-2">Pas encore assez de données.</p>
-            <p className="text-gray-400 text-sm">
-              Consultez des articles pour obtenir une analyse de votre diversité d'information.
-            </p>
+        {/* Statistiques rapides */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-2xl font-bold">{analyticsData?.totalInteractions || 0}</div>
+            <div className="text-sm text-gray-500">Articles consultés</div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Graphique radar */}
-            <div className="flex justify-center items-center">
-              <ResponsiveRadarChart data={prepareRadarData()} />
-            </div>
-
-            {/* Statistiques */}
-            <div className="space-y-4">
-              {/* Score global */}
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  Score global de diversité
-                </h4>
-                <div className="flex items-center">
-                  <div className="w-full bg-gray-200 rounded-full h-3 mr-2">
-                    <div
-                      className="bg-primary h-3 rounded-full"
-                      style={{ width: `${calculateOverallScore()}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-lg font-bold text-primary">
-                    {Math.round(calculateOverallScore())}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Statistiques de lecture */}
-              <div className="p-4 border border-gray-200 rounded-md">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Statistiques</h4>
-                <ul className="space-y-2">
-                  <li className="flex justify-between">
-                    <span className="text-sm text-gray-600">Articles lus:</span>
-                    <span className="font-medium">{diversityData.totalArticlesRead}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-sm text-gray-600">Sources consultées:</span>
-                    <span className="font-medium">{diversityData.uniqueSourcesRead}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span className="text-sm text-gray-600">Catégories explorées:</span>
-                    <span className="font-medium">{diversityData.uniqueCategoriesRead}</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-2xl font-bold">{diversityData?.uniqueSourcesRead || 0}</div>
+            <div className="text-sm text-gray-500">Sources différentes</div>
           </div>
-        )}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-2xl font-bold">{diversityData?.uniqueCategoriesRead || 0}</div>
+            <div className="text-sm text-gray-500">Catégories explorées</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Graphiques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Graphique radar de diversité */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Score de diversité</h2>
+          <ResponsiveRadarChart data={prepareRadarData(diversityData)} />
+        </div>
+
+        {/* Distribution des orientations */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Répartition des sources</h2>
+          <div className="h-64">
+            <PieChart data={analyticsData?.orientationStats?.political} />
+          </div>
+        </div>
+
+        {/* Catégories consultées */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Catégories consultées</h2>
+          <div className="h-64">
+            <BarChart data={analyticsData?.categoryBreakdown} />
+          </div>
+        </div>
+
+        {/* Types de médias */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4">Types de médias</h2>
+          <div className="h-64">
+            <PieChart data={analyticsData?.orientationStats?.type} />
+          </div>
+        </div>
       </div>
 
       {/* Explications méthodologiques */}
@@ -330,6 +328,7 @@ const Diversity = () => {
           </button>
         )}
       </div>
+      <InformationAnalytics />
     </div>
   );
 };

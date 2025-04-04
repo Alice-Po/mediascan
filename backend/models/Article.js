@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ORIENTATIONS } from '../config/constants.js';
 
 const ArticleSchema = new mongoose.Schema(
   {
@@ -46,10 +47,22 @@ const ArticleSchema = new mongoose.Schema(
       },
     ],
     orientation: {
-      political: String,
-      type: String,
-      structure: String,
-      scope: String,
+      political: {
+        type: String,
+        enum: ORIENTATIONS.political,
+      },
+      type: {
+        type: String,
+        enum: ORIENTATIONS.type,
+      },
+      structure: {
+        type: String,
+        enum: ORIENTATIONS.structure,
+      },
+      scope: {
+        type: String,
+        enum: ORIENTATIONS.scope,
+      },
     },
     // Pour suivre les interactions des utilisateurs
     userInteractions: [

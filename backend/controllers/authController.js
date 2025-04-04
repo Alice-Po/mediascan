@@ -99,15 +99,19 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
+    // Enregistrer l'événement de connexion
+    const analytics = new Analytics({
       userId: user._id,
       eventType: 'userLogin',
       metadata: {
+        timestamp: new Date(),
         userAgent: req.headers['user-agent'],
-        platform: req.headers['sec-ch-ua-platform'] || 'unknown',
+        platform: req.headers['sec-ch-ua-platform'],
+        success: true,
       },
     });
+
+    await analytics.save();
 
     // Génération du token
     const token = generateToken(user._id);

@@ -320,3 +320,40 @@ export const getSavedArticles = async (req, res) => {
     });
   }
 };
+
+const createOrUpdateArticle = async (articleData, source) => {
+  try {
+    console.log('Creating/Updating article with source data:', {
+      sourceId: source._id,
+      sourceName: source.name,
+      sourceOrientation: source.orientation,
+      articleTitle: articleData.title,
+    });
+
+    const article = await Article.findOneAndUpdate(
+      { title: articleData.title, sourceId: source._id },
+      {
+        ...articleData,
+        sourceId: source._id,
+        sourceName: source.name,
+        sourceFavicon: source.faviconUrl,
+        orientation: source.orientation,
+        categories: source.categories,
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log('Article created/updated:', {
+      articleId: article._id,
+      title: article.title,
+      sourceId: article.sourceId,
+      orientation: article.orientation,
+      categories: article.categories,
+    });
+
+    return article;
+  } catch (error) {
+    console.error('Error in createOrUpdateArticle:', error);
+    throw error;
+  }
+};

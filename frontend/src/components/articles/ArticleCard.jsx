@@ -1,4 +1,5 @@
 import React from 'react';
+import { trackEvent } from '../../api/analyticsApi';
 
 // Icônes pour les actions
 const BookmarkIcon = ({ filled }) => (
@@ -70,15 +71,58 @@ const ArticleCard = ({ article, onSave, onShare }) => {
     onShare(article.link);
   };
 
-  // Ouvrir l'article dans un nouvel onglet
-  const openArticle = () => {
-    window.open(article.link, '_blank');
+  const handleClick = async (e) => {
+    try {
+      // S'assurer que l'orientation est un objet
+      let orientation = article.orientation;
+
+      if (typeof orientation === 'string') {
+        try {
+          // Nettoyer la chaîne avant de la parser
+          const cleanStr = orientation
+            .replace(/\n/g, '')
+            .replace(/\\n/g, '')
+            .replace(/'/g, '"')
+            .trim();
+          orientation = JSON.parse(cleanStr);
+        } catch (parseError) {
+          console.warn("Erreur de parsing de l'orientation:", parseError);
+          orientation = {
+            political: 'non-spécifié',
+            type: 'non-spécifié',
+            structure: 'non-spécifié',
+            scope: 'non-spécifié',
+          };
+        }
+      }
+
+      await trackEvent({
+        eventType: 'read',
+        metadata: {
+          articleId: article._id,
+          sourceId: article.sourceId,
+          orientation: orientation,
+          category: article.categories?.[0],
+          timestamp: new Date(),
+        },
+      });
+
+      console.log('Article click tracked:', {
+        articleId: article._id,
+        orientation: orientation,
+      });
+
+      // Ouvrir l'article dans un nouvel onglet
+      window.open(article.link, '_blank');
+    } catch (error) {
+      console.error('Error tracking article click:', error);
+    }
   };
 
   return (
     <div
       className="card h-[180px] mb-4 cursor-pointer hover:shadow-md transition-shadow"
-      onClick={openArticle}
+      onClick={handleClick}
     >
       <div className="flex h-full">
         {/* Image de l'article (si disponible) */}
