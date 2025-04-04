@@ -48,6 +48,11 @@ function AppProvider({ children }) {
   // Ajout du state pour les thématiques
   const [userInterests, setUserInterests] = useState([]);
 
+  // Ajouter des logs pour suivre l'état
+  console.log('AppContext render:', {
+    articlesCount: articles?.length,
+  });
+
   // Charger les sources initiales
   useEffect(() => {
     let mounted = true;
@@ -96,45 +101,26 @@ function AppProvider({ children }) {
     };
   }, [user]);
 
-  // Charger les articles quand les filtres changent
+  // Fonction pour charger les articles
+  const loadArticles = useCallback(async () => {
+    try {
+      console.log('Loading articles...');
+      setLoadingArticles(true);
+      const response = await fetchArticles(filters);
+      console.log('Articles loaded:', response);
+      setArticles(response.articles);
+    } catch (error) {
+      console.error('Error loading articles:', error);
+    } finally {
+      setLoadingArticles(false);
+    }
+  }, [filters]);
+
+  // Charger les articles au montage et quand les filtres changent
   useEffect(() => {
-    let mounted = true;
-
-    const loadArticles = async () => {
-      if (!user || !filters.sources?.length) {
-        setArticles([]);
-        setLoadingArticles(false);
-        return;
-      }
-
-      try {
-        setLoadingArticles(true);
-        const data = await fetchArticles({
-          page: 1,
-          limit: 20,
-          ...filters,
-        });
-
-        if (!mounted) return;
-
-        setArticles(data.articles || []);
-        setHasMoreArticles(data.hasMore);
-        setArticlesPage(1);
-      } catch (err) {
-        console.error('Erreur lors du chargement des articles:', err);
-      } finally {
-        if (mounted) {
-          setLoadingArticles(false);
-        }
-      }
-    };
-
+    console.log('AppContext useEffect triggered');
     loadArticles();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user, JSON.stringify(filters)]);
+  }, [loadArticles]);
 
   // Fonction pour charger plus d'articles
   const loadMoreArticles = async () => {

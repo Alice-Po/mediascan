@@ -10,8 +10,20 @@ import InterestsList from '../components/InterestsList';
  */
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
-  const { resetFilters, loadingArticles } = useContext(AppContext);
+  const { resetFilters, loadingArticles, articles } = useContext(AppContext);
   const [error, setError] = useState(null);
+
+  console.log('Dashboard render:', {
+    articlesCount: articles?.length,
+    loadingArticles,
+  });
+
+  useEffect(() => {
+    console.log('Dashboard mounted/updated:', {
+      articlesCount: articles?.length,
+      loadingArticles,
+    });
+  }, [articles, loadingArticles]);
 
   // Réinitialiser les filtres au montage de la page
   useEffect(() => {
