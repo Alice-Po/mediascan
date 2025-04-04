@@ -13,19 +13,26 @@ export const getArticles = async (req, res) => {
 
     const { page = 1, limit = 20, sources, categories } = req.query;
 
-    // Vérifier que l'utilisateur a des sources actives
+    // Récupérer l'utilisateur avec ses sources actives et ses intérêts
     const user = await User.findById(req.user._id).populate('activeSources');
-    console.log('User active sources:', user.activeSources);
+    console.log('User interests:', user.interests);
 
     // Construire la requête
     const query = {};
 
-    // Si des sources sont spécifiées dans la requête, les utiliser
-    // Sinon, utiliser toutes les sources actives de l'utilisateur
+    // Filtrer par sources actives
     if (sources && sources.length) {
       query.sourceId = { $in: sources.split(',') };
     } else if (user.activeSources.length) {
       query.sourceId = { $in: user.activeSources.map((s) => s._id) };
+    }
+
+    // Filtrer par catégories spécifiées dans la requête OU par les intérêts de l'utilisateur
+    if (categories && categories.length) {
+      query.categories = { $in: categories.split(',') };
+    } else if (user.interests && user.interests.length) {
+      // Par défaut, filtrer par les intérêts de l'utilisateur
+      query.categories = { $in: user.interests };
     }
 
     console.log('Article query:', query);
@@ -37,16 +44,15 @@ export const getArticles = async (req, res) => {
       .limit(parseInt(limit))
       .populate('sourceId', 'name faviconUrl url');
 
-    // Log pour vérifier l'ordre des articles
+    // Log pour vérifier les articles filtrés
     console.log(
-      'Articles sorted by date:',
+      'Articles filtered by interests:',
       articles.map((a) => ({
         title: a.title.substring(0, 30),
-        pubDate: a.pubDate,
+        categories: a.categories,
+        matches: a.categories.filter((c) => user.interests.includes(c)),
       }))
     );
-
-    console.log(`Found ${articles.length} articles matching query`);
 
     res.json({
       articles,

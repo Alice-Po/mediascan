@@ -45,13 +45,13 @@ const extractImageFromRSSItem = (item) => {
  */
 export const fetchAllSources = async () => {
   try {
-    console.log('Démarrage de la récupération de tous les flux RSS...');
+    // console.log('Démarrage de la récupération de tous les flux RSS...');
 
     // Récupération de toutes les sources
     const sources = await Source.find();
 
     if (sources.length === 0) {
-      console.log('Aucune source à récupérer');
+      // console.log('Aucune source à récupérer');
       return {
         success: true,
         message: 'Aucune source à récupérer',
@@ -60,7 +60,7 @@ export const fetchAllSources = async () => {
       };
     }
 
-    console.log(`Récupération des articles pour ${sources.length} sources...`);
+    // console.log(`Récupération des articles pour ${sources.length} sources...`);
 
     // Pour chaque source, récupération des articles
     let totalArticles = 0;
@@ -70,7 +70,7 @@ export const fetchAllSources = async () => {
       totalArticles += articlesCount;
     }
 
-    console.log(`Récupération terminée: ${totalArticles} nouveaux articles ajoutés`);
+    // console.log(`Récupération terminée: ${totalArticles} nouveaux articles ajoutés`);
 
     return {
       success: true,
@@ -79,7 +79,7 @@ export const fetchAllSources = async () => {
       totalArticles,
     };
   } catch (error) {
-    console.error('Erreur lors de la récupération de tous les flux RSS:', error);
+    // console.error('Erreur lors de la récupération de tous les flux RSS:', error);
     return {
       success: false,
       message: error.message,
@@ -94,7 +94,7 @@ export const fetchAllSources = async () => {
  */
 export const fetchSourceArticles = async (source) => {
   try {
-    console.log(`Récupération des articles de la source: ${source.name}`);
+    // console.log(`Récupération des articles de la source: ${source.name}`);
 
     // Récupération du flux RSS
     const feed = await parser.parseURL(source.rssUrl);
@@ -156,12 +156,12 @@ export const fetchSourceArticles = async (source) => {
     // Insertion des nouveaux articles en masse (pour performance)
     if (validArticles.length > 0) {
       await Article.insertMany(validArticles);
-      console.log(`${validArticles.length} nouveaux articles ajoutés pour ${source.name}`);
+      // console.log(`${validArticles.length} nouveaux articles ajoutés pour ${source.name}`);
     }
 
     return validArticles.length;
   } catch (error) {
-    console.error(`Erreur lors de la récupération des articles de ${source.name}:`, error);
+    // console.error(`Erreur lors de la récupération des articles de ${source.name}:`, error);
 
     // Mise à jour du statut d'erreur
     await Source.findByIdAndUpdate(source._id, {
