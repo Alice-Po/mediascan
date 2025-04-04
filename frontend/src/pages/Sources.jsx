@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { addUserSource, updateUserSource, deleteUserSource } from '../api/sourcesApi';
 import api from '../api';
+import { CATEGORIES, ORIENTATIONS } from '../constants';
 
 /**
  * Page de gestion des sources
@@ -33,26 +34,10 @@ const Sources = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Liste des catégories disponibles
-  const categories = [
-    'politique',
-    'économie',
-    'international',
-    'société',
-    'culture',
-    'sport',
-    'sciences',
-    'tech',
-    'environnement',
-    'santé',
-  ];
+  const categories = CATEGORIES;
 
   // Options d'orientation
-  const orientationOptions = {
-    political: ['gauche', 'centre', 'droite'],
-    type: ['mainstream', 'alternatif'],
-    structure: ['institutionnel', 'indépendant'],
-    scope: ['généraliste', 'spécialisé'],
-  };
+  const orientationOptions = ORIENTATIONS;
 
   // Filtrer les sources en fonction de la recherche
   const filteredSources = !searchTerm

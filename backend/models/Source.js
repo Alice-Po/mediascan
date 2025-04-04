@@ -5,17 +5,17 @@ const SourceSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Veuillez fournir un nom pour la source'],
+      required: [true, 'Le nom est requis'],
       trim: true,
     },
     url: {
       type: String,
-      required: [true, "Veuillez fournir l'URL du site"],
+      required: [true, "L'URL est requise"],
       trim: true,
     },
     rssUrl: {
       type: String,
-      required: [true, "Veuillez fournir l'URL du flux RSS"],
+      required: [true, "L'URL du flux RSS est requise"],
       trim: true,
     },
     faviconUrl: {
@@ -32,18 +32,22 @@ const SourceSchema = new mongoose.Schema(
       political: {
         type: String,
         enum: ORIENTATIONS.political,
+        default: 'centre',
       },
       type: {
         type: String,
         enum: ORIENTATIONS.type,
+        default: 'mainstream',
       },
       structure: {
         type: String,
         enum: ORIENTATIONS.structure,
+        default: 'institutionnel',
       },
       scope: {
         type: String,
         enum: ORIENTATIONS.scope,
+        default: 'généraliste',
       },
     },
     defaultEnabled: {
