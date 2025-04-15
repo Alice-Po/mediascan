@@ -47,25 +47,7 @@ export const AppProvider = ({ children }) => {
 
   // Memoize les articles filtrés
   const filteredArticles = React.useMemo(() => {
-    console.log('=== Début du filtrage ===');
-    console.log('État initial:', {
-      totalArticles: articles.length,
-      filters: {
-        sources: filters.sources,
-        categories: filters.categories,
-        political: filters.orientation.political,
-      },
-    });
-
     const filtered = articles.filter((article) => {
-      console.log('\nAnalyse article:', {
-        id: article._id,
-        title: article.title,
-        sourceId: article.sourceId._id,
-        categories: article.categories,
-        orientation: article.orientation,
-      });
-
       // Si aucune source n'est sélectionnée, ne pas filtrer par source
       if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId._id)) {
         return false;

@@ -13,11 +13,6 @@ const Dashboard = () => {
   const { resetFilters, loadingArticles, articles } = useContext(AppContext);
   const [error, setError] = useState(null);
 
-  console.log('Dashboard render:', {
-    articlesCount: articles?.length,
-    loadingArticles,
-  });
-
   useEffect(() => {
     console.log('Dashboard mounted/updated:', {
       articlesCount: articles?.length,
@@ -86,7 +81,7 @@ const Dashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl mb-4">Bienvenue, {user?.name}</h2>
-        <InterestsList />
+        {/* <InterestsList /> */}
         {/* Filtres */}
         <ArticleFilters />
 

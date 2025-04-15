@@ -7,6 +7,30 @@ import {
   getOrientationLabel,
 } from '../../constants';
 
+// Composant Accordion réutilisable
+const Accordion = ({ title, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border rounded-lg">
+      <button
+        className="w-full px-4 py-2 flex justify-between items-center bg-gray-50 hover:bg-gray-100 rounded-t-lg"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="font-medium">{title}</span>
+        <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+      <div
+        className={`px-4 py-2 transition-all duration-200 ease-in-out ${
+          isOpen ? 'block' : 'hidden'
+        }`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 /**
  * Composant de filtres pour les articles
  */
@@ -95,8 +119,7 @@ const ArticleFilters = () => {
       {isExpanded && (
         <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
           {/* Catégories */}
-          <div>
-            <h3 className="font-medium mb-2">Catégories</h3>
+          <Accordion title="Catégories">
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((category) => (
                 <button
@@ -112,11 +135,10 @@ const ArticleFilters = () => {
                 </button>
               ))}
             </div>
-          </div>
+          </Accordion>
 
           {/* Orientations politiques */}
-          <div>
-            <h3 className="font-medium mb-2">Orientation politique</h3>
+          <Accordion title="Orientation politique">
             <div className="flex flex-wrap gap-2">
               {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
                 <button
@@ -137,40 +159,10 @@ const ArticleFilters = () => {
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Autres orientations */}
-          <div>
-            <h3 className="font-medium mb-2">Autres critères</h3>
-            <div className="space-y-2">
-              {Object.entries(ORIENTATIONS)
-                .filter(([key]) => key !== 'political')
-                .map(([type, values]) => (
-                  <div key={type}>
-                    <h4 className="text-sm text-gray-600 mb-1 capitalize">{type}</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {values.map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => handleOrientationChange(type, value)}
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            filters.orientation[type]?.includes(value)
-                              ? 'bg-primary text-white'
-                              : 'bg-gray-100 hover:bg-gray-200'
-                          }`}
-                        >
-                          {value}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+          </Accordion>
 
           {/* Sources avec conteneur isolé */}
-          <div className="isolate">
-            <h3 className="font-medium mb-2">Sources</h3>
+          <Accordion title="Sources">
             <div className="space-y-2">
               {userSources.map((source) => (
                 <label
@@ -192,7 +184,7 @@ const ArticleFilters = () => {
                 </label>
               ))}
             </div>
-          </div>
+          </Accordion>
 
           {/* Bouton de réinitialisation */}
           <div className="flex justify-end pt-2 border-t">

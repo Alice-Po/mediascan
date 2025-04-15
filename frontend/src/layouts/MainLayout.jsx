@@ -36,12 +36,8 @@ const MainLayout = () => {
         {' '}
         {/* Ajout des marges */}
         {/* En-tête de page */}
-        <header className="bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 py-3">
-            <h1 className="text-xl font-semibold text-gray-800">{getPageTitle()}</h1>
-            {user && <p className="text-sm text-gray-500">Bonjour, {user.name}</p>}
-          </div>
-        </header>
+        {/* <header className="bg-white border-b border-gray-200">
+        </header> */}
         {/* Contenu principal */}
         <main className="container mx-auto px-4 py-6">
           <Outlet />
