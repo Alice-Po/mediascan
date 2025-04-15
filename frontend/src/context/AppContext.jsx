@@ -5,7 +5,7 @@ import { fetchArticles } from '../api/articlesApi';
 import { updateUserSource } from '../api/sourcesApi';
 
 // Création du contexte et du hook dans des constantes nommées
-const AppContext = createContext(null);
+export const AppContext = createContext(null);
 
 // Hook personnalisé dans une fonction nommée
 function useApp() {
@@ -17,7 +17,7 @@ function useApp() {
 }
 
 // Provider dans une fonction nommée
-function AppProvider({ children }) {
+export const AppProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
 
   // State pour les sources
@@ -32,26 +32,73 @@ function AppProvider({ children }) {
   const [articlesPage, setArticlesPage] = useState(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
 
-  // State pour les filtres avec une structure complète
-  const [filters, setFilters] = useState({
-    categories: [],
-    sources: [],
-    orientation: {
-      political: [],
-      type: [],
-      structure: [],
-      scope: [],
-    },
-    searchTerm: '',
+  // State pour les filtres
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem('articleFilters');
+    return savedFilters
+      ? JSON.parse(savedFilters)
+      : {
+          searchTerm: '',
+          categories: [],
+          orientation: {},
+          sources: [],
+        };
   });
+
+  // Memoize les articles filtrés
+  const filteredArticles = React.useMemo(() => {
+    console.log('=== Début du filtrage ===');
+    console.log('État initial:', {
+      totalArticles: articles.length,
+      filters: {
+        sources: filters.sources,
+        categories: filters.categories,
+        political: filters.orientation.political,
+      },
+    });
+
+    const filtered = articles.filter((article) => {
+      console.log('\nAnalyse article:', {
+        id: article._id,
+        title: article.title,
+        sourceId: article.sourceId._id,
+        categories: article.categories,
+        orientation: article.orientation,
+      });
+
+      // Si aucune source n'est sélectionnée, ne pas filtrer par source
+      if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId._id)) {
+        return false;
+      }
+
+      // Filtre par catégorie
+      if (
+        filters.categories.length > 0 &&
+        !article.categories?.some((cat) => filters.categories.includes(cat))
+      ) {
+        return false;
+      }
+
+      // Filtre par orientation
+      if (
+        filters.orientation.political?.length > 0 &&
+        !filters.orientation.political.includes(article.orientation?.political)
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    return filtered;
+  }, [articles, filters]);
+
+  // Sauvegarder les filtres dans localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem('articleFilters', JSON.stringify(filters));
+  }, [filters]);
 
   // Ajout du state pour les thématiques
   const [userInterests, setUserInterests] = useState([]);
-
-  // Ajouter des logs pour suivre l'état
-  console.log('AppContext render:', {
-    articlesCount: articles?.length,
-  });
 
   // Charger les sources initiales
   useEffect(() => {
@@ -74,23 +121,28 @@ function AppProvider({ children }) {
           ? userSourcesData.map((source) => ({ ...source, enabled: true }))
           : [];
 
-        setUserSources(formattedUserSources);
-        setAllSources(allSourcesData.data);
+        if (mounted) {
+          setUserSources(formattedUserSources);
+          setAllSources(allSourcesData.data);
 
-        // Initialiser les filtres avec les IDs des sources actives
-        const activeSourceIds = formattedUserSources
-          .filter((source) => source.enabled)
-          .map((source) => source._id);
+          // Initialiser les filtres avec TOUTES les sources actives
+          const activeSourceIds = formattedUserSources
+            .filter((source) => source.enabled)
+            .map((source) => source._id);
 
-        setFilters((prev) => ({
-          ...prev,
-          sources: activeSourceIds,
-        }));
+          // Mettre à jour les filtres en préservant les autres filtres existants
+          setFilters((prev) => ({
+            ...prev,
+            sources: prev.sources.length === 0 ? activeSourceIds : prev.sources, // Ne pas écraser si déjà défini
+          }));
+        }
       } catch (err) {
         console.error('Error loading sources:', err);
         setError('Erreur lors du chargement des sources');
       } finally {
-        setLoadingSources(false);
+        if (mounted) {
+          setLoadingSources(false);
+        }
       }
     };
 
@@ -101,26 +153,30 @@ function AppProvider({ children }) {
     };
   }, [user]);
 
+  // Charger les articles une seule fois au montage ou quand l'utilisateur change
+  useEffect(() => {
+    if (user) {
+      loadArticles();
+    }
+  }, [user]);
+
   // Fonction pour charger les articles
-  const loadArticles = useCallback(async () => {
+  const loadArticles = async () => {
     try {
-      console.log('Loading articles...');
       setLoadingArticles(true);
-      const response = await fetchArticles(filters);
-      console.log('Articles loaded:', response);
+      const response = await fetchArticles();
+      console.log('Articles loaded:', {
+        count: response.articles.length,
+        firstArticle: response.articles[0],
+      });
       setArticles(response.articles);
+      setHasMoreArticles(response.hasMore);
     } catch (error) {
       console.error('Error loading articles:', error);
     } finally {
       setLoadingArticles(false);
     }
-  }, [filters]);
-
-  // Charger les articles au montage et quand les filtres changent
-  useEffect(() => {
-    console.log('AppContext useEffect triggered');
-    loadArticles();
-  }, [loadArticles]);
+  };
 
   // Fonction pour charger plus d'articles
   const loadMoreArticles = async () => {
@@ -253,12 +309,20 @@ function AppProvider({ children }) {
     );
   }, []);
 
+  // Log pour suivre les changements d'état importants
+  useEffect(() => {
+    console.log('Articles state updated:', {
+      totalArticles: articles.length,
+      filteredArticles: filteredArticles.length,
+    });
+  }, [articles, filteredArticles]);
+
   // Valeur du contexte
   const value = {
     userSources,
     allSources,
     loadingSources,
-    articles,
+    articles: filteredArticles,
     loadingArticles,
     hasMoreArticles,
     filters,
@@ -274,7 +338,7 @@ function AppProvider({ children }) {
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-}
+};
 
 // Export des constantes et fonctions nommées
-export { AppContext, useApp, AppProvider };
+export { useApp };

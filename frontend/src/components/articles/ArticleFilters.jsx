@@ -1,5 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import {
+  CATEGORIES,
+  ORIENTATIONS,
+  getOrientationColor,
+  getOrientationLabel,
+} from '../../constants';
 
 /**
  * Composant de filtres pour les articles
@@ -10,29 +16,7 @@ const ArticleFilters = () => {
   // State local pour afficher/masquer les filtres sur mobile
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Catégories disponibles
-  const categories = [
-    'politique',
-    'économie',
-    'international',
-    'société',
-    'culture',
-    'sport',
-    'sciences',
-    'tech',
-    'environnement',
-    'santé',
-  ];
-
-  // Options d'orientation
-  const orientationOptions = {
-    political: ['gauche', 'centre', 'droite'],
-    type: ['mainstream', 'alternatif'],
-    structure: ['institutionnel', 'indépendant'],
-    scope: ['généraliste', 'spécialisé'],
-  };
-
-  // Toggle pour un filter de catégorie
+  // Utilisation des catégories depuis le fichier de constantes
   const handleCategoryChange = (category) => {
     setFilters((prev) => ({
       ...prev,
@@ -42,30 +26,28 @@ const ArticleFilters = () => {
     }));
   };
 
-  // Toggle pour un filtre d'orientation
+  // Gestion des filtres d'orientation
   const handleOrientationChange = (type, value) => {
     setFilters((prev) => ({
       ...prev,
       orientation: {
-        ...(prev.orientation || {}), // Fournir un objet vide si null
-        [type]: value,
+        ...prev.orientation,
+        [type]: prev.orientation[type]?.includes(value)
+          ? prev.orientation[type].filter((v) => v !== value)
+          : [...(prev.orientation[type] || []), value],
       },
     }));
   };
 
-  // Toggle pour un filtre de source
-  const handleSourceChange = (sourceId) => {
+  // Gestion des sources
+  const handleSourceChange = (e, sourceId) => {
+    e.stopPropagation();
     setFilters((prev) => ({
       ...prev,
       sources: prev.sources.includes(sourceId)
         ? prev.sources.filter((id) => id !== sourceId)
         : [...prev.sources, sourceId],
     }));
-  };
-
-  // Toggle pour l'affichage des filtres (mobile)
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
   };
 
   // Gérer la recherche
@@ -77,47 +59,53 @@ const ArticleFilters = () => {
     }));
   };
 
-  return (
-    <div className="bg-white rounded-lg shadow-sm mb-4">
-      {/* En-tête des filtres (toujours visible) */}
-      <div className="p-3 flex justify-between items-center cursor-pointer" onClick={toggleExpand}>
-        <h2 className="font-medium text-gray-800">Filtres</h2>
-        <div className="flex items-center">
-          {filters.categories.length > 0 ||
-          Object.values(filters.orientation).some((arr) => arr.length > 0) ? (
-            <span className="bg-primary text-white text-xs px-2 py-0.5 rounded-full mr-2">
-              {filters.categories.length +
-                Object.values(filters.orientation).reduce((sum, arr) => sum + arr.length, 0)}
-            </span>
-          ) : null}
+  // Nouveau handler pour les orientations politiques
+  const handlePoliticalOrientationChange = (orientation) => {
+    setFilters((prev) => ({
+      ...prev,
+      orientation: {
+        ...prev.orientation,
+        political: prev.orientation.political?.includes(orientation)
+          ? prev.orientation.political.filter((v) => v !== orientation)
+          : [...(prev.orientation.political || []), orientation],
+      },
+    }));
+  };
 
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4">
+      {/* Header séparé avec le bouton toggle */}
+      <div className="border-b pb-2 mb-4">
+        <div className="flex justify-between items-center">
+          <h2 className="font-medium">Filtres</h2>
+          <button
+            className="p-2 hover:bg-gray-100 rounded-full"
+            onClick={() => setIsExpanded(!isExpanded)}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+            <span
+              className={`transform transition-transform block ${isExpanded ? 'rotate-180' : ''}`}
+            >
+              ▼
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Contenu des filtres (visible uniquement si développé) */}
+      {/* Contenu des filtres dans un conteneur séparé */}
       {isExpanded && (
-        <div className="p-3 border-t border-gray-100">
-          {/* Filtres de catégories */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Catégories</h3>
+        <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+          {/* Catégories */}
+          <div>
+            <h3 className="font-medium mb-2">Catégories</h3>
             <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
+              {CATEGORIES.map((category) => (
                 <button
                   key={category}
                   onClick={() => handleCategoryChange(category)}
-                  className={`px-2 py-1 rounded-full text-xs ${
+                  className={`px-3 py-1 rounded-full text-sm ${
                     filters.categories.includes(category)
                       ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 hover:bg-gray-200'
                   }`}
                 >
                   {category}
@@ -126,70 +114,88 @@ const ArticleFilters = () => {
             </div>
           </div>
 
-          {/* Filtres d'orientation */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Orientation</h3>
-
-            {Object.entries(orientationOptions).map(([type, values]) => (
-              <div key={type} className="mb-2">
-                <h4 className="text-xs text-gray-500 mb-1 capitalize">
-                  {type === 'political'
-                    ? 'Politique'
-                    : type === 'type'
-                    ? 'Type'
-                    : type === 'structure'
-                    ? 'Structure'
-                    : 'Portée'}
-                </h4>
-
-                <div className="flex flex-wrap gap-2">
-                  {values.map((value) => (
-                    <button
-                      key={`${type}-${value}`}
-                      onClick={() => handleOrientationChange(type, value)}
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        filters.orientation[type]?.includes(value)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Filtres de sources */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Sources</h3>
-            <div className="max-h-40 overflow-y-auto pr-2">
-              {userSources.map((source) => (
-                <div key={source.id} className="flex items-center mb-1">
-                  <input
-                    type="checkbox"
-                    id={`source-${source.id}`}
-                    checked={filters.sources.includes(source.id)}
-                    onChange={() => handleSourceChange(source.id)}
-                    className="mr-2"
-                  />
-                  <label
-                    htmlFor={`source-${source.id}`}
-                    className="text-sm flex items-center cursor-pointer"
-                  >
-                    {source.faviconUrl && (
-                      <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-1" />
-                    )}
-                    {source.name}
-                  </label>
-                </div>
+          {/* Orientations politiques */}
+          <div>
+            <h3 className="font-medium mb-2">Orientation politique</h3>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
+                <button
+                  key={key}
+                  onClick={() => handlePoliticalOrientationChange(key)}
+                  className={`px-3 py-1 rounded-full text-sm flex items-center gap-1`}
+                  style={{
+                    backgroundColor: filters.orientation.political?.includes(key)
+                      ? value.color
+                      : '#f3f4f6',
+                    color: filters.orientation.political?.includes(key) ? '#ffffff' : '#374151',
+                    borderWidth: '1px',
+                    borderColor: value.color,
+                  }}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: value.color }} />
+                  {value.label}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Actions des filtres */}
-          <div className="flex justify-end">
+          {/* Autres orientations */}
+          <div>
+            <h3 className="font-medium mb-2">Autres critères</h3>
+            <div className="space-y-2">
+              {Object.entries(ORIENTATIONS)
+                .filter(([key]) => key !== 'political')
+                .map(([type, values]) => (
+                  <div key={type}>
+                    <h4 className="text-sm text-gray-600 mb-1 capitalize">{type}</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {values.map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => handleOrientationChange(type, value)}
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            filters.orientation[type]?.includes(value)
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Sources avec conteneur isolé */}
+          <div className="isolate">
+            <h3 className="font-medium mb-2">Sources</h3>
+            <div className="space-y-2">
+              {userSources.map((source) => (
+                <label
+                  key={source._id}
+                  className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.sources.includes(source._id)}
+                    onChange={(e) => handleSourceChange(e, source._id)}
+                    className="mr-2"
+                  />
+                  <div className="flex items-center">
+                    {source.faviconUrl && (
+                      <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-1" />
+                    )}
+                    <span className="text-sm">{source.name}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Bouton de réinitialisation */}
+          <div className="flex justify-end pt-2 border-t">
             <button
               onClick={() => setFilters((prev) => ({ ...prev, searchTerm: '' }))}
               className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
