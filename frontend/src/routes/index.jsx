@@ -10,7 +10,7 @@ import AuthLayout from '../layouts/AuthLayout';
 import Dashboard from '../pages/Dashboard';
 import Sources from '../pages/Sources';
 import Saved from '../pages/Saved';
-import Diversity from '../pages/Diversity';
+import Statistics from '../pages/Statistics';
 import Profile from '../pages/Profile';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -37,7 +37,7 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path="sources" element={<Sources />} />
           <Route path="saved" element={<Saved />} />
-          <Route path="diversity" element={<Diversity />} />
+          <Route path="statistics" element={<Statistics />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Route>

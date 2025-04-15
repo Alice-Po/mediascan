@@ -143,7 +143,7 @@ const Navbar = () => {
                 </NavLink>
               ))}
               <NavLink
-                to="/diversity"
+                to="/statistics"
                 className={({ isActive }) =>
                   `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive
@@ -152,7 +152,7 @@ const Navbar = () => {
                   }`
                 }
               >
-                Diététique
+                Statistiques
               </NavLink>
               <button
                 onClick={handleLogout}

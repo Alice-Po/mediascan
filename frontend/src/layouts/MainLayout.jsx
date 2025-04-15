@@ -17,8 +17,8 @@ const MainLayout = () => {
         return 'Mes sources';
       case '/saved':
         return 'Articles sauvegardés';
-      case '/diversity':
-        return "Ma diversité d'information";
+      case '/statistics':
+        return 'Statistiques de lecture';
       case '/profile':
         return 'Mon profil';
       default:

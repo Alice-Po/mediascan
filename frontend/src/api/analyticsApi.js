@@ -1,12 +1,12 @@
 import api from './index';
 
 /**
- * Récupérer les données de diversité
- * @returns {Promise} Données sur la diversité des sources consultées
+ * Récupérer les données de lecture
+ * @returns {Promise} Données sur la lecture
  */
-export const fetchDiversityData = async () => {
+export const fetchStatisticsData = async () => {
   try {
-    const response = await api.get('/analytics/diversity');
+    const response = await api.get('/analytics/statistics');
     return response.data;
   } catch (error) {
     throw error;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchDiversityData, fetchUserAnalytics, resetAnalytics } from '../api/analyticsApi';
+import { fetchStatisticsData, fetchUserAnalytics, resetAnalytics } from '../api/analyticsApi';
 import {
   Radar,
   RadarChart,
@@ -13,11 +13,11 @@ import {
 } from 'recharts';
 import InformationAnalytics from '../components/analytics/InformationAnalytics';
 /**
- * Page de la dimension pédagogique (diversité d'information)
+ * Page des statistiques de lecture
  */
-const Diversity = () => {
+const Statistics = () => {
   // State pour les données
-  const [diversityData, setDiversityData] = useState(null);
+  const [statisticsData, setStatisticsData] = useState(null);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [period, setPeriod] = useState('30days');
   const [loading, setLoading] = useState(true);
@@ -29,11 +29,11 @@ const Diversity = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [diversity, analytics] = await Promise.all([
-          fetchDiversityData(),
+        const [statistics, analytics] = await Promise.all([
+          fetchStatisticsData(),
           fetchUserAnalytics(period),
         ]);
-        setDiversityData(diversity);
+        setStatisticsData(statistics);
         setAnalyticsData(analytics);
       } catch (err) {
         console.error('Erreur lors du chargement des données:', err);
@@ -58,8 +58,8 @@ const Diversity = () => {
       await resetAnalytics();
 
       // Recharger les données après réinitialisation
-      const data = await fetchDiversityData();
-      setDiversityData(data);
+      const data = await fetchStatisticsData();
+      setStatisticsData(data);
 
       setResetConfirm(false);
     } catch (err) {
@@ -103,15 +103,15 @@ const Diversity = () => {
     ];
   };
 
-  // Calculer le score global de diversité
+  // Calculer le score global
   const calculateOverallScore = () => {
-    if (!diversityData) return 0;
+    if (!statisticsData) return 0;
 
     const scores = [
-      diversityData.political.score,
-      diversityData.type.score,
-      diversityData.structure.score,
-      diversityData.scope.score,
+      statisticsData.political.score,
+      statisticsData.type.score,
+      statisticsData.structure.score,
+      statisticsData.scope.score,
     ];
 
     return (scores.reduce((sum, score) => sum + score, 0) / scores.length) * 100;
@@ -135,7 +135,7 @@ const Diversity = () => {
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* En-tête */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold mb-4">Ma diététique informationnelle</h1>
+        <h1 className="text-2xl font-bold mb-4">Statistiques de lecture</h1>
         <p className="text-gray-600">
           Découvrez et analysez vos habitudes de consommation d'information à travers différentes
           dimensions.
@@ -164,11 +164,11 @@ const Diversity = () => {
             <div className="text-sm text-gray-500">Articles consultés</div>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold">{diversityData?.uniqueSourcesRead || 0}</div>
+            <div className="text-2xl font-bold">{statisticsData?.uniqueSourcesRead || 0}</div>
             <div className="text-sm text-gray-500">Sources différentes</div>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold">{diversityData?.uniqueCategoriesRead || 0}</div>
+            <div className="text-2xl font-bold">{statisticsData?.uniqueCategoriesRead || 0}</div>
             <div className="text-sm text-gray-500">Catégories explorées</div>
           </div>
         </div>
@@ -176,10 +176,10 @@ const Diversity = () => {
 
       {/* Graphiques */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Graphique radar de diversité */}
+        {/* Graphique radar de statistiques */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4">Score de diversité</h2>
-          <ResponsiveRadarChart data={prepareRadarData(diversityData)} />
+          <h2 className="text-lg font-semibold mb-4">Répartition des lectures</h2>
+          <ResponsiveRadarChart data={prepareRadarData(statisticsData)} />
         </div>
 
         {/* Distribution des orientations */}
@@ -342,7 +342,13 @@ const ResponsiveRadarChart = ({ data }) => {
           <PolarGrid />
           <PolarAngleAxis dataKey="subject" />
           <PolarRadiusAxis angle={30} domain={[0, 100]} />
-          <Radar name="Diversité" dataKey="A" stroke="#0066cc" fill="#0066cc" fillOpacity={0.6} />
+          <Radar
+            name="Statistiques"
+            dataKey="A"
+            stroke="#0066cc"
+            fill="#0066cc"
+            fillOpacity={0.6}
+          />
           <Legend />
         </RadarChart>
       </ResponsiveContainer>
@@ -350,4 +356,4 @@ const ResponsiveRadarChart = ({ data }) => {
   );
 };
 
-export default Diversity;
+export default Statistics;
