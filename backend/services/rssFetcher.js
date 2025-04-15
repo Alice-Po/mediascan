@@ -181,7 +181,6 @@ export const fetchSourceArticles = async (source) => {
             sourceFavicon: source.faviconUrl,
             categories: source.categories,
             orientation: source.orientation,
-            // Nouveaux champs
             tags: item.tags || [],
             language: item.language || 'fr',
             creator: item.creator || item.author || item['dc:creator'] || 'Non spécifié',

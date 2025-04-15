@@ -1,5 +1,6 @@
 import React from 'react';
 import { trackEvent } from '../../api/analyticsApi';
+import { getOrientationColor, getOrientationLabel } from '../../constants';
 
 // Icônes pour les actions
 const BookmarkIcon = ({ filled }) => (
@@ -119,6 +120,36 @@ const ArticleCard = ({ article, onSave, onShare }) => {
     }
   };
 
+  // Helper pour obtenir l'orientation politique
+  const getPoliticalOrientation = () => {
+    if (!article.orientation || typeof article.orientation === 'string') {
+      return null;
+    }
+
+    const political = article.orientation.political?.toLowerCase();
+    if (!political) return null;
+
+    return {
+      color: getOrientationColor(political),
+      label: getOrientationLabel(political),
+    };
+  };
+
+  // Helper pour déterminer si une couleur est claire
+  const isLightColor = (hexColor) => {
+    // Convertir la couleur hex en RGB
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+
+    // Calculer la luminosité (formule standard)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.5;
+  };
+
+  const politicalOrientation = getPoliticalOrientation();
+
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
       <div onClick={handleClick} className="flex cursor-pointer overflow-hidden">
@@ -137,8 +168,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
         {/* Contenu de l'article */}
         <div className={`flex flex-col p-3 ${article.image ? 'w-2/3' : 'w-full'}`}>
           {/* En-tête avec auteur et langue */}
-
-          {/* Titre de l'article */}
           <h3 className="text-base font-semibold line-clamp-2 mb-1">{article.title}</h3>
           <div className="flex items-center justify-between mb-2">
             {article.creator && (
@@ -153,6 +182,28 @@ const ArticleCard = ({ article, onSave, onShare }) => {
           <div className="mt-auto">
             {/* Tags et catégories */}
             <div className="flex flex-wrap gap-1 mb-2">
+              {/* Orientation politique avec couleur */}
+              {politicalOrientation && (
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1`}
+                  style={{
+                    backgroundColor: politicalOrientation.color,
+                    color: isLightColor(politicalOrientation.color) ? '#000000' : '#ffffff',
+                  }}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      backgroundColor: isLightColor(politicalOrientation.color)
+                        ? '#000000'
+                        : '#ffffff',
+                      opacity: 0.75,
+                    }}
+                  />
+                  {politicalOrientation.label}
+                </span>
+              )}
+
               {/* Catégories */}
               {article.categories &&
                 article.categories.map((category, index) => (
@@ -174,13 +225,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
                     #{tag}
                   </span>
                 ))}
-
-              {/* Orientation politique */}
-              {article.orientation && article.orientation.political && (
-                <span className="text-xs px-2 py-0.5 bg-primary-light bg-opacity-20 rounded-full">
-                  {article.orientation.political}
-                </span>
-              )}
             </div>
 
             {/* Source et date */}

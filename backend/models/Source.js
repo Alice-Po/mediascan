@@ -22,6 +22,7 @@ const SourceSchema = new mongoose.Schema(
       type: String,
       default: '/default-favicon.png',
     },
+    //A n'utiliser qu'en absence de catégorie dédiée d'un article
     categories: [
       {
         type: String,
@@ -31,23 +32,23 @@ const SourceSchema = new mongoose.Schema(
     orientation: {
       political: {
         type: String,
-        enum: ORIENTATIONS.political,
-        default: 'centre',
+        enum: Object.keys(ORIENTATIONS.political),
+        default: 'non-spécifié',
       },
       type: {
         type: String,
         enum: ORIENTATIONS.type,
-        default: 'mainstream',
+        default: 'non-spécifié',
       },
       structure: {
         type: String,
         enum: ORIENTATIONS.structure,
-        default: 'institutionnel',
+        default: 'non-spécifié',
       },
       scope: {
         type: String,
         enum: ORIENTATIONS.scope,
-        default: 'généraliste',
+        default: 'non-spécifié',
       },
     },
     defaultEnabled: {
