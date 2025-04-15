@@ -32,7 +32,7 @@ const SourceSchema = new mongoose.Schema(
     orientation: {
       political: {
         type: String,
-        enum: Object.keys(ORIENTATIONS.political),
+        enum: ORIENTATIONS.political,
         default: 'non-spécifié',
       },
     },
