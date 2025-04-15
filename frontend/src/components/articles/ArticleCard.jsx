@@ -1,6 +1,7 @@
 import React from 'react';
 import { trackEvent } from '../../api/analyticsApi';
 import { getOrientationColor, getOrientationLabel } from '../../constants';
+import { isLightColor } from '../../utils/colorUtils';
 
 // Icônes pour les actions
 const BookmarkIcon = ({ filled }) => (
@@ -133,19 +134,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
       color: getOrientationColor(political),
       label: getOrientationLabel(political),
     };
-  };
-
-  // Helper pour déterminer si une couleur est claire
-  const isLightColor = (hexColor) => {
-    // Convertir la couleur hex en RGB
-    const r = parseInt(hexColor.slice(1, 3), 16);
-    const g = parseInt(hexColor.slice(3, 5), 16);
-    const b = parseInt(hexColor.slice(5, 7), 16);
-
-    // Calculer la luminosité (formule standard)
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-    return luminance > 0.5;
   };
 
   const politicalOrientation = getPoliticalOrientation();
