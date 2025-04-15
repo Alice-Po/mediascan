@@ -119,7 +119,10 @@ const Statistics = () => {
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={stats ? prepareRadarData(stats.orientationBreakdown) : []}>
-              <PolarGrid />
+              <PolarGrid
+                gridType="polygon"
+                stroke="#e5e7eb" // Couleur plus claire pour la grille
+              />
               <PolarAngleAxis
                 dataKey="orientation"
                 tick={{ fill: '#666', fontSize: 12 }}
@@ -129,6 +132,8 @@ const Statistics = () => {
                 angle={90}
                 domain={[0, 100]}
                 tickFormatter={(value) => `${value}%`}
+                axisLine={false}
+                tick={{ fill: '#666' }}
               />
               <Radar
                 name="Répartition"
@@ -136,6 +141,16 @@ const Statistics = () => {
                 stroke="#2563eb"
                 fill="#3b82f6"
                 fillOpacity={0.6}
+                dot={{
+                  // Style des points
+                  fill: '#2563eb',
+                  strokeWidth: 0,
+                  r: 4,
+                }}
+                isAnimationActive={true} // Animation au chargement
+                animationBegin={0}
+                animationDuration={500}
+                animationEasing="ease-out"
               />
             </RadarChart>
           </ResponsiveContainer>
