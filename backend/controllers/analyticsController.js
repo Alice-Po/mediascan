@@ -251,11 +251,11 @@ export const getUserAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error in getUserAnalytics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des analytics',
-      error: error.message,
-    });
+    // console.error('Error in getUserAnalytics:', error);
+    // res.status(500).json({
+    //   success: false,
+    //   message: 'Erreur lors de la récupération des analytics',
+    //   error: error.message,
+    // });
   }
 };

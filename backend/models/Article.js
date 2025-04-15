@@ -29,12 +29,30 @@ const ArticleSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    tags: [
+      {
+        type: String,
+        trim: true,
+        index: true,
+      },
+    ],
+    language: {
+      type: String,
+      trim: true,
+      default: 'fr',
+      enum: ['fr', 'en', 'es', 'de', 'it'],
+      index: true,
+    },
+    creator: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     sourceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Source',
       required: true,
     },
-    // On stocke ces infos dupliquées pour la performance des requêtes et l'historique
     sourceName: {
       type: String,
     },
@@ -64,7 +82,6 @@ const ArticleSchema = new mongoose.Schema(
         enum: ORIENTATIONS.scope,
       },
     },
-    // Pour suivre les interactions des utilisateurs
     userInteractions: [
       {
         userId: {
@@ -81,7 +98,6 @@ const ArticleSchema = new mongoose.Schema(
         },
       },
     ],
-    // TTL index pour la suppression automatique après 7 jours (version gratuite)
     createdAt: {
       type: Date,
       default: Date.now,
@@ -100,13 +116,11 @@ const ArticleSchema = new mongoose.Schema(
   }
 );
 
-// Index composé pour la recherche rapide d'articles par source et date
 ArticleSchema.index({ sourceId: 1, pubDate: -1 });
-
-// Index pour la recherche d'articles par catégorie
 ArticleSchema.index({ categories: 1 });
-
-// Index pour aider à dédoublonner (titre + source)
 ArticleSchema.index({ title: 1, sourceId: 1 }, { unique: true });
+ArticleSchema.index({ language: 1, pubDate: -1 });
+ArticleSchema.index({ tags: 1, pubDate: -1 });
+ArticleSchema.index({ creator: 1, pubDate: -1 });
 
 export default mongoose.model('Article', ArticleSchema);

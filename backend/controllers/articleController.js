@@ -9,8 +9,6 @@ import config from '../config/config.js';
 // @access  Private
 export const getArticles = async (req, res) => {
   try {
-    console.log('Getting articles with query:', req.query);
-
     const { page = 1, limit = 20, sources, categories } = req.query;
     const userId = req.user._id;
 
@@ -37,8 +35,6 @@ export const getArticles = async (req, res) => {
       query.categories = { $in: user.interests };
     }
 
-    console.log('Article query:', query);
-
     // Récupérer les articles
     let articles = await Article.find(query)
       .sort({ pubDate: -1 })
@@ -53,14 +49,14 @@ export const getArticles = async (req, res) => {
     }));
 
     // Log pour vérifier les articles filtrés
-    console.log(
-      'Articles filtered by interests:',
-      articles.map((a) => ({
-        title: a.title.substring(0, 30),
-        categories: a.categories,
-        matches: a.categories.filter((c) => user.interests.includes(c)),
-      }))
-    );
+    // console.log(
+    //   'Articles filtered by interests:',
+    //   articles.map((a) => ({
+    //     title: a.title.substring(0, 30),
+    //     categories: a.categories,
+    //     matches: a.categories.filter((c) => user.interests.includes(c)),
+    //   }))
+    // );
 
     res.json({
       articles,

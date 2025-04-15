@@ -156,12 +156,12 @@ export const getProfile = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération du profil:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération du profil',
-      error: error.message,
-    });
+    // console.error('Erreur lors de la récupération du profil:', error);
+    // res.status(500).json({
+    //   success: false,
+    //   message: 'Erreur lors de la récupération du profil',
+    //   error: error.message,
+    // });
   }
 };
 

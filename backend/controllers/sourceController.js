@@ -50,16 +50,16 @@ export const getAllSources = async (req, res) => {
 export const getUserSources = async (req, res) => {
   try {
     const userId = req.user._id;
-    console.log('Getting sources for user:', userId);
+    // console.log('Getting sources for user:', userId);
 
     // Récupérer l'utilisateur avec ses sources actives
     const user = await User.findById(userId).populate('activeSources').select('activeSources');
 
-    console.log('Found user sources:', {
-      userId,
-      activeSources: user?.activeSources,
-      sourceCount: user?.activeSources?.length,
-    });
+    // console.log('Found user sources:', {
+    //   userId,
+    //   activeSources: user?.activeSources,
+    //   sourceCount: user?.activeSources?.length,
+    // });
 
     if (!user) {
       console.log('User not found:', userId);
@@ -74,8 +74,6 @@ export const getUserSources = async (req, res) => {
       ...source.toObject(),
       enabled: true,
     }));
-
-    console.log('Sending enabled sources:', enabledSources);
 
     // Retourner les sources actives
     res.status(200).json(enabledSources);

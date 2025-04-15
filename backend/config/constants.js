@@ -14,7 +14,15 @@ export const CATEGORIES = [
 
 // Orientations possibles pour les sources
 export const ORIENTATIONS = {
-  political: ['gauche', 'centre-gauche', 'centre', 'centre-droite', 'droite', 'non-spécifié'],
+  political: [
+    'gauche',
+    'centre-gauche',
+    'centre',
+    'centre-droit',
+    'droite',
+    'non-spécifié',
+    'républicain',
+  ],
   type: [
     'mainstream',
     'alternatif',
@@ -32,6 +40,7 @@ export const ORIENTATIONS = {
     'investigation',
     'international',
     'économique',
+    'culturel',
     'non-spécifié',
   ],
 };

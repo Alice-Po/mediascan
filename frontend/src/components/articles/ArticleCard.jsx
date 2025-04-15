@@ -120,55 +120,62 @@ const ArticleCard = ({ article, onSave, onShare }) => {
   };
 
   return (
-    <div
-      className="card h-[180px] mb-4 cursor-pointer hover:shadow-md transition-shadow"
-      onClick={handleClick}
-    >
-      <div className="flex h-full">
-        {/* Image de l'article (si disponible) */}
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div onClick={handleClick} className="flex cursor-pointer overflow-hidden">
+        {/* Image de l'article */}
         {article.image && (
-          <div className="flex-shrink-0 w-1/3 h-full">
+          <div className="w-1/3 relative">
             <img
               src={article.image}
               alt={article.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              className="object-cover w-full h-full"
+              style={{ minHeight: '200px' }}
             />
           </div>
         )}
 
         {/* Contenu de l'article */}
         <div className={`flex flex-col p-3 ${article.image ? 'w-2/3' : 'w-full'}`}>
-          {/* Titre de l'article (max 2 lignes) */}
-          <h3 className="text-base font-semibold line-clamp-2 mb-1">{article.title}</h3>
+          {/* En-tête avec auteur et langue */}
 
-          {/* Extrait de l'article (max 3 lignes) */}
+          {/* Titre de l'article */}
+          <h3 className="text-base font-semibold line-clamp-2 mb-1">{article.title}</h3>
+          <div className="flex items-center justify-between mb-2">
+            {article.creator && (
+              <span className="text-xs text-gray-600">Par {article.creator}</span>
+            )}
+          </div>
+
+          {/* Extrait de l'article */}
           <p className="text-sm text-gray-600 line-clamp-3 mb-2">{article.contentSnippet}</p>
 
           {/* Métadonnées et actions */}
-          <div className="mt-auto flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {/* Favicon de la source */}
-              {article.sourceFavicon && (
-                <img src={article.sourceFavicon} alt={article.sourceName} className="w-4 h-4" />
-              )}
-
-              {/* Nom de la source */}
-              <span className="text-xs font-medium">{article.sourceName}</span>
-
-              {/* Date de publication - utiliser directement formatRelativeTime */}
-              <span className="text-xs text-gray-500">{formatRelativeTime(article.pubDate)}</span>
-            </div>
-
-            {/* Tags (thématique, orientation) */}
-            <div className="flex flex-wrap gap-1">
+          <div className="mt-auto">
+            {/* Tags et catégories */}
+            <div className="flex flex-wrap gap-1 mb-2">
+              {/* Catégories */}
               {article.categories &&
                 article.categories.map((category, index) => (
-                  <span key={index} className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
+                  <span
+                    key={`cat-${index}`}
+                    className="text-xs px-2 py-0.5 bg-gray-100 rounded-full"
+                  >
                     {category}
                   </span>
                 ))}
 
+              {/* Tags */}
+              {article.tags &&
+                article.tags.map((tag, index) => (
+                  <span
+                    key={`tag-${index}`}
+                    className="text-xs px-2 py-0.5 bg-primary-light bg-opacity-20 rounded-full"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+
+              {/* Orientation politique */}
               {article.orientation && article.orientation.political && (
                 <span className="text-xs px-2 py-0.5 bg-primary-light bg-opacity-20 rounded-full">
                   {article.orientation.political}
@@ -176,22 +183,33 @@ const ArticleCard = ({ article, onSave, onShare }) => {
               )}
             </div>
 
-            {/* Boutons d'action */}
-            <div className="flex space-x-2">
-              <button
-                onClick={handleSaveClick}
-                className="p-1 hover:bg-gray-100 rounded-full"
-                aria-label={article.isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-              >
-                <BookmarkIcon filled={article.isSaved} />
-              </button>
-              <button
-                onClick={handleShareClick}
-                className="p-1 hover:bg-gray-100 rounded-full"
-                aria-label="Partager l'article"
-              >
-                <ShareIcon />
-              </button>
+            {/* Source et date */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {article.sourceFavicon && (
+                  <img src={article.sourceFavicon} alt={article.sourceName} className="w-4 h-4" />
+                )}
+                <span className="text-xs font-medium">{article.sourceName}</span>
+                <span className="text-xs text-gray-500">{formatRelativeTime(article.pubDate)}</span>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleSaveClick}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  aria-label={article.isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                >
+                  <BookmarkIcon filled={article.isSaved} />
+                </button>
+                <button
+                  onClick={handleShareClick}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  aria-label="Partager l'article"
+                >
+                  <ShareIcon />
+                </button>
+              </div>
             </div>
           </div>
         </div>

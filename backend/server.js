@@ -69,10 +69,10 @@ app.use((err, req, res, next) => {
 // Planification des tâches (CRON)
 // Récupération des articles RSS toutes les 30 minutes
 cron.schedule('*/30 * * * *', async () => {
-  console.log('Exécution du service: récupération des flux RSS');
+  // console.log('Exécution du service: récupération des flux RSS');
   try {
     await fetchAllSources();
-    console.log('Récupération des flux RSS terminée avec succès');
+    // console.log('Récupération des flux RSS terminée avec succès');
   } catch (error) {
     console.error('Erreur lors de la récupération des flux RSS:', error);
   }
