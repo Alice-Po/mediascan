@@ -1,8 +1,8 @@
 import express from 'express';
 import { protect } from '../middleware/authMiddleware.js';
 import {
-  getDiversityScore,
-  resetHistory,
+  getStatisticsData,
+  resetAnalytics,
   trackEvent,
   getUserAnalytics,
 } from '../controllers/analyticsController.js';
@@ -13,8 +13,8 @@ const router = express.Router();
 router.use(protect);
 
 // Routes pour les analytics
-router.get('/diversity', getDiversityScore);
-router.delete('/history', resetHistory);
+router.get('/statistics', getStatisticsData);
+router.delete('/history', resetAnalytics);
 router.post('/track', trackEvent);
 router.get('/user', getUserAnalytics);
 
