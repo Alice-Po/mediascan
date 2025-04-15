@@ -1,5 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { fetchStatisticsData, fetchUserAnalytics } from '../api/analyticsApi';
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+} from 'recharts';
+
+/**
+ * Prépare les données pour le graphique radar
+ * @param {Object} orientationBreakdown - Données brutes des orientations
+ * @returns {Array} Données formatées pour le radar
+ */
+const prepareRadarData = (orientationBreakdown) => {
+  // Ordre spécifique pour le spectre politique
+  const politicalSpectrum = [
+    'extrême-gauche',
+    'gauche',
+    'centre-gauche',
+    'centre',
+    'centre-droit',
+    'droite',
+    'extrême-droite',
+    'ténèbres', // Point supplémentaire entre les extrêmes
+  ];
+
+  // Calculer le total pour les pourcentages
+  const total = Object.values(orientationBreakdown).reduce((sum, count) => sum + count, 0);
+
+  // Créer les données pour le radar
+  return politicalSpectrum.map((orientation) => {
+    let value = 0;
+    if (orientation === 'ténèbres') {
+      // Calculer la moyenne des extrêmes pour le point "ténèbres"
+      value =
+        ((orientationBreakdown['extrême-gauche'] || 0) +
+          (orientationBreakdown['extrême-droite'] || 0)) /
+        2;
+    } else {
+      value = orientationBreakdown[orientation] || 0;
+    }
+
+    return {
+      orientation: orientation,
+      value: total > 0 ? (value / total) * 100 : 0,
+    };
+  });
+};
 
 /**
  * Page des statistiques de lecture simplifiée
@@ -64,14 +113,43 @@ const Statistics = () => {
         </div>
       </div>
 
-      {/* Répartition des orientations politiques */}
+      {/* Radar des orientations politiques */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Répartition des orientations</h2>
+        <h2 className="text-xl font-semibold mb-4">Spectre politique des lectures</h2>
+        <div className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart data={stats ? prepareRadarData(stats.orientationBreakdown) : []}>
+              <PolarGrid />
+              <PolarAngleAxis
+                dataKey="orientation"
+                tick={{ fill: '#666', fontSize: 12 }}
+                tickFormatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+              />
+              <Radar
+                name="Répartition"
+                dataKey="value"
+                stroke="#2563eb"
+                fill="#3b82f6"
+                fillOpacity={0.6}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Liste détaillée des orientations */}
+      <div className="bg-white p-6 rounded-lg shadow mt-8">
+        <h2 className="text-xl font-semibold mb-4">Détail des orientations</h2>
         <div className="space-y-2">
-          {Object.entries(stats.orientationBreakdown).map(([orientation, count]) => (
+          {Object.entries(stats?.orientationBreakdown || {}).map(([orientation, count]) => (
             <div key={orientation} className="flex justify-between items-center">
               <span className="capitalize">{orientation}</span>
-              <span className="font-medium">{count}</span>
+              <span className="font-medium">{count} articles</span>
             </div>
           ))}
         </div>
