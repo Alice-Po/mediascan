@@ -8,6 +8,10 @@ const parser = new Parser({
       ['media:content', 'media'],
       ['enclosure', 'enclosure'],
       ['content:encoded', 'contentEncoded'],
+      ['dc:creator', 'creator'],
+      ['dc:date', 'date'],
+      ['category', 'category'],
+      ['tags', 'tags'],
     ],
   },
 });
@@ -79,7 +83,7 @@ export const fetchAllSources = async () => {
       totalArticles,
     };
   } catch (error) {
-    // console.error('Erreur lors de la récupération de tous les flux RSS:', error);
+    console.error('Erreur lors de la récupération de tous les flux RSS:', error);
     return {
       success: false,
       message: error.message,
@@ -94,12 +98,51 @@ export const fetchAllSources = async () => {
  */
 export const fetchSourceArticles = async (source) => {
   try {
-    // console.log(`Récupération des articles de la source: ${source.name}`);
-
-    // Récupération du flux RSS
     const feed = await parser.parseURL(source.rssUrl);
+    // const brutfeed = await parser.parseURL(source.rssUrl);
 
-    // Mise à jour du statut de récupération
+    // const echantillon = {
+    //   'https://www.lemonde.fr': 0,
+    //   'https://www.lefigaro.fr': 0,
+    //   'https://www.liberation.fr': 0,
+    //   'https://www.lesechos.fr': 0,
+    //   'https://www.francetvinfo.fr': 0,
+    //   'https://www.lepoint.fr': 0,
+    //   'https://www.lexpress.fr': 0,
+    //   'https://www.mediapart.fr': 0,
+    //   'https://www.leparisien.fr': 0,
+    //   'https://www.20minutes.fr': 0,
+    //   'https://www.humanite.fr': 0,
+    //   'https://www.challenges.fr': 0,
+    //   'https://www.la-croix.com': 0,
+    //   'https://www.marianne.net': 0,
+    //   'https://www.nouvelobs.com': 0,
+    //   'https://www.lesinrocks.com': 0,
+    //   'https://www.courrierinternational.com': 0,
+    //   'https://reporterre.net/': 0,
+    // };
+    // // Vérifier si le feed a des items
+    // if (brutfeed && brutfeed.items && brutfeed.items.length > 0) {
+    //   // Essayer de déterminer quelle source c'est à partir du premier article
+    //   const firstItem = brutfeed.items[0];
+
+    //   if (firstItem.link) {
+    //     // Parcourir les clés de l'objet échantillon
+    //     for (const sourceKey in echantillon) {
+    //       // Vérifier si le lien de l'article contient la clé de la source
+    //       // et que cette source n'a pas encore été loggée
+    //       if (firstItem.link.toLowerCase().includes(sourceKey) && echantillon[sourceKey] < 1) {
+    //         // Afficher uniquement le premier article de cette source
+    //         console.log(`Premier article de ${sourceKey}:`, JSON.stringify(firstItem, null, 2));
+    //         // Marquer cette source comme loggée
+    //         echantillon[sourceKey] = 1;
+    //         // Sortir de la boucle après avoir trouvé une correspondance
+    //         break;
+    //       }
+    //     }
+    //   }
+    // }
+
     await Source.findByIdAndUpdate(source._id, {
       lastFetched: new Date(),
       fetchStatus: {
@@ -109,24 +152,20 @@ export const fetchSourceArticles = async (source) => {
       },
     });
 
-    // Traitement des articles
     const articles = await Promise.all(
       feed.items.map(async (item) => {
         try {
-          // Extraction de l'image
           const imageUrl = extractImageFromRSSItem(item);
+          const pubDate = item.isoDate || item.date || item.pubDate || new Date();
 
-          // Formatage de la date de publication
-          const pubDate = item.pubDate ? new Date(item.pubDate) : new Date();
-
-          // Vérification si l'article existe déjà (pour éviter les doublons)
+          // Vérification si l'article existe déjà
           const existingArticle = await Article.findOne({
             title: item.title,
             sourceId: source._id,
           });
 
           if (existingArticle) {
-            return null; // Article déjà existant, on ne fait rien
+            return null;
           }
 
           // Création du nouvel article
@@ -142,28 +181,27 @@ export const fetchSourceArticles = async (source) => {
             sourceFavicon: source.faviconUrl,
             categories: source.categories,
             orientation: source.orientation,
+            // Nouveaux champs
+            tags: item.tags || [],
+            language: item.language || 'fr',
+            creator: item.creator || item.author || item['dc:creator'] || 'Non spécifié',
           };
         } catch (error) {
           console.error(`Erreur lors du traitement d'un article de ${source.name}:`, error);
-          return null; // On ignore cet article en cas d'erreur
+          return null;
         }
       })
     );
 
-    // Filtrage des articles nuls (ignorés car existants ou en erreur)
     const validArticles = articles.filter((article) => article !== null);
-
-    // Insertion des nouveaux articles en masse (pour performance)
     if (validArticles.length > 0) {
       await Article.insertMany(validArticles);
-      // console.log(`${validArticles.length} nouveaux articles ajoutés pour ${source.name}`);
     }
 
     return validArticles.length;
   } catch (error) {
-    // console.error(`Erreur lors de la récupération des articles de ${source.name}:`, error);
+    console.error(`Erreur lors de la récupération des articles de ${source.name}:`, error);
 
-    // Mise à jour du statut d'erreur
     await Source.findByIdAndUpdate(source._id, {
       lastFetched: new Date(),
       fetchStatus: {
