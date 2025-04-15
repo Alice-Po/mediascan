@@ -40,21 +40,6 @@ const AnalyticsSchema = new mongoose.Schema(
           enum: ORIENTATIONS.political,
           default: 'non-spécifié',
         },
-        type: {
-          type: String,
-          enum: ORIENTATIONS.type,
-          default: 'non-spécifié',
-        },
-        structure: {
-          type: String,
-          enum: ORIENTATIONS.structure,
-          default: 'non-spécifié',
-        },
-        scope: {
-          type: String,
-          enum: ORIENTATIONS.scope,
-          default: 'non-spécifié',
-        },
         _id: false,
       },
       category: String,

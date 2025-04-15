@@ -30,21 +30,6 @@ const InformationAnalytics = () => {
     { name: 'Droite', value: 10 },
   ];
 
-  const typeData = [
-    { name: 'Mainstream', value: 65 },
-    { name: 'Alternatif', value: 35 },
-  ];
-
-  const structureData = [
-    { name: 'Institutionnel', value: 55 },
-    { name: 'Indépendant', value: 45 },
-  ];
-
-  const scopeData = [
-    { name: 'Généraliste', value: 60 },
-    { name: 'Spécialisé', value: 40 },
-  ];
-
   const radarData = [
     { subject: 'Politique', A: 65, fullMark: 100 },
     { subject: 'Économie', A: 85, fullMark: 100 },
@@ -114,17 +99,6 @@ const InformationAnalytics = () => {
                   style={{ width: `${structureData[0].value}%` }}
                 >
                   {structureData[0].name} {structureData[0].value}%
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 mt-4">
-              <h5 className="text-md font-medium mb-1">Généraliste vs Spécialisé</h5>
-              <div className="w-full bg-gray-200 rounded-full h-6">
-                <div
-                  className="bg-yellow-600 h-6 rounded-full text-white text-xs flex items-center justify-center"
-                  style={{ width: `${scopeData[0].value}%` }}
-                >
-                  {scopeData[0].name} {scopeData[0].value}%
                 </div>
               </div>
             </div>

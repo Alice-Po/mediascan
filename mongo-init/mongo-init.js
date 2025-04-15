@@ -18,9 +18,6 @@ db.sources.insertMany([
     categories: ['politique', 'économie', 'international'],
     orientation: {
       political: 'centre',
-      type: 'mainstream',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -41,9 +38,6 @@ db.sources.insertMany([
     categories: ['politique', 'économie', 'société'],
     orientation: {
       political: 'droite',
-      type: 'mainstream',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -64,9 +58,6 @@ db.sources.insertMany([
     categories: ['politique', 'société', 'culture'],
     orientation: {
       political: 'gauche',
-      type: 'mainstream',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -88,9 +79,6 @@ db.sources.insertMany([
     categories: ['économie', 'finance', 'entreprises', 'marchés'],
     orientation: {
       political: 'centre-droit',
-      type: 'spécialisé',
-      structure: 'institutionnel',
-      scope: 'économique',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -111,9 +99,6 @@ db.sources.insertMany([
     categories: ['actualité', 'politique', 'société', 'international'],
     orientation: {
       political: 'centre',
-      type: 'service public',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -134,9 +119,6 @@ db.sources.insertMany([
     categories: ['politique', 'économie', 'culture', 'société'],
     orientation: {
       political: 'centre-droit',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -157,9 +139,6 @@ db.sources.insertMany([
     categories: ['politique', 'économie', 'société', 'international'],
     orientation: {
       political: 'centre-droit',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -180,9 +159,6 @@ db.sources.insertMany([
     categories: ['politique', 'enquête', 'justice', 'société'],
     orientation: {
       political: 'gauche',
-      type: 'indépendant',
-      structure: 'alternatif',
-      scope: 'investigation',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -203,9 +179,6 @@ db.sources.insertMany([
     categories: ['actualité', 'société', 'faits divers', 'local'],
     orientation: {
       political: 'centre',
-      type: 'quotidien',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -226,9 +199,6 @@ db.sources.insertMany([
     categories: ['actualité', 'société', 'culture', 'sport'],
     orientation: {
       political: 'centre',
-      type: 'gratuit',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -249,9 +219,6 @@ db.sources.insertMany([
     categories: ['politique', 'social', 'société', 'international'],
     orientation: {
       political: 'gauche',
-      type: 'quotidien',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -272,9 +239,6 @@ db.sources.insertMany([
     categories: ['économie', 'entreprises', 'finance', 'innovation'],
     orientation: {
       political: 'centre-droit',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'économique',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -295,9 +259,6 @@ db.sources.insertMany([
     categories: ['actualité', 'religion', 'société', 'international'],
     orientation: {
       political: 'centre',
-      type: 'quotidien',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -318,9 +279,6 @@ db.sources.insertMany([
     categories: ['politique', 'société', 'débats', 'culture'],
     orientation: {
       political: 'républicain',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -341,9 +299,6 @@ db.sources.insertMany([
     categories: ['politique', 'culture', 'société', 'international'],
     orientation: {
       political: 'centre-gauche',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -364,9 +319,6 @@ db.sources.insertMany([
     categories: ['culture', 'musique', 'cinéma', 'société'],
     orientation: {
       political: 'gauche',
-      type: 'magazine',
-      structure: 'alternatif',
-      scope: 'culturel',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -387,9 +339,6 @@ db.sources.insertMany([
     categories: ['international', 'géopolitique', 'monde', 'culture'],
     orientation: {
       political: 'centre',
-      type: 'magazine',
-      structure: 'institutionnel',
-      scope: 'international',
     },
     defaultEnabled: true,
     isUserAdded: false,
@@ -409,10 +358,7 @@ db.sources.insertMany([
     faviconUrl: 'https://www.lopinion.fr/favicon.ico',
     categories: ['économie', 'politique', 'entreprises', 'finance'],
     orientation: {
-      political: 'libéral',
-      type: 'quotidien',
-      structure: 'institutionnel',
-      scope: 'économique',
+      political: 'droite',
     },
     defaultEnabled: true,
     isUserAdded: false,

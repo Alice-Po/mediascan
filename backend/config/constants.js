@@ -26,26 +26,6 @@ export const ORIENTATIONS = {
     'écologiste',
     'non-spécifié',
   ],
-  type: [
-    'mainstream',
-    'alternatif',
-    'indépendant',
-    'magazine',
-    'gratuit',
-    'service public',
-    'spécialisé',
-    'non-spécifié',
-  ],
-  structure: ['institutionnel', 'indépendant', 'alternatif', 'non-spécifié'],
-  scope: [
-    'généraliste',
-    'spécialisé',
-    'investigation',
-    'international',
-    'économique',
-    'culturel',
-    'non-spécifié',
-  ],
 };
 
 // Helper pour obtenir la couleur d'une orientation politique

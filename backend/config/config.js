@@ -30,9 +30,6 @@ const config = {
   // Orientations éditoriales
   orientations: {
     political: ['gauche', 'centre-gauche', 'centre', 'centre-droite', 'droite', 'non-spécifié'],
-    type: ['mainstream', 'alternatif', 'non-spécifié'],
-    structure: ['institutionnel', 'indépendant', 'non-spécifié'],
-    scope: ['généraliste', 'spécialisé', 'non-spécifié'],
   },
 
   mongoUri: process.env.MONGODB_URI,

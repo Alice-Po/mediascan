@@ -85,21 +85,6 @@ const Statistics = () => {
         A: data.political.score * 100,
         fullMark: 100,
       },
-      {
-        subject: 'Type',
-        A: data.type.score * 100,
-        fullMark: 100,
-      },
-      {
-        subject: 'Structure',
-        A: data.structure.score * 100,
-        fullMark: 100,
-      },
-      {
-        subject: 'Portée',
-        A: data.scope.score * 100,
-        fullMark: 100,
-      },
     ];
   };
 
@@ -107,12 +92,7 @@ const Statistics = () => {
   const calculateOverallScore = () => {
     if (!statisticsData) return 0;
 
-    const scores = [
-      statisticsData.political.score,
-      statisticsData.type.score,
-      statisticsData.structure.score,
-      statisticsData.scope.score,
-    ];
+    const scores = [statisticsData.political.score];
 
     return (scores.reduce((sum, score) => sum + score, 0) / scores.length) * 100;
   };

@@ -91,9 +91,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
           console.warn("Erreur de parsing de l'orientation:", parseError);
           orientation = {
             political: 'non-spécifié',
-            type: 'non-spécifié',
-            structure: 'non-spécifié',
-            scope: 'non-spécifié',
           };
         }
       }

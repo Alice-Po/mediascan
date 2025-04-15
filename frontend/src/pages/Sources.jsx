@@ -21,9 +21,6 @@ const Sources = () => {
     categories: [],
     orientation: {
       political: 'centre',
-      type: 'mainstream',
-      structure: 'institutionnel',
-      scope: 'généraliste',
     },
   });
   const [formErrors, setFormErrors] = useState({});
@@ -37,9 +34,6 @@ const Sources = () => {
   const categories = CATEGORIES;
   const orientationOptions = {
     political: Object.keys(ORIENTATIONS.political),
-    type: ORIENTATIONS.type,
-    structure: ORIENTATIONS.structure,
-    scope: ORIENTATIONS.scope,
   };
 
   // Gérer la recherche et les suggestions
@@ -229,9 +223,6 @@ const Sources = () => {
         categories: [],
         orientation: {
           political: 'centre',
-          type: 'mainstream',
-          structure: 'institutionnel',
-          scope: 'généraliste',
         },
       });
 

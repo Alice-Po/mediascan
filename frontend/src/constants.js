@@ -25,8 +25,6 @@ export const ORIENTATIONS = {
     'extrême-droite': { label: 'Extrême Droite', color: '#000080' }, // Bleu marine
     écologiste: { label: 'Écologiste', color: '#00FF00' }, // Vert vif
   },
-  structure: ['institutionnel', 'indépendant'],
-  scope: ['généraliste', 'spécialisé'],
 };
 
 // Helper pour obtenir la couleur d'une orientation politique

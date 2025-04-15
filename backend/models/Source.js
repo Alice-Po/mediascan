@@ -35,21 +35,6 @@ const SourceSchema = new mongoose.Schema(
         enum: Object.keys(ORIENTATIONS.political),
         default: 'non-spécifié',
       },
-      type: {
-        type: String,
-        enum: ORIENTATIONS.type,
-        default: 'non-spécifié',
-      },
-      structure: {
-        type: String,
-        enum: ORIENTATIONS.structure,
-        default: 'non-spécifié',
-      },
-      scope: {
-        type: String,
-        enum: ORIENTATIONS.scope,
-        default: 'non-spécifié',
-      },
     },
     defaultEnabled: {
       type: Boolean,

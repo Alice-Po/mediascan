@@ -69,18 +69,6 @@ const ArticleSchema = new mongoose.Schema(
         type: String,
         enum: ORIENTATIONS.political,
       },
-      type: {
-        type: String,
-        enum: ORIENTATIONS.type,
-      },
-      structure: {
-        type: String,
-        enum: ORIENTATIONS.structure,
-      },
-      scope: {
-        type: String,
-        enum: ORIENTATIONS.scope,
-      },
     },
     userInteractions: [
       {

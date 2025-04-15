@@ -204,9 +204,6 @@ export const AppProvider = ({ children }) => {
         sources: [],
         orientation: {
           political: [],
-          type: [],
-          structure: [],
-          scope: [],
         },
         searchTerm: '',
       };

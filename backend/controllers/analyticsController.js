@@ -28,21 +28,6 @@ export const getDiversityScore = async (req, res) => {
             droite: 0,
             'non-spécifié': 0,
           },
-          type: {
-            mainstream: 0,
-            alternatif: 0,
-            'non-spécifié': 0,
-          },
-          structure: {
-            institutionnel: 0,
-            indépendant: 0,
-            'non-spécifié': 0,
-          },
-          scope: {
-            généraliste: 0,
-            spécialisé: 0,
-            'non-spécifié': 0,
-          },
         },
       });
     }
@@ -50,9 +35,6 @@ export const getDiversityScore = async (req, res) => {
     // Initialisation des compteurs
     const orientationCounts = {
       political: {},
-      type: {},
-      structure: {},
-      scope: {},
     };
 
     // Comptage des orientations
@@ -153,15 +135,6 @@ export const trackEvent = async (req, res) => {
       political: ORIENTATIONS.political.includes(orientation.political)
         ? orientation.political
         : ORIENTATIONS.political[ORIENTATIONS.political.length - 1],
-      type: ORIENTATIONS.type.includes(orientation.type)
-        ? orientation.type
-        : ORIENTATIONS.type[ORIENTATIONS.type.length - 1],
-      structure: ORIENTATIONS.structure.includes(orientation.structure)
-        ? orientation.structure
-        : ORIENTATIONS.structure[ORIENTATIONS.structure.length - 1],
-      scope: ORIENTATIONS.scope.includes(orientation.scope)
-        ? orientation.scope
-        : ORIENTATIONS.scope[ORIENTATIONS.scope.length - 1],
     };
 
     console.log('Cleaned orientation:', cleanOrientation);
