@@ -4,6 +4,13 @@ import Article from '../models/Article.js';
 import { createOrUpdateArticles } from '../controllers/articleController.js';
 
 const parser = new Parser({
+  headers: {
+    'User-Agent':
+      "MédiaScan/1.0 (Agrégateur d'actualités français en cours de developpement; Merci de votre hospitalité !;) Node.js/rss-parser",
+    Accept: 'application/rss+xml, application/xml, application/atom+xml, text/xml;q=0.9, */*;q=0.8',
+    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+  },
+  timeout: 5000, // Timeout raisonnable
   customFields: {
     item: [
       ['media:content', 'media'],
