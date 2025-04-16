@@ -92,11 +92,9 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         {/* En-tête */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">NewsAgg</h1>
+          <h1 className="text-3xl font-bold text-gray-900">MédiaScan</h1>
           <h2 className="mt-6 text-2xl font-semibold text-gray-900">Connexion</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Accédez à votre fil d'actualités personnalisé
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Accédez à votre fil d'actualités</p>
         </div>
 
         {/* Message d'erreur */}
