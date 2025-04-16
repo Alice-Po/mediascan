@@ -119,6 +119,7 @@ const Sources = () => {
   // Handler pour les changements dans le formulaire
   const handleCustomSourceChange = (e) => {
     const { name, value, type } = e.target;
+    console.log('Form change:', { name, value, type, currentSource: customSource }); // Log amélioré
 
     if (type === 'checkbox') {
       const newCategories = [...customSource.categories];
@@ -131,25 +132,27 @@ const Sources = () => {
         }
       }
       setCustomSource({ ...customSource, categories: newCategories });
-    } else if (name.startsWith('orientation.')) {
-      const orientationType = name.split('.')[1];
-      setCustomSource({
-        ...customSource,
-        orientation: {
-          ...customSource.orientation,
-          [orientationType]: value,
-        },
-      });
     } else {
-      setCustomSource({ ...customSource, [name]: value });
+      // Simplification du code - plus besoin de la condition orientation
+      setCustomSource((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   // Handler pour la soumission du formulaire
   const handleSubmit = async (sourceData) => {
     try {
+      // Validation basique avant envoi
+      if (!sourceData.rssUrl) {
+        setFormErrors({ rssUrl: "L'URL du flux RSS est requise" });
+        return;
+      }
+
+      console.log('Submitting source data:', sourceData); // Log avant envoi
       setLoading(true);
+
       const result = await addUserSource(sourceData);
+      console.log('Source added successfully:', result); // Log après succès
+
       setShowAddForm(false);
       setCustomSource({
         name: '',
@@ -159,7 +162,9 @@ const Sources = () => {
         orientation: { political: 'centre' },
       });
     } catch (error) {
-      setError("Erreur lors de l'ajout de la source");
+      console.error('Detailed error:', error.response?.data || error); // Log détaillé de l'erreur
+      setError(error.response?.data?.message || "Erreur lors de l'ajout de la source");
+      setFormErrors(error.response?.data?.errors || {});
     } finally {
       setLoading(false);
     }

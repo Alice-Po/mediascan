@@ -12,6 +12,7 @@ const AddSourceForm = ({
 }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Form submission - RSS URL:', customSource.rssUrl);
     onSubmit(customSource);
   };
 
@@ -19,42 +20,6 @@ const AddSourceForm = ({
     <div className="mt-4 bg-white p-6 rounded-lg shadow-sm">
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
-          {/* Nom */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Nom de la source
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={customSource.name}
-              onChange={onSourceChange}
-              className={`mt-1 block w-full rounded-md ${
-                formErrors.name ? 'border-red-300' : 'border-gray-300'
-              } shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50`}
-            />
-            {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
-          </div>
-
-          {/* URL */}
-          <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700">
-              URL du site
-            </label>
-            <input
-              type="url"
-              id="url"
-              name="url"
-              value={customSource.url}
-              onChange={onSourceChange}
-              className={`mt-1 block w-full rounded-md ${
-                formErrors.url ? 'border-red-300' : 'border-gray-300'
-              } shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50`}
-            />
-            {formErrors.url && <p className="mt-1 text-sm text-red-600">{formErrors.url}</p>}
-          </div>
-
           {/* RSS URL */}
           <div>
             <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700">
@@ -66,6 +31,7 @@ const AddSourceForm = ({
               name="rssUrl"
               value={customSource.rssUrl}
               onChange={onSourceChange}
+              placeholder="https://www.example.com/rss"
               className={`mt-1 block w-full rounded-md ${
                 formErrors.rssUrl ? 'border-red-300' : 'border-gray-300'
               } shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50`}
@@ -146,8 +112,6 @@ const AddSourceForm = ({
 
 AddSourceForm.propTypes = {
   customSource: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    url: PropTypes.string.isRequired,
     rssUrl: PropTypes.string.isRequired,
     categories: PropTypes.arrayOf(PropTypes.string).isRequired,
     orientation: PropTypes.shape({
