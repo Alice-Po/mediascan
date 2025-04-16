@@ -4,6 +4,7 @@ import { addUserSource, updateUserSource, deleteUserSource } from '../api/source
 import { CATEGORIES, ORIENTATIONS } from '../constants';
 import { isLightColor } from '../utils/colorUtils';
 import SourceItem from '../components/sources/SourceItem';
+import AddSourceForm from '../components/sources/AddSourceForm';
 
 /**
  * Page de gestion des sources
@@ -115,17 +116,22 @@ const Sources = () => {
     };
   }, []);
 
-  // Gérer l'affichage du formulaire d'ajout de source personnalisée
-  const toggleAddForm = () => {
-    setShowAddForm(!showAddForm);
-    setFormErrors({});
-  };
-
-  // Gérer le changement dans le formulaire d'ajout
+  // Handler pour les changements dans le formulaire
   const handleCustomSourceChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
-    if (name.startsWith('orientation.')) {
+    if (type === 'checkbox') {
+      const newCategories = [...customSource.categories];
+      if (e.target.checked) {
+        newCategories.push(value);
+      } else {
+        const index = newCategories.indexOf(value);
+        if (index > -1) {
+          newCategories.splice(index, 1);
+        }
+      }
+      setCustomSource({ ...customSource, categories: newCategories });
+    } else if (name.startsWith('orientation.')) {
       const orientationType = name.split('.')[1];
       setCustomSource({
         ...customSource,
@@ -135,115 +141,25 @@ const Sources = () => {
         },
       });
     } else {
-      setCustomSource({
-        ...customSource,
-        [name]: value,
-      });
-    }
-
-    // Effacer l'erreur
-    if (formErrors[name]) {
-      setFormErrors({
-        ...formErrors,
-        [name]: null,
-      });
+      setCustomSource({ ...customSource, [name]: value });
     }
   };
 
-  // Gérer le changement dans les catégories
-  const handleCategoryChange = (category) => {
-    const updatedCategories = customSource.categories.includes(category)
-      ? customSource.categories.filter((cat) => cat !== category)
-      : [...customSource.categories, category];
-
-    setCustomSource({
-      ...customSource,
-      categories: updatedCategories,
-    });
-
-    // Effacer l'erreur
-    if (formErrors.categories) {
-      setFormErrors({
-        ...formErrors,
-        categories: null,
-      });
-    }
-  };
-
-  // Valider le formulaire d'ajout
-  const validateCustomSource = () => {
-    const errors = {};
-
-    if (!customSource.name.trim()) {
-      errors.name = 'Le nom est requis';
-    }
-
-    if (!customSource.url.trim()) {
-      errors.url = "L'URL est requise";
-    } else if (
-      !customSource.url.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
-    ) {
-      errors.url = 'URL invalide';
-    }
-
-    if (!customSource.rssUrl.trim()) {
-      errors.rssUrl = "L'URL du flux RSS est requise";
-    } else if (
-      !customSource.rssUrl.match(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
-    ) {
-      errors.rssUrl = 'URL du flux RSS invalide';
-    }
-
-    if (customSource.categories.length === 0) {
-      errors.categories = 'Sélectionnez au moins une catégorie';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Soumettre le formulaire d'ajout
-  const handleCustomSourceSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateCustomSource()) {
-      return;
-    }
-
-    setLoading(true);
-
+  // Handler pour la soumission du formulaire
+  const handleSubmit = async (sourceData) => {
     try {
-      const response = await addUserSource({
-        ...customSource,
-        isUserAdded: true,
+      setLoading(true);
+      const result = await addUserSource(sourceData);
+      setShowAddForm(false);
+      setCustomSource({
+        name: '',
+        url: '',
+        rssUrl: '',
+        categories: [],
+        orientation: { political: 'centre' },
       });
-
-      if (response && response.data) {
-        await addOrEnableSource(response.data._id);
-
-        setCustomSource({
-          name: '',
-          url: '',
-          rssUrl: '',
-          categories: [],
-          orientation: {
-            political: 'centre',
-          },
-        });
-
-        setShowAddForm(false);
-        setSearchTerm('');
-        setFormErrors({});
-      } else {
-        throw new Error('Réponse invalide du serveur');
-      }
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la source personnalisée:", error);
-      setFormErrors({
-        submit:
-          error.response?.data?.message ||
-          "Erreur lors de l'ajout de la source. Vérifiez l'URL du flux RSS.",
-      });
+      setError("Erreur lors de l'ajout de la source");
     } finally {
       setLoading(false);
     }
@@ -295,174 +211,16 @@ const Sources = () => {
           </ul>
         )}
 
-        {/* Formulaire d'ajout - affiché quand la recherche ne donne aucun résultat */}
-        {showAddForm && searchTerm.trim() && (
-          <div className="mt-4">
-            <p className="text-gray-600 mb-2">
-              Aucune source trouvée. Voulez-vous ajouter une nouvelle source ?
-            </p>
-            <form
-              onSubmit={handleCustomSourceSubmit}
-              className="border border-gray-200 rounded-md p-4 mb-4"
-            >
-              <h3 className="text-lg font-medium text-gray-800 mb-4">
-                Ajouter une source personnalisée
-              </h3>
-
-              {formErrors.submit && (
-                <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">
-                  {formErrors.submit}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {/* Nom de la source */}
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nom de la source <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={customSource.name}
-                    onChange={handleCustomSourceChange}
-                    className={`w-full px-3 py-2 border ${
-                      formErrors.name ? 'border-red-300' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    placeholder="Le Monde, Libération, etc."
-                  />
-                  {formErrors.name && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
-                  )}
-                </div>
-
-                {/* URL de la source */}
-                <div>
-                  <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-                    URL du site <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="url"
-                    name="url"
-                    value={customSource.url}
-                    onChange={handleCustomSourceChange}
-                    className={`w-full px-3 py-2 border ${
-                      formErrors.url ? 'border-red-300' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    placeholder="https://www.lemonde.fr"
-                  />
-                  {formErrors.url && <p className="text-red-500 text-xs mt-1">{formErrors.url}</p>}
-                </div>
-
-                {/* URL du flux RSS */}
-                <div>
-                  <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                    URL du flux RSS <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="rssUrl"
-                    name="rssUrl"
-                    value={customSource.rssUrl}
-                    onChange={handleCustomSourceChange}
-                    className={`w-full px-3 py-2 border ${
-                      formErrors.rssUrl ? 'border-red-300' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    placeholder="https://www.lemonde.fr/rss/une.xml"
-                  />
-                  {formErrors.rssUrl && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.rssUrl}</p>
-                  )}
-                </div>
-
-                {/* Catégories */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Catégories <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category}
-                        type="button"
-                        onClick={() => handleCategoryChange(category)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium ${
-                          customSource.categories.includes(category)
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-                  {formErrors.categories && (
-                    <p className="text-red-500 text-xs mt-1">{formErrors.categories}</p>
-                  )}
-                </div>
-
-                {/* Orientation */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(orientationOptions).map(([type, options]) => (
-                    <div key={type}>
-                      <label
-                        htmlFor={`orientation.${type}`}
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        {type === 'political'
-                          ? 'Orientation politique'
-                          : type === 'type'
-                          ? 'Type de média'
-                          : type === 'structure'
-                          ? 'Structure'
-                          : 'Portée'}
-                      </label>
-                      <select
-                        id={`orientation.${type}`}
-                        name={`orientation.${type}`}
-                        value={customSource.orientation[type]}
-                        onChange={handleCustomSourceChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      >
-                        {options.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Boutons d'action */}
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={toggleAddForm}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={`px-4 py-2 rounded-md ${
-                      loading
-                        ? 'bg-gray-300 text-gray-600'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {loading ? (
-                      <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></span>
-                    ) : null}
-                    Ajouter
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+        {/* Formulaire d'ajout de source */}
+        {showAddForm && (
+          <AddSourceForm
+            customSource={customSource}
+            onSourceChange={handleCustomSourceChange}
+            onSubmit={handleSubmit}
+            onCancel={() => setShowAddForm(false)}
+            loading={loading}
+            formErrors={formErrors}
+          />
         )}
       </div>
 
