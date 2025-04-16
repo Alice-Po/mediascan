@@ -226,10 +226,10 @@ export const addUserSource = async (req, res) => {
         await Analytics.create({
           userId,
           eventType: 'sourceAdd',
-          sourceId: source._id,
           metadata: {
             sourceName: source.name,
             sourceUrl: source.url,
+            sourceId: source._id,
             orientation: source.orientation,
           },
         });
