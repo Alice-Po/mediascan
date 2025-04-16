@@ -3,7 +3,6 @@ import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
 import ArticleFilters from '../components/articles/ArticleFilters';
 import ArticleList from '../components/articles/ArticleList';
-import InterestsList from '../components/InterestsList';
 
 /**
  * Page principale du Dashboard
