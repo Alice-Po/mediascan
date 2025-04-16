@@ -87,7 +87,7 @@ const parseDate = (item) => {
  */
 export const fetchAllSources = async () => {
   try {
-    // console.log('Démarrage de la récupération de tous les flux RSS...');
+    console.log('Démarrage de la récupération de tous les flux RSS...');
 
     // Récupération de toutes les sources
     const sources = await Source.find();
@@ -137,49 +137,6 @@ export const fetchAllSources = async () => {
 export const fetchSourceArticles = async (source) => {
   try {
     const feed = await parser.parseURL(source.rssUrl);
-    // const brutfeed = await parser.parseURL(source.rssUrl);
-
-    // const echantillon = {
-    //   'https://www.lemonde.fr': 0,
-    //   'https://www.lefigaro.fr': 0,
-    //   'https://www.liberation.fr': 0,
-    //   'https://www.lesechos.fr': 0,
-    //   'https://www.francetvinfo.fr': 0,
-    //   'https://www.lepoint.fr': 0,
-    //   'https://www.lexpress.fr': 0,
-    //   'https://www.mediapart.fr': 0,
-    //   'https://www.leparisien.fr': 0,
-    //   'https://www.20minutes.fr': 0,
-    //   'https://www.humanite.fr': 0,
-    //   'https://www.challenges.fr': 0,
-    //   'https://www.la-croix.com': 0,
-    //   'https://www.marianne.net': 0,
-    //   'https://www.nouvelobs.com': 0,
-    //   'https://www.lesinrocks.com': 0,
-    //   'https://www.courrierinternational.com': 0,
-    //   'https://reporterre.net/': 0,
-    // };
-    // // Vérifier si le feed a des items
-    // if (brutfeed && brutfeed.items && brutfeed.items.length > 0) {
-    //   // Essayer de déterminer quelle source c'est à partir du premier article
-    //   const firstItem = brutfeed.items[0];
-
-    //   if (firstItem.link) {
-    //     // Parcourir les clés de l'objet échantillon
-    //     for (const sourceKey in echantillon) {
-    //       // Vérifier si le lien de l'article contient la clé de la source
-    //       // et que cette source n'a pas encore été loggée
-    //       if (firstItem.link.toLowerCase().includes(sourceKey) && echantillon[sourceKey] < 1) {
-    //         // Afficher uniquement le premier article de cette source
-    //         console.log(`Premier article de ${sourceKey}:`, JSON.stringify(firstItem, null, 2));
-    //         // Marquer cette source comme loggée
-    //         echantillon[sourceKey] = 1;
-    //         // Sortir de la boucle après avoir trouvé une correspondance
-    //         break;
-    //       }
-    //     }
-    //   }
-    // }
 
     await Source.findByIdAndUpdate(source._id, {
       lastFetched: new Date(),
@@ -191,14 +148,14 @@ export const fetchSourceArticles = async (source) => {
     });
 
     const articles = await Promise.all(
-      feed.items.map(async (item) => {
+      feed.items.map(async (item, index) => {
         try {
           const imageUrl = extractImageFromRSSItem(item);
           const publishedAt = parseDate(item);
 
           // Vérifier que la date est valide
           if (isNaN(publishedAt.getTime())) {
-            console.warn('Date invalide pour article:', item.title);
+            console.warn(`[${source.name}] Date invalide pour l'article: ${item.title}`);
             return null;
           }
 
@@ -213,7 +170,7 @@ export const fetchSourceArticles = async (source) => {
           }
 
           // Création du nouvel article
-          return {
+          const articleData = {
             title: item.title,
             content: item.content || item.contentEncoded || '',
             contentSnippet: item.contentSnippet || '',
@@ -229,21 +186,30 @@ export const fetchSourceArticles = async (source) => {
             language: item.language || 'fr',
             creator: item.creator || item.author || item['dc:creator'] || 'Non spécifié',
           };
+
+          return articleData;
         } catch (error) {
-          console.error(`Erreur lors du traitement d'un article de ${source.name}:`, error);
+          console.error(`[${source.name}] Erreur traitement article:`, {
+            title: item.title,
+            error: error.message,
+          });
           return null;
         }
       })
     );
 
     const validArticles = articles.filter((article) => article !== null);
+
     if (validArticles.length > 0) {
       await createOrUpdateArticles(validArticles);
     }
 
     return validArticles.length;
   } catch (error) {
-    console.error(`Erreur lors de la récupération des articles de ${source.name}:`, error);
+    console.error(`Erreur complète pour ${source.name}:`, {
+      error: error.message,
+      stack: error.stack,
+    });
 
     await Source.findByIdAndUpdate(source._id, {
       lastFetched: new Date(),

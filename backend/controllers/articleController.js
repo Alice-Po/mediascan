@@ -22,17 +22,46 @@ export const getArticles = async (req, res) => {
 
     // Filtrer par sources actives
     if (sources && sources.length) {
-      query.sourceId = { $in: sources.split(',') };
-    } else if (user.activeSources.length) {
-      query.sourceId = { $in: user.activeSources.map((s) => s._id) };
+      // Filtrer les sourceIds vides et invalides
+      const validSourceIds = sources
+        .split(',')
+        .filter((id) => id && id.trim().length === 24)
+        .filter((id) => user.activeSources.some((s) => s._id.toString() === id)); // Ne garder que les sources actives
+
+      if (validSourceIds.length > 0) {
+        query.sourceId = { $in: validSourceIds };
+      } else {
+        // Si aucune source valide après filtrage, retourner un tableau vide
+        return res.json({
+          articles: [],
+          hasMore: false,
+          total: 0,
+        });
+      }
+    } else {
+      // Si aucune source n'est spécifiée, utiliser toutes les sources actives
+      if (user.activeSources.length) {
+        query.sourceId = { $in: user.activeSources.map((s) => s._id) };
+      } else {
+        // Si l'utilisateur n'a aucune source active, retourner un tableau vide
+        return res.json({
+          articles: [],
+          hasMore: false,
+          total: 0,
+        });
+      }
     }
 
-    // Filtrer par catégories spécifiées dans la requête OU par les intérêts de l'utilisateur
+    // Log pour débugger
+    console.log('Query sources:', {
+      userActiveSources: user.activeSources.map((s) => s._id),
+      requestedSources: sources,
+      finalQuery: query.sourceId,
+    });
+
+    // Filtrer par catégories si spécifiées
     if (categories && categories.length) {
       query.categories = { $in: categories.split(',') };
-    } else if (user.interests && user.interests.length) {
-      // Par défaut, filtrer par les intérêts de l'utilisateur
-      query.categories = { $in: user.interests };
     }
 
     // Récupérer les articles
@@ -42,24 +71,11 @@ export const getArticles = async (req, res) => {
       .limit(parseInt(limit))
       .populate('sourceId', 'name faviconUrl url');
 
-    // Convertir les articles en objets simples et ajouter le flag isSaved
-    articles = articles.map((article) => {
-      const obj = article.toObject();
-      return {
-        ...obj,
-        isSaved: user.savedArticles.includes(article._id),
-      };
-    });
-
-    // Log pour vérifier les articles filtrés
-    // console.log(
-    //   'Articles filtered by interests:',
-    //   articles.map((a) => ({
-    //     title: a.title.substring(0, 30),
-    //     categories: a.categories,
-    //     matches: a.categories.filter((c) => user.interests.includes(c)),
-    //   }))
-    // );
+    // Ajouter le flag isSaved
+    articles = articles.map((article) => ({
+      ...article.toObject(),
+      isSaved: user.savedArticles.includes(article._id),
+    }));
 
     res.json({
       articles,

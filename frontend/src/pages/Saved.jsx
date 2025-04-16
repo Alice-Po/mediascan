@@ -17,7 +17,6 @@ const Saved = () => {
       try {
         setLoading(true);
         const response = await fetchSavedArticles();
-        console.log('Saved articles response:', response); // Debug log
 
         // S'assurer que nous utilisons le bon chemin pour accéder aux articles
         const articles = response.articles || [];

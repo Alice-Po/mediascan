@@ -138,6 +138,10 @@ export const AppProvider = ({ children }) => {
   // Charger les articles une seule fois au montage ou quand l'utilisateur change
   useEffect(() => {
     if (user) {
+      console.log('AppContext - Chargement initial des articles', {
+        user: user._id,
+        filters,
+      });
       loadArticles();
     }
   }, [user]);
@@ -146,11 +150,18 @@ export const AppProvider = ({ children }) => {
   const loadArticles = async () => {
     try {
       setLoadingArticles(true);
-      const response = await fetchArticles();
+
+      const response = await fetchArticles({
+        sources: filters.sources.map((s) => s._id).join(','),
+        categories: filters.categories.join(','),
+        page: articlesPage,
+      });
+
       setArticles(response.articles);
       setHasMoreArticles(response.hasMore);
     } catch (error) {
-      console.error('Error loading articles:', error);
+      console.error('AppContext - Erreur loadArticles:', error);
+      setError(error.message);
     } finally {
       setLoadingArticles(false);
     }
@@ -284,6 +295,21 @@ export const AppProvider = ({ children }) => {
     );
   }, []);
 
+  // Vérifier les logs des sources actives
+  const loadUserSources = async () => {
+    try {
+      setLoadingSources(true);
+      const sources = await fetchUserSources();
+      console.log('Sources actives chargées:', sources);
+      setUserSources(sources);
+    } catch (error) {
+      console.error('Erreur chargement sources:', error);
+      setError(error.message);
+    } finally {
+      setLoadingSources(false);
+    }
+  };
+
   // Valeur du contexte
   const value = {
     userSources,
@@ -302,6 +328,7 @@ export const AppProvider = ({ children }) => {
     userInterests,
     setArticles,
     updateArticle,
+    loadUserSources,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

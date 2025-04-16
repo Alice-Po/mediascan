@@ -248,16 +248,6 @@ const Sources = () => {
     }
   };
 
-  // Log pour debug
-  useEffect(() => {
-    console.log('Sources component data:', {
-      userSources,
-      userSourcesEnabled: userSources.filter((source) => source.enabled),
-      allSources,
-      loadingSources,
-    });
-  }, [userSources, allSources, loadingSources]);
-
   if (loadingSources) {
     return (
       <div className="flex justify-center items-center h-screen">
