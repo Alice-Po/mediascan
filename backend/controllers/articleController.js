@@ -317,6 +317,32 @@ export const getSavedArticles = async (req, res) => {
   }
 };
 
+// Fonction pour créer ou mettre à jour des articles en masse
+export const createOrUpdateArticles = async (articles) => {
+  try {
+    const bulkOps = articles.map((article) => ({
+      updateOne: {
+        filter: { link: article.link },
+        update: { $set: article },
+        upsert: true,
+      },
+    }));
+
+    const result = await Article.bulkWrite(bulkOps);
+    console.log('Bulk write result:', {
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
+      upserted: result.upsertedCount,
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error in createOrUpdateArticles:', error);
+    throw error;
+  }
+};
+
+// Utilisation dans la fonction de création/mise à jour d'article
 const createOrUpdateArticle = async (articleData, source) => {
   try {
     console.log('Creating/Updating article with source data:', {
@@ -326,25 +352,27 @@ const createOrUpdateArticle = async (articleData, source) => {
       articleTitle: articleData.title,
     });
 
-    const article = await Article.findOneAndUpdate(
-      { title: articleData.title, sourceId: source._id },
-      {
-        ...articleData,
-        sourceId: source._id,
-        sourceName: source.name,
-        sourceFavicon: source.faviconUrl,
-        orientation: source.orientation,
-        categories: source.categories,
-      },
-      { upsert: true, new: true }
+    // Préparer les données de l'article
+    const article = {
+      ...articleData,
+      sourceId: source._id,
+      sourceName: source.name,
+      sourceFavicon: source.faviconUrl,
+      orientation: source.orientation,
+      categories: source.categories,
+    };
+
+    // Utiliser updateOne avec upsert
+    const result = await Article.updateOne(
+      { link: article.link }, // Critère de recherche
+      { $set: article }, // Données à mettre à jour/insérer
+      { upsert: true } // Créer si n'existe pas
     );
 
     console.log('Article created/updated:', {
-      articleId: article._id,
-      title: article.title,
-      sourceId: article.sourceId,
-      orientation: article.orientation,
-      categories: article.categories,
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
+      upserted: result.upsertedId,
     });
 
     return article;

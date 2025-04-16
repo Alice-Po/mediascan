@@ -1,6 +1,7 @@
 import Parser from 'rss-parser';
 import Source from '../models/Source.js';
 import Article from '../models/Article.js';
+import { createOrUpdateArticles } from '../controllers/articleController.js';
 
 const parser = new Parser({
   customFields: {
@@ -194,7 +195,7 @@ export const fetchSourceArticles = async (source) => {
 
     const validArticles = articles.filter((article) => article !== null);
     if (validArticles.length > 0) {
-      await Article.insertMany(validArticles);
+      await createOrUpdateArticles(validArticles);
     }
 
     return validArticles.length;
