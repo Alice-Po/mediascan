@@ -376,6 +376,6 @@ db.sources.insertMany([
 // Création des index pour optimiser les requêtes
 db.sources.createIndex({ name: 1 }, { unique: true });
 db.articles.createIndex({ link: 1 }, { unique: true });
-db.articles.createIndex({ pubDate: -1 });
+db.articles.createIndex({ publishedAt: -1 });
 db.articles.createIndex({ sourceId: 1 });
 db.users.createIndex({ email: 1 }, { unique: true });

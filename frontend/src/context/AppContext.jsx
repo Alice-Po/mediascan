@@ -147,10 +147,6 @@ export const AppProvider = ({ children }) => {
     try {
       setLoadingArticles(true);
       const response = await fetchArticles();
-      console.log('Articles loaded:', {
-        count: response.articles.length,
-        firstArticle: response.articles[0],
-      });
       setArticles(response.articles);
       setHasMoreArticles(response.hasMore);
     } catch (error) {
@@ -287,14 +283,6 @@ export const AppProvider = ({ children }) => {
       )
     );
   }, []);
-
-  // Log pour suivre les changements d'état importants
-  useEffect(() => {
-    console.log('Articles state updated:', {
-      totalArticles: articles.length,
-      filteredArticles: filteredArticles.length,
-    });
-  }, [articles, filteredArticles]);
 
   // Valeur du contexte
   const value = {

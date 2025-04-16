@@ -13,13 +13,6 @@ const Dashboard = () => {
   const { resetFilters, loadingArticles, articles } = useContext(AppContext);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    console.log('Dashboard mounted/updated:', {
-      articlesCount: articles?.length,
-      loadingArticles,
-    });
-  }, [articles, loadingArticles]);
-
   // Réinitialiser les filtres au montage de la page
   useEffect(() => {
     const init = async () => {

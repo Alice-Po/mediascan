@@ -219,7 +219,9 @@ const ArticleCard = ({ article, onSave, onShare }) => {
                   <img src={article.sourceFavicon} alt={article.sourceName} className="w-4 h-4" />
                 )}
                 <span className="text-xs font-medium">{article.sourceName}</span>
-                <span className="text-xs text-gray-500">{formatRelativeTime(article.pubDate)}</span>
+                <span className="text-xs text-gray-500">
+                  {formatRelativeTime(article.publishedAt)}
+                </span>
               </div>
 
               {/* Boutons d'action */}

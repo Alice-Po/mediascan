@@ -45,6 +45,36 @@ const extractImageFromRSSItem = (item) => {
   return null;
 };
 
+const parseDate = (item) => {
+  try {
+    // Essayer d'abord isoDate qui est le plus fiable
+    if (item.isoDate) {
+      return new Date(item.isoDate);
+    }
+
+    // Essayer ensuite la date standard
+    if (item.date) {
+      return new Date(item.date);
+    }
+
+    // Pour pubDate, nettoyer le format si nécessaire
+    if (item.pubDate) {
+      // Remplacer CEST/CET par +0200/+0100
+      const cleanedDate = item.pubDate.replace(' CEST', ' +0200').replace(' CET', ' +0100');
+      const date = new Date(cleanedDate);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    // Si aucune date valide n'est trouvée
+    return new Date();
+  } catch (error) {
+    console.warn('Erreur parsing date:', error);
+    return new Date();
+  }
+};
+
 /**
  * Récupère les articles de toutes les sources actives
  */
@@ -157,7 +187,13 @@ export const fetchSourceArticles = async (source) => {
       feed.items.map(async (item) => {
         try {
           const imageUrl = extractImageFromRSSItem(item);
-          const pubDate = item.isoDate || item.date || item.pubDate || new Date();
+          const publishedAt = parseDate(item);
+
+          // Vérifier que la date est valide
+          if (isNaN(publishedAt.getTime())) {
+            console.warn('Date invalide pour article:', item.title);
+            return null;
+          }
 
           // Vérification si l'article existe déjà
           const existingArticle = await Article.findOne({
@@ -175,7 +211,7 @@ export const fetchSourceArticles = async (source) => {
             content: item.content || item.contentEncoded || '',
             contentSnippet: item.contentSnippet || '',
             link: item.link,
-            pubDate: pubDate,
+            publishedAt,
             image: imageUrl,
             sourceId: source._id,
             sourceName: source.name,

@@ -20,11 +20,6 @@ const ArticleSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    pubDate: {
-      type: Date,
-      required: true,
-      index: true,
-    },
     image: {
       type: String,
       trim: true,
@@ -93,10 +88,9 @@ const ArticleSchema = new mongoose.Schema(
     },
     publishedAt: {
       type: Date,
+      required: true,
       index: true,
-      default: function () {
-        return this.pubDate;
-      },
+      default: Date.now, // fallback si aucune date n'est fournie
     },
   },
   {
@@ -104,11 +98,11 @@ const ArticleSchema = new mongoose.Schema(
   }
 );
 
-ArticleSchema.index({ sourceId: 1, pubDate: -1 });
+ArticleSchema.index({ sourceId: 1, publishedAt: -1 });
 ArticleSchema.index({ categories: 1 });
 ArticleSchema.index({ title: 1, sourceId: 1 }, { unique: true });
-ArticleSchema.index({ language: 1, pubDate: -1 });
-ArticleSchema.index({ tags: 1, pubDate: -1 });
-ArticleSchema.index({ creator: 1, pubDate: -1 });
+ArticleSchema.index({ language: 1, publishedAt: -1 });
+ArticleSchema.index({ tags: 1, publishedAt: -1 });
+ArticleSchema.index({ creator: 1, publishedAt: -1 });
 
 export default mongoose.model('Article', ArticleSchema);

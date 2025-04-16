@@ -37,16 +37,19 @@ export const getArticles = async (req, res) => {
 
     // Récupérer les articles
     let articles = await Article.find(query)
-      .sort({ pubDate: -1 })
+      .sort({ publishedAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
       .populate('sourceId', 'name faviconUrl url');
 
     // Convertir les articles en objets simples et ajouter le flag isSaved
-    articles = articles.map((article) => ({
-      ...article.toObject(),
-      isSaved: user.savedArticles.includes(article._id),
-    }));
+    articles = articles.map((article) => {
+      const obj = article.toObject();
+      return {
+        ...obj,
+        isSaved: user.savedArticles.includes(article._id),
+      };
+    });
 
     // Log pour vérifier les articles filtrés
     // console.log(
