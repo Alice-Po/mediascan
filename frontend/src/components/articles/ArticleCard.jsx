@@ -136,11 +136,14 @@ const ArticleCard = ({ article, onSave, onShare }) => {
   const politicalOrientation = getPoliticalOrientation();
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div onClick={handleClick} className="flex cursor-pointer overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-4">
+      <div
+        onClick={handleClick}
+        className="flex flex-col sm:flex-row cursor-pointer overflow-hidden"
+      >
         {/* Image de l'article */}
         {article.image && (
-          <div className="w-1/3 relative">
+          <div className="w-full sm:w-1/3 relative h-48 sm:h-auto">
             <img
               src={article.image}
               alt={article.title}
@@ -151,7 +154,7 @@ const ArticleCard = ({ article, onSave, onShare }) => {
         )}
 
         {/* Contenu de l'article */}
-        <div className={`flex flex-col p-3 ${article.image ? 'w-2/3' : 'w-full'}`}>
+        <div className={`flex flex-col p-3 ${article.image ? 'sm:w-2/3' : 'w-full'}`}>
           {/* En-tête avec auteur et langue */}
           <h3 className="text-base font-semibold line-clamp-2 mb-1">{article.title}</h3>
           <div className="flex items-center justify-between mb-2">
