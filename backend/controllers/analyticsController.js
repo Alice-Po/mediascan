@@ -162,8 +162,6 @@ export const getUserAnalytics = async (req, res) => {
 export const trackEvent = async (req, res) => {
   try {
     const { eventType, metadata } = req.body;
-    console.log('Received event:', { eventType, metadata });
-
     const cleanOrientation = {
       political: ORIENTATIONS.political.includes(metadata.orientation?.political)
         ? metadata.orientation.political
@@ -182,8 +180,6 @@ export const trackEvent = async (req, res) => {
     });
 
     await event.save();
-    console.log('Event saved:', event);
-
     res.status(200).json({
       success: true,
       message: 'Événement enregistré',

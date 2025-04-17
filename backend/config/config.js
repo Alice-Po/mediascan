@@ -1,7 +1,13 @@
+// Log au début du fichier pour voir les variables d'environnement
+console.log("Variables d'environnement:", {
+  EMAIL_USER: process.env.EMAIL_USER,
+  HAS_EMAIL_PASSWORD: !!process.env.EMAIL_PASSWORD,
+});
+
 const config = {
   // Configuration JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'news-aggregator-secret-dev-key',
+    secret: process.env.JWT_SECRET || 'your-secret-key',
     expiresIn: '7d',
     refreshExpiresIn: '30d',
   },
@@ -13,26 +19,21 @@ const config = {
     maxArticlesPerPage: 50,
   },
 
-  // Catégories disponibles
-  categories: [
-    'politique',
-    'économie',
-    'société',
-    'culture',
-    'sport',
-    'sciences',
-    'technologie',
-    'environnement',
-    'santé',
-    'international',
-  ],
+  mongoUri: process.env.MONGODB_URI,
 
-  // Orientations éditoriales
-  orientations: {
-    political: ['gauche', 'centre-gauche', 'centre', 'centre-droite', 'droite', 'non-spécifié'],
+  email: {
+    user: process.env.EMAIL_USER,
+    password: process.env.EMAIL_PASSWORD,
   },
 
-  mongoUri: process.env.MONGODB_URI,
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 };
+
+// Vérification détaillée de la configuration au démarrage
+console.log('Configuration email:', {
+  user: config.email.user,
+  hasPassword: !!config.email.password,
+  frontendUrl: config.frontendUrl,
+});
 
 export default config;

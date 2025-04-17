@@ -15,35 +15,26 @@ import Profile from '../pages/Profile';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Onboarding from '../pages/auth/Onboarding';
+import VerifyEmail from '../pages/auth/VerifyEmail';
 
 const AppRoutes = () => {
-  const { loading } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (loading) {
-    return <div>Chargement...</div>;
-  }
   return (
     <Routes>
       {/* Routes publiques */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       {/* Routes protégées */}
-      <Route element={<AuthLayout />}>
-        {/* Route d'onboarding */}
-        <Route path="/onboarding" element={<Onboarding />} />
-
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="sources" element={<Sources />} />
-          <Route path="saved" element={<Saved />} />
-          <Route path="statistics" element={<Statistics />} />
-          <Route path="profile" element={<Profile />} />
-        </Route>
+      <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
+        <Route index element={<Dashboard />} />
+        <Route path="sources" element={<Sources />} />
+        <Route path="saved" element={<Saved />} />
+        <Route path="statistics" element={<Statistics />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
-
-      {/* Redirection par défaut */}
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
 import config from '../config/config.js';
+import crypto from 'crypto';
+import { sendVerificationEmail } from '../services/emailService.js';
 
 // Génération du token JWT
 const generateToken = (id) => {
@@ -15,54 +17,67 @@ const generateToken = (id) => {
 // @access  Public
 export const register = async (req, res) => {
   try {
-    const { email, password, name, interests } = req.body;
+    const { email, password, name } = req.body;
 
-    // Vérification si l'utilisateur existe déjà
-    const userExists = await User.findOne({ email });
-
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cet email est déjà utilisé',
-      });
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Création de l'utilisateur
-    const user = await User.create({
+    // Créer l'utilisateur
+    const user = new User({
       email,
       password,
       name,
-      interests: interests || [],
+      verificationToken: crypto.randomBytes(32).toString('hex'),
+      verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    // Enregistrement de l'événement analytique
-    await Analytics.create({
-      userId: user._id,
-      eventType: 'userRegister',
-      metadata: {
-        userAgent: req.headers['user-agent'],
-        platform: req.headers['sec-ch-ua-platform'] || 'unknown',
-      },
-    });
+    // Sauvegarder l'utilisateur d'abord
+    await user.save();
+    console.log('Utilisateur créé:', user._id);
 
-    // Génération du token
-    const token = generateToken(user._id);
+    try {
+      // Puis envoyer l'email de vérification
+      await sendVerificationEmail(email, user.verificationToken);
 
-    res.status(201).json({
-      success: true,
-      message: 'Inscription réussie',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        interests: user.interests,
-      },
-    });
+      // Enregistrer l'événement analytics
+      await Analytics.create({
+        userId: user._id,
+        eventType: 'userRegister',
+        metadata: {
+          timestamp: new Date(),
+        },
+      });
+
+      return res.status(201).json({
+        message: 'Inscription réussie. Veuillez vérifier votre email pour activer votre compte.',
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          isVerified: user.isVerified,
+        },
+      });
+    } catch (emailError) {
+      // Si l'envoi d'email échoue, on garde l'utilisateur mais on log l'erreur
+      console.error('Erreur envoi email:', emailError);
+
+      return res.status(201).json({
+        message:
+          "Inscription réussie mais erreur lors de l'envoi de l'email de vérification. Un nouvel email sera envoyé ultérieurement.",
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          isVerified: user.isVerified,
+        },
+      });
+    }
   } catch (error) {
-    console.error("Erreur lors de l'inscription:", error);
+    console.error('Erreur inscription:', error);
     res.status(500).json({
-      success: false,
       message: "Erreur lors de l'inscription",
       error: error.message,
     });
@@ -75,50 +90,29 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Vérification que l'email et le mot de passe sont fournis
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Veuillez fournir un email et un mot de passe',
-      });
-    }
-
-    // Recherche de l'utilisateur
     const user = await User.findOne({ email });
 
-    // Vérification que l'utilisateur existe et que le mot de passe est correct
     if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+    }
+
+    if (!user.isVerified) {
       return res.status(401).json({
-        success: false,
-        message: 'Identifiants invalides',
+        message: 'Veuillez vérifier votre email avant de vous connecter',
       });
     }
 
-    // Mise à jour de la date de dernière connexion
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Enregistrer l'événement de connexion
-    const analytics = new Analytics({
+    // Enregistrer l'événement analytics de connexion
+    await Analytics.create({
       userId: user._id,
       eventType: 'userLogin',
       metadata: {
         timestamp: new Date(),
-        userAgent: req.headers['user-agent'],
-        platform: req.headers['sec-ch-ua-platform'],
-        success: true,
       },
     });
 
-    await analytics.save();
-
-    // Génération du token
     const token = generateToken(user._id);
-
-    res.status(200).json({
-      success: true,
-      message: 'Connexion réussie',
+    res.json({
       token,
       user: {
         id: user._id,
@@ -128,12 +122,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Erreur lors de la connexion:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la connexion',
-      error: error.message,
-    });
+    res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };
 
@@ -188,7 +177,6 @@ export const updateProfile = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du profil:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la mise à jour du profil',
@@ -238,22 +226,14 @@ export const completeOnboarding = async (req, res) => {
     const userId = req.user._id;
     const { categories, sources } = req.body;
 
-    console.log('Données onboarding reçues:', {
-      userId,
-      categories,
-      sources,
-    });
-
-    // Validation des données
     if (!categories || !Array.isArray(categories)) {
-      console.log('Validation échouée - catégories:', categories);
       return res.status(400).json({
         success: false,
         message: 'Les catégories sont requises et doivent être un tableau',
       });
     }
 
-    // Mise à jour de l'utilisateur avec les bons champs
+    // Mise à jour de l'utilisateur
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
@@ -266,19 +246,56 @@ export const completeOnboarding = async (req, res) => {
       { new: true }
     ).select('-password');
 
-    console.log('Utilisateur mis à jour:', updatedUser);
-
     res.status(200).json({
       success: true,
       message: 'Onboarding complété avec succès',
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Erreur onboarding backend:', error);
     res.status(500).json({
       success: false,
       message: "Erreur lors de la complétion de l'onboarding",
       error: error.message,
     });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        message: 'Token de vérification manquant',
+      });
+    }
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: 'Le lien de vérification est invalide ou a expiré',
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    await Analytics.create({
+      userId: user._id,
+      eventType: 'emailVerification',
+      metadata: {
+        timestamp: new Date(),
+      },
+    });
+
+    res.json({ message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la vérification de l'email" });
   }
 };

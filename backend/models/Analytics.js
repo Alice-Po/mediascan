@@ -19,6 +19,7 @@ const AnalyticsSchema = new mongoose.Schema(
         'userLogout',
         'sourceAdd',
         'sourceRemove',
+        'emailVerification',
       ],
       required: true,
     },
@@ -58,20 +59,20 @@ const AnalyticsSchema = new mongoose.Schema(
 );
 
 // Middleware pre-save pour logger les événements
-AnalyticsSchema.pre('save', function (next) {
-  console.log('Nouvel événement analytique:', {
-    userId: this.userId,
-    eventType: this.eventType,
-    metadata: {
-      articleId: this.metadata.articleId,
-      sourceId: this.metadata.sourceId,
-      orientation: this.metadata.orientation,
-      category: this.metadata.category,
-      timestamp: this.metadata.timestamp,
-    },
-  });
-  next();
-});
+// AnalyticsSchema.pre('save', function (next) {
+//   console.log('Nouvel événement analytique:', {
+//     userId: this.userId,
+//     eventType: this.eventType,
+//     metadata: {
+//       articleId: this.metadata.articleId,
+//       sourceId: this.metadata.sourceId,
+//       orientation: this.metadata.orientation,
+//       category: this.metadata.category,
+//       timestamp: this.metadata.timestamp,
+//     },
+//   });
+//   next();
+// });
 
 // Méthode statique pour logger les statistiques globales
 AnalyticsSchema.statics.logStats = async function () {

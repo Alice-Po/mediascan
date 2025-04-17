@@ -25,10 +25,12 @@ export const login = async (credentials) => {
  */
 export const register = async (userData) => {
   try {
+    console.log('API - Tentative inscription:', userData);
     const response = await api.post('/auth/register', userData);
+    console.log('API - Réponse inscription:', response.data);
     return response.data;
   } catch (error) {
-    console.error("Erreur d'inscription:", error);
+    console.error('API - Erreur inscription:', error.response?.data || error);
     throw error;
   }
 };

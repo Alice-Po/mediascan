@@ -1,5 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, register as apiRegister, getUserProfile } from '../api/authApi';
+import {
+  login as apiLogin,
+  register as apiRegister,
+  getUserProfile,
+  refreshToken as apiRefreshToken,
+} from '../api/authApi';
 
 // Création du contexte
 export const AuthContext = createContext(null);
@@ -22,60 +27,84 @@ export const AuthProvider = ({ children }) => {
   // Calculer isAuthenticated en fonction de la présence de l'utilisateur
   const isAuthenticated = !!user;
 
+  // Vérifier si l'utilisateur est déjà connecté au chargement
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté au chargement
-    const token = localStorage.getItem('token');
-    if (token) {
-      getUserProfile()
-        .then((data) => {
-          setUser(data.user);
-        })
-        .catch((err) => {
-          console.error('Erreur lors de la récupération du profil:', err);
-          localStorage.removeItem('token');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { user } = await getUserProfile();
+        setUser(user);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du profil:', error);
+        localStorage.removeItem('token');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (credentials) => {
     try {
-      const data = await apiLogin(credentials);
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+      const { token, user } = await apiLogin(credentials);
+
+      if (!user.isVerified) {
+        throw new Error('Veuillez vérifier votre email avant de vous connecter');
+      }
+
+      localStorage.setItem('token', token);
+      setUser(user);
       setError(null);
-      return data;
-    } catch (err) {
-      setError(err.message || 'Erreur lors de la connexion');
-      throw err;
+      return user;
+    } catch (error) {
+      setError(error.message);
+      throw error;
     }
   };
 
   const register = async (userData) => {
     try {
-      const data = await apiRegister(userData);
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+      const result = await apiRegister(userData);
       setError(null);
-      return data;
-    } catch (err) {
-      console.error('Register error:', err);
-      setError(err.message || "Erreur lors de l'inscription");
-      throw err;
+      return result;
+    } catch (error) {
+      setError(error.message);
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    setError(null);
+  };
+
+  const refreshUserToken = async () => {
+    try {
+      const { token } = await apiRefreshToken();
+      localStorage.setItem('token', token);
+      return token;
+    } catch (error) {
+      logout();
+      throw error;
+    }
   };
 
   const updateUser = (userData) => {
-    setUser(userData);
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...userData,
+    }));
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
@@ -86,7 +115,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    refreshUserToken,
     updateUser,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -6,14 +6,16 @@ import {
   updateProfile,
   refreshToken,
   completeOnboarding,
+  verifyEmail,
 } from '../controllers/authController.js';
 import { protect, logAuthEvent } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Routes d'authentification
+// Routes publiques
 router.post('/register', logAuthEvent, register);
 router.post('/login', logAuthEvent, login);
+router.get('/verify-email/:token', verifyEmail);
 router.post('/refresh', refreshToken);
 
 // Routes protégées (nécessitant une authentification)

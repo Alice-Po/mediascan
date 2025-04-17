@@ -20,7 +20,6 @@ export const ORIENTATIONS = {
     'centre-gauche',
     'centre',
     'centre-droit',
-    'républicain',
     'droite',
     'extrême-droite',
     'écologiste',

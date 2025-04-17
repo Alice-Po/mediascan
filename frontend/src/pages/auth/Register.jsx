@@ -6,7 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
  * Page d'inscription
  */
 const Register = () => {
-  const { register, error: authError } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // State pour le formulaire
@@ -21,8 +21,14 @@ const Register = () => {
   // State pour les erreurs de validation
   const [errors, setErrors] = useState({});
 
+  // State pour l'erreur générale
+  const [error, setError] = useState(null);
+
   // State pour l'état de chargement
   const [loading, setLoading] = useState(false);
+
+  // State pour le message de succès
+  const [success, setSuccess] = useState(false);
 
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
@@ -43,6 +49,7 @@ const Register = () => {
 
   // Valider le formulaire
   const validateForm = () => {
+    console.log('Validation du formulaire...'); // Log de debug
     const newErrors = {};
 
     if (!formData.name.trim()) {
@@ -69,31 +76,72 @@ const Register = () => {
       newErrors.acceptTerms = "Vous devez accepter les conditions d'utilisation";
     }
 
+    console.log('Erreurs de validation:', newErrors); // Log de debug
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
+    console.log('Début de soumission du formulaire'); // Log de debug
     e.preventDefault();
-    if (!validateForm()) return;
 
+    console.log('FormData avant validation:', formData); // Log de debug
+
+    if (!validateForm()) {
+      console.log('Validation échouée'); // Log de debug
+      return;
+    }
+
+    console.log('Validation réussie, début inscription'); // Log de debug
     setLoading(true);
-    try {
-      const result = await register(formData);
-      console.log('Registration successful:', result);
+    setError(null);
 
-      // Attendons un peu pour laisser le temps au contexte de se mettre à jour
-      setTimeout(() => {
-        console.log('Navigating to onboarding, user:', result.user);
-        navigate('/onboarding');
-      }, 100);
+    try {
+      console.log("Tentative d'inscription avec:", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log('Résultat inscription:', result);
+      setSuccess(true);
     } catch (err) {
-      console.error("Erreur lors de l'inscription:", err);
+      console.error('Erreur inscription:', err);
+      setError(err.response?.data?.message || "Erreur lors de l'inscription");
     } finally {
       setLoading(false);
     }
   };
+
+  // Ajout du message de succès dans le rendu
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Inscription réussie !</h2>
+          <div className="mt-4 text-gray-600">
+            <p>Un email de vérification a été envoyé à votre adresse.</p>
+            <p className="mt-2">
+              Veuillez vérifier votre boîte de réception et cliquer sur le lien pour activer votre
+              compte.
+            </p>
+          </div>
+          <div className="mt-6">
+            <Link to="/login" className="text-primary hover:text-primary-dark font-medium">
+              Retour à la page de connexion
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -106,12 +154,12 @@ const Register = () => {
         </div>
 
         {/* Message d'erreur */}
-        {authError && (
+        {error && (
           <div
             className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative"
             role="alert"
           >
-            <p className="text-sm">{authError}</p>
+            <p className="text-sm">{error}</p>
           </div>
         )}
 
@@ -225,6 +273,22 @@ const Register = () => {
               )}
             </div>
           </div>
+
+          {/* Conditions d'utilisation */}
+          <div className="flex items-center">
+            <input
+              id="acceptTerms"
+              name="acceptTerms"
+              type="checkbox"
+              checked={formData.acceptTerms}
+              onChange={handleChange}
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+            />
+            <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
+              J'accepte les conditions d'utilisation
+            </label>
+          </div>
+          {errors.acceptTerms && <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p>}
 
           {/* Bouton d'inscription */}
           <div>

@@ -1,21 +1,23 @@
-import express from 'express';
-import cors from 'cors';
-import cron from 'node-cron';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { fetchAllSources } from './services/rssFetcher.js';
 import config from './config/config.js';
-
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import cron from 'node-cron';
 
 // Configuration ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-// Import des configurations et services
+// Charger les variables d'environnement AVANT les autres imports
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env.local') });
+
+// Autres imports qui utilisent les variables d'environnement
 import connectDB from './config/database.js';
 
 // Import des routes
