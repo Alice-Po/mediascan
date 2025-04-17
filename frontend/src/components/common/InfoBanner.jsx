@@ -12,12 +12,9 @@ const InfoBanner = ({ className = '' }) => {
           </span>
           <p>
             <span className="font-semibold">Version alpha</span> - Il est possible que vous
-            rencontriez des bugs. Vos retours sont les bienvenus !
-            <a
-              href="/feedback"
-              className="ml-2 text-blue-600 hover:text-blue-800 underline hidden sm:inline"
-            >
-              Partagez votre expérience
+            rencontriez des bugs.
+            <a href="/feedback" className="ml-2 text-blue-600 hover:text-blue-800 underline ">
+              Vos retours sont les bienvenus !
             </a>
           </p>
         </div>

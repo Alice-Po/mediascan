@@ -25,7 +25,7 @@ const ContactForm = () => {
           id="email"
           type="email"
           name="email"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
           placeholder="exemple@email.com"
         />
         <ValidationError
@@ -44,7 +44,7 @@ const ContactForm = () => {
           id="message"
           name="message"
           rows="4"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
           placeholder="Décrivez votre retour d'expérience, bug rencontré ou suggestion d'amélioration..."
         />
         <ValidationError
@@ -58,7 +58,7 @@ const ContactForm = () => {
       <button
         type="submit"
         disabled={state.submitting}
-        className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors duration-200 disabled:opacity-50"
+        className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 font-medium"
       >
         {state.submitting ? 'Envoi en cours...' : 'Envoyer mon retour'}
       </button>

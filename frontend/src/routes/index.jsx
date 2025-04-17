@@ -18,6 +18,7 @@ import Register from '../pages/auth/Register';
 import Onboarding from '../pages/auth/Onboarding';
 import VerifyEmail from '../pages/auth/VerifyEmail';
 import Premium from '../pages/Premium';
+import Feedback from '../pages/Feedback';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
@@ -43,6 +44,7 @@ const AppRoutes = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/premium" element={<Premium />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Route>
       </Route>
     </Routes>

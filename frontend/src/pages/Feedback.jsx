@@ -30,43 +30,8 @@ const Feedback = () => {
             </div>
           </div>
 
-          {/* Formulaire stylisé */}
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <div className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Votre adresse mail
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                  placeholder="exemple@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Votre message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                  placeholder="Décrivez votre retour d'expérience, bug rencontré ou suggestion d'amélioration..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors duration-200"
-              >
-                Envoyer mon retour
-              </button>
-            </div>
-          </div>
+          {/* Intégration du formulaire de contact */}
+          <ContactForm />
         </div>
 
         {/* Section FAQ ou Informations supplémentaires */}
