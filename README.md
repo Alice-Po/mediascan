@@ -1,85 +1,61 @@
-# News Aggregator MVP
+# MédiaScan - News Aggregator MVP
 
-## Description
+<p align="center">
+  <strong>🇫🇷 A French News Aggregation Platform with Advanced Monitoring Features</strong>
+</p>
 
-This is a simple news aggregator MVP built with Node.js, Express, and MongoDB.
+## Important Notice
 
-## Installation
+🚧 **MVP Stage - Active Development** 🚧
 
-1. Clone the repository
+This project is currently a **Minimum Viable Product (MVP)** in very early stages of development. It is specifically designed for the French market and has no internationalization features implemented yet. All user interfaces, documentation, and content are in French.
+
+## About The Project
+
+MédiaScan aims to provide an accessible and powerful news monitoring tool for the general public. It combines the simplicity of a news aggregator with advanced monitoring features usually reserved for professional tools.
+
+## Development Setup
 
 ```bash
-git clone https://github.com/yourusername/news-aggregator-mvp.git
+# Start all services in development mode
+npm run dev:all
+
+# Access points:
+Frontend: http://localhost:5173
+Backend API: http://localhost:5000
 ```
 
-2. Mount docker container Docker
+### MongoDB Express Access
 
-```bash
-npm run docker:up
+- URL: http://localhost:8081
+- Username: dev
+- Password: devpassword
 
-ou
+## Contributing
 
-docker compose up -d
-```
+We welcome contributions in various forms! The project is in its early stages, and your input is valuable.
 
-docker-compose logs mongo-express
-Si besoin de log
+### Ways to Contribute
 
-3. Accède à Mongo Express:
+1. **Report Issues**
 
-Visite http://localhost:8081
-Utilise les identifiants:
+   - Bug reports
+   - Feature suggestions
+   - UX/UI feedback
+   - General discussions
 
-Utilisateur: dev
-Mot de passe: devpassword
+2. **Code Contributions**
+   - For substantial contributions, please reach out first
+   - Email us via mediascan.alicepoggioli.fr/feebacks to discuss your ideas over coffee ☕
 
-```
+### Support the Project
 
+- Share the application
+- Provide feedbacks
+- Support us on [Patreon](https://patreon.com/AlicePoggioli)
 
-docker/
-├── dev/
-│   └── docker-compose.yml
-└── prod/
-    └── docker-compose.yml
- docker exec -it news-aggregator-mongodb mongo -u admin -p password
-```
+## License
 
-> use news_aggregator
-> switched to db news_aggregator
-> db.sources.insertOne({
-> ... name: 'Les Echos',
-> ... url: 'https://www.lesechos.fr',
-> ... rssUrl: 'https://services.lesechos.fr/rss/les-echos-actualites.xml',
-> ... faviconUrl: 'https://www.lesechos.fr/favicon.ico',
-> ... categories: [
-> ... 'économie',
-> ... 'finance',
-> ... 'entreprises',
-> ... 'marchés'
-> ... ],
-> ... orientation: {
-> ... political: 'centre-droit',
-> ... type: 'spécialisé',
-> ... structure: 'institutionnel',
-> ... scope: 'économique'
-> ... },
-> ... defaultEnabled: true,
-> ... isUserAdded: false,
-> ... addedDate: new Date(),
-> ... fetchStatus: {
-> ... success: true,
-> ... message: '',
-> ... timestamp: new Date()
-> ... },
-> ... lastFetched: new Date(),
-> ... updatedAt: new Date()
-> ... })
-> {
+MIT licence
 
-        "acknowledged" : true,
-        "insertedId" : ObjectId("67eedb1469dc9b335f97d1d2")
-
-}
-
-> db.sources.find({name: 'Les Echos'})
-> { "\_id" : ObjectId("67eedb1469dc9b335f97d1d2"), "name" : "Les Echos", "url" : "https://www.lesechos.fr", "rssUrl" : "https://services.lesechos.fr/rss/les-echos-actualites.xml", "faviconUrl" : "https://www.lesechos.fr/favicon.ico", "categories" : [ "économie", "finance", "entreprises", "marchés" ], "orientation" : { "political" : "centre-droit", "type" : "spécialisé", "structure" : "institutionnel", "scope" : "économique" }, "defaultEnabled" : true, "isUserAdded" : false, "addedDate" : ISODate("2025-04-03T19:01:40.885Z"), "fetchStatus" : { "success" : true, "message" : "", "timestamp" : ISODate("2025-04-03T19:01:40.885Z") }, "lastFetched" : ISODate("2025-04-03T19:01:40.885Z"), "updatedAt" : ISODate("2025-04-03T19:01:40.885Z") }
+---
