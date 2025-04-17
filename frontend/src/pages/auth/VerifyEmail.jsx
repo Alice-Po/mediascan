@@ -11,10 +11,20 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        await api.get(`/auth/verify-email/${token}`);
+        console.log('=== Vérification Email Frontend ===');
+        console.log('Token à vérifier:', token);
+
+        const response = await api.get(`/auth/verify-email/${token}`);
+        console.log('Réponse vérification:', response.data);
+
         setStatus('success');
         setTimeout(() => navigate('/login'), 3000);
       } catch (error) {
+        console.error('Erreur vérification:', {
+          message: error.response?.data?.message || error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
         setStatus('error');
       }
     };

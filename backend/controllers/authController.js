@@ -18,6 +18,8 @@ const generateToken = (id) => {
 export const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
+    console.log('=== Inscription ===');
+    console.log('Données reçues:', { email, name });
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await User.findOne({ email });
@@ -26,21 +28,27 @@ export const register = async (req, res) => {
     }
 
     // Créer l'utilisateur
+    const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = new User({
       email,
       password,
       name,
-      verificationToken: crypto.randomBytes(32).toString('hex'),
+      verificationToken,
       verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    // Sauvegarder l'utilisateur d'abord
+    // Sauvegarder l'utilisateur
     await user.save();
-    console.log('Utilisateur créé:', user._id);
+    console.log('Utilisateur créé:', {
+      id: user._id,
+      token: verificationToken,
+      expiration: user.verificationTokenExpires,
+    });
 
     try {
-      // Puis envoyer l'email de vérification
-      await sendVerificationEmail(email, user.verificationToken);
+      // Envoyer l'email de vérification
+      await sendVerificationEmail(email, verificationToken);
+      console.log('Email de vérification envoyé');
 
       // Enregistrer l'événement analytics
       await Analytics.create({
@@ -61,9 +69,7 @@ export const register = async (req, res) => {
         },
       });
     } catch (emailError) {
-      // Si l'envoi d'email échoue, on garde l'utilisateur mais on log l'erreur
       console.error('Erreur envoi email:', emailError);
-
       return res.status(201).json({
         message:
           "Inscription réussie mais erreur lors de l'envoi de l'email de vérification. Un nouvel email sera envoyé ultérieurement.",
@@ -278,29 +284,42 @@ export const completeOnboarding = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
+    console.log('=== Vérification Email ===');
+    console.log('Token reçu:', token);
 
-    if (!token) {
-      return res.status(400).json({
-        message: 'Token de vérification manquant',
-      });
-    }
-
+    // Rechercher l'utilisateur
     const user = await User.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() },
     });
 
+    console.log('Recherche utilisateur:', {
+      utilisateurTrouvé: !!user,
+      email: user?.email,
+      tokenStocké: user?.verificationToken,
+      dateExpiration: user?.verificationTokenExpires,
+      maintenant: new Date(),
+    });
+
     if (!user) {
+      console.log('Utilisateur non trouvé ou token expiré');
       return res.status(400).json({
         message: 'Le lien de vérification est invalide ou a expiré',
       });
     }
 
+    // Mise à jour de l'utilisateur
     user.isVerified = true;
     user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
     await user.save();
 
+    console.log('Utilisateur vérifié avec succès:', {
+      id: user._id,
+      email: user.email,
+    });
+
+    // Enregistrer l'événement analytics
     await Analytics.create({
       userId: user._id,
       eventType: 'emailVerification',
@@ -311,6 +330,10 @@ export const verifyEmail = async (req, res) => {
 
     res.json({ message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' });
   } catch (error) {
+    console.error('Erreur lors de la vérification:', {
+      message: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: "Erreur lors de la vérification de l'email" });
   }
 };
