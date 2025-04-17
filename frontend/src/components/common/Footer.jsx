@@ -9,7 +9,7 @@ const Footer = () => {
           <Link to="/statistics " className="text-primary hover:underline">
             Découvrez vos statistiques de lecture
           </Link>
-          <p className="mt-1">© {new Date().getFullYear()} NewsAgg MVP</p>
+          <p className="mt-1">© {new Date().getFullYear()} MédiaScan</p>
         </div>
       </div>
     </footer>

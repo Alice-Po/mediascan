@@ -554,7 +554,7 @@ const Profile = () => {
       {/* Informations sur la version */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <h2 className="text-lg font-medium text-gray-800 mb-2">À propos</h2>
-        <p className="text-sm text-gray-600 mb-1">NewsAgg - Version MVP 1.0.0</p>
+        <p className="text-sm text-gray-600 mb-1">MédiaScanon MVP 1.0.0</p>
         <p className="text-sm text-gray-500">Vous utilisez actuellement la version gratuite.</p>
       </div>
     </div>
