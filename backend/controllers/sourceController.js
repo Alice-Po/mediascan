@@ -2,7 +2,7 @@ import Source from '../models/Source.js';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
 import Parser from 'rss-parser';
-import config from '../config/config.js';
+import config from '../config/env.js';
 
 const parser = new Parser();
 

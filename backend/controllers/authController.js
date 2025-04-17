@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
-import config from '../config/config.js';
+import config from '../config/env.js';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../services/emailService.js';
 

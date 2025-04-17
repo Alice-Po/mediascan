@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import config from '../config/config.js';
+import config from '../config/env.js';
 
 // Créer un compte de test Ethereal
 const createTestAccount = async () => {

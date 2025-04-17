@@ -8,8 +8,6 @@ import { completeOnboarding } from '../../api/authApi';
  * Page d'onboarding pour les nouveaux utilisateurs
  */
 const Onboarding = () => {
-  console.log('Onboarding component rendering');
-
   const { user, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -50,9 +48,7 @@ const Onboarding = () => {
   useEffect(() => {
     const loadSources = async () => {
       try {
-        console.log('Fetching sources...');
         const sources = await fetchAllSources();
-        console.log('Received sources:', sources);
         // Vérifier que sources est bien un tableau
         if (Array.isArray(sources)) {
           setAllSources(sources);
@@ -70,10 +66,6 @@ const Onboarding = () => {
     };
 
     loadSources();
-  }, []);
-
-  useEffect(() => {
-    console.log('Onboarding mounted with user:', user);
   }, []);
 
   // Toggle pour une catégorie

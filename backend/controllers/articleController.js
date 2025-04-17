@@ -2,7 +2,7 @@ import Article from '../models/Article.js';
 import Source from '../models/Source.js';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
-import config from '../config/config.js';
+import config from '../config/env.js';
 
 // @desc    Récupérer les articles (avec filtres)
 // @route   GET /api/articles

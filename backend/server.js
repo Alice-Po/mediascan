@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import mongoose from 'mongoose';
 import { fetchAllSources } from './services/rssFetcher.js';
-import config from './config/config.js';
+import config from './config/env.js';
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
@@ -12,10 +11,6 @@ import cron from 'node-cron';
 // Configuration ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Charger les variables d'environnement AVANT les autres imports
-dotenv.config();
-dotenv.config({ path: path.join(__dirname, '.env.local') });
 
 // Autres imports qui utilisent les variables d'environnement
 import connectDB from './config/database.js';
@@ -26,20 +21,13 @@ import sourceRoutes from './routes/sourceRoutes.js';
 import articleRoutes from './routes/articleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 
-// Configuration de l'environnement
-const PORT = process.env.PORT || 5000;
-
 // Initialisation de l'application Express
 const app = express();
 
 // Middleware
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : ['http://localhost:5173', 'http://127.0.0.1:5173'],
-    credentials: true,
+    ...config.cors,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   })
@@ -64,7 +52,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: 'Erreur serveur',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Une erreur est survenue',
+    error: config.isDev ? err.message : 'Une erreur est survenue',
   });
 });
 
@@ -85,13 +73,13 @@ fetchAllSources().catch((error) => {
   console.error('Erreur lors de la récupération initiale des flux RSS:', error);
 });
 
-// Initialiser les jobs après la connexion à la base de données
+// Connexion MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(config.mongoUri)
   .then(() => {
     console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`);
     });
   })
   .catch((err) => {
