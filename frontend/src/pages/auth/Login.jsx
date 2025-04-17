@@ -69,16 +69,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await login(formData);
-      // Rediriger vers l'onboarding si c'est la première connexion
-      if (response.user && !response.user.onboardingCompleted) {
-        navigate('/onboarding');
-      } else {
-        navigate('/');
-      }
+      await login(formData);
+      navigate('/');
     } catch (error) {
       setError(error.message);
       if (error.message.includes('vérifier votre email')) {
+        // Ajouter un bouton pour renvoyer l'email de vérification
         setShowResendButton(true);
       }
     } finally {

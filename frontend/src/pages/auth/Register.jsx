@@ -123,7 +123,27 @@ const Register = () => {
   // Ajout du message de succès dans le rendu
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">
+        {/* Bandeau d'information */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 p-3 text-center fixed top-0 right-0 left-0 z-50">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-center gap-2 text-sm text-blue-800">
+              <span role="img" aria-label="construction" className="hidden sm:inline">
+                🏗️
+              </span>
+              <p>
+                <span className="font-semibold">Version alpha</span> - Il est possible que vous
+                rencontriez des bugs. Vos retours sont les bienvenus !
+                <a
+                  href="/feedback"
+                  className="ml-2 text-blue-600 hover:text-blue-800 underline hidden sm:inline"
+                >
+                  Partagez votre expérience
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="max-w-md w-full space-y-8 text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Inscription réussie !</h2>
           <div className="mt-4 text-gray-600">

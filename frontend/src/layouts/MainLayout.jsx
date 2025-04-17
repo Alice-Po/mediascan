@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
+import InfoBanner from '../components/common/InfoBanner';
 
 const MainLayout = () => {
   const { user } = useContext(AuthContext);
@@ -27,12 +28,12 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Navbar fixe en haut pour desktop, en bas pour mobile */}
+    <div className="flex flex-col min-h-screen bg-gray-50 relative">
+      <InfoBanner />
       <Navbar />
 
-      {/* Contenu principal avec padding pour éviter le chevauchement avec la navbar */}
-      <div className="flex-1 md:mt-16 mb-16 md:mb-0">
+      {/* Ajuster les marges pour tenir compte de la banner ET de la navbar */}
+      <div className="flex-1 md:mt-[7rem] mb-16 md:mb-0">
         {' '}
         {/* Ajout des marges */}
         {/* En-tête de page */}

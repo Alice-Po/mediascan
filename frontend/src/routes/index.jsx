@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
+import PublicAuthLayout from '../layouts/PublicAuthLayout';
 
 // Pages
 import Dashboard from '../pages/Dashboard';
@@ -16,6 +17,7 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Onboarding from '../pages/auth/Onboarding';
 import VerifyEmail from '../pages/auth/VerifyEmail';
+// import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
@@ -23,9 +25,12 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Routes publiques */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route element={<PublicAuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
+      </Route>
 
       {/* Routes protégées */}
       <Route element={<AuthLayout />}>

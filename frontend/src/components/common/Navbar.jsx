@@ -118,8 +118,8 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Navigation desktop */}
-      <nav className="hidden md:block bg-white shadow-sm fixed w-full top-0 z-50">
+      {/* Navigation desktop - Ajuster le z-index et le top */}
+      <nav className="hidden md:block bg-white shadow-sm fixed w-full top-[44px] z-40">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
