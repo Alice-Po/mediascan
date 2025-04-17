@@ -68,6 +68,13 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       setToken(data.token);
 
+      // Rediriger vers l'onboarding si nécessaire
+      if (data.user && !data.user.onboardingCompleted) {
+        window.location.href = '/onboarding';
+      } else {
+        window.location.href = '/';
+      }
+
       return data;
     } catch (error) {
       const message = error.response?.data?.message || error.message;
