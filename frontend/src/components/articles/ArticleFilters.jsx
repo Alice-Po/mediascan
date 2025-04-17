@@ -6,6 +6,7 @@ import {
   getOrientationColor,
   getOrientationLabel,
 } from '../../constants';
+import { isLightColor } from '../../utils/colorUtils';
 
 // Composant Accordion réutilisable
 const Accordion = ({ title, children, defaultOpen = false }) => {
@@ -140,24 +141,28 @@ const ArticleFilters = () => {
           {/* Orientations politiques */}
           <Accordion title="Orientation politique">
             <div className="flex flex-wrap gap-2">
-              {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
-                <button
-                  key={key}
-                  onClick={() => handlePoliticalOrientationChange(key)}
-                  className={`px-3 py-1 rounded-full text-sm flex items-center gap-1`}
-                  style={{
-                    backgroundColor: filters.orientation.political?.includes(key)
-                      ? value.color
-                      : '#f3f4f6',
-                    color: filters.orientation.political?.includes(key) ? '#ffffff' : '#374151',
-                    borderWidth: '1px',
-                    borderColor: value.color,
-                  }}
-                >
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: value.color }} />
-                  {value.label}
-                </button>
-              ))}
+              {Object.entries(ORIENTATIONS.political).map(([key, value]) => {
+                const bgColor = getOrientationColor(key);
+                const isLight = isLightColor(bgColor);
+                const textColor = isLight ? '#000000' : '#ffffff';
+
+                return (
+                  <button
+                    key={key}
+                    onClick={() => handlePoliticalOrientationChange(key)}
+                    className={`px-3 py-1 rounded-full text-sm transition-colors duration-200`}
+                    style={{
+                      backgroundColor: filters.orientation.political?.includes(key)
+                        ? bgColor
+                        : 'transparent',
+                      color: filters.orientation.political?.includes(key) ? textColor : '#666666',
+                      border: `1px solid ${bgColor}`,
+                    }}
+                  >
+                    {value.label}
+                  </button>
+                );
+              })}
             </div>
           </Accordion>
 

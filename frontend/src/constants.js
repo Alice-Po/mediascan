@@ -19,9 +19,8 @@ export const ORIENTATIONS = {
     gauche: { label: 'Gauche', color: '#FF6666' }, // Rouge clair
     'centre-gauche': { label: 'Centre Gauche', color: '#FF9999' }, // Rose
     centre: { label: 'Centre', color: '#FFFF00' }, // Jaune
-    'centre-droit': { label: 'Centre Droit', color: '#99FF99' }, // Bleu clair
-    républicain: { label: 'Républicain', color: '#3366FF' }, // Bleu
-    droite: { label: 'Droite', color: '#66FF66' }, // Bleu
+    'centre-droit': { label: 'Centre Droit', color: '#3366FF' }, // Bleu clair
+    droite: { label: 'Droite', color: '#3366FF' }, // Bleu
     'extrême-droite': { label: 'Extrême Droite', color: '#000080' }, // Bleu marine
     écologiste: { label: 'Écologiste', color: '#00FF00' }, // Vert vif
   },
