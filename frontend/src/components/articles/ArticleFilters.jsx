@@ -119,22 +119,23 @@ const ArticleFilters = () => {
       {/* Contenu des filtres dans un conteneur séparé */}
       {isExpanded && (
         <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-          {/* Catégories */}
-          <Accordion title="Catégories">
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    filters.categories.includes(category)
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+          {/* Teaser pour la future fonctionnalité */}
+          <Accordion title="Catégories" defaultOpen={true}>
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200">
+              <div className="flex items-center mb-2">
+                <span className="text-blue-500 font-mono mr-2">🚧</span>
+                <span className="bg-yellow-100 px-2 py-0.5 rounded-full text-xs font-mono text-yellow-800">
+                  En développement
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                Quelque chose de beaucoup plus cool qu'un filtre par catégorie arrive !
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                Abonnez-vous à notre infolettre pour être informé lorsque cette fonctionnalité sera
+                disponible !
+              </p>
+              <div className="font-mono text-xs text-gray-500"></div>
             </div>
           </Accordion>
 
