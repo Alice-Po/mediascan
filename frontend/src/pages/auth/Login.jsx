@@ -24,6 +24,9 @@ const Login = () => {
   // State pour l'état d'erreur
   const [error, setError] = useState(null);
 
+  // State pour afficher le bouton de renvoi de l'email
+  const [showResendButton, setShowResendButton] = useState(false);
+
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,26 +65,22 @@ const Login = () => {
   // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
     setError(null);
+    setLoading(true);
 
     try {
-      const result = await login({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      console.log('Connexion réussie:', result);
-      navigate('/');
-    } catch (err) {
-      console.error('Erreur lors de la connexion:', err);
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Une erreur s'est produite lors de la connexion"
-      );
+      const response = await login(formData);
+      // Rediriger vers l'onboarding si c'est la première connexion
+      if (response.user && !response.user.onboardingCompleted) {
+        navigate('/onboarding');
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      setError(error.message);
+      if (error.message.includes('vérifier votre email')) {
+        setShowResendButton(true);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // Layouts
@@ -28,12 +28,15 @@ const AppRoutes = () => {
       <Route path="/verify-email" element={<VerifyEmail />} />
 
       {/* Routes protégées */}
-      <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
-        <Route index element={<Dashboard />} />
-        <Route path="sources" element={<Sources />} />
-        <Route path="saved" element={<Saved />} />
-        <Route path="statistics" element={<Statistics />} />
-        <Route path="profile" element={<Profile />} />
+      <Route element={<AuthLayout />}>
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/sources" element={<Sources />} />
+          <Route path="/saved" element={<Saved />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/statistics" element={<Statistics />} />
+        </Route>
       </Route>
     </Routes>
   );

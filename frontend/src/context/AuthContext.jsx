@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
 
   // Calculer isAuthenticated en fonction de la présence de l'utilisateur
   const isAuthenticated = !!user;
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const { user } = await getUserProfile();
         setUser(user);
+        setToken(token);
       } catch (error) {
         console.error('Erreur lors de la récupération du profil:', error);
         localStorage.removeItem('token');
@@ -52,19 +54,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const { token, user } = await apiLogin(credentials);
+      const data = await apiLogin(credentials);
 
-      if (!user.isVerified) {
+      // Vérifier si l'utilisateur est vérifié
+      if (data.user && !data.user.isVerified) {
         throw new Error('Veuillez vérifier votre email avant de vous connecter');
       }
 
-      localStorage.setItem('token', token);
-      setUser(user);
-      setError(null);
-      return user;
+      // Stocker le token
+      localStorage.setItem('token', data.token);
+
+      // Mettre à jour le contexte
+      setUser(data.user);
+      setToken(data.token);
+
+      return data;
     } catch (error) {
-      setError(error.message);
-      throw error;
+      const message = error.response?.data?.message || error.message;
+      throw new Error(message);
     }
   };
 
@@ -83,12 +90,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
     setError(null);
+    setToken(null);
   };
 
   const refreshUserToken = async () => {
     try {
       const { token } = await apiRefreshToken();
       localStorage.setItem('token', token);
+      setToken(token);
       return token;
     } catch (error) {
       logout();
@@ -118,6 +127,7 @@ export const AuthProvider = ({ children }) => {
     refreshUserToken,
     updateUser,
     clearError,
+    token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

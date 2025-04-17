@@ -90,19 +90,31 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
 
-    if (!user || !(await user.comparePassword(password))) {
+    // Trouver l'utilisateur
+    const user = await User.findOne({ email });
+    if (!user) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
+    // Vérifier le mot de passe
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+    }
+
+    // Vérifier si l'email est vérifié
     if (!user.isVerified) {
-      return res.status(401).json({
+      return res.status(403).json({
         message: 'Veuillez vérifier votre email avant de vous connecter',
+        isVerified: false,
       });
     }
 
-    // Enregistrer l'événement analytics de connexion
+    // Générer le token
+    const token = generateToken(user._id);
+
+    // Enregistrer l'événement de connexion
     await Analytics.create({
       userId: user._id,
       eventType: 'userLogin',
@@ -111,14 +123,17 @@ export const login = async (req, res) => {
       },
     });
 
-    const token = generateToken(user._id);
+    // S'assurer que onboardingCompleted est inclus dans la réponse
     res.json({
       token,
       user: {
         id: user._id,
         email: user.email,
         name: user.name,
+        isVerified: user.isVerified,
         interests: user.interests,
+        activeSources: user.activeSources,
+        onboardingCompleted: user.onboardingCompleted || false, // Valeur par défaut si non définie
       },
     });
   } catch (error) {
