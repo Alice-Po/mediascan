@@ -120,7 +120,7 @@ const ArticleFilters = () => {
       {isExpanded && (
         <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
           {/* Teaser pour la future fonctionnalité */}
-          <Accordion title="Catégories" defaultOpen={true}>
+          <Accordion title="Catégories" defaultOpen={false}>
             <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200">
               <div className="flex items-center mb-2">
                 <span className="text-blue-500 font-mono mr-2">🚧</span>

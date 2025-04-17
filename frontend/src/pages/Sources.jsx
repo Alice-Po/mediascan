@@ -188,6 +188,33 @@ const Sources = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Bannière Premium */}
+      <div className="mb-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-2 border-dashed border-purple-200 overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-center mb-2">
+            <span className="bg-purple-100 px-2 py-0.5 rounded-full text-xs font-mono text-purple-800">
+              Premium
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-purple-900 mb-2">
+            Libérez vos newsletters de votre boîte mail !
+          </h3>
+          <p className="text-sm text-gray-600 mb-3">
+            N'encombrez plus votre boite mail avec des newsletters que vous n'avez jamais le temps
+            de lire. Ranger les à la bonne place : ici dans votre fils d'actualités.
+          </p>
+          <a
+            href="/premium"
+            className="inline-flex items-center text-sm font-medium text-purple-700 hover:text-purple-900 transition-colors"
+          >
+            Découvrir le plan Premium
+            <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
       {/* Barre de recherche */}
       <div className="relative mb-8">
         <input

@@ -89,6 +89,48 @@ const LogoutIcon = () => (
   </svg>
 );
 
+// Ajouter l'icône du radar
+const RadarIcon = () => (
+  <svg
+    className="h-6 w-6"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 2v10" />
+    <path d="M12 12l8-4" />
+    <path d="M12 12l-8 4" />
+  </svg>
+);
+
+// Ajouter l'icône de l'antenne
+const AntennaIcon = () => (
+  <svg
+    className="h-6 w-6"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {/* Base de l'antenne */}
+    <line x1="12" y1="24" x2="12" y2="16" />
+    {/* Support de l'antenne */}
+    <line x1="8" y1="16" x2="16" y2="16" />
+    {/* Antenne principale */}
+    <path d="M12 16L12 2" />
+    {/* Ondes radio (3 arcs) */}
+    <path d="M6 8C6 8 9 5 12 5C15 5 18 8 18 8" />
+    <path d="M4 4C4 4 8 1 12 1C16 1 20 4 20 4" />
+    <path d="M8 12C8 12 10 9 12 9C14 9 16 12 16 12" />
+  </svg>
+);
+
 const Navbar = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -122,8 +164,9 @@ const Navbar = () => {
       <nav className="hidden md:block bg-white shadow-sm fixed w-full top-[44px] z-40">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <span className="text-xl font-bold text-primary">NewsAgg</span>
+            <div className="flex items-center space-x-2">
+              <AntennaIcon />
+              <span className="text-xl font-bold text-primary">MédiaScan</span>
             </div>
 
             <div className="flex space-x-4">
