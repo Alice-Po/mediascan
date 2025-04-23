@@ -128,14 +128,29 @@ const ArticleFilters = () => {
                   En développement
                 </span>
               </div>
+
               <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Quelque chose de beaucoup plus cool qu'un filtre par catégorie arrive !
+                Quelque chose de bien plus cool qu'un filtre par catégorie arrive !
               </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                Abonnez-vous à notre infolettre pour être informé lorsque cette fonctionnalité sera
-                disponible !
+
+              <p className="text-sm text-gray-600 mb-3">
+                Laissez-nous votre email et nous vous en informerons lorsque cette fonctionnalité
+                sera disponible !
               </p>
-              <div className="font-mono text-xs text-gray-500"></div>
+
+              <div className="space-y-2">
+                <a
+                  href="/feedback"
+                  className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm"
+                >
+                  Je veux être informé
+                </a>
+
+                <p className="text-xs text-gray-500 italic mt-2">
+                  PS: Si vous avez des idées pour améliorer l'app, n'hésitez pas à nous en faire
+                  part. Nous adorons les retours créatifs !
+                </p>
+              </div>
             </div>
           </Accordion>
 

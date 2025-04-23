@@ -1,7 +1,7 @@
 # MédiaScan - News Aggregator MVP
 
 <p align="center">
-  <strong>🇫🇷 A French News Aggregation Platform with Advanced Monitoring Features</strong>
+  <strong> A French News Aggregation Platform with Advanced Monitoring Features</strong>
 </p>
 
 ## Important Notice
