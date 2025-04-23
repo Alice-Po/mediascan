@@ -166,28 +166,42 @@ const Premium = () => {
 
       {/* Nouvelle section feedback */}
       <div className="max-w-2xl mx-auto mt-16 text-center">
-        <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-          <h3 className="text-lg font-medium text-blue-900 mb-2">
-            Aidez-nous à construire le bon modèle
-          </h3>
-          <p className="text-blue-700 mb-4">
-            C'est trop cher ? Une fonctionnalité vous manque pour être convaincu ? Nous sommes à
-            l'écoute de vos suggestions pour construire une offre qui correspond à vos besoins.
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+          <h3 className="text-lg font-medium text-blue-900 mb-2">C'est trop cher ?</h3>
+          <p className="text-blue-700 mb-6">
+            Une fonctionnalité vous manque pour être convaincu ? Aidez-nous à construire le bon
+            modèle. Nous sommes à l'écoute de vos suggestions pour proposer une offre qui correspond
+            à vos besoins.
           </p>
-          <a
-            href="/feedback"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Partagez votre avis
-            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </a>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="/feedback"
+              className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 group"
+            >
+              <span className="font-medium">Partagez votre avis</span>
+              <svg
+                className="ml-2 w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </a>
+
+            <span className="text-sm text-blue-600">Votre avis compte vraiment pour nous ! </span>
+          </div>
+
+          <p className="text-xs text-gray-600 mt-4 opacity-90">
+            Envie d'aller plus loin ? Que ce soit pour une simple idée ou pour participer activement
+            au développement, nous sommes ouverts aux collaborations créatives.
+          </p>
         </div>
       </div>
 
