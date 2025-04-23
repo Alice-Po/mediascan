@@ -5,8 +5,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Charger les variables d'environnement selon l'environnement
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+// Déterminer le mode d'exécution
+const mode = process.env.NODE_ENV || 'development';
+
+// Charger le fichier d'environnement approprié
+const envFile = `.env.${mode}`;
 dotenv.config({ path: path.resolve(__dirname, '..', envFile) });
 
 // Vérifier les variables requises
@@ -19,6 +22,7 @@ if (missingEnvVars.length > 0) {
 
 // Configuration centralisée
 const config = {
+  mode,
   port: process.env.PORT || 5000,
   mongoUri: process.env.MONGODB_URI,
   jwt: {
@@ -45,7 +49,7 @@ const config = {
     password: process.env.EMAIL_PASSWORD,
   },
   frontendUrl: process.env.FRONTEND_URL,
-  isDev: process.env.NODE_ENV !== 'production',
+  isDev: mode === 'development',
 };
 
 export default config;

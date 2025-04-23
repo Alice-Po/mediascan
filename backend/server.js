@@ -21,48 +21,114 @@ import sourceRoutes from './routes/sourceRoutes.js';
 import articleRoutes from './routes/articleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 
+// Fonction pour logger les infos de l'application selon le mode
+const logAppInfo = (mode) => {
+  console.log('\n=== MediaScan Server ===');
+  console.log(`Environment: ${mode}`);
+  console.log(`Server: http://localhost:${config.port}`);
+
+  switch (mode) {
+    case 'development':
+      console.log('\nDevelopment URLs:');
+      console.log(`Frontend: http://localhost:5173`);
+      console.log(`API: http://localhost:${config.port}/api`);
+      console.log('\nEndpoints:');
+      console.log('- Auth: /api/auth');
+      console.log('- Sources: /api/sources');
+      console.log('- Articles: /api/articles');
+      console.log('- Analytics: /api/analytics');
+      break;
+
+    case 'preview':
+      console.log('\nPreview URLs:');
+      console.log(`Frontend: http://localhost:4173`); // Port par défaut de Vite preview
+      console.log(`API: http://localhost:${config.port}/api`);
+      console.log('\nTesting production build locally');
+      break;
+
+    case 'production':
+      console.log('\nProduction URLs:');
+      console.log(`App: http://localhost:${config.port}`);
+      console.log(`API: http://localhost:${config.port}/api`);
+      break;
+  }
+  console.log('\nPress Ctrl+C to stop the server\n');
+};
+
 // Initialisation de l'application Express
 const app = express();
 
-// Middleware
-app.use(
-  cors({
-    ...config.cors,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  })
-);
+// Configuration CORS selon l'environnement
+const corsOptions = {
+  ...config.cors,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+};
+
+// Ajuster les origines CORS selon le mode
+if (config.mode === 'preview') {
+  corsOptions.origin = ['http://localhost:4173'];
+} else if (config.mode === 'development') {
+  corsOptions.origin = ['http://localhost:5173'];
+}
+
+app.use(cors(corsOptions));
+
+// Middleware de base
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/sources', sourceRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Route de base pour tester l'API
-app.get('/', (req, res) => {
-  res.json({ message: "Bienvenue sur l'API de l'agrégateur d'actualités" });
-});
+// Route de test API uniquement en développement
+if (config.mode === 'development') {
+  app.get('/api', (req, res) => {
+    res.json({ message: "Bienvenue sur l'API de MediaScan (Development)" });
+  });
+}
 
-// Gestion des erreurs
+// En preview et production, servir le frontend
+if (config.mode !== 'development') {
+  // Servir les fichiers statiques
+  const distPath = path.resolve(__dirname, '../frontend/dist');
+  console.log('Serving frontend from:', distPath);
+
+  // Servir les fichiers statiques
+  app.use(express.static(distPath));
+
+  // Route catch-all pour le frontend
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+
+  // Route catch-all pour les sous-routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// Gestion des erreurs avec plus de détails en développement
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     success: false,
     message: 'Erreur serveur',
-    error: config.isDev ? err.message : 'Une erreur est survenue',
+    error: config.mode === 'development' ? err.message : 'Une erreur est survenue',
+    ...(config.mode === 'development' && { stack: err.stack }),
   });
 });
 
-// Planification des tâches (CRON)
-// Récupération des articles RSS toutes les 30 minutes
+// CRON jobs avec logs conditionnels
 cron.schedule('*/30 * * * *', async () => {
-  // console.log('Exécution du service: récupération des flux RSS');
+  if (config.mode === 'development') console.log('Exécution du service: récupération des flux RSS');
   try {
     await fetchAllSources();
-    // console.log('Récupération des flux RSS terminée avec succès');
+    if (config.mode === 'development')
+      console.log('Récupération des flux RSS terminée avec succès');
   } catch (error) {
     console.error('Erreur lors de la récupération des flux RSS:', error);
   }
@@ -73,13 +139,13 @@ fetchAllSources().catch((error) => {
   console.error('Erreur lors de la récupération initiale des flux RSS:', error);
 });
 
-// Connexion MongoDB
+// Connexion MongoDB et démarrage du serveur
 mongoose
   .connect(config.mongoUri)
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(config.port, () => {
-      console.log(`Server running on port ${config.port}`);
+      logAppInfo(config.mode);
     });
   })
   .catch((err) => {

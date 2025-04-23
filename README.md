@@ -31,6 +31,34 @@ Backend API: http://localhost:5000
 - Username: dev
 - Password: devpassword
 
+### Preview Setup
+
+```bash
+npm run preview
+```
+
+## Production Setup (MongoDB Atlas)
+
+### MongoDB Atlas
+
+```bash
+# Connect to Atlas
+mongosh "mongodb+srv://<username>:<password>@<cluster>.mongodb.net/news_aggregator"
+
+# Paste the script content
+load('mongo-init/mongo-init.js')
+```
+
+### Render
+
+```bash
+# Build the project
+npm run render-build
+
+# Start the project
+npm run start
+```
+
 ## Contributing
 
 We welcome contributions in various forms! The project is in its early stages, and your input is valuable.

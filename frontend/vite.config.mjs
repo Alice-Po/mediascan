@@ -23,20 +23,6 @@ export default defineConfig(({ mode }) => {
     console.log('Erreur de lecture de .env.local:', error.message);
   }
 
-  // Debug des fichiers et variables
-  console.log("\nDébug des fichiers d'environnement:");
-  [
-    '.env',
-    '.env.local',
-    '.env.development',
-    '.env.development.local',
-    '.env.production',
-    '.env.production.local',
-  ].forEach((file) => {
-    const filePath = path.join(frontendRoot, file);
-    console.log(`${file}: ${fs.existsSync(filePath) ? 'existe' : "n'existe pas"}`);
-  });
-
   console.log("\nVariables d'environnement chargées:");
   Object.entries(env).forEach(([key, value]) => {
     if (key.startsWith('VITE_')) {
@@ -49,12 +35,32 @@ export default defineConfig(({ mode }) => {
     root: '.',
     build: {
       outDir: 'dist',
+      emptyOutDir: true,
+      minify: mode === 'production',
+    },
+    preview: {
+      outDir: 'dist',
+      port: 4173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     resolve: {
       extensions: ['.js', '.jsx'],
     },
     server: {
       port: 5173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     envPrefix: 'VITE_',
     envDir: frontendRoot,
