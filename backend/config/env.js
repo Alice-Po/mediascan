@@ -46,7 +46,7 @@ const config = {
   },
   email: {
     user: process.env.EMAIL_USER,
-    password: process.env.EMAIL_PASSWORD,
+    password: process.env.EMAIL_APP_PASSWORD,
   },
   frontendUrl: process.env.FRONTEND_URL,
   isDev: mode === 'development',
