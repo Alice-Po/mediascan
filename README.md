@@ -16,6 +16,8 @@ MédiaScan aims to provide an accessible and powerful news monitoring tool for t
 
 ## Development Setup
 
+Mayby it's a good idea to kill all containers and start fresh : docker stop $(docker ps -a -q)
+
 ```bash
 # Start all services in development mode
 npm run dev:all
