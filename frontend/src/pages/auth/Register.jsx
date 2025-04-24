@@ -300,12 +300,17 @@ const Register = () => {
               id="acceptTerms"
               name="acceptTerms"
               type="checkbox"
-              checked={formData.acceptTerms}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+              required
+              className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
             />
             <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
-              J'accepte les conditions d'utilisation
+              J'accepte les{' '}
+              <Link
+                to="/terms-of-service"
+                className="text-primary hover:text-primary-dark underline"
+              >
+                conditions d'utilisation
+              </Link>
             </label>
           </div>
           {errors.acceptTerms && <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p>}

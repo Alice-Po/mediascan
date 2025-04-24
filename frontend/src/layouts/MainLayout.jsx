@@ -31,15 +31,8 @@ const MainLayout = () => {
     <div className="flex flex-col min-h-screen bg-gray-50 relative">
       <InfoBanner />
       <Navbar />
-
-      {/* Ajuster les marges pour tenir compte de la banner ET de la navbar */}
       <div className="flex-1 md:mt-[7rem] mb-16 md:mb-0">
         {' '}
-        {/* Ajout des marges */}
-        {/* En-tête de page */}
-        {/* <header className="bg-white border-b border-gray-200">
-        </header> */}
-        {/* Contenu principal */}
         <main className="container mx-auto px-4 py-6">
           <Outlet />
         </main>

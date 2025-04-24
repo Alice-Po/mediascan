@@ -19,6 +19,7 @@ import Onboarding from '../pages/auth/Onboarding';
 import VerifyEmail from '../pages/auth/VerifyEmail';
 import Premium from '../pages/Premium';
 import Feedback from '../pages/Feedback';
+import TermsOfService from '../pages/TermsOfService';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
@@ -45,6 +46,7 @@ const AppRoutes = () => {
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/premium" element={<Premium />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
         </Route>
       </Route>
     </Routes>
