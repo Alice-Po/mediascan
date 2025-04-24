@@ -233,16 +233,26 @@ const Sources = () => {
 
         {/* Liste des suggestions */}
         {showSuggestions && suggestions.length > 0 && (
-          <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg">
+          <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg divide-y divide-gray-200">
             {suggestions.map((source, index) => (
               <li
                 key={source._id}
-                className={`p-2 hover:bg-gray-100 cursor-pointer ${
-                  index === selectedIndex ? 'bg-gray-100' : ''
+                className={`hover:bg-gray-50 cursor-pointer ${
+                  index === selectedIndex ? 'bg-gray-50' : ''
                 }`}
                 onClick={() => handleSuggestionSelect(source)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSuggestionSelect(source);
+                }}
+                role="option"
+                aria-selected={index === selectedIndex}
+                tabIndex={0}
               >
-                {source.name}
+                <SourceItem
+                  source={source}
+                  onDisable={() => {}} // On désactive le bouton de suppression dans les suggestions
+                  variant="compact" // Nouvelle prop pour un affichage adapté aux suggestions
+                />
               </li>
             ))}
           </ul>
