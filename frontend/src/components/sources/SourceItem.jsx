@@ -3,79 +3,119 @@ import PropTypes from 'prop-types';
 import { ORIENTATIONS } from '../../constants';
 import { isLightColor } from '../../utils/colorUtils';
 
-const SourceItem = ({ source, onDisable, variant = 'default' }) => {
-  const isCompact = variant === 'compact';
+// Icône de poubelle personnalisée
+const TrashIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
+// Composant de base
+const SourceItemBase = ({ source, children, leftAction }) => {
+  const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
+  const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
 
   return (
-    <div className={`${isCompact ? 'p-2' : 'p-4'} hover:bg-gray-50`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {source.faviconUrl && (
-            <img
-              src={source.faviconUrl}
-              alt=""
-              className={`${isCompact ? 'w-5 h-5' : 'w-6 h-6'}`}
-            />
-          )}
-          <div>
-            <h3 className={`font-medium text-gray-900 ${isCompact ? 'text-sm' : ''}`}>
-              {source.name}
-            </h3>
-            <p className={`text-gray-500 ${isCompact ? 'text-xs' : 'text-sm'}`}>
-              {source.categories.slice(0, 3).join(', ')}
-              {source.categories.length > 3 && '...'}
-            </p>
+    <div className="flex items-center p-2 border border-gray-200 rounded-md hover:bg-gray-50">
+      {leftAction}
+      <div className="flex items-center flex-grow">
+        {/* Info source */}
+        {source.faviconUrl && <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />}
+        <div>
+          <div className="font-medium text-gray-900">{source.name}</div>
+          <div className="text-xs text-gray-500">
+            {source.categories?.slice(0, 3).join(', ')}
+            {source.categories?.length > 3 && '...'}
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="ml-auto mr-2">
           <span
-            className={`px-2 py-1 text-xs rounded-full ${isCompact ? 'text-xs' : ''}`}
+            className="px-2 py-1 text-xs rounded-full"
             style={{
-              backgroundColor:
-                ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6',
-              color: isLightColor(
-                ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6'
-              )
-                ? '#000000'
-                : '#ffffff',
+              backgroundColor: bgColor,
+              color: textColor,
             }}
           >
             {ORIENTATIONS.political[source.orientation.political]?.label ||
               source.orientation.political}
           </span>
-          {!isCompact && (
-            <button
-              onClick={() => onDisable(source._id)}
-              className="text-sm text-gray-400 hover:text-red-600 transition-colors"
-              title="Retirer cette source"
-            >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          )}
         </div>
       </div>
+      {children}
     </div>
   );
 };
 
-SourceItem.propTypes = {
-  source: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    faviconUrl: PropTypes.string,
-    categories: PropTypes.arrayOf(PropTypes.string).isRequired,
-    orientation: PropTypes.shape({
-      political: PropTypes.string.isRequired,
-    }).isRequired,
+// Variante sélectionnable pour l'onboarding
+export const SelectableSourceItem = ({ source, isSelected, onToggle }) => (
+  <SourceItemBase
+    source={source}
+    leftAction={
+      <div className="flex-shrink-0 mr-3">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onToggle}
+          className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+        />
+      </div>
+    }
+  />
+);
+
+// Variante avec bouton de suppression pour la page Sources
+export const DeletableSourceItem = ({ source, onDelete }) => (
+  <SourceItemBase source={source}>
+    <div className="flex-shrink-0">
+      <button
+        onClick={onDelete}
+        className="text-gray-400 hover:text-red-600 transition-colors"
+        title="Retirer cette source"
+      >
+        <TrashIcon className="h-5 w-5" />
+      </button>
+    </div>
+  </SourceItemBase>
+);
+
+// Variante simple pour l'autocomplétion
+export const SimpleSourceItem = ({ source }) => <SourceItemBase source={source} />;
+
+// PropTypes
+const sourceShape = {
+  _id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  faviconUrl: PropTypes.string,
+  categories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  orientation: PropTypes.shape({
+    political: PropTypes.string.isRequired,
   }).isRequired,
-  onDisable: PropTypes.func.isRequired,
-  variant: PropTypes.oneOf(['default', 'compact']),
 };
 
-export default SourceItem;
+SourceItemBase.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+  children: PropTypes.node,
+  leftAction: PropTypes.node,
+};
+
+SelectableSourceItem.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+};
+
+DeletableSourceItem.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
+
+SimpleSourceItem.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+};
+
+export default SimpleSourceItem;

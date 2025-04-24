@@ -244,40 +244,27 @@ export const refreshToken = async (req, res) => {
 // @access  Private
 export const completeOnboarding = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { categories, sources } = req.body;
+    const { sources } = req.body;
 
-    if (!categories || !Array.isArray(categories)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Les catégories sont requises et doivent être un tableau',
-      });
+    // Vérifier que sources est un tableau
+    if (!Array.isArray(sources)) {
+      return res.status(400).json({ message: 'Les sources doivent être un tableau' });
     }
 
-    // Mise à jour de l'utilisateur
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
+    // Mettre à jour l'utilisateur
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
       {
-        $set: {
-          interests: categories,
-          activeSources: sources,
-          onboardingCompleted: true,
-        },
+        activeSources: sources,
+        onboardingCompleted: true,
       },
       { new: true }
     ).select('-password');
 
-    res.status(200).json({
-      success: true,
-      message: 'Onboarding complété avec succès',
-      user: updatedUser,
-    });
+    res.json({ user });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Erreur lors de la complétion de l'onboarding",
-      error: error.message,
-    });
+    console.error('Erreur onboarding:', error);
+    res.status(500).json({ message: "Erreur lors de la finalisation de l'onboarding" });
   }
 };
 

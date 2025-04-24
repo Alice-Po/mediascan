@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { CATEGORIES } from '../config/constants.js';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -21,12 +20,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    interests: [
-      {
-        type: String,
-        enum: CATEGORIES,
-      },
-    ],
     activeSources: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -80,7 +73,6 @@ UserSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     console.log('Sauvegarde utilisateur:', {
       id: this._id,
-      interests: this.interests,
       activeSources: this.activeSources,
       onboardingCompleted: this.onboardingCompleted,
     });

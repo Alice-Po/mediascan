@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { CATEGORIES, ORIENTATIONS } from '../../constants';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
+import { SimpleSourceItem } from '../../components/sources/SourceItem';
 
 const AddSourceForm = ({
   customSource,
@@ -11,6 +12,8 @@ const AddSourceForm = ({
   onCancel,
   loading,
   formErrors,
+  suggestions,
+  handleSelectSource,
 }) => {
   const [showRssHelp, setShowRssHelp] = useState(false);
 
@@ -237,6 +240,19 @@ const AddSourceForm = ({
       />
 
       <RssHelpModal isOpen={showRssHelp} onClose={() => setShowRssHelp(false)} />
+
+      {/* Suggestions */}
+      <div className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg">
+        {suggestions.map((source) => (
+          <div
+            key={source._id}
+            onClick={() => handleSelectSource(source)}
+            className="cursor-pointer"
+          >
+            <SimpleSourceItem source={source} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -267,6 +283,8 @@ AddSourceForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   formErrors: PropTypes.object.isRequired,
+  suggestions: PropTypes.array.isRequired,
+  handleSelectSource: PropTypes.func.isRequired,
 };
 
 export default AddSourceForm;

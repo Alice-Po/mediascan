@@ -11,7 +11,6 @@ const Register = () => {
 
   // State pour le formulaire
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -33,17 +32,17 @@ const Register = () => {
   // Gérer les changements dans le formulaire
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value,
-    });
+    }));
 
     // Effacer l'erreur lors de la saisie
     if (errors[name]) {
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         [name]: null,
-      });
+      }));
     }
   };
 
@@ -51,10 +50,6 @@ const Register = () => {
   const validateForm = () => {
     console.log('Validation du formulaire...'); // Log de debug
     const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Le nom est requis';
-    }
 
     if (!formData.email) {
       newErrors.email = "L'email est requis";
@@ -99,13 +94,11 @@ const Register = () => {
 
     try {
       console.log("Tentative d'inscription avec:", {
-        name: formData.name,
         email: formData.email,
         password: formData.password,
       });
 
       const result = await register({
-        name: formData.name,
         email: formData.email,
         password: formData.password,
       });
@@ -272,7 +265,8 @@ const Register = () => {
               id="acceptTerms"
               name="acceptTerms"
               type="checkbox"
-              required
+              onChange={handleChange}
+              checked={formData.acceptTerms}
               className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
             />
             <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">

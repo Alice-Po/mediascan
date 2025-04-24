@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { fetchAllSources } from '../../api/sourcesApi';
 import { completeOnboarding } from '../../api/authApi';
+import { SelectableSourceItem } from '../../components/sources/SourceItem';
 
 /**
  * Page d'onboarding pour les nouveaux utilisateurs
@@ -11,31 +12,14 @@ const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // State pour suivre les étapes de l'onboarding
+  // Réduire à 2 étapes au lieu de 3
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // State pour les données du formulaire
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  // Garder uniquement les sources
   const [selectedSources, setSelectedSources] = useState([]);
-
-  // Données disponibles
   const [allSources, setAllSources] = useState([]);
-
-  // Liste de catégories disponibles
-  const categories = [
-    'politique',
-    'économie',
-    'international',
-    'société',
-    'culture',
-    'sport',
-    'sciences',
-    'tech',
-    'environnement',
-    'santé',
-  ];
 
   // Vérifier si l'utilisateur a déjà complété l'onboarding
   useEffect(() => {
@@ -68,23 +52,14 @@ const Onboarding = () => {
     loadSources();
   }, []);
 
-  // Toggle pour une catégorie
-  const toggleCategory = (category) => {
-    console.log('Toggle catégorie:', category);
-    console.log('Catégories actuelles:', selectedCategories);
-
-    if (selectedCategories.includes(category)) {
-      const newCategories = selectedCategories.filter((c) => c !== category);
-      console.log('Nouvelles catégories après suppression:', newCategories);
-      setSelectedCategories(newCategories);
-    } else {
-      if (selectedCategories.length < 10) {
-        const newCategories = [...selectedCategories, category];
-        console.log('Nouvelles catégories après ajout:', newCategories);
-        setSelectedCategories(newCategories);
-      }
+  // Ajouter un useEffect pour initialiser les sources sélectionnées quand allSources est chargé
+  useEffect(() => {
+    if (Array.isArray(allSources) && allSources.length > 0) {
+      // Présélectionner toutes les sources
+      const allSourceIds = allSources.map((source) => source._id);
+      setSelectedSources(allSourceIds);
     }
-  };
+  }, [allSources]); // Dépendance à allSources pour ne s'exécuter qu'une fois au chargement des sources
 
   // Toggle pour une source
   const toggleSource = (sourceId) => {
@@ -114,13 +89,7 @@ const Onboarding = () => {
 
   // Passer à l'étape suivante
   const nextStep = () => {
-    // Validation pour chaque étape
-    if (step === 1 && selectedCategories.length === 0) {
-      setError('Veuillez sélectionner au moins une catégorie');
-      return;
-    }
-
-    if (step < 3) {
+    if (step < 2) {
       setStep(step + 1);
       setError(null);
     } else {
@@ -143,12 +112,10 @@ const Onboarding = () => {
 
     try {
       console.log('État final avant envoi:', {
-        selectedCategories,
         selectedSources,
         recommendedSources: recommendedSources.map((s) => ({
           id: s._id,
           name: s.name,
-          categories: s.categories,
         })),
       });
 
@@ -156,37 +123,24 @@ const Onboarding = () => {
         selectedSources.length > 0 ? selectedSources : recommendedSources.map((s) => s._id);
 
       const dataToSend = {
-        categories: selectedCategories,
         sources: sourcesToSend,
       };
 
       console.log('Données à envoyer au serveur:', dataToSend);
 
       const userData = await completeOnboarding(dataToSend);
-      console.log('Réponse du serveur:', userData);
 
-      // Vérifier que les données sont bien dans la réponse
       if (userData.user) {
-        console.log('Données utilisateur mises à jour:', {
-          interests: userData.user.interests,
-          activeSources: userData.user.activeSources,
+        updateUser({
+          ...user,
+          ...userData.user,
+          onboardingCompleted: true,
         });
       }
 
-      updateUser({
-        ...user,
-        ...userData.user,
-        onboardingCompleted: true,
-      });
-
       navigate('/');
     } catch (err) {
-      console.error('Erreur complète:', err);
-      console.error("Détails de l'erreur:", {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
+      console.error('Erreur:', err);
       setError("Erreur lors de la finalisation de l'onboarding");
     } finally {
       setLoading(false);
@@ -194,37 +148,24 @@ const Onboarding = () => {
   };
 
   // Filtrer les sources recommandées basées sur les catégories sélectionnées
-  const recommendedSources = Array.isArray(allSources)
-    ? allSources
-        .filter((source) =>
-          source.categories.some((category) => selectedCategories.includes(category))
-        )
-        .slice(0, 10)
-    : [];
+  const recommendedSources = Array.isArray(allSources) ? allSources.slice(0, 10) : [];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Personnalisez votre expérience</h1>
-          <p className="text-gray-600">Étape {step} sur 3</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Bienvenue sur MédiaScan</h1>
+          <p className="text-gray-600">Étape {step} sur 2</p>
 
           {/* Indicateur d'étapes */}
           <div className="flex justify-center mt-4 space-x-2">
-            {[1, 2, 3].map((i) => (
+            {[1, 2].map((i) => (
               <div
                 key={i}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  i === step
-                    ? 'bg-blue-600 scale-110' // Point actif
-                    : i < step
-                    ? 'bg-blue-400' // Points passés
-                    : 'bg-gray-300' // Points à venir
+                  i === step ? 'bg-blue-600 scale-110' : i < step ? 'bg-blue-400' : 'bg-gray-300'
                 }`}
-                aria-label={`Étape ${i}`}
-                role="progressbar"
-                aria-current={i === step ? 'step' : undefined}
               />
             ))}
           </div>
@@ -234,94 +175,84 @@ const Onboarding = () => {
         {error && <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">{error}</div>}
 
         {/* Contenu de l'étape */}
-        <div className="bg-white rounded-lg shadow-md p-5 mb-4">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-4">
           {step === 1 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Quelles thématiques vous intéressent ?</h2>
-              <p className="text-gray-600 mb-8">
-                Sélectionnez jusqu'à 10 thématiques qui vous intéressent.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => toggleCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                      selectedCategories.includes(category)
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' // Catégorie sélectionnée
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200' // Catégorie non sélectionnée
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Vous venez de trouver mieux que Google News
+                </h2>
+                <p className="text-gray-600">
+                  MédiaScan est un agrégateur d'actualités collaboratif
+                </p>
               </div>
-              <p className="mt-4 text-sm text-gray-500">
-                {selectedCategories.length}/10 thématiques sélectionnées
-              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h3 className="font-medium text-blue-900 mb-2">🎯 Vision Claire</h3>
+                  <p className="text-sm text-blue-800">
+                    Visualisez rapidement les différentes perspectives sur un même sujet d'actualité
+                  </p>
+                </div>
+
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <h3 className="font-medium text-purple-900 mb-2">🔍 Transparence</h3>
+                  <p className="text-sm text-purple-800">
+                    Identifiez facilement l'orientation éditoriale de chaque source
+                  </p>
+                </div>
+
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h3 className="font-medium text-green-900 mb-2">📊 Personnalisation</h3>
+                  <p className="text-sm text-green-800">
+                    Choisissez vos sources préférées et suivez les sujets qui vous intéressent
+                    (Média, blog, infolettre..)
+                  </p>
+                </div>
+
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <h3 className="font-medium text-yellow-900 mb-2">🤝 Collaboration</h3>
+                  <p className="text-sm text-yellow-800">
+                    Participez à l'amélioration continue en suggérant de nouvelles sources ou des
+                    nouvelles fonctionalités.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-medium text-gray-900 mb-2">Notre engagement</h3>
+                <ul className="text-sm text-gray-700 space-y-2">
+                  <li>✓ Service gratuit avec fonctionnalités premium optionnelles</li>
+                  <li>✓ Pas de revente de vos données personnelles</li>
+                  <li>✓ Code source ouvert et transparent</li>
+                </ul>
+              </div>
             </div>
           )}
 
           {step === 2 && (
             <>
-              <h2 className="text-lg font-medium text-gray-800 mb-4">
-                Choisissez vos sources préférées
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Personnalisez votre fil d'actualités
               </h2>
-              <p className="text-gray-600 mb-4">
-                Voici quelques sources recommandées basées sur vos intérêts.
+              <p className="text-gray-600 mb-6">
+                Sélectionnez les sources que vous souhaitez suivre. Vous pourrez modifier vos choix
+                à tout moment.
               </p>
 
               <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
                 {recommendedSources.length > 0 ? (
-                  recommendedSources.map((source) => {
-                    console.log('Rendering source:', source);
-                    return (
-                      <div
-                        key={source._id}
-                        className="flex items-center p-2 border border-gray-200 rounded-md"
-                      >
-                        <input
-                          type="checkbox"
-                          id={`source-${source._id}`}
-                          checked={selectedSources.includes(source._id)}
-                          onChange={() => toggleSource(source._id)}
-                          className="mr-3"
-                        />
-                        <label
-                          htmlFor={`source-${source._id}`}
-                          className="flex items-center flex-grow cursor-pointer"
-                        >
-                          {source.faviconUrl && (
-                            <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />
-                          )}
-                          <div>
-                            <div className="font-medium">{source.name}</div>
-                            <div className="text-xs text-gray-500">
-                              {source.categories.slice(0, 3).join(', ')}
-                              {source.categories.length > 3 && '...'}
-                            </div>
-                          </div>
-                        </label>
-
-                        <div className="ml-auto text-xs">
-                          <span
-                            className={`px-2 py-1 rounded-full ${
-                              source.orientation.political === 'gauche'
-                                ? 'bg-red-100 text-red-700'
-                                : source.orientation.political === 'centre'
-                                ? 'bg-purple-100 text-purple-700'
-                                : 'bg-blue-100 text-blue-700'
-                            }`}
-                          >
-                            {source.orientation.political}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
+                  recommendedSources.map((source) => (
+                    <SelectableSourceItem
+                      key={source._id}
+                      source={source}
+                      isSelected={selectedSources.includes(source._id)}
+                      onToggle={() => toggleSource(source._id)}
+                    />
+                  ))
                 ) : (
                   <p className="text-gray-500 text-center py-4">
-                    Sélectionnez des thématiques pour voir des recommandations
+                    Aucune source disponible pour le moment
                   </p>
                 )}
               </div>
@@ -331,65 +262,26 @@ const Onboarding = () => {
               </p>
             </>
           )}
-
-          {step === 3 && (
-            <>
-              <h2 className="text-lg font-medium text-gray-800 mb-4">Vous êtes prêt !</h2>
-              <p className="text-gray-600 mb-6">
-                Félicitations ! Vous avez configuré votre expérience personnalisée. Vous allez
-                maintenant découvrir des actualités en fonction de vos préférences.
-              </p>
-
-              <div className="bg-gray-50 p-4 rounded-md mb-4">
-                <h3 className="text-md font-medium text-gray-700 mb-2">Résumé de vos choix</h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  <strong>Thématiques :</strong> {selectedCategories.join(', ')}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Sources :</strong> {selectedSources.length} sélectionnées
-                  <br />
-                  {/* Debug info */}
-                  {/* <span className="text-xs text-gray-400">
-                    IDs sélectionnés : {JSON.stringify(selectedSources)}
-                  </span> */}
-                </p>
-              </div>
-
-              <p className="text-sm text-gray-500">
-                Vous pourrez modifier ces paramètres à tout moment dans votre profil.
-              </p>
-            </>
-          )}
         </div>
 
         {/* Boutons de navigation */}
         <div className="flex justify-between">
-          <button
-            onClick={prevStep}
-            disabled={step === 1}
-            className={`px-4 py-2 rounded-md font-medium ${
-              step === 1
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400'
-            }`}
-          >
-            Précédent
-          </button>
+          {step > 1 && (
+            <button
+              onClick={prevStep}
+              className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-700 hover:bg-gray-300"
+            >
+              Précédent
+            </button>
+          )}
 
           <button
             onClick={nextStep}
-            disabled={loading}
-            className={`px-4 py-2 rounded-md font-medium ${
-              loading
-                ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400'
+            className={`px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 ${
+              step === 1 ? 'ml-auto' : ''
             }`}
-            aria-busy={loading}
           >
-            {step < 3 ? 'Suivant' : 'Terminer'}
-            {loading && (
-              <span className="ml-2 inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white"></span>
-            )}
+            {step === 1 ? 'Commencer' : 'Terminer'}
           </button>
         </div>
       </div>
