@@ -91,12 +91,12 @@ const ArticleFilters = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
-      {/* Header séparé avec le bouton toggle */}
-      <div className="border-b pb-2 mb-4">
-        <div className="flex justify-between items-center">
-          <h2 className="font-medium">Filtres</h2>
+      {/* En-tête des filtres avec explication */}
+      <div className="border-b pb-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-gray-900">Filtrer mes articles</h2>
           <button
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-full lg:hidden"
             onClick={() => setIsExpanded(!isExpanded)}
           >
             <span
@@ -106,16 +106,23 @@ const ArticleFilters = () => {
             </span>
           </button>
         </div>
+        <p className="text-sm text-gray-600">
+          Affinez les articles de vos {userSources.length} sources sélectionnées
+        </p>
       </div>
 
-      {/* Barre de recherche */}
-      <div className="mb-4">
+      {/* Barre de recherche avec contexte */}
+      <div className="mb-6">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          Rechercher dans mes articles
+        </label>
         <div className="relative">
           <input
+            id="search"
             type="text"
             value={searchInput}
             onChange={handleSearch}
-            placeholder="Rechercher dans les articles..."
+            placeholder="Ex: climat, économie, europe..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -152,115 +159,96 @@ const ArticleFilters = () => {
             </button>
           )}
         </div>
-        {searchInput && (
-          <p className="mt-1 text-xs text-gray-500">
-            Recherche dans les titres et le contenu des articles
-          </p>
-        )}
+        <p className="mt-1 text-xs text-gray-500">
+          {searchInput
+            ? 'Recherche dans les titres et le contenu des articles'
+            : "La recherche s'effectue uniquement dans les articles de vos sources"}
+        </p>
       </div>
 
-      {/* Contenu des filtres dans un conteneur séparé */}
-      {isExpanded && (
-        <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-          {/* Teaser pour la future fonctionnalité
-          <Accordion title="Catégories" defaultOpen={false}>
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200">
-              <div className="flex items-center mb-2">
-                <span className="text-blue-500 font-mono mr-2">🚧</span>
-                <span className="bg-yellow-100 px-2 py-0.5 rounded-full text-xs font-mono text-yellow-800">
-                  En développement
-                </span>
-              </div>
+      {/* Filtres toujours visibles sur desktop */}
+      <div className={`space-y-4 lg:block ${isExpanded ? 'block' : 'hidden'}`}>
+        {/* Orientations politiques */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Orientation politique</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(ORIENTATIONS.political).map(([key, value]) => {
+              const bgColor = getOrientationColor(key);
+              const isLight = isLightColor(bgColor);
+              const textColor = isLight ? '#000000' : '#ffffff';
 
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Quelque chose de bien plus cool qu'un filtre par catégorie arrive !
-              </h3>
-
-              <p className="text-sm text-gray-600 mb-3">
-                Laissez-nous votre email et nous vous en informerons lorsque cette fonctionnalité
-                sera disponible !
-              </p>
-
-              <div className="space-y-2">
-                <a
-                  href="/feedback"
-                  className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm"
+              return (
+                <button
+                  key={key}
+                  onClick={() => handlePoliticalOrientationChange(key)}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200`}
+                  style={{
+                    backgroundColor: filters.orientation.political?.includes(key)
+                      ? bgColor
+                      : 'transparent',
+                    color: filters.orientation.political?.includes(key) ? textColor : '#666666',
+                    border: `1px solid ${bgColor}`,
+                  }}
                 >
-                  Je veux être informé
-                </a>
-
-                <p className="text-xs text-gray-500 italic mt-2">
-                  PS: Si vous avez des idées pour améliorer l'app, n'hésitez pas à nous en faire
-                  part. Nous adorons les retours créatifs !
-                </p>
-              </div>
-            </div>
-          </Accordion> */}
-
-          {/* Orientations politiques */}
-          <Accordion title="Orientation politique">
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(ORIENTATIONS.political).map(([key, value]) => {
-                const bgColor = getOrientationColor(key);
-                const isLight = isLightColor(bgColor);
-                const textColor = isLight ? '#000000' : '#ffffff';
-
-                return (
-                  <button
-                    key={key}
-                    onClick={() => handlePoliticalOrientationChange(key)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors duration-200`}
-                    style={{
-                      backgroundColor: filters.orientation.political?.includes(key)
-                        ? bgColor
-                        : 'transparent',
-                      color: filters.orientation.political?.includes(key) ? textColor : '#666666',
-                      border: `1px solid ${bgColor}`,
-                    }}
-                  >
-                    {value.label}
-                  </button>
-                );
-              })}
-            </div>
-          </Accordion>
-
-          {/* Sources avec conteneur isolé */}
-          <Accordion title="Sources">
-            <div className="space-y-2">
-              {userSources.map((source) => (
-                <label
-                  key={source._id}
-                  className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.sources.includes(source._id)}
-                    onChange={(e) => handleSourceChange(e, source._id)}
-                    className="mr-2"
-                  />
-                  <div className="flex items-center">
-                    {source.faviconUrl && (
-                      <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-1" />
-                    )}
-                    <span className="text-sm">{source.name}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </Accordion>
-
-          {/* Bouton de réinitialisation */}
-          <div className="flex justify-end pt-2 border-t">
-            <button
-              onClick={() => setFilters((prev) => ({ ...prev, searchTerm: '' }))}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-            >
-              Réinitialiser
-            </button>
+                  {value.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-      )}
+
+        {/* Sources */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Mes sources ({userSources.length})
+          </h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {userSources.map((source) => (
+              <label
+                key={source._id}
+                className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={filters.sources.includes(source._id)}
+                  onChange={(e) => handleSourceChange(e, source._id)}
+                  className="mr-2"
+                />
+                <div className="flex items-center">
+                  {source.faviconUrl && (
+                    <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-1" />
+                  )}
+                  <span className="text-sm">{source.name}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Indicateur de filtres actifs */}
+        {(filters.searchTerm ||
+          filters.orientation.political.length > 0 ||
+          filters.sources.length !== userSources.length) && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Filtres actifs</span>
+              <button
+                onClick={() => {
+                  setSearchInput('');
+                  setFilters({
+                    searchTerm: '',
+                    sources: userSources.map((s) => s._id),
+                    orientation: { political: [] },
+                  });
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Réinitialiser tout
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
