@@ -180,7 +180,7 @@ const ArticleCard = ({ article, onSave, onShare }) => {
 
           {/* Métadonnées et actions */}
           <div className="mt-auto">
-            {/* Tags et catégories */}
+            {/* Tags et orientation politique */}
             <div className="flex flex-wrap gap-1 mb-2">
               {/* Orientation politique avec couleur */}
               {politicalOrientation && (
@@ -203,28 +203,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
                   {politicalOrientation.label}
                 </span>
               )}
-
-              {/* Catégories */}
-              {article.categories &&
-                article.categories.map((category, index) => (
-                  <span
-                    key={`cat-${index}`}
-                    className="text-xs px-2 py-0.5 bg-gray-100 rounded-full"
-                  >
-                    {category}
-                  </span>
-                ))}
-
-              {/* Tags */}
-              {article.tags &&
-                article.tags.map((tag, index) => (
-                  <span
-                    key={`tag-${index}`}
-                    className="text-xs px-2 py-0.5 bg-primary-light bg-opacity-20 rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
             </div>
 
             {/* Source et date */}
