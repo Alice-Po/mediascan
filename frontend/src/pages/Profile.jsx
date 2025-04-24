@@ -368,7 +368,7 @@ const Profile = () => {
         </form>
       </div>
 
-      {/* Ajouter la section des thématiques d'intérêt */}
+      {/* Ajouter la section des thématiques d'intérêt
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium text-gray-800">Thématiques d'intérêt</h2>
@@ -436,7 +436,7 @@ const Profile = () => {
             )}
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Paramètres de confidentialité */}
       <div className="bg-white rounded-lg shadow-sm p-4">

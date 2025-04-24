@@ -471,7 +471,7 @@ const Premium = () => {
                             </div>
                             <div className="text-sm">
                               <span className="font-medium text-gray-900">Idées</span>
-                              <p className="text-gray-600">Proposez des solutions innovantes</p>
+                              <p className="text-gray-600">Proposez des solutions originales</p>
                             </div>
                           </div>
                           <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
