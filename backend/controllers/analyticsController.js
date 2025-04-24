@@ -162,10 +162,10 @@ export const getUserAnalytics = async (req, res) => {
 export const trackEvent = async (req, res) => {
   try {
     const { eventType, metadata } = req.body;
+
+    // S'assurer qu'on envoie juste la clé de l'orientation
     const cleanOrientation = {
-      political: ORIENTATIONS.political.includes(metadata.orientation?.political)
-        ? metadata.orientation.political
-        : ORIENTATIONS.political[ORIENTATIONS.political.length - 1],
+      political: metadata.orientation?.political || 'center',
     };
 
     const event = new Analytics({

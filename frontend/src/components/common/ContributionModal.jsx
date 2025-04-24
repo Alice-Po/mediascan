@@ -154,7 +154,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
                     min="1"
                     className="pl-8 pr-4 py-3 w-full border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     placeholder="Montant personnalisé"
-                    required
                   />
                 </div>
                 <p className="mt-1.5 text-xs text-gray-500">

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ORIENTATIONS } from '../config/constants.js';
+import { VALID_ORIENTATIONS } from '../config/constants.js';
 
 const ArticleSchema = new mongoose.Schema(
   {
@@ -62,7 +62,7 @@ const ArticleSchema = new mongoose.Schema(
     orientation: {
       political: {
         type: String,
-        enum: ORIENTATIONS.political,
+        enum: VALID_ORIENTATIONS,
       },
     },
     userInteractions: [

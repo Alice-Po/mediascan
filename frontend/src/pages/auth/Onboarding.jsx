@@ -148,7 +148,7 @@ const Onboarding = () => {
   };
 
   // Filtrer les sources recommandées basées sur les catégories sélectionnées
-  const recommendedSources = Array.isArray(allSources) ? allSources.slice(0, 10) : [];
+  const recommendedSources = Array.isArray(allSources) ? allSources.slice(0, 20) : [];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -258,7 +258,8 @@ const Onboarding = () => {
               </div>
 
               <p className="text-sm text-gray-500">
-                Vous pourrez ajouter d'autres sources plus tard.
+                Les sources qui vous sont proposées sont aléatoires pour l'instant. Vous pourrez
+                ajouter d'autres sources plus tard.
               </p>
             </>
           )}

@@ -54,17 +54,29 @@ export const addUserSource = async (sourceData) => {
 };
 
 /**
- * Mettre à jour une source utilisateur (activation/désactivation)
- * @param {string} sourceId - ID de la source
- * @param {Object} data - Données à mettre à jour
- * @returns {Promise} Source mise à jour
+ * Activer une source pour l'utilisateur
+ * @param {string} sourceId - ID de la source à activer
  */
-export const updateUserSource = async (sourceId, data) => {
+export const enableUserSource = async (sourceId) => {
   try {
-    const response = await api.put(`/sources/user/${sourceId}`, data);
+    const response = await api.post(`/sources/user/${sourceId}/enable`);
     return response.data;
   } catch (error) {
-    console.error('Error updating source:', error);
+    console.error('Error enabling source:', error);
+    throw error;
+  }
+};
+
+/**
+ * Désactiver une source pour l'utilisateur
+ * @param {string} sourceId - ID de la source à désactiver
+ */
+export const disableUserSource = async (sourceId) => {
+  try {
+    const response = await api.post(`/sources/user/${sourceId}/disable`);
+    return response.data;
+  } catch (error) {
+    console.error('Error disabling source:', error);
     throw error;
   }
 };

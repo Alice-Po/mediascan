@@ -257,49 +257,55 @@ export const addUserSource = async (req, res) => {
   }
 };
 
-// @desc    Activer/désactiver une source pour l'utilisateur
-// @route   PUT /api/sources/user/:id
+// @desc    Activer une source pour l'utilisateur courant
+// @route   POST /api/sources/user/:sourceId/enable
 // @access  Private
-export const toggleUserSource = async (req, res) => {
+export const enableUserSource = async (req, res) => {
   try {
-    const sourceId = req.params.id;
-    const { enabled } = req.body;
+    const sourceId = req.params.sourceId;
+    const userId = req.user._id;
 
-    console.log('Toggling source:', { sourceId, enabled });
+    // Ajouter la source aux sources actives de l'utilisateur
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { activeSources: sourceId } },
+      { new: true }
+    );
 
-    // Vérification que la source existe
-    const source = await Source.findById(sourceId);
-    if (!source) {
-      return res.status(404).json({
-        success: false,
-        message: 'Source non trouvée',
-      });
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
 
-    const user = await User.findById(req.user._id);
-    if (enabled) {
-      // Activation de la source
-      if (!user.activeSources.includes(sourceId)) {
-        await User.findByIdAndUpdate(req.user._id, { $addToSet: { activeSources: sourceId } });
-      }
-    } else {
-      // Désactivation de la source
-      await User.findByIdAndUpdate(req.user._id, { $pull: { activeSources: sourceId } });
-    }
-
-    console.log('Source updated successfully');
-
-    res.status(200).json({
-      success: true,
-      message: enabled ? 'Source activée avec succès' : 'Source désactivée avec succès',
-    });
+    res.json({ message: 'Source activée avec succès' });
   } catch (error) {
-    console.error('Error in toggleUserSource:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la modification de la source',
-      error: error.message,
-    });
+    console.error('Error enabling source:', error);
+    res.status(500).json({ message: "Erreur lors de l'activation de la source" });
+  }
+};
+
+// @desc    Désactiver une source pour l'utilisateur courant
+// @route   POST /api/sources/user/:sourceId/disable
+// @access  Private
+export const disableUserSource = async (req, res) => {
+  try {
+    const sourceId = req.params.sourceId;
+    const userId = req.user._id;
+
+    // Retirer la source des sources actives de l'utilisateur
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { activeSources: sourceId } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    res.json({ message: 'Source désactivée avec succès' });
+  } catch (error) {
+    console.error('Error disabling source:', error);
+    res.status(500).json({ message: 'Erreur lors de la désactivation de la source' });
   }
 };
 

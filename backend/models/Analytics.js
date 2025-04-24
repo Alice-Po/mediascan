@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ORIENTATIONS } from '../config/constants.js';
+import { VALID_ORIENTATIONS } from '../config/constants.js';
 
 const AnalyticsSchema = new mongoose.Schema(
   {
@@ -10,6 +10,7 @@ const AnalyticsSchema = new mongoose.Schema(
     },
     eventType: {
       type: String,
+      required: true,
       enum: [
         'read',
         'save',
@@ -21,36 +22,23 @@ const AnalyticsSchema = new mongoose.Schema(
         'sourceRemove',
         'emailVerification',
       ],
-      required: true,
     },
     metadata: {
-      articleId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Article',
-        required: function () {
-          return ['read', 'save', 'share'].includes(this.eventType);
-        },
-      },
       sourceId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Source',
       },
+      category: String,
       orientation: {
         political: {
           type: String,
-          enum: ORIENTATIONS.political,
-          default: 'non-spécifié',
+          enum: VALID_ORIENTATIONS,
         },
-        _id: false,
       },
-      category: String,
       timestamp: {
         type: Date,
         default: Date.now,
       },
-      userAgent: String,
-      platform: String,
-      success: Boolean,
     },
   },
   {

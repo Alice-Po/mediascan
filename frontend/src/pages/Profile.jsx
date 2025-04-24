@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, deleteAccount } from '../api/authApi';
 import { resetAnalytics } from '../api/analyticsApi';
-import { CATEGORIES } from '../constants';
 
 /**
  * Page de profil utilisateur

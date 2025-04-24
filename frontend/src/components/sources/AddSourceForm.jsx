@@ -1,26 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { CATEGORIES, ORIENTATIONS } from '../../constants';
+import { ORIENTATIONS, getOrientationLabel } from '../../constants';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
-import { SimpleSourceItem } from '../../components/sources/SourceItem';
+import { SimpleSourceItem } from './SourceItem';
 
 const AddSourceForm = ({
-  customSource,
-  onSourceChange,
   onSubmit,
   onCancel,
   loading,
   formErrors,
-  suggestions,
-  handleSelectSource,
+  suggestions = [],
+  handleSelectSource = () => {},
 }) => {
   const [showRssHelp, setShowRssHelp] = useState(false);
+  const [customSource, setCustomSource] = useState({
+    name: '',
+    url: '',
+    rssUrl: '',
+    description: '',
+    funding: {
+      type: '',
+      details: '',
+    },
+    orientation: {
+      political: 'centre',
+    },
+  });
+
+  // Log l'état initial
+  useEffect(() => {
+    console.log('Initial customSource state:', customSource);
+  }, []);
+
+  const handleCustomSourceChange = (e) => {
+    const { name, value, type } = e.target;
+    console.log('Input change event:', {
+      name,
+      value,
+      type,
+      element: e.target,
+      validity: e.target.validity,
+    });
+
+    if (name.includes('.')) {
+      // Gestion des champs imbriqués
+      const [parent, child] = name.split('.');
+      setCustomSource((prev) => {
+        const newState = {
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: value,
+          },
+        };
+        console.log('Updated nested state:', newState);
+        return newState;
+      });
+    } else {
+      // Champs simples
+      setCustomSource((prev) => {
+        const newState = { ...prev, [name]: value };
+        console.log('Updated simple state:', newState);
+        return newState;
+      });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Form submission:', {
+      formData: customSource,
+      formValidity: e.target.checkValidity(),
+      formElements: e.target.elements,
+    });
     onSubmit(customSource);
   };
+
+  // Log à chaque changement d'état
+  useEffect(() => {
+    console.log('customSource state updated:', customSource);
+  }, [customSource]);
 
   return (
     <div className="mt-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -44,7 +104,7 @@ const AddSourceForm = ({
         linkText="En savoir plus sur la détection intelligente de flux RSS"
       />
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate={false}>
         <div className="space-y-4">
           {/* RSS URL avec aide */}
           <div>
@@ -58,7 +118,14 @@ const AddSourceForm = ({
                 id="rssUrl"
                 name="rssUrl"
                 value={customSource.rssUrl}
-                onChange={onSourceChange}
+                onChange={handleCustomSourceChange}
+                onInvalid={(e) =>
+                  console.log('Input invalid event:', {
+                    value: e.target.value,
+                    validity: e.target.validity,
+                    validationMessage: e.target.validationMessage,
+                  })
+                }
                 placeholder="https://www.example.com/feed.xml"
                 className={`block w-full rounded-md ${
                   formErrors.rssUrl ? 'border-red-300' : 'border-gray-300'
@@ -96,7 +163,7 @@ const AddSourceForm = ({
               id="description"
               name="description"
               value={customSource.description}
-              onChange={onSourceChange}
+              onChange={handleCustomSourceChange}
               rows="3"
               placeholder="Ex: Journal indépendant spécialisé dans le journalisme d'investigation..."
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
@@ -120,7 +187,7 @@ const AddSourceForm = ({
                 id="funding.type"
                 name="funding.type"
                 value={customSource.funding?.type}
-                onChange={onSourceChange}
+                onChange={handleCustomSourceChange}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
               >
                 <option value="">Sélectionner un type de financement</option>
@@ -141,7 +208,7 @@ const AddSourceForm = ({
                   id="funding.details"
                   name="funding.details"
                   value={customSource.funding?.details || ''}
-                  onChange={onSourceChange}
+                  onChange={handleCustomSourceChange}
                   placeholder="Ex: Appartient au groupe Bouygues, Financé par ses lecteurs..."
                   className="block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
                 />
@@ -151,31 +218,6 @@ const AddSourceForm = ({
               <p className="mt-1 text-sm text-red-600">{formErrors.funding}</p>
             )}
           </div>
-
-          {/* Catégories avec explication
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Catégories principales
-            </label>
-            <p className="text-xs text-gray-500 mb-3">
-              Sélectionnez les thématiques principales couvertes par cette source
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES.map((category) => (
-                <label key={category} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    name="categories"
-                    value={category}
-                    checked={customSource.categories.includes(category)}
-                    onChange={onSourceChange}
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{category}</span>
-                </label>
-              ))}
-            </div>
-          </div> */}
 
           {/* Orientation avec aide */}
           <div>
@@ -192,7 +234,7 @@ const AddSourceForm = ({
               id="orientation.political"
               name="orientation.political"
               value={customSource.orientation.political}
-              onChange={onSourceChange}
+              onChange={handleCustomSourceChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
             >
               {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
@@ -241,18 +283,20 @@ const AddSourceForm = ({
 
       <RssHelpModal isOpen={showRssHelp} onClose={() => setShowRssHelp(false)} />
 
-      {/* Suggestions */}
-      <div className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg">
-        {suggestions.map((source) => (
-          <div
-            key={source._id}
-            onClick={() => handleSelectSource(source)}
-            className="cursor-pointer"
-          >
-            <SimpleSourceItem source={source} />
-          </div>
-        ))}
-      </div>
+      {/* Suggestions avec vérification de sécurité */}
+      {Array.isArray(suggestions) && suggestions.length > 0 && (
+        <div className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg">
+          {suggestions.map((source) => (
+            <div
+              key={source._id}
+              onClick={() => handleSelectSource(source)}
+              className="cursor-pointer"
+            >
+              <SimpleSourceItem source={source} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -273,18 +317,16 @@ AddSourceForm.propTypes = {
       ]).isRequired,
       details: PropTypes.string,
     }).isRequired,
-    categories: PropTypes.arrayOf(PropTypes.string).isRequired,
     orientation: PropTypes.shape({
       political: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  onSourceChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   formErrors: PropTypes.object.isRequired,
-  suggestions: PropTypes.array.isRequired,
-  handleSelectSource: PropTypes.func.isRequired,
+  suggestions: PropTypes.array,
+  handleSelectSource: PropTypes.func,
 };
 
 export default AddSourceForm;

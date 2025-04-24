@@ -20,18 +20,20 @@ const SourceItemBase = ({ source, children, leftAction }) => {
   const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
   const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
 
+  // S'assurer que la description existe et est une chaîne
+  const description = source.description || '';
+  const words = description.split(' ');
+  const shortDescription = words.length > 20 ? words.slice(0, 20).join(' ') + '...' : description;
+
   return (
     <div className="flex items-center p-2 border border-gray-200 rounded-md hover:bg-gray-50">
       {leftAction}
       <div className="flex items-center flex-grow">
         {/* Info source */}
         {source.faviconUrl && <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />}
-        <div>
-          <div className="font-medium text-gray-900">{source.name}</div>
-          <div className="text-xs text-gray-500">
-            {source.categories?.slice(0, 3).join(', ')}
-            {source.categories?.length > 3 && '...'}
-          </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-medium text-gray-900 truncate">{source.name}</h3>
+          <p className="mt-1 text-sm text-gray-500">{shortDescription}</p>
         </div>
         <div className="ml-auto mr-2">
           <span

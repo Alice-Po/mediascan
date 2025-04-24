@@ -95,16 +95,29 @@ export const register = async (req, res) => {
 // @access  Public
 export const login = async (req, res) => {
   try {
+    console.log('=== Tentative de connexion ===');
+    console.log('Email reçu:', req.body.email);
+
     const { email, password } = req.body;
 
     // Trouver l'utilisateur
-    const user = await User.findOne({ email });
+    console.log("Recherche de l'utilisateur...");
+    const user = await User.findOne({ email }).select('+password');
+    console.log('Résultat recherche:', {
+      utilisateurTrouvé: !!user,
+      email: user?.email,
+      isVerified: user?.isVerified,
+    });
+
     if (!user) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
     // Vérifier le mot de passe
+    console.log('Vérification du mot de passe...');
     const isMatch = await user.comparePassword(password);
+    console.log('Résultat vérification mot de passe:', { isMatch });
+
     if (!isMatch) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
@@ -118,7 +131,17 @@ export const login = async (req, res) => {
     }
 
     // Générer le token
+    console.log('Génération du token...');
     const token = generateToken(user._id);
+    console.log('Token généré avec succès');
+
+    // Log avant l'envoi de la réponse
+    console.log('Envoi de la réponse...', {
+      userId: user._id,
+      email: user.email,
+      isVerified: user.isVerified,
+      onboardingCompleted: user.onboardingCompleted,
+    });
 
     // Enregistrer l'événement de connexion
     await Analytics.create({
@@ -129,7 +152,6 @@ export const login = async (req, res) => {
       },
     });
 
-    // S'assurer que onboardingCompleted est inclus dans la réponse
     res.json({
       token,
       user: {
@@ -139,10 +161,16 @@ export const login = async (req, res) => {
         isVerified: user.isVerified,
         interests: user.interests,
         activeSources: user.activeSources,
-        onboardingCompleted: user.onboardingCompleted || false, // Valeur par défaut si non définie
+        onboardingCompleted: user.onboardingCompleted || false,
       },
     });
   } catch (error) {
+    // Log détaillé de l'erreur
+    console.error('Erreur dans login:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
     res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };

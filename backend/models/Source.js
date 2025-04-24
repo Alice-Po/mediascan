@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { CATEGORIES, ORIENTATIONS } from '../config/constants.js';
+import { VALID_ORIENTATIONS } from '../config/constants.js';
 
 const SourceSchema = new mongoose.Schema(
   {
@@ -22,18 +22,24 @@ const SourceSchema = new mongoose.Schema(
       type: String,
       default: '/default-favicon.png',
     },
-    //A n'utiliser qu'en absence de catégorie dédiée d'un article
-    categories: [
-      {
+    description: {
+      type: String,
+      trim: true,
+    },
+    funding: {
+      type: {
         type: String,
-        enum: CATEGORIES,
+        enum: ['independent', 'public', 'private', 'cooperative', 'association', 'other'],
       },
-    ],
+      details: {
+        type: String,
+        trim: true,
+      },
+    },
     orientation: {
       political: {
         type: String,
-        enum: ORIENTATIONS.political,
-        default: 'non-spécifié',
+        enum: VALID_ORIENTATIONS,
       },
     },
     defaultEnabled: {
@@ -59,6 +65,15 @@ const SourceSchema = new mongoose.Schema(
       success: Boolean,
       message: String,
       timestamp: Date,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'active', 'rejected', 'disabled'],
+      default: 'pending',
+    },
+    moderationNotes: {
+      type: String,
+      trim: true,
     },
   },
   {

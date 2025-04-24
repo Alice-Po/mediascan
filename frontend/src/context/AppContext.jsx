@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect, useContext, useCallback } fr
 import { AuthContext } from './AuthContext';
 import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
-import { updateUserSource } from '../api/sourcesApi';
 
 // Création du contexte et du hook dans des constantes nommées
 export const AppContext = createContext(null);
@@ -211,75 +210,6 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  // Fonction pour ajouter/activer une source
-  const addOrEnableSource = async (sourceId) => {
-    try {
-      // Appeler l'API pour activer la source
-      await updateUserSource(sourceId, { enabled: true });
-
-      // Trouver la source dans allSources
-      const sourceToAdd = allSources.find((source) => source._id === sourceId);
-
-      if (!sourceToAdd) {
-        return;
-      }
-
-      // Ajouter la source aux sources actives de l'utilisateur
-      setUserSources((prev) => {
-        // Vérifier si la source existe déjà
-        const exists = prev.some((source) => source._id === sourceId);
-        if (exists) {
-          // Mettre à jour enabled à true si la source existe
-          return prev.map((source) =>
-            source._id === sourceId ? { ...source, enabled: true } : source
-          );
-        }
-        // Ajouter la nouvelle source si elle n'existe pas
-        return [...prev, { ...sourceToAdd, enabled: true }];
-      });
-
-      // Mettre à jour les filtres pour inclure la nouvelle source
-      setFilters((prev) => ({
-        ...prev,
-        sources: [...prev.sources, sourceId],
-      }));
-    } catch (error) {
-      console.error('Error adding/enabling source:', error);
-      throw error;
-    }
-  };
-
-  // Fonction pour désactiver une source
-  const disableSource = async (sourceId) => {
-    try {
-      // Appeler l'API pour désactiver la source
-      await updateUserSource(sourceId, { enabled: false });
-
-      // Mettre à jour userSources
-      setUserSources((prev) =>
-        prev.map((source) => (source._id === sourceId ? { ...source, enabled: false } : source))
-      );
-
-      // Mettre à jour les filtres
-      setFilters((prev) => ({
-        ...prev,
-        sources: prev.sources.filter((id) => id !== sourceId),
-      }));
-    } catch (error) {
-      console.error('Error disabling source:', error);
-      setError('Erreur lors de la désactivation de la source');
-    }
-  };
-
-  // Mettre à jour les thématiques quand l'utilisateur change
-  useEffect(() => {
-    if (user?.interests) {
-      setUserInterests(user.interests);
-    } else {
-      setUserInterests([]);
-    }
-  }, [user]);
-
   // Fonction pour mettre à jour l'état d'un article
   const updateArticle = useCallback((articleId, updates) => {
     setArticles((prevArticles) =>
@@ -316,10 +246,7 @@ export const AppProvider = ({ children }) => {
     setFilters,
     resetFilters,
     loadMoreArticles,
-    addOrEnableSource,
-    disableSource,
     error,
-    userInterests,
     setArticles,
     updateArticle,
     loadUserSources,

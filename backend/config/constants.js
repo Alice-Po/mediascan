@@ -1,31 +1,19 @@
-// Catégories disponibles pour les sources et les intérêts utilisateurs
-export const CATEGORIES = [
-  'politique',
-  'économie',
-  'société',
-  'international',
-  'culture',
-  'sciences',
-  'technologie',
-  'environnement',
-  'sport',
-  'santé',
-];
-
-// Orientations possibles pour les sources
+// Orientations politiques possibles
 export const ORIENTATIONS = {
-  political: [
-    'extrême-gauche',
-    'gauche',
-    'centre-gauche',
-    'centre',
-    'centre-droit',
-    'droite',
-    'extrême-droite',
-    'écologiste',
-    'non-spécifié',
-  ],
+  political: {
+    'extreme-left': { label: 'Extrême Gauche', color: '#FF0000' },
+    left: { label: 'Gauche', color: '#FF6666' },
+    'center-left': { label: 'Centre Gauche', color: '#FF9999' },
+    center: { label: 'Centre', color: '#FFFF00' },
+    'center-right': { label: 'Centre Droit', color: '#3366FF' },
+    right: { label: 'Droite', color: '#3366FF' },
+    'extreme-right': { label: 'Extrême Droite', color: '#000080' },
+    ecologist: { label: 'Écologiste', color: '#00FF00' },
+  },
 };
+
+// Liste des valeurs valides pour l'enum MongoDB
+export const VALID_ORIENTATIONS = Object.keys(ORIENTATIONS.political);
 
 // Helper pour obtenir la couleur d'une orientation politique
 export const getOrientationColor = (orientation) => {
