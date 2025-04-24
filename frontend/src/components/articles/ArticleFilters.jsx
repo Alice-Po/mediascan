@@ -1,12 +1,9 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
-import {
-  CATEGORIES,
-  ORIENTATIONS,
-  getOrientationColor,
-  getOrientationLabel,
-} from '../../constants';
+import { ORIENTATIONS } from '../../constants';
+import { getOrientationColor, getOrientationLabel } from '../../constants';
 import { isLightColor } from '../../utils/colorUtils';
+import { useDebounce } from '../../hooks/useDebounce';
 
 // Composant Accordion réutilisable
 const Accordion = ({ title, children, defaultOpen = false }) => {
@@ -37,19 +34,17 @@ const Accordion = ({ title, children, defaultOpen = false }) => {
  */
 const ArticleFilters = () => {
   const { filters, setFilters, userSources } = useContext(AppContext);
-
-  // State local pour afficher/masquer les filtres sur mobile
   const [isExpanded, setIsExpanded] = useState(false);
+  const [searchInput, setSearchInput] = useState(filters.searchTerm);
+  const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Utilisation des catégories depuis le fichier de constantes
-  const handleCategoryChange = (category) => {
+  // Mettre à jour les filtres quand la valeur debouncée change
+  useEffect(() => {
     setFilters((prev) => ({
       ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category],
+      searchTerm: debouncedSearch,
     }));
-  };
+  }, [debouncedSearch, setFilters]);
 
   // Gestion des filtres d'orientation
   const handleOrientationChange = (type, value) => {
@@ -78,10 +73,7 @@ const ArticleFilters = () => {
   // Gérer la recherche
   const handleSearch = (e) => {
     const { value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      searchTerm: value,
-    }));
+    setSearchInput(value);
   };
 
   // Nouveau handler pour les orientations politiques
@@ -116,10 +108,61 @@ const ArticleFilters = () => {
         </div>
       </div>
 
+      {/* Barre de recherche */}
+      <div className="mb-4">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={handleSearch}
+            placeholder="Rechercher dans les articles..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          {searchInput && (
+            <button
+              onClick={() => {
+                setSearchInput('');
+                setFilters((prev) => ({ ...prev, searchTerm: '' }));
+              }}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+        {searchInput && (
+          <p className="mt-1 text-xs text-gray-500">
+            Recherche dans les titres et le contenu des articles
+          </p>
+        )}
+      </div>
+
       {/* Contenu des filtres dans un conteneur séparé */}
       {isExpanded && (
         <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-          {/* Teaser pour la future fonctionnalité */}
+          {/* Teaser pour la future fonctionnalité
           <Accordion title="Catégories" defaultOpen={false}>
             <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200">
               <div className="flex items-center mb-2">
@@ -152,7 +195,7 @@ const ArticleFilters = () => {
                 </p>
               </div>
             </div>
-          </Accordion>
+          </Accordion> */}
 
           {/* Orientations politiques */}
           <Accordion title="Orientation politique">

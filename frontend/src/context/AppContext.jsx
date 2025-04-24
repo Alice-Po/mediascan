@@ -33,16 +33,12 @@ export const AppProvider = ({ children }) => {
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
 
   // State pour les filtres
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem('articleFilters');
-    return savedFilters
-      ? JSON.parse(savedFilters)
-      : {
-          searchTerm: '',
-          categories: [],
-          orientation: {},
-          sources: [],
-        };
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    sources: [],
+    orientation: {
+      political: [],
+    },
   });
 
   // Memoize les articles filtrés
@@ -53,12 +49,14 @@ export const AppProvider = ({ children }) => {
         return false;
       }
 
-      // Filtre par catégorie
-      if (
-        filters.categories.length > 0 &&
-        !article.categories?.some((cat) => filters.categories.includes(cat))
-      ) {
-        return false;
+      // Filtre par recherche textuelle
+      if (filters.searchTerm) {
+        const searchTermLower = filters.searchTerm.toLowerCase();
+        const matchesSearch =
+          article.title?.toLowerCase().includes(searchTermLower) ||
+          article.contentSnippet?.toLowerCase().includes(searchTermLower);
+
+        if (!matchesSearch) return false;
       }
 
       // Filtre par orientation
@@ -153,7 +151,6 @@ export const AppProvider = ({ children }) => {
 
       const response = await fetchArticles({
         sources: filters.sources.map((s) => s._id).join(','),
-        categories: filters.categories.join(','),
         page: articlesPage,
       });
 
@@ -179,7 +176,6 @@ export const AppProvider = ({ children }) => {
         page: nextPage,
         limit: 20,
         sources: filters.sources,
-        categories: filters.categories,
         orientation: Object.entries(filters.orientation).flatMap(([key, values]) =>
           values.map((v) => `${key}:${v}`)
         ),
@@ -199,7 +195,6 @@ export const AppProvider = ({ children }) => {
   const resetFilters = () => {
     setFilters((prev) => {
       if (
-        prev.categories.length === 0 &&
         prev.sources.length === 0 &&
         !prev.searchTerm &&
         (!prev.orientation || Object.values(prev.orientation).every((arr) => arr.length === 0))
@@ -207,7 +202,6 @@ export const AppProvider = ({ children }) => {
         return prev;
       }
       return {
-        categories: [],
         sources: [],
         orientation: {
           political: [],

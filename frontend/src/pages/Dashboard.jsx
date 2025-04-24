@@ -9,7 +9,7 @@ import ArticleList from '../components/articles/ArticleList';
  */
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
-  const { resetFilters, loadingArticles, articles } = useContext(AppContext);
+  const { resetFilters, loadingArticles, articles, filters } = useContext(AppContext);
   const [error, setError] = useState(null);
 
   // Réinitialiser les filtres au montage de la page
@@ -52,6 +52,34 @@ const Dashboard = () => {
       document.removeEventListener('touchend', handleTouchEnd);
     };
   }, []); // Pas de dépendances car ces événements ne changent pas
+
+  const filterArticles = (articles) => {
+    return articles.filter((article) => {
+      // Filtre par recherche textuelle
+      if (filters.searchTerm) {
+        const searchTermLower = filters.searchTerm.toLowerCase();
+        const matchesSearch =
+          article.title?.toLowerCase().includes(searchTermLower) ||
+          article.contentSnippet?.toLowerCase().includes(searchTermLower);
+
+        if (!matchesSearch) return false;
+      }
+
+      // Autres filtres existants...
+      if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId)) {
+        return false;
+      }
+
+      if (
+        filters.orientation.political?.length > 0 &&
+        !filters.orientation.political.includes(article.orientation?.political)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  };
 
   if (loadingArticles) {
     return (
