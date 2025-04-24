@@ -234,7 +234,7 @@ const Profile = () => {
             {/* Nom */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nom
+                Nom ou pseudo
               </label>
               <input
                 type="text"
@@ -249,6 +249,10 @@ const Profile = () => {
                   !isEditingProfile ? 'bg-gray-50' : 'bg-white'
                 } focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Ce nom sera utilisé pour personnaliser votre expérience (accueil, modération des
+                sources, partage de contenu). Un pseudo est parfaitement acceptable.
+              </p>
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 

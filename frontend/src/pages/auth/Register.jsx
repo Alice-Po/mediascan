@@ -184,34 +184,6 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Nom */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Nom
-            </label>
-            <div className="mt-1">
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Votre nom"
-                className={`appearance-none block w-full px-3 py-2 border ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
-                aria-describedby={errors.name ? 'name-error' : undefined}
-              />
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600" id="name-error">
-                  {errors.name}
-                </p>
-              )}
-            </div>
-          </div>
-
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
