@@ -7,7 +7,7 @@ const Feedback = () => {
       <div className="max-w-2xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Votre avis compte</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Envoyez-nous un message</h1>
           <p className="text-lg text-gray-600">
             Nous sommes en version alpha et vos retours sont précieux pour améliorer l'application.
           </p>

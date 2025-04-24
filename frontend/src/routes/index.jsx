@@ -33,6 +33,9 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
+        <Route element={<MainLayout />}>
+          <Route path="/feedback" element={<Feedback />} />
+        </Route>
       </Route>
 
       {/* Routes protégées */}
@@ -45,7 +48,6 @@ const AppRoutes = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/premium" element={<Premium />} />
-          <Route path="/feedback" element={<Feedback />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
         </Route>
       </Route>
