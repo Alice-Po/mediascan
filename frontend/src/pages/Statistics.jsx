@@ -119,6 +119,39 @@ const Statistics = () => {
         </div> */}
       </div>
 
+      {/* Bannière Premium - Analytics avancées */}
+      <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200 overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-center mb-2">
+            <span className="bg-blue-100 px-2 py-0.5 rounded-full text-xs font-mono text-blue-800">
+              En réflexion
+            </span>
+          </div>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Envie d'aller plus loin dans l'analyse de vos lectures ?
+          </h3>
+          <p className="text-sm text-gray-600 mb-3">
+            Nous réfléchissons à de nouvelles façons de vous aider à comprendre vos habitudes de
+            lecture : temps passé par source, sujets récurrents, évolution de vos centres
+            d'intérêt...
+          </p>
+          <a
+            href="/premium"
+            className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:text-blue-900 group"
+          >
+            <span>Contribuer à la réflexion sur les analytics</span>
+            <svg
+              className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
       {/* Radar des orientations politiques */}
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Spectre politique des lectures</h2>

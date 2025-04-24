@@ -127,6 +127,25 @@ const Premium = () => {
       funded: 0,
       issue: 'https://github.com/Alice-Po/mediascan/issues/36',
     },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
+      title: 'Analytics avancées de lecture',
+      description:
+        "Pour mieux comprendre vos habitudes de lecture, nous réfléchissons à de nouvelles métriques : temps passé par source, sujets récurrents, évolution de vos centres d'intérêt... Aidez-nous à définir les indicateurs les plus pertinents.",
+      status: 'investigation',
+      goal: 600,
+      funded: 0,
+      issue: 'https://github.com/Alice-Po/mediascan/issues/37',
+    },
   ];
 
   return (
