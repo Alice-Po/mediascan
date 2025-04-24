@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { CATEGORIES, ORIENTATIONS } from '../../constants';
 import RssHelpModal from './RssHelpModal';
+import PremiumBanner from '../premium/PremiumBanner';
 
 const AddSourceForm = ({
   customSource,
@@ -32,36 +33,13 @@ const AddSourceForm = ({
       </div>
 
       {/* Bannière Premium - Détection RSS */}
-      <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-2 border-dashed border-purple-200 overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center mb-2">
-            <span className="bg-purple-100 px-2 py-0.5 rounded-full text-xs font-mono text-purple-800">
-              Bientôt disponible
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-purple-900 mb-2">
-            Fini la recherche manuelle des flux RSS !
-          </h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Bientôt, vous n'aurez plus qu'à entrer l'URL du site web et nous détecterons
-            automatiquement le flux RSS correspondant.
-          </p>
-          <a
-            href="/premium"
-            className="inline-flex items-center gap-2 text-sm font-medium text-purple-700 hover:text-purple-900 group"
-          >
-            <span>En savoir plus sur la détection intelligente de flux RSS</span>
-            <svg
-              className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-      </div>
+      <PremiumBanner
+        className="mb-6"
+        variant="coming"
+        title="Fini la recherche manuelle des flux RSS !"
+        description="Bientôt, vous n'aurez plus qu'à entrer l'URL du site web et nous détecterons automatiquement le flux RSS correspondant."
+        linkText="En savoir plus sur la détection intelligente de flux RSS"
+      />
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
@@ -251,38 +229,12 @@ const AddSourceForm = ({
         </div>
       </form>
 
-      {/* Bannière modération communautaire */}
-      <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-dashed border-blue-200 overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center mb-2">
-            <span className="bg-blue-100 px-2 py-0.5 rounded-full text-xs font-mono text-blue-800">
-              En réflexion
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            Vous trouvez cette gestion de sources un peu légère ?
-          </h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Nous réfléchissons à une approche intelligente de modération communautaire pour enrichir
-            et valider collectivement les descriptions des sources. Si vous avez des idées ou de
-            l'expertise en la matière, nous serions ravis d'en discuter !
-          </p>
-          <a
-            href="/premium"
-            className="inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:text-blue-900 group"
-          >
-            <span>Contribuer à la réflexion</span>
-            <svg
-              className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-      </div>
+      <PremiumBanner
+        className="mt-8"
+        title="Vous trouvez cette gestion de sources un peu légère ?"
+        description="Nous réfléchissons à une approche intelligente de modération communautaire pour enrichir et valider collectivement les descriptions des sources. Si vous avez des idées ou de l'expertise en la matière, nous serions ravis d'en discuter !"
+        linkText="Contribuer à la réflexion"
+      />
 
       <RssHelpModal isOpen={showRssHelp} onClose={() => setShowRssHelp(false)} />
     </div>
