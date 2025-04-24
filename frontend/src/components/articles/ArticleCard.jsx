@@ -44,9 +44,21 @@ const formatRelativeTime = (date) => {
   const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
 
   if (diffInSeconds < 60) return "à l'instant";
-  if (diffInSeconds < 3600) return `il y a ${Math.floor(diffInSeconds / 60)} minutes`;
-  if (diffInSeconds < 86400) return `il y a ${Math.floor(diffInSeconds / 3600)} heures`;
-  if (diffInSeconds < 604800) return `il y a ${Math.floor(diffInSeconds / 86400)} jours`;
+
+  const minutes = Math.floor(diffInSeconds / 60);
+  if (diffInSeconds < 3600) {
+    return `il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+
+  const hours = Math.floor(diffInSeconds / 3600);
+  if (diffInSeconds < 86400) {
+    return `il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+  }
+
+  const days = Math.floor(diffInSeconds / 86400);
+  if (diffInSeconds < 604800) {
+    return `il y a ${days} jour${days > 1 ? 's' : ''}`;
+  }
 
   return new Date(date).toLocaleDateString('fr-FR');
 };

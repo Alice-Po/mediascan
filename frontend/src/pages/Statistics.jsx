@@ -101,16 +101,22 @@ const Statistics = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow">
           <div className="text-2xl font-bold">{stats.totalArticles}</div>
-          <div className="text-gray-600">Articles lus</div>
+          <div className="text-gray-600">
+            {stats.totalArticles > 1 ? 'Articles lus' : 'Article lu'}
+          </div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <div className="text-2xl font-bold">{stats.uniqueSources}</div>
-          <div className="text-gray-600">Sources consultées</div>
+          <div className="text-gray-600">
+            {stats.uniqueSources > 1 ? 'Sources consultées' : 'Source consultée'}
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
+        {/* <div className="bg-white p-4 rounded-lg shadow">
           <div className="text-2xl font-bold">{stats.uniqueCategories}</div>
-          <div className="text-gray-600">Catégories explorées</div>
-        </div>
+          <div className="text-gray-600">
+            {stats.uniqueCategories > 1 ? 'Catégories explorées' : 'Catégorie explorée'}
+          </div>
+        </div> */}
       </div>
 
       {/* Radar des orientations politiques */}
