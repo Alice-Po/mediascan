@@ -73,6 +73,7 @@ const AddSourceForm = ({
             <div className="mt-1">
               <input
                 type="url"
+                required
                 id="rssUrl"
                 name="rssUrl"
                 value={customSource.rssUrl}
@@ -101,7 +102,76 @@ const AddSourceForm = ({
             </div>
           </div>
 
-          {/* Catégories avec explication */}
+          {/* Description éditoriale */}
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              Description de la source
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Une brève description de la ligne éditoriale pour aider les utilisateurs à comprendre
+              l'approche de cette source
+            </p>
+            <textarea
+              id="description"
+              name="description"
+              value={customSource.description}
+              onChange={onSourceChange}
+              rows="3"
+              placeholder="Ex: Journal indépendant spécialisé dans le journalisme d'investigation..."
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+            />
+            {formErrors.description && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
+            )}
+          </div>
+
+          {/* Type de financement */}
+          <div>
+            <label htmlFor="funding" className="block text-sm font-medium text-gray-700 mb-2">
+              Type de financement
+            </label>
+            <p className="text-xs text-gray-500 mb-3">
+              Cette information aide à comprendre le degré d'indépendance éditoriale de la source
+            </p>
+
+            <div className="space-y-3">
+              <select
+                id="funding.type"
+                name="funding.type"
+                value={customSource.funding?.type}
+                onChange={onSourceChange}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+              >
+                <option value="">Sélectionner un type de financement</option>
+                <option value="independent">Média indépendant</option>
+                <option value="public">Service public</option>
+                <option value="private">Groupe privé / Industriel</option>
+                <option value="cooperative">Coopérative de journalistes</option>
+                <option value="association">Association / ONG</option>
+                <option value="other">Autre</option>
+              </select>
+
+              <div className="mt-3">
+                <label htmlFor="funding.details" className="block text-xs text-gray-600 mb-1">
+                  Précisions (optionnel)
+                </label>
+                <input
+                  type="text"
+                  id="funding.details"
+                  name="funding.details"
+                  value={customSource.funding?.details || ''}
+                  onChange={onSourceChange}
+                  placeholder="Ex: Appartient au groupe Bouygues, Financé par ses lecteurs..."
+                  className="block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+                />
+              </div>
+            </div>
+            {formErrors.funding && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.funding}</p>
+            )}
+          </div>
+
+          {/* Catégories avec explication
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Catégories principales
@@ -124,7 +194,7 @@ const AddSourceForm = ({
                 </label>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Orientation avec aide */}
           <div>
@@ -132,7 +202,7 @@ const AddSourceForm = ({
               htmlFor="orientation.political"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Orientation éditoriale
+              Orientation politique
             </label>
             <p className="text-xs text-gray-500 mb-3">
               Cette information aide les utilisateurs à diversifier leurs sources d'information
@@ -189,6 +259,19 @@ const AddSourceForm = ({
 AddSourceForm.propTypes = {
   customSource: PropTypes.shape({
     rssUrl: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    funding: PropTypes.shape({
+      type: PropTypes.oneOf([
+        '',
+        'independent',
+        'public',
+        'private',
+        'cooperative',
+        'association',
+        'other',
+      ]).isRequired,
+      details: PropTypes.string,
+    }).isRequired,
     categories: PropTypes.arrayOf(PropTypes.string).isRequired,
     orientation: PropTypes.shape({
       political: PropTypes.string.isRequired,
