@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchStatisticsData, fetchUserAnalytics } from '../api/analyticsApi';
+import { fetchStatisticsData, fetchUserAnalytics } from '../../api/analyticsApi';
 import {
   Radar,
   RadarChart,
@@ -8,7 +8,7 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from 'recharts';
-import PremiumBanner from '../components/premium/PremiumBanner';
+import PremiumBanner from '../../components/premium/PremiumBanner';
 
 /**
  * Prépare les données pour le graphique radar
@@ -54,7 +54,7 @@ const prepareRadarData = (orientationBreakdown) => {
 /**
  * Page des statistiques de lecture simplifiée
  */
-const Statistics = () => {
+const UserAnalytics = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -188,4 +188,4 @@ const Statistics = () => {
   );
 };
 
-export default Statistics;
+export default UserAnalytics;

@@ -11,7 +11,6 @@ import PublicAuthLayout from '../layouts/PublicAuthLayout';
 import Dashboard from '../pages/Dashboard';
 import Sources from '../pages/Sources';
 import Saved from '../pages/Saved';
-import Statistics from '../pages/Statistics';
 import Profile from '../pages/Profile';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -47,7 +46,6 @@ const AppRoutes = () => {
           <Route path="/sources" element={<Sources />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/statistics" element={<Statistics />} />
           <Route path="/premium" element={<Premium />} />
         </Route>
       </Route>
