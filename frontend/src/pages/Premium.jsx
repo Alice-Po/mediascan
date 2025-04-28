@@ -184,51 +184,60 @@ const Premium = () => {
 
   return (
     <div className="container mx-auto px-0 sm:px-4 py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-0 sm:px-6 lg:px-8">
-        <div className="text-center mb-8 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 sm:mb-12">MédiaScan</h1>
+      <div className="max-w-4xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-16 pt-16 sm:pt-0">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-6 sm:mb-12">MédiaScan</h1>
 
           <div className="space-y-6 sm:space-y-8 text-base sm:text-lg text-gray-700 max-w-3xl mx-auto">
             <div>
               <h2 className="font-semibold text-xl mb-2">Ce que nous faisons :</h2>
               <p>
-                Un agrégateur de flux d'actualités qui montre clairement d'où viennent les
-                informations et qui les contextualisent.
+                Nous développons Médiascan, un agrégateur de flux RSS qui évoluera progressivement
+                vers une plateforme complète d'information. Notre MVP actuel pose les bases d'un
+                projet qui, grâce au crowdfunding communautaire, s'enrichira de fonctionnalités
+                comme l'intégration d'infolettres, les collections de sources partageables ou toute
+                autre fonctionalités réclamées par sa communauté.
               </p>
             </div>
 
             <div>
               <h2 className="font-semibold text-xl mb-2">Pourquoi nous le faisons :</h2>
               <p>
-                Parce qu'il devient de plus en plus difficile de s'y retrouver dans le flot
-                d'informations, de distinguer les faits des opinions, et de réaliser et de
-                comprendre les différentes perspectives sur un même événement.
+                Nous sommes convaincus que l'enshitification du web a détérioré notre relation à
+                l'information. Les algorithmes opaques favorisent l'engagement émotionnel plutôt que
+                la pertinence, creusant les divisions sociales et affaiblissant notre capacité
+                d'empathie. Nous voulons briser ce cycle où nous jugeons "fous" ceux que nous ne
+                comprenons pas simplement parce que nos sources d'information diffèrent. Dans un
+                monde où être bien informé devient paradoxalement plus difficile malgré l'abondance
+                de contenus, nous croyons qu'une alternative indépendante et transparente est
+                nécessaire.
               </p>
             </div>
 
             <div>
               <h2 className="font-semibold text-xl mb-2">Notre approche :</h2>
               <p>
-                Nous ne prétendons pas avoir toutes les réponses. MédiaScan est un outil qui évolue
-                avec ses utilisateurs, dans un esprit d'ouverture et de pragmatisme. Pas de solution
-                miracle, juste un effort collectif pour mieux comprendre la complexité croissante du
-                monde.
+                Médiascan est développé par et pour sa communauté. Sans investisseurs ni pression
+                financière, nous pouvons rester fidèles à notre mission sur le long terme. Chaque
+                fonctionnalité est conçue avec pragmatisme, en réponse aux besoins réels des
+                utilisateurs et non pour maximiser l'engagement ou les revenus. Notre roadmap est
+                collaborative permettant à la communauté de guider l'évolution du projet selon ses
+                besoins.
               </p>
             </div>
 
             <div>
               <h2 className="font-semibold text-xl mb-2">Notre promesse :</h2>
               <p>
-                Rester transparent sur notre fonctionnement, accessible à tous (pas seulement aux
-                experts), et à l'écoute de vos idées pour améliorer l'outil.
+                Médiascan sera toujours un outil au service de votre compréhension du monde, jamais
+                un instrument d'exploitation de votre attention. Nous nous engageons à maintenir une
+                plateforme qui respecte votre intelligence, valorise la diversité des perspectives,
+                et vous aide à retrouver le goût de vous informer. Pas de manipulation algorithmique
+                cachée, pas de monétisation agressive de vos données, juste un outil honnête qui
+                évolue avec vous pour affronter les défis informationnels d'aujourd'hui et de
+                demain.
               </p>
             </div>
-
-            <p className="italic text-gray-600 mt-8">
-              Nous ne savons pas à quoi ressemblera l'information demain, mais nous pensons qu'en
-              travaillant ensemble, nous pourrons créer quelque chose d'utile pour naviguer dans
-              cette incertitude.
-            </p>
           </div>
 
           {/* Séparateur */}
