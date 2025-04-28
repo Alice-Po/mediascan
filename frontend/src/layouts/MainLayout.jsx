@@ -28,18 +28,11 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 relative">
-      <InfoBanner />
+    <div className="min-h-screen bg-gray-50 pt-[104px]">
       <Navbar />
-      <div className="flex-1 md:mt-[7rem] mb-16 md:mb-0">
-        {' '}
-        <main className="container mx-auto px-4 py-6">
-          <Outlet />
-        </main>
-      </div>
-
-      {/* Footer */}
-      <Footer />
+      <main className="container mx-auto px-4 md:max-w-4xl">
+        <Outlet />
+      </main>
     </div>
   );
 };
