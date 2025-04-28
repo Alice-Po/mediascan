@@ -33,7 +33,12 @@ const config = {
   cors: {
     origin:
       mode === 'development'
-        ? ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://192.168.1.10:5173']
+        ? [
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+            'http://192.168.1.10:5173',
+            'https://1d71-2a02-8434-9be0-701-5f05-7f20-f655-fb30.ngrok-free.app',
+          ]
         : process.env.CORS_ORIGIN?.split(',') || [],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
