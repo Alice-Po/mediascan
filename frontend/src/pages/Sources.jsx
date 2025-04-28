@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useSources } from '../hooks/useSources';
 import { DeletableSourceItem, SimpleSourceItem } from '../components/sources/SourceItem';
 import AddSourceForm from '../components/sources/AddSourceForm';
@@ -124,7 +124,7 @@ const Sources = () => {
       </div>
 
       <section>
-        <h2 className="text-xl font-semibold mb-4">Mes sources</h2>
+        <h2 className="text-xl font-semibold mb-4">Mes sources ({userSources?.length || 0})</h2>
         <div className="bg-white rounded-lg shadow-sm">
           {userSources.length === 0 ? (
             <div className="text-center py-8">
