@@ -91,25 +91,21 @@ const ArticleList = () => {
   };
 
   return (
-    <div className="article-list">
+    <div className="article-list -mx-3 sm:mx-0">
       {/* Liste des articles */}
       {articles.length > 0
         ? articles.map((article, index) => {
             if (articles.length === index + 1) {
-              // Dernier article, on lui ajoute la ref pour l'infinite scroll
               return (
-                <div ref={lastArticleRef} key={article._id}>
+                <div ref={lastArticleRef} key={article._id} className="mb-3 last:mb-0">
                   <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
                 </div>
               );
             } else {
               return (
-                <ArticleCard
-                  key={article._id}
-                  article={article}
-                  onSave={handleSave}
-                  onShare={handleShare}
-                />
+                <div key={article._id} className="mb-3 last:mb-0">
+                  <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
+                </div>
               );
             }
           })

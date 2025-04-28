@@ -98,16 +98,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl mb-4">Bienvenue, {user?.name}</h2>
-        {/* <InterestsList /> */}
-        {/* Filtres */}
-        <ArticleFilters />
+    <div className="bg-white rounded-lg shadow p-3 sm:p-6">
+      <h2 className="text-xl mb-4">Bienvenue, {user?.name}</h2>
+      {/* <InterestsList /> */}
+      {/* Filtres */}
+      <ArticleFilters />
 
-        {/* Liste des articles */}
-        <ArticleList />
-      </div>
+      {/* Liste des articles */}
+      <ArticleList />
     </div>
   );
 };
