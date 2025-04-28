@@ -50,6 +50,12 @@ const config = {
   },
   frontendUrl: process.env.FRONTEND_URL,
   isDev: mode === 'development',
+  security: {
+    allowedHosts: (process.env.ALLOWED_HOSTS || 'localhost').split(','),
+    listenInterface: process.env.LISTEN_INTERFACE || 'localhost',
+    trustedProxies: (process.env.TRUSTED_PROXIES || '127.0.0.1').split(','),
+    allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(','),
+  },
 };
 
 export default config;

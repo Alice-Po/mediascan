@@ -7,6 +7,7 @@ import config from './config/env.js';
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
+import { networkInterfaces } from 'os';
 
 // Configuration ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -25,18 +26,27 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 const logAppInfo = (mode) => {
   console.log('\n=== MediaScan Server ===');
   console.log(`Environment: ${mode}`);
-  console.log(`Server: http://localhost:${config.port}`);
+
+  // Déterminer l'interface d'écoute selon le mode
+  const listenInterface = mode === 'development' ? '0.0.0.0' : 'localhost';
+  console.log(`Server listening on: ${listenInterface}`);
 
   switch (mode) {
     case 'development':
       console.log('\nDevelopment URLs:');
       console.log(`Frontend: http://localhost:5173`);
       console.log(`API: http://localhost:${config.port}/api`);
-      console.log('\nEndpoints:');
-      console.log('- Auth: /api/auth');
-      console.log('- Sources: /api/sources');
-      console.log('- Articles: /api/articles');
-      console.log('- Analytics: /api/analytics');
+
+      // Afficher les adresses IP locales en développement uniquement
+      console.log('\nLocal Network Access:');
+      const interfaces = networkInterfaces();
+      Object.keys(interfaces).forEach((interfaceName) => {
+        interfaces[interfaceName].forEach((iface) => {
+          if (iface.family === 'IPv4' && !iface.internal) {
+            console.log(`http://${iface.address}:${config.port}`);
+          }
+        });
+      });
       break;
 
     case 'preview':
@@ -60,9 +70,9 @@ const app = express();
 
 // Configuration CORS selon l'environnement
 const corsOptions = {
-  ...config.cors,
+  origin: config.security.allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Ajuster les origines CORS selon le mode
@@ -73,6 +83,9 @@ if (config.mode === 'preview') {
 }
 
 app.use(cors(corsOptions));
+
+// Configuration de la sécurité
+app.set('trust proxy', config.security.trustedProxies);
 
 // Middleware de base
 app.use(express.json());
@@ -144,7 +157,7 @@ mongoose
   .connect(config.mongoUri)
   .then(() => {
     console.log('Connected to MongoDB');
-    app.listen(config.port, () => {
+    app.listen(config.port, config.security.listenInterface, () => {
       logAppInfo(config.mode);
     });
   })

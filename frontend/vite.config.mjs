@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
+      host: env.VITE_SERVER_HOST || 'localhost',
       proxy: {
         '/api': {
           target: 'http://localhost:5000',
@@ -61,6 +62,7 @@ export default defineConfig(({ mode }) => {
           secure: false,
         },
       },
+      allowedHosts: (env.VITE_ALLOWED_HOSTS || 'localhost').split(','),
     },
     envPrefix: 'VITE_',
     envDir: frontendRoot,
