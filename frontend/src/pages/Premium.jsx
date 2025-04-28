@@ -127,25 +127,25 @@ const Premium = () => {
       funded: 0,
       issue: 'https://github.com/Alice-Po/mediascan/issues/36',
     },
-    {
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-          />
-        </svg>
-      ),
-      title: 'Analytics avancées de lecture',
-      description:
-        "Pour mieux comprendre vos habitudes de lecture, nous réfléchissons à de nouvelles métriques : temps passé par source, sujets récurrents, évolution de vos centres d'intérêt... Aidez-nous à définir les indicateurs les plus pertinents.",
-      status: 'investigation',
-      goal: 600,
-      funded: 0,
-      issue: 'https://github.com/Alice-Po/mediascan/issues/37',
-    },
+    // {
+    //   icon: (
+    //     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    //       <path
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         strokeWidth="2"
+    //         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+    //       />
+    //     </svg>
+    //   ),
+    //   title: 'Analytics avancées de lecture',
+    //   description:
+    //     "Pour mieux comprendre vos habitudes de lecture, nous réfléchissons à de nouvelles métriques : temps passé par source, sujets récurrents, évolution de vos centres d'intérêt... Aidez-nous à définir les indicateurs les plus pertinents.",
+    //   status: 'investigation',
+    //   goal: 600,
+    //   funded: 0,
+    //   issue: 'https://github.com/Alice-Po/mediascan/issues/37',
+    // },
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,12 +183,12 @@ const Premium = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-12">MédiaScan</h1>
+    <div className="container mx-auto px-0 sm:px-4 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-0 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 sm:mb-12">MédiaScan</h1>
 
-          <div className="space-y-8 text-lg text-gray-700 max-w-3xl mx-auto">
+          <div className="space-y-6 sm:space-y-8 text-base sm:text-lg text-gray-700 max-w-3xl mx-auto">
             <div>
               <h2 className="font-semibold text-xl mb-2">Ce que nous faisons :</h2>
               <p>
@@ -319,237 +319,260 @@ const Premium = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Section crowdfunding */}
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-8 text-center text-white">
-          <h2 className="text-2xl font-bold mb-2">Une approche différente</h2>
-          <p className="text-lg text-purple-100">
-            Pas de levée de fonds, pas d'investisseurs : juste une communauté qui construit
-            ensemble. On ira là où vous nous guiderez.
-          </p>
-        </div>
-
-        <div className="p-8">
-          {/* Objectifs de financement */}
-          <div className="space-y-6 mb-8">
-            {features
-              .filter((feature) => feature.status === 'fundable')
-              .map((feature, index) => {
-                const progress = Math.round((feature.funded / feature.goal) * 100);
-                const isEven = index % 2 === 0;
-
-                return (
-                  <div
-                    key={feature.title}
-                    className={`bg-gradient-to-r ${
-                      isEven ? 'from-purple-50 to-indigo-50' : 'from-blue-50 to-purple-50'
-                    } rounded-lg p-6`}
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3
-                          className={`text-lg font-semibold ${
-                            isEven ? 'text-purple-900' : 'text-blue-900'
-                          }`}
-                        >
-                          {feature.title}
-                        </h3>
-                        <p
-                          className={`text-sm mt-1 ${isEven ? 'text-purple-700' : 'text-blue-700'}`}
-                        >
-                          {feature.description}
-                        </p>
-                        <a
-                          href={feature.issue}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center mt-2 text-xs text-gray-500 hover:text-gray-700"
-                        >
-                          <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-                          </svg>
-                          Voir les spécifications
-                        </a>
-                      </div>
-                      <div className="text-right">
-                        <div
-                          className={`text-2xl font-bold ${
-                            isEven ? 'text-purple-900' : 'text-blue-900'
-                          }`}
-                        >
-                          {feature.goal}€
-                        </div>
-                        <div className={`text-sm ${isEven ? 'text-purple-700' : 'text-blue-700'}`}>
-                          Objectif
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`w-full ${
-                        isEven ? 'bg-purple-100' : 'bg-blue-100'
-                      } rounded-full h-2 mb-4`}
-                    >
-                      <div
-                        className={`${isEven ? 'bg-purple-600' : 'bg-blue-600'} h-2 rounded-full`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-
-                    <div
-                      className={`flex justify-between text-sm mb-4 ${
-                        isEven ? 'text-purple-700' : 'text-blue-700'
-                      }`}
-                    >
-                      <span>{feature.funded}€ collectés</span>
-                      <span>{progress}%</span>
-                    </div>
-
-                    <button
-                      onClick={() => handleContribute(feature.title.toLowerCase(), feature.goal)}
-                      className={`w-full ${
-                        isEven
-                          ? 'bg-purple-600 hover:bg-purple-700'
-                          : 'bg-blue-600 hover:bg-blue-700'
-                      } text-white py-2 px-4 rounded-lg font-medium transition-colors`}
-                    >
-                      Contribuer à cette fonctionnalité
-                    </button>
-                  </div>
-                );
-              })}
+        {/* Section crowdfunding */}
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 sm:p-8 text-center text-white">
+            <h2 className="text-2xl font-bold mb-2">Une approche différente</h2>
+            <p className="text-lg text-purple-100">
+              Pas de levée de fonds, pas d'investisseurs : juste une communauté qui construit
+              ensemble. On ira là où vous nous guiderez.
+            </p>
           </div>
 
-          {/* Avantages contributeurs */}
-          <div className="border-t border-gray-200 pt-8 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Devenez membre premium à vie
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Pour toute contribution de 50€ ou plus, recevez un accès premium à vie à toutes les
-              fonctionnalités actuelles et futures de MediaScan.
-            </p>
-            <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
-              <p>
-                💡 Nous vous réclamerons l'argent que vous avez contribué lorsque l'objectif sera
-                atteint et le développement terminé. En attendant, votre promesse de don nous aide à
-                avancer !
+          <div className="p-2 sm:p-8">
+            {/* Objectifs de financement */}
+            <div className="space-y-4 sm:space-y-6 mb-8">
+              {features
+                .filter((feature) => feature.status === 'fundable')
+                .map((feature, index) => {
+                  const progress = Math.round((feature.funded / feature.goal) * 100);
+                  const isEven = index % 2 === 0;
+
+                  return (
+                    <div
+                      key={feature.title}
+                      className={`bg-gradient-to-r ${
+                        isEven ? 'from-purple-50 to-indigo-50' : 'from-blue-50 to-purple-50'
+                      } rounded-lg p-3 sm:p-6 mx-0`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 hidden sm:block">{feature.icon}</div>
+                            <div>
+                              <h3
+                                className={`text-lg font-semibold ${
+                                  isEven ? 'text-purple-900' : 'text-blue-900'
+                                }`}
+                              >
+                                {feature.title}
+                              </h3>
+                              <p
+                                className={`text-sm mt-1 ${
+                                  isEven ? 'text-purple-700' : 'text-blue-700'
+                                }`}
+                              >
+                                {feature.description}
+                              </p>
+                              <a
+                                href={feature.issue}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center mt-2 text-xs text-gray-500 hover:text-gray-700"
+                              >
+                                <svg
+                                  className="w-3.5 h-3.5 mr-1"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                                </svg>
+                                Voir les spécifications
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div
+                            className={`text-xl sm:text-2xl font-bold ${
+                              isEven ? 'text-purple-900' : 'text-blue-900'
+                            }`}
+                          >
+                            {feature.goal}€
+                          </div>
+                          <div
+                            className={`text-sm ${isEven ? 'text-purple-700' : 'text-blue-700'}`}
+                          >
+                            Objectif
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Barre de progression et bouton */}
+                      <div className="space-y-4">
+                        <div>
+                          <div
+                            className={`w-full ${
+                              isEven ? 'bg-purple-100' : 'bg-blue-100'
+                            } rounded-full h-2 mb-2`}
+                          >
+                            <div
+                              className={`${
+                                isEven ? 'bg-purple-600' : 'bg-blue-600'
+                              } h-2 rounded-full`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <div
+                            className={`flex justify-between text-xs sm:text-sm ${
+                              isEven ? 'text-purple-700' : 'text-blue-700'
+                            }`}
+                          >
+                            <span>{feature.funded}€ collectés</span>
+                            <span>{progress}%</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            handleContribute(feature.title.toLowerCase(), feature.goal)
+                          }
+                          className={`w-full ${
+                            isEven
+                              ? 'bg-purple-600 hover:bg-purple-700'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          } text-white py-2 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base`}
+                        >
+                          Contribuer à cette fonctionnalité
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Avantages contributeurs */}
+            <div className="border-t border-gray-200 pt-6 sm:pt-8 text-center px-2 sm:px-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Devenez membre premium à vie
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Pour toute contribution de 50€ ou plus, recevez un accès premium à vie à toutes les
+                fonctionnalités actuelles et futures de MediaScan.
               </p>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
+                <p>
+                  💡 Nous vous réclamerons l'argent que vous avez contribué lorsque l'objectif sera
+                  atteint et le développement terminé. En attendant, votre promesse de don nous aide
+                  à avancer !
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Section Investigation */}
-      <div className="max-w-3xl mx-auto mt-16">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Contribuez avec votre expertise</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto mt-8 sm:mt-16 px-2 sm:px-0">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
+            Contribuez avec votre expertise
+          </h2>
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-6">
             Ces fonctionnalités sont en phase d'étude. Votre expérience, vos contacts ou vos idées
             peuvent nous aider à les concrétiser plus rapidement et plus efficacement.
           </p>
+
+          {/* Section "Comment contribuer" */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="text-sm text-left">
+                <span className="font-medium text-gray-900">Retour d'expérience</span>
+                <p className="text-gray-600">Partagez vos expériences similaires</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+              <div className="text-sm text-left">
+                <span className="font-medium text-gray-900">Contacts</span>
+                <p className="text-gray-600">Mettez-nous en relation avec des experts</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <div className="text-sm text-left">
+                <span className="font-medium text-gray-900">Idées</span>
+                <p className="text-gray-600">Proposez des solutions originales</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                  />
+                </svg>
+              </div>
+              <div className="text-sm text-left">
+                <span className="font-medium text-gray-900">Code</span>
+                <p className="text-gray-600">Contribuez au développement</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {features
             .filter((feature) => feature.status === 'investigation')
             .map((feature) => (
               <div
                 key={feature.title}
-                className="bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-all"
+                className="bg-gradient-to-r from-gray-50 to-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-all"
               >
-                <div className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <div className="p-4 sm:p-6">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="hidden sm:flex flex-shrink-0 w-12 h-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
                       {feature.icon}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
-                        <span className="px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 rounded-full">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                          {feature.title}
+                        </h3>
+                        <span className="self-start sm:self-auto px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 rounded-full">
                           En réflexion
                         </span>
                       </div>
-                      <p className="text-gray-600 mb-4">{feature.description}</p>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">
+                        {feature.description}
+                      </p>
 
-                      <div className="space-y-3">
-                        <h4 className="font-medium text-gray-900">Comment contribuer ?</h4>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
-                              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium text-gray-900">Retour d'expérience</span>
-                              <p className="text-gray-600">Partagez vos expériences similaires</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
-                              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                />
-                              </svg>
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium text-gray-900">Contacts</span>
-                              <p className="text-gray-600">
-                                Mettez-nous en relation avec des experts
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
-                              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                                />
-                              </svg>
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium text-gray-900">Idées</span>
-                              <p className="text-gray-600">Proposez des solutions originales</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 w-5 h-5 mt-0.5 text-blue-600">
-                              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                />
-                              </svg>
-                            </div>
-                            <div className="text-sm">
-                              <span className="font-medium text-gray-900">Code</span>
-                              <p className="text-gray-600">Contribuez au développement</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                         <a
                           href={`/feedback?type=investigation&feature=${feature.title.toLowerCase()}`}
-                          className="flex-1 inline-flex justify-center items-center px-4 py-2 border-2 border-blue-600 text-blue-700 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+                          className="flex-1 inline-flex justify-center items-center px-4 py-2 border-2 border-blue-600 text-blue-700 hover:bg-blue-50 rounded-lg font-medium transition-colors text-sm sm:text-base"
                         >
                           Partager mon expertise
                         </a>
@@ -557,14 +580,14 @@ const Premium = () => {
                           href={feature.issue}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                          className="flex-1 inline-flex justify-center items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm sm:text-base"
                         >
-                          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                              fillRule="evenodd"
-                              clipRule="evenodd"
-                              d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"
-                            />
+                          <svg
+                            className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
                           </svg>
                           Voir sur GitHub
                         </a>
@@ -578,26 +601,31 @@ const Premium = () => {
       </div>
 
       {/* Section Propositions */}
-      <div className="max-w-3xl mx-auto mt-16 mb-16">
-        <div className="bg-white rounded-xl border border-gray-200 p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+      <div className="max-w-3xl mx-auto mt-8 sm:mt-16 mb-8 sm:mb-16 px-2 sm:px-0">
+        <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+            <div className="flex-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                 Vous avez une expertise à partager ?
               </h2>
-              <p className="text-gray-600 max-w-xl">
+              <p className="text-sm sm:text-base text-gray-600 max-w-xl">
                 Que vous soyez journalistes, chercheurs, développeur, designer, expert en UX ou
                 simplement passionné par l'information, votre expérience peut enrichir le projet.
               </p>
             </div>
 
-            <div className="flex flex-col items-end">
+            <div className="flex sm:flex-col sm:items-end">
               <a
                 href="/feedback"
-                className="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-700 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white text-sm sm:text-base font-medium rounded-lg sm:rounded-xl hover:bg-purple-700 transition-colors"
               >
-                Proposer une contribution
-                <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span>Proposer une contribution</span>
+                <svg
+                  className="w-4 h-4 ml-2 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
