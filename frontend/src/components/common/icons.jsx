@@ -1,0 +1,24 @@
+import React from 'react';
+
+export const AntennaIcon = () => (
+  <svg
+    className="h-full w-full"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {/* Base de l'antenne */}
+    <line x1="12" y1="24" x2="12" y2="16" />
+    {/* Support de l'antenne */}
+    <line x1="8" y1="16" x2="16" y2="16" />
+    {/* Antenne principale */}
+    <path d="M12 16L12 2" />
+    {/* Ondes radio (3 arcs) */}
+    <path d="M6 8C6 8 9 5 12 5C15 5 18 8 18 8" />
+    <path d="M4 4C4 4 8 1 12 1C16 1 20 4 20 4" />
+    <path d="M8 12C8 12 10 9 12 9C14 9 16 12 16 12" />
+  </svg>
+);

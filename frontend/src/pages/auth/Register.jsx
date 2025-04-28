@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { AntennaIcon } from '../../components/common/icons';
 
 /**
  * Page d'inscription
@@ -157,159 +158,166 @@ const Register = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* En-tête */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">MédiaScan</h1>
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">Inscription</h2>
-          <p className="mt-2 text-sm text-gray-600">Créez votre compte pour commencer</p>
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="text-gray-800 w-12 h-12">
+            <AntennaIcon />
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenue sur Médiascan</h1>
+        <h2 className="text-xl text-gray-600">Retrouvez le plaisir de vous informer.</h2>
+      </div>
+
+      {/* Formulaire d'inscription */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Adresse email
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="exemple@email.com"
+                  className={`appearance-none block w-full px-3 py-2 border ${
+                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                />
+                {errors.email && (
+                  <p className="mt-2 text-sm text-red-600" id="email-error">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Mot de passe */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Mot de passe
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border ${
+                    errors.password ? 'border-red-300' : 'border-gray-300'
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                />
+                {errors.password && (
+                  <p className="mt-2 text-sm text-red-600" id="password-error">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Confirmation du mot de passe */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirmer le mot de passe
+              </label>
+              <div className="mt-1">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border ${
+                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
+                  aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+                />
+                {errors.confirmPassword && (
+                  <p className="mt-2 text-sm text-red-600" id="confirmPassword-error">
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Conditions d'utilisation */}
+            <div className="flex items-center">
+              <input
+                id="acceptTerms"
+                name="acceptTerms"
+                type="checkbox"
+                onChange={handleChange}
+                checked={formData.acceptTerms}
+                className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+              />
+              <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
+                J'accepte les{' '}
+                <Link
+                  to="/terms-of-service"
+                  className="text-primary hover:text-primary-dark underline"
+                >
+                  conditions d'utilisation
+                </Link>
+              </label>
+            </div>
+            {errors.acceptTerms && (
+              <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p>
+            )}
+
+            {/* Bouton d'inscription */}
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-busy={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="sr-only">Inscription en cours...</span>
+                    <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2" />
+                  </>
+                ) : (
+                  "S'inscrire"
+                )}
+              </button>
+            </div>
+
+            {/* Lien de connexion */}
+            <div className="text-center text-sm">
+              <p className="text-gray-600">
+                Déjà un compte ?{' '}
+                <Link to="/login" className="font-medium text-primary hover:text-primary-dark">
+                  Connectez-vous
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
 
-        {/* Message d'erreur */}
-        {error && (
-          <div
-            className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative"
-            role="alert"
-          >
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Adresse email
-            </label>
-            <div className="mt-1">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="exemple@email.com"
-                className={`appearance-none block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
-                aria-describedby={errors.email ? 'email-error' : undefined}
-              />
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600" id="email-error">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Mot de passe */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Mot de passe
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className={`appearance-none block w-full px-3 py-2 border ${
-                  errors.password ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
-                aria-describedby={errors.password ? 'password-error' : undefined}
-              />
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-600" id="password-error">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Confirmation du mot de passe */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-              Confirmer le mot de passe
-            </label>
-            <div className="mt-1">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`appearance-none block w-full px-3 py-2 border ${
-                  errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm`}
-                aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-              />
-              {errors.confirmPassword && (
-                <p className="mt-2 text-sm text-red-600" id="confirmPassword-error">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Conditions d'utilisation */}
-          <div className="flex items-center">
-            <input
-              id="acceptTerms"
-              name="acceptTerms"
-              type="checkbox"
-              onChange={handleChange}
-              checked={formData.acceptTerms}
-              className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-            />
-            <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-900">
-              J'accepte les{' '}
-              <Link
-                to="/terms-of-service"
-                className="text-primary hover:text-primary-dark underline"
-              >
-                conditions d'utilisation
-              </Link>
-            </label>
-          </div>
-          {errors.acceptTerms && <p className="mt-2 text-sm text-red-600">{errors.acceptTerms}</p>}
-
-          {/* Bouton d'inscription */}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-busy={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="sr-only">Inscription en cours...</span>
-                  <span className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2" />
-                </>
-              ) : (
-                "S'inscrire"
-              )}
-            </button>
-          </div>
-
-          {/* Lien de connexion */}
-          <div className="text-center text-sm">
-            <p className="text-gray-600">
-              Déjà un compte ?{' '}
-              <Link to="/login" className="font-medium text-primary hover:text-primary-dark">
-                Connectez-vous
-              </Link>
-            </p>
-          </div>
-        </form>
+        {/* Note en bas de page */}
+        <div className="mt-6">
+          <p className="text-xs text-gray-500 text-center">
+            Médiascan est un projet open source financé par sa communauté, sans investisseurs
+            externes ni publicité. Votre soutien est notre seul moteur.
+          </p>
+        </div>
       </div>
     </div>
   );

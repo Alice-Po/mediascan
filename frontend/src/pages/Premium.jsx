@@ -203,14 +203,22 @@ const Premium = () => {
             <div>
               <h2 className="font-semibold text-xl mb-2">Pourquoi nous le faisons :</h2>
               <p>
-                Nous sommes convaincus que l'enshitification du web a détérioré notre relation à
-                l'information. Les algorithmes opaques favorisent l'engagement émotionnel plutôt que
-                la pertinence, creusant les divisions sociales et affaiblissant notre capacité
-                d'empathie. Nous voulons briser ce cycle où nous jugeons "fous" ceux que nous ne
-                comprenons pas simplement parce que nos sources d'information diffèrent. Dans un
-                monde où être bien informé devient paradoxalement plus difficile malgré l'abondance
-                de contenus, nous croyons qu'une alternative indépendante et transparente est
-                nécessaire.
+                Nous sommes convaincus que l'"
+                <a
+                  href="https://fr.wiktionary.org/wiki/enshittification"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  enshittification
+                </a>
+                " du web a détérioré notre relation à l'information. Les algorithmes opaques
+                favorisent l'engagement émotionnel plutôt que la pertinence, creusant les divisions
+                sociales et affaiblissant notre capacité d'empathie. Nous voulons briser ce cycle où
+                nous jugeons "fous" ceux que nous ne comprenons pas simplement parce que nos sources
+                d'information diffèrent. Dans un monde où être bien informé devient paradoxalement
+                plus difficile malgré l'abondance de contenus, nous croyons qu'une alternative
+                indépendante et transparente est nécessaire.
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { AntennaIcon } from './icons';
 
 // Icônes (tu pourras remplacer par des importations de bibliothèques d'icônes)
 const HomeIcon = () => (
@@ -71,65 +72,45 @@ const ProfileIcon = () => (
   </svg>
 );
 
-// Ajouter une icône pour la déconnexion
-const LogoutIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-    />
-  </svg>
-);
+// const LogoutIcon = () => (
+//   <svg
+//     xmlns="http://www.w3.org/2000/svg"
+//     className="h-6 w-6"
+//     fill="none"
+//     viewBox="0 0 24 24"
+//     stroke="currentColor"
+//   >
+//     <path
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       strokeWidth={2}
+//       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+//     />
+//   </svg>
+// );
 
-// Ajouter l'icône du radar
-const RadarIcon = () => (
-  <svg
-    className="h-6 w-6"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 2v10" />
-    <path d="M12 12l8-4" />
-    <path d="M12 12l-8 4" />
-  </svg>
-);
-
-// Ajouter l'icône de l'antenne
-const AntennaIcon = () => (
-  <svg
-    className="h-6 w-6"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    {/* Base de l'antenne */}
-    <line x1="12" y1="24" x2="12" y2="16" />
-    {/* Support de l'antenne */}
-    <line x1="8" y1="16" x2="16" y2="16" />
-    {/* Antenne principale */}
-    <path d="M12 16L12 2" />
-    {/* Ondes radio (3 arcs) */}
-    <path d="M6 8C6 8 9 5 12 5C15 5 18 8 18 8" />
-    <path d="M4 4C4 4 8 1 12 1C16 1 20 4 20 4" />
-    <path d="M8 12C8 12 10 9 12 9C14 9 16 12 16 12" />
-  </svg>
-);
+// const AntennaIcon = () => (
+//   <svg
+//     className="h-6 w-6"
+//     viewBox="0 0 24 24"
+//     fill="none"
+//     stroke="currentColor"
+//     strokeWidth="2"
+//     strokeLinecap="round"
+//     strokeLinejoin="round"
+//   >
+//     {/* Base de l'antenne */}
+//     <line x1="12" y1="24" x2="12" y2="16" />
+//     {/* Support de l'antenne */}
+//     <line x1="8" y1="16" x2="16" y2="16" />
+//     {/* Antenne principale */}
+//     <path d="M12 16L12 2" />
+//     {/* Ondes radio (3 arcs) */}
+//     <path d="M6 8C6 8 9 5 12 5C15 5 18 8 18 8" />
+//     <path d="M4 4C4 4 8 1 12 1C16 1 20 4 20 4" />
+//     <path d="M8 12C8 12 10 9 12 9C14 9 16 12 16 12" />
+//   </svg>
+// );
 
 // Ajouter l'icône Premium
 const PremiumIcon = () => (
