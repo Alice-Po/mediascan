@@ -151,7 +151,7 @@ const Onboarding = () => {
   const recommendedSources = Array.isArray(allSources) ? allSources.slice(0, 20) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-24 sm:pt-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
@@ -182,50 +182,95 @@ const Onboarding = () => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Vous venez de trouver mieux que Google News
                 </h2>
+                <span className="text-gray-600">(enfin... on y travaille !)</span>
+                <br />
+                <br />
                 <p className="text-gray-600">
-                  MédiaScan est un agrégateur d'actualités collaboratif
+                  Vous arrivez au tout début de l'aventure Médiascan ! Pour l'instant, c'est un
+                  simple agrégateur d'actualités avec ses petits bugs. Mais c'est aussi le moment
+                  idéal pour façonner son avenir et profiter des meilleures conditions pour devenir
+                  membre premium.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h3 className="font-medium text-blue-900 mb-2">🎯 Vision Claire</h3>
-                  <p className="text-sm text-blue-800">
-                    Visualisez rapidement les différentes perspectives sur un même sujet d'actualité
-                  </p>
-                </div>
-
-                <div className="p-4 bg-purple-50 rounded-lg">
-                  <h3 className="font-medium text-purple-900 mb-2">🔍 Transparence</h3>
-                  <p className="text-sm text-purple-800">
-                    Identifiez facilement l'orientation éditoriale de chaque source
-                  </p>
-                </div>
-
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <h3 className="font-medium text-green-900 mb-2">📊 Personnalisation</h3>
-                  <p className="text-sm text-green-800">
-                    Choisissez vos sources préférées et suivez les sujets qui vous intéressent
-                    (Média, blog, infolettre..)
-                  </p>
-                </div>
-
-                <div className="p-4 bg-yellow-50 rounded-lg">
-                  <h3 className="font-medium text-yellow-900 mb-2">🤝 Collaboration</h3>
-                  <p className="text-sm text-yellow-800">
-                    Participez à l'amélioration continue en suggérant de nouvelles sources ou des
-                    nouvelles fonctionalités.
-                  </p>
+              {/* Ce que vous pouvez faire dès maintenant */}
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">
+                  Ce que vous pouvez faire dès maintenant
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span role="img" aria-label="rss" className="text-xl">
+                        📰
+                      </span>
+                      <p className="text-sm text-blue-800">
+                        Centraliser vos sources d'information préférées via leurs flux RSS
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span role="img" aria-label="organize" className="text-xl">
+                        🗂️
+                      </span>
+                      <p className="text-sm text-purple-800">
+                        Consulter et filtrer votre fil d'actualités à votre façon
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span role="img" aria-label="share" className="text-xl">
+                        🤝
+                      </span>
+                      <p className="text-sm text-green-800">
+                        Participer au financement des futures fonctionnalités qui vous tiennent à
+                        cœur
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-yellow-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span role="img" aria-label="feedback" className="text-xl">
+                        💡
+                      </span>
+                      <p className="text-sm text-yellow-800">
+                        Nous aider à améliorer l'outil en signalant bugs et suggestions
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-medium text-gray-900 mb-2">Notre engagement</h3>
-                <ul className="text-sm text-gray-700 space-y-2">
-                  <li>✓ Service gratuit avec fonctionnalités premium optionnelles</li>
-                  <li>✓ Pas de revente de vos données personnelles</li>
-                  <li>✓ Code source ouvert et transparent</li>
-                </ul>
+              {/* Le Médiascan de demain */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                <h3 className="font-medium text-gray-900 mb-3">Le Médiascan de demain</h3>
+                <p className="text-gray-600 mb-4">
+                  L'avenir de l'information en ligne est incertain, mais une chose est sûre : nous
+                  ne voulons pas dépendre d'investisseurs qui nous pousseraient à monétiser votre
+                  attention à tout prix. C'est pourquoi nous développons Médiascan différemment.
+                </p>
+                <p className="text-gray-600 mb-4">
+                  En tant que premiers utilisateurs, vous avez un pouvoir unique : celui d'orienter
+                  le développement de Médiascan selon vos besoins réels. Chaque nouvelle
+                  fonctionnalité sera développée grâce au financement participatif, et deviendra
+                  ensuite accessible via un abonnement premium.
+                </p>
+                <p className="text-gray-600 font-medium">
+                  🌟 Offre early adopter : En participant au financement maintenant, vous devenez
+                  premium à vie !
+                </p>
+                <div className="flex items-center gap-2 text-sm text-blue-700 mt-4">
+                  <span role="img" aria-label="build" className="text-base">
+                    🏗️
+                  </span>
+                  <span className="font-medium">
+                    <a href="/premium" target="_blank" rel="noopener noreferrer">
+                      Découvrir les fonctionnalités en cours de financement
+                    </a>
+                  </span>
+                </div>
               </div>
             </div>
           )}
