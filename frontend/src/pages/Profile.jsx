@@ -193,6 +193,10 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   // Afficher un message de chargement
   if (loading && !profileData.name) {
     return (
@@ -496,6 +500,16 @@ const Profile = () => {
           <h2 className="text-lg font-medium text-gray-800 mb-2">À propos</h2>
           <p className="text-sm text-gray-600 mb-1">MédiaScanon MVP 1.0.0</p>
           <p className="text-sm text-gray-500">Vous utilisez actuellement la version gratuite.</p>
+        </div>
+
+        {/* Ajout du bouton de déconnexion */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <button
+            onClick={handleLogout}
+            className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Se déconnecter
+          </button>
         </div>
       </div>
     </div>

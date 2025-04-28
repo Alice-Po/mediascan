@@ -131,6 +131,24 @@ const AntennaIcon = () => (
   </svg>
 );
 
+// Ajouter l'icône Premium
+const PremiumIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+    />
+  </svg>
+);
+
 const Navbar = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -196,7 +214,7 @@ const Navbar = () => {
                   }`
                 }
               >
-                Tarifs
+                Premium
               </NavLink>
 
               <button
@@ -213,8 +231,6 @@ const Navbar = () => {
       {/* Navigation mobile */}
       <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-50">
         <div className="grid grid-cols-5">
-          {' '}
-          {/* Changé de 4 à 5 colonnes */}
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -229,16 +245,19 @@ const Navbar = () => {
               <span className="text-xs mt-1">{item.label}</span>
             </NavLink>
           ))}
-          {/* Bouton de déconnexion mobile */}
-          <button
-            onClick={handleLogout}
-            className="flex flex-col items-center justify-center py-2 text-gray-500 hover:text-red-600 transition-colors"
+          <NavLink
+            to="/premium"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center py-2 transition-colors ${
+                isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
+              }`
+            }
           >
             <div className="h-6 w-6">
-              <LogoutIcon />
+              <PremiumIcon />
             </div>
-            <span className="text-xs mt-1">Déconnexion</span>
-          </button>
+            <span className="text-xs mt-1">Premium</span>
+          </NavLink>
         </div>
       </nav>
     </>
