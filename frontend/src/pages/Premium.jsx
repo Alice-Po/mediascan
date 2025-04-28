@@ -146,6 +146,40 @@ const Premium = () => {
       funded: 0,
       issue: 'https://github.com/Alice-Po/mediascan/issues/37',
     },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+          />
+        </svg>
+      ),
+      title: 'Couverture médiatique complète',
+      description:
+        "Agrégation intelligente des articles sur un même sujet, sans personnalisation, pour une vision plus objective de l'actualité.Exactement comme le fait Google News",
+      status: 'investigation',
+      issue: 'https://github.com/Alice-Po/mediascan/issues/39',
+    },
+    {
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+      ),
+      title: 'Playlists de sources',
+      description:
+        "Créez et partagez des collections de sources thématiques, comme des playlists Spotify. Idéal pour la veille collaborative et le partage de centres d'intérêt spécifiques.",
+      status: 'investigation',
+      issue: 'https://github.com/Alice-Po/mediascan/issues/40',
+    },
   ];
 
   return (
