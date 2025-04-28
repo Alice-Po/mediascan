@@ -25,6 +25,18 @@ const SourceItemBase = ({ source, children, leftAction }) => {
   const words = description.split(' ');
   const shortDescription = words.length > 20 ? words.slice(0, 20).join(' ') + '...' : description;
 
+  // Helper pour afficher le type de financement
+  const getFundingTypeLabel = (type) => {
+    const types = {
+      private: 'Privé',
+      public: 'Public',
+      cooperative: 'Coopératif',
+      association: 'Associatif',
+      independent: 'Indépendant',
+    };
+    return types[type] || type;
+  };
+
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-sm">
       {/* Action à gauche (checkbox, etc.) */}
@@ -59,6 +71,19 @@ const SourceItemBase = ({ source, children, leftAction }) => {
         <div className="flex-1 min-w-0 space-y-1">
           <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">{source.name}</h3>
           <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">{shortDescription}</p>
+
+          {/* Financement */}
+          {source.funding && (
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-500">
+                {getFundingTypeLabel(source.funding.type)}
+              </span>
+              <span className="text-gray-300">•</span>
+              <span className="text-xs text-gray-500 truncate" title={source.funding.details}>
+                {source.funding.details}
+              </span>
+            </div>
+          )}
 
           {/* Tags et orientation en version mobile */}
           <div className="flex flex-wrap gap-2 sm:hidden mt-2">
