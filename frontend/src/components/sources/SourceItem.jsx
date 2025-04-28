@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ORIENTATIONS } from '../../constants';
 import { isLightColor } from '../../utils/colorUtils';
+import SourceDetailsModal from './SourceDetailsModal';
 
 // Icône de poubelle personnalisée
 const TrashIcon = ({ className }) => (
@@ -17,6 +18,7 @@ const TrashIcon = ({ className }) => (
 
 // Composant de base
 const SourceItemBase = ({ source, children, leftAction }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
   const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
 
@@ -37,60 +39,97 @@ const SourceItemBase = ({ source, children, leftAction }) => {
     return types[type] || type;
   };
 
+  const handleClick = (e) => {
+    // Ne pas ouvrir la modal si on clique sur un bouton ou un lien
+    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) {
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-sm">
-      {/* Action à gauche (checkbox, etc.) */}
-      {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
+    <>
+      <div
+        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleClick}
+      >
+        {/* Action à gauche (checkbox, etc.) */}
+        {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
 
-      {/* Logo et infos */}
-      <div className="flex flex-1 min-w-0 gap-3 sm:gap-4">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          {source.faviconUrl ? (
-            <img
-              src={source.faviconUrl}
-              alt={`Logo ${source.name}`}
-              className="w-12 h-12 rounded object-contain bg-gray-50"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-          ) : null}
-          <div
-            className={`w-12 h-12 rounded flex items-center justify-center text-lg font-semibold ${
-              source.faviconUrl ? 'hidden' : ''
-            }`}
-            style={{ backgroundColor: bgColor, color: textColor }}
-          >
-            {source.name.charAt(0).toUpperCase()}
-          </div>
-        </div>
-
-        {/* Informations */}
-        <div className="flex-1 min-w-0 space-y-1">
-          <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">{source.name}</h3>
-          <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">{shortDescription}</p>
-
-          {/* Financement */}
-          {source.funding && (
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-500">
-                {getFundingTypeLabel(source.funding.type)}
-              </span>
-              <span className="text-gray-300">•</span>
-              <span className="text-xs text-gray-500 truncate" title={source.funding.details}>
-                {source.funding.details}
-              </span>
+        {/* Logo et infos */}
+        <div className="flex flex-1 min-w-0 gap-3 sm:gap-4">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            {source.faviconUrl ? (
+              <img
+                src={source.faviconUrl}
+                alt={`Logo ${source.name}`}
+                className="w-12 h-12 rounded object-contain bg-gray-50"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div
+              className={`w-12 h-12 rounded flex items-center justify-center text-lg font-semibold ${
+                source.faviconUrl ? 'hidden' : ''
+              }`}
+              style={{ backgroundColor: bgColor, color: textColor }}
+            >
+              {source.name.charAt(0).toUpperCase()}
             </div>
-          )}
+          </div>
 
-          {/* Tags et orientation en version mobile */}
-          <div className="flex flex-wrap gap-2 sm:hidden mt-2">
+          {/* Informations */}
+          <div className="flex-1 min-w-0 space-y-1">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">
+              {source.name}
+            </h3>
+            <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">{shortDescription}</p>
+
+            {/* Financement */}
+            {source.funding && (
+              <div className="mt-1 flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-500">
+                  {getFundingTypeLabel(source.funding.type)}
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="text-xs text-gray-500 truncate" title={source.funding.details}>
+                  {source.funding.details}
+                </span>
+              </div>
+            )}
+
+            {/* Tags et orientation en version mobile */}
+            <div className="flex flex-wrap gap-2 sm:hidden mt-2">
+              <span
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: `${bgColor}33`, // Ajoute une transparence
+                  color:
+                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
+                }}
+              >
+                {source.orientation.political}
+              </span>
+              {source.categories?.map((category) => (
+                <span
+                  key={category}
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Tags et orientation en version desktop */}
+          <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
             <span
-              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
               style={{
-                backgroundColor: `${bgColor}33`, // Ajoute une transparence
+                backgroundColor: `${bgColor}33`,
                 color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
               }}
             >
@@ -99,7 +138,7 @@ const SourceItemBase = ({ source, children, leftAction }) => {
             {source.categories?.map((category) => (
               <span
                 key={category}
-                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
               >
                 {category}
               </span>
@@ -107,35 +146,20 @@ const SourceItemBase = ({ source, children, leftAction }) => {
           </div>
         </div>
 
-        {/* Tags et orientation en version desktop */}
-        <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
-          <span
-            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-            style={{
-              backgroundColor: `${bgColor}33`,
-              color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
-            }}
-          >
-            {source.orientation.political}
-          </span>
-          {source.categories?.map((category) => (
-            <span
-              key={category}
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-            >
-              {category}
-            </span>
-          ))}
-        </div>
+        {/* Actions à droite */}
+        {children && (
+          <div className="flex justify-end items-center gap-2 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0">
+            {children}
+          </div>
+        )}
       </div>
 
-      {/* Actions à droite */}
-      {children && (
-        <div className="flex justify-end items-center gap-2 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0">
-          {children}
-        </div>
-      )}
-    </div>
+      <SourceDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        source={source}
+      />
+    </>
   );
 };
 

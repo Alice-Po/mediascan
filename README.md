@@ -27,6 +27,8 @@ Frontend: http://localhost:5173
 Backend API: http://localhost:5000
 ```
 
+ngrok http http://localhost:5173
+
 ### MongoDB Express Access
 
 - URL: http://localhost:8081
