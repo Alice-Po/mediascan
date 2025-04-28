@@ -164,7 +164,11 @@ mongoose
   .connect(config.mongoUri)
   .then(() => {
     console.log('Connected to MongoDB');
-    app.listen(config.port, config.security.listenInterface, () => {
+    // En production, on écoute sur toutes les interfaces
+    const listenInterface =
+      config.mode === 'production' ? '0.0.0.0' : config.security.listenInterface;
+
+    app.listen(config.port, listenInterface, () => {
       logAppInfo(config.mode);
     });
   })
