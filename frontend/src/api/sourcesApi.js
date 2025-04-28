@@ -94,3 +94,13 @@ export const deleteUserSource = async (sourceId) => {
     throw error;
   }
 };
+
+export const fetchSourceById = async (sourceId) => {
+  try {
+    const response = await api.get(`/sources/${sourceId}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Erreur dans fetchSourceById:', error.response?.data || error.message);
+    throw error;
+  }
+};

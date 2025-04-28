@@ -388,3 +388,33 @@ export const validateRssUrl = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Récupérer une source par son ID
+ * @route   GET /api/sources/:id
+ * @access  Private
+ */
+export const getSourceById = async (req, res) => {
+  try {
+    const source = await Source.findById(req.params.id);
+
+    if (!source) {
+      return res.status(404).json({
+        success: false,
+        message: 'Source non trouvée',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: source,
+    });
+  } catch (error) {
+    console.error('Erreur dans getSourceById:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération de la source',
+      error: error.message,
+    });
+  }
+};

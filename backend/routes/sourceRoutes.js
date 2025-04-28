@@ -7,6 +7,7 @@ import {
   disableUserSource,
   deleteUserSource,
   validateRssUrl,
+  getSourceById,
 } from '../controllers/sourceController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -22,5 +23,6 @@ router.delete('/user/:id', protect, deleteUserSource);
 router.post('/validate-rss', protect, validateRssUrl);
 router.post('/user/:sourceId/enable', protect, enableUserSource);
 router.post('/user/:sourceId/disable', protect, disableUserSource);
+router.get('/:id', protect, getSourceById);
 
 export default router;
