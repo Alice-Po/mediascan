@@ -26,29 +26,90 @@ const SourceItemBase = ({ source, children, leftAction }) => {
   const shortDescription = words.length > 20 ? words.slice(0, 20).join(' ') + '...' : description;
 
   return (
-    <div className="flex items-center p-2 border border-gray-200 rounded-md hover:bg-gray-50">
-      {leftAction}
-      <div className="flex items-center flex-grow">
-        {/* Info source */}
-        {source.faviconUrl && <img src={source.faviconUrl} alt="" className="w-5 h-5 mr-2" />}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-medium text-gray-900 truncate">{source.name}</h3>
-          <p className="mt-1 text-sm text-gray-500">{shortDescription}</p>
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-sm">
+      {/* Action à gauche (checkbox, etc.) */}
+      {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
+
+      {/* Logo et infos */}
+      <div className="flex flex-1 min-w-0 gap-3 sm:gap-4">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          {source.faviconUrl ? (
+            <img
+              src={source.faviconUrl}
+              alt={`Logo ${source.name}`}
+              className="w-12 h-12 rounded object-contain bg-gray-50"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div
+            className={`w-12 h-12 rounded flex items-center justify-center text-lg font-semibold ${
+              source.faviconUrl ? 'hidden' : ''
+            }`}
+            style={{ backgroundColor: bgColor, color: textColor }}
+          >
+            {source.name.charAt(0).toUpperCase()}
+          </div>
         </div>
-        <div className="ml-auto mr-2">
+
+        {/* Informations */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">{source.name}</h3>
+          <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">{shortDescription}</p>
+
+          {/* Tags et orientation en version mobile */}
+          <div className="flex flex-wrap gap-2 sm:hidden mt-2">
+            <span
+              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+              style={{
+                backgroundColor: `${bgColor}33`, // Ajoute une transparence
+                color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
+              }}
+            >
+              {source.orientation.political}
+            </span>
+            {source.categories?.map((category) => (
+              <span
+                key={category}
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Tags et orientation en version desktop */}
+        <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
           <span
-            className="px-2 py-1 text-xs rounded-full"
+            className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
             style={{
-              backgroundColor: bgColor,
-              color: textColor,
+              backgroundColor: `${bgColor}33`,
+              color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
             }}
           >
-            {ORIENTATIONS.political[source.orientation.political]?.label ||
-              source.orientation.political}
+            {source.orientation.political}
           </span>
+          {source.categories?.map((category) => (
+            <span
+              key={category}
+              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+            >
+              {category}
+            </span>
+          ))}
         </div>
       </div>
-      {children}
+
+      {/* Actions à droite */}
+      {children && (
+        <div className="flex justify-end items-center gap-2 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0">
+          {children}
+        </div>
+      )}
     </div>
   );
 };
