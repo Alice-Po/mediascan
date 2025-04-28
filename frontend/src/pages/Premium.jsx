@@ -47,7 +47,7 @@ const Premium = () => {
       description:
         "Importez vos infolettres préférées directement dans votre fil d'actualités. Fini les emails qui s'accumulent, retrouvez tout votre contenu au même endroit.",
       status: 'fundable',
-      goal: 500,
+      goal: 1000,
       funded: 15,
       issue: 'https://github.com/Alice-Po/mediascan/issues/32',
     },
@@ -466,7 +466,8 @@ const Premium = () => {
               </h3>
               <p className="text-gray-600 mb-6">
                 Pour toute contribution de 50€ ou plus, recevez un accès premium à vie à toutes les
-                fonctionnalités actuelles et futures de MediaScan.
+                fonctionnalités actuelles et futures de MediaScan (Proposition valable jusqu'au 1
+                Janvier 2026).
               </p>
               <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
                 <p>
