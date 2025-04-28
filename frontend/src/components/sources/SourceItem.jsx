@@ -164,21 +164,55 @@ const SourceItemBase = ({ source, children, leftAction }) => {
 };
 
 // Variante sélectionnable pour l'onboarding
-export const SelectableSourceItem = ({ source, isSelected, onToggle }) => (
-  <SourceItemBase
-    source={source}
-    leftAction={
-      <div className="flex-shrink-0 mr-3">
+export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = false }) => {
+  return (
+    <div
+      className={`
+        flex items-center justify-between 
+        ${compact ? 'p-2' : 'p-4'} 
+        bg-white rounded-lg shadow-sm 
+        hover:bg-gray-50 transition-colors
+        ${isSelected ? 'border-2 border-blue-500' : 'border border-gray-200'}
+      `}
+    >
+      {/* Partie gauche : Logo et infos */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Logo */}
+        <div className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} flex-shrink-0`}>
+          {source.faviconUrl ? (
+            <img
+              src={source.faviconUrl}
+              alt={`Logo ${source.name}`}
+              className="w-full h-full object-contain rounded"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
+              {source.name.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        {/* Infos */}
+        <div className="flex-1 min-w-0">
+          <h3 className={`font-medium text-gray-900 truncate ${compact ? 'text-sm' : 'text-base'}`}>
+            {source.name}
+          </h3>
+          {!compact && <p className="text-sm text-gray-500 truncate">{source.description}</p>}
+        </div>
+      </div>
+
+      {/* Checkbox */}
+      <div className="ml-4 flex-shrink-0">
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={onToggle}
-          className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+          onChange={() => onToggle(source._id)}
+          className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
         />
       </div>
-    }
-  />
-);
+    </div>
+  );
+};
 
 // Variante avec bouton de suppression pour la page Sources
 export const DeletableSourceItem = ({ source, onDelete }) => (
@@ -219,6 +253,7 @@ SelectableSourceItem.propTypes = {
   source: PropTypes.shape(sourceShape).isRequired,
   isSelected: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
+  compact: PropTypes.bool,
 };
 
 DeletableSourceItem.propTypes = {

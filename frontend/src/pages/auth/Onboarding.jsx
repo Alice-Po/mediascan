@@ -277,24 +277,36 @@ const Onboarding = () => {
 
           {step === 2 && (
             <>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 Personnalisez votre fil d'actualités
               </h2>
-              <p className="text-gray-600 mb-6">
-                Sélectionnez les sources que vous souhaitez suivre. Vous pourrez modifier vos choix
-                à tout moment.
+              <p className="text-gray-600 mb-4 text-sm">
+                Sélectionnez au moins 3 sources pour commencer. Vous pourrez en ajouter d'autres
+                plus tard.
               </p>
 
-              <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
+              {/* Compteur de sources sélectionnées */}
+              <div className="mb-4 text-sm text-center">
+                <span className="font-medium">
+                  {selectedSources.length} source{selectedSources.length > 1 ? 's' : ''}{' '}
+                  sélectionnée{selectedSources.length > 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* Liste des sources avec hauteur ajustée */}
+              <div className="space-y-2 mb-4 max-h-[60vh] overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
                 {recommendedSources.length > 0 ? (
-                  recommendedSources.map((source) => (
-                    <SelectableSourceItem
-                      key={source._id}
-                      source={source}
-                      isSelected={selectedSources.includes(source._id)}
-                      onToggle={() => toggleSource(source._id)}
-                    />
-                  ))
+                  <div className="grid gap-2">
+                    {recommendedSources.map((source) => (
+                      <SelectableSourceItem
+                        key={source._id}
+                        source={source}
+                        isSelected={selectedSources.includes(source._id)}
+                        onToggle={() => toggleSource(source._id)}
+                        compact={true}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   <p className="text-gray-500 text-center py-4">
                     Aucune source disponible pour le moment
@@ -302,9 +314,10 @@ const Onboarding = () => {
                 )}
               </div>
 
-              <p className="text-sm text-gray-500">
-                Les sources qui vous sont proposées sont aléatoires pour l'instant. Vous pourrez
-                ajouter d'autres sources plus tard.
+              {/* Note d'information */}
+              <p className="text-xs text-gray-500 text-center">
+                Les sources sont présentées de manière aléatoire. Vous pourrez affiner vos choix
+                plus tard depuis votre profil.
               </p>
             </>
           )}
