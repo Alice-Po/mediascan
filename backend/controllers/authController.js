@@ -94,6 +94,12 @@ export const register = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 export const login = async (req, res) => {
+  console.log('Login attempt:', {
+    headers: req.headers,
+    origin: req.headers.origin,
+    method: req.method,
+  });
+
   try {
     console.log('=== Tentative de connexion ===');
     console.log('Email reçu:', req.body.email);

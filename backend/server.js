@@ -68,21 +68,28 @@ const logAppInfo = (mode) => {
 // Initialisation de l'application Express
 const app = express();
 
-// Configuration CORS selon l'environnement
-const corsOptions = {
-  origin: config.security.allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+// Activer CORS avant tout autre middleware
+app.use(
+  cors({
+    origin: true, // Autorise l'origine de la requête
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  })
+);
 
-// Ajuster les origines CORS selon le mode
-if (config.mode === 'preview') {
-  corsOptions.origin = ['http://localhost:4173'];
-} else if (config.mode === 'development') {
-  corsOptions.origin = ['http://localhost:5173'];
+// Middleware de debug CORS en développement
+if (config.mode === 'development') {
+  app.use((req, res, next) => {
+    console.log('CORS Debug:', {
+      origin: req.headers.origin,
+      method: req.method,
+      path: req.path,
+      headers: req.headers,
+    });
+    next();
+  });
 }
-
-app.use(cors(corsOptions));
 
 // Configuration de la sécurité
 app.set('trust proxy', config.security.trustedProxies);

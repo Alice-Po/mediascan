@@ -32,9 +32,9 @@ const config = {
   },
   cors: {
     origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+      mode === 'development'
+        ? ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://192.168.1.10:5173']
+        : process.env.CORS_ORIGIN?.split(',') || [],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
