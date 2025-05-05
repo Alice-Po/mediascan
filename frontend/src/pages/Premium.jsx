@@ -81,9 +81,9 @@ const Premium = () => {
           />
         </svg>
       ),
-      title: 'Detection intelligente de flux RSS',
+      title: "Détection intelligente de flux d'actualités",
       description:
-        "Chacun flux RSS délivre des données structuré différemment. Aujourd'hui vous êtes obligé de rentrer l'adresse url précise du flux, ce qui n'est pas forcément évident à trouver. Demain, vous pourriez seulement entrer un site web et nous détecterons automatiquement le flux RSS.",
+        "Aujourd'hui nous récupérons les actualités via la technologie RSS. Mais chacun flux RSS délivre des données structurées différemment. Aujourd'hui vous êtes obligé de rentrer l'adresse url précise du flux, ce qui n'est pas forcément évident à trouver. Demain, vous pourriez seulement entrer un site web et nous détecterons automatiquement le flux RSS.",
       status: 'fundable',
       goal: 1000,
       funded: 5,
@@ -192,11 +192,11 @@ const Premium = () => {
             <div>
               <h2 className="font-semibold text-xl mb-2">Ce que nous faisons :</h2>
               <p>
-                Nous développons Médiascan, un agrégateur de flux RSS qui évoluera progressivement
-                vers une plateforme complète d'information. Notre MVP actuel pose les bases d'un
-                projet qui, grâce au crowdfunding communautaire, s'enrichira de fonctionnalités
-                comme l'intégration d'infolettres, les collections de sources partageables ou toute
-                autre fonctionalités réclamées par sa communauté.
+                Nous développons Médiascan, un agrégateur d'actualités qui évoluera progressivement
+                vers une plateforme complète d'information. Notre service minimum actuel pose les
+                bases d'un projet qui, grâce au financement participatif, s'enrichira de
+                fonctionnalités comme l'intégration d'infolettres, les collections de sources
+                partageables ou toute autre fonctionalités réclamées par ses utilisateurs.
               </p>
             </div>
 
@@ -228,9 +228,9 @@ const Premium = () => {
                 Médiascan est développé par et pour sa communauté. Sans investisseurs ni pression
                 financière, nous pouvons rester fidèles à notre mission sur le long terme. Chaque
                 fonctionnalité est conçue avec pragmatisme, en réponse aux besoins réels des
-                utilisateurs et non pour maximiser l'engagement ou les revenus. Notre roadmap est
-                collaborative permettant à la communauté de guider l'évolution du projet selon ses
-                besoins.
+                utilisateurs et non pour maximiser l'engagement ou les revenus. Notre feuille de
+                route est collaborative permettant aux utilisateurs de guider l'évolution du projet
+                selon leurs besoins.
               </p>
             </div>
 
@@ -242,9 +242,12 @@ const Premium = () => {
                 plateforme qui respecte votre intelligence, valorise la diversité des perspectives,
                 et vous aide à retrouver le goût de vous informer. Pas de manipulation algorithmique
                 cachée, pas de monétisation agressive de vos données, juste un outil honnête qui
-                évolue avec vous pour affronter les défis informationnels d'aujourd'hui et de
-                demain.
+                évolue avec vous.
               </p>
+            </div>
+            <div>
+              <h2 className="font-semibold text-xl mb-2">C'est qui nous ? </h2>
+              <p>Pour l'instant c'est Alice et son chat.</p>
             </div>
           </div>
 
@@ -278,8 +281,8 @@ const Premium = () => {
                 </div>
                 <h3 className="text-gray-900 font-semibold mb-2">Phase 1 : Les fondations</h3>
                 <p className="text-gray-600 text-sm">
-                  Un agrégateur d'actualités fonctionnel et utilisable au quotidien. Version web
-                  complète, applications mobiles en phase finale de développement.
+                  Un agrégateur d'actualités fonctionnel et gratuit. Version web complète,
+                  applications mobiles en phase finale de développement.
                 </p>
               </div>
 
@@ -304,9 +307,9 @@ const Premium = () => {
                   Phase 2 : Fonctionnalités avancées
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  Développement collaboratif des fonctionnalités premium : intégration des
-                  newsletters, veille intelligente, détection automatique des sources. Financées par
-                  vos contributions.
+                  Développement collaboratif des fonctionnalités premium : intégration
+                  d'infolettres, veille intelligente, détection automatique des sources. Financées
+                  par vos contributions.
                 </p>
               </div>
 
@@ -330,7 +333,8 @@ const Premium = () => {
                 <h3 className="text-gray-900 font-semibold mb-2">Phase 3 : Pérennisation</h3>
                 <p className="text-gray-600 text-sm">
                   Lancement des abonnements premium pour assurer la maintenance et l'évolution
-                  continue des fonctionnalités développées ensemble.
+                  continue des fonctionnalités développées ensemble. Nous garantissons une version
+                  gratuite sera toujours disponible.
                 </p>
               </div>
             </div>
@@ -340,127 +344,81 @@ const Premium = () => {
         {/* Section crowdfunding */}
         <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 sm:p-8 text-center text-white">
-            <h2 className="text-2xl font-bold mb-2">Une approche différente</h2>
+            <h2 className="text-2xl font-bold mb-2">Développement guidé par vos envies</h2>
             <p className="text-lg text-purple-100">
-              Pas de levée de fonds, pas d'investisseurs : juste une communauté qui construit
-              ensemble. On ira là où vous nous guiderez.
+              Pas de levée de fonds, pas d'investisseurs : juste des promesses de soutien pour
+              guider nos priorités.
             </p>
           </div>
 
-          <div className="p-2 sm:p-8">
-            {/* Objectifs de financement */}
-            <div className="space-y-4 sm:space-y-6 mb-8">
-              {features
-                .filter((feature) => feature.status === 'fundable')
-                .map((feature, index) => {
-                  const progress = Math.round((feature.funded / feature.goal) * 100);
-                  const isEven = index % 2 === 0;
-
-                  return (
-                    <div
-                      key={feature.title}
-                      className={`bg-gradient-to-r ${
-                        isEven ? 'from-purple-50 to-indigo-50' : 'from-blue-50 to-purple-50'
-                      } rounded-lg p-3 sm:p-6 mx-0`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 hidden sm:block">{feature.icon}</div>
-                            <div>
-                              <h3
-                                className={`text-lg font-semibold ${
-                                  isEven ? 'text-purple-900' : 'text-blue-900'
-                                }`}
-                              >
-                                {feature.title}
-                              </h3>
-                              <p
-                                className={`text-sm mt-1 ${
-                                  isEven ? 'text-purple-700' : 'text-blue-700'
-                                }`}
-                              >
-                                {feature.description}
-                              </p>
-                              <a
-                                href={feature.issue}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center mt-2 text-xs text-gray-500 hover:text-gray-700"
-                              >
-                                <svg
-                                  className="w-3.5 h-3.5 mr-1"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-                                </svg>
-                                Voir les spécifications
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div
-                            className={`text-xl sm:text-2xl font-bold ${
-                              isEven ? 'text-purple-900' : 'text-blue-900'
-                            }`}
-                          >
-                            {feature.goal}€
-                          </div>
-                          <div
-                            className={`text-sm ${isEven ? 'text-purple-700' : 'text-blue-700'}`}
-                          >
-                            Objectif
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Barre de progression et bouton */}
-                      <div className="space-y-4">
-                        <div>
-                          <div
-                            className={`w-full ${
-                              isEven ? 'bg-purple-100' : 'bg-blue-100'
-                            } rounded-full h-2 mb-2`}
-                          >
-                            <div
-                              className={`${
-                                isEven ? 'bg-purple-600' : 'bg-blue-600'
-                              } h-2 rounded-full`}
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <div
-                            className={`flex justify-between text-xs sm:text-sm ${
-                              isEven ? 'text-purple-700' : 'text-blue-700'
-                            }`}
-                          >
-                            <span>{feature.funded}€ collectés</span>
-                            <span>{progress}%</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            handleContribute(feature.title.toLowerCase(), feature.goal)
-                          }
-                          className={`w-full ${
-                            isEven
-                              ? 'bg-purple-600 hover:bg-purple-700'
-                              : 'bg-blue-600 hover:bg-blue-700'
-                          } text-white py-2 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base`}
-                        >
-                          Contribuer à cette fonctionnalité
-                        </button>
+          <div className="p-4 sm:p-8">
+            {/* Explication du concept */}
+            <div className="mb-8 bg-blue-50 p-6 rounded-xl">
+              <div className="flex items-start gap-4">
+                <div className=" hidden flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">Comment ça marche ?</h3>
+                  <div className="space-y-4 text-blue-800">
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-xl">1.</span>
+                      <div>
+                        <p className="font-medium">Manifestez votre intérêt - sans payer !</p>
+                        <p className="text-sm">
+                          Faites une simple promesse de don pour les fonctionnalités qui vous
+                          intéressent. Aucun paiement n'est demandé à ce stade.
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
-            </div>
 
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-xl">2.</span>
+                      <div>
+                        <p className="font-medium">Nous développons selon vos priorités</p>
+                        <p className="text-sm">
+                          Une fois qu'une fonctionnalité atteint suffisamment de promesses, nous la
+                          développons et la testons rigoureusement.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-xl">3.</span>
+                      <div>
+                        <p className="font-medium">Vous ne payez qu'une fois satisfait</p>
+                        <p className="text-sm">
+                          Nous vous recontactons uniquement quand la fonctionnalité est prête et
+                          testée. Vous décidez alors de concrétiser votre promesse ou non.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 bg-white p-4 rounded-lg border border-blue-100">
+                      <div className="flex items-start gap-3">
+                        <span role="img" aria-label="shield" className="text-xl">
+                          🛡️
+                        </span>
+                        <p className="text-sm">
+                          <span className="font-medium block mb-1">Notre engagement :</span>
+                          Aucun risque pour vous - vous ne payez que si la fonctionnalité est
+                          développée et vous convient.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Avantages contributeurs */}
-            <div className="border-t border-gray-200 pt-6 sm:pt-8 text-center px-2 sm:px-0">
+            <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800 border-t border-gray-200 pt-6 sm:pt-8 text-center px-2 sm:px-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Devenez membre premium à vie
               </h3>
@@ -469,12 +427,121 @@ const Premium = () => {
                 fonctionnalités actuelles et futures de MediaScan (Proposition valable jusqu'au 1
                 Janvier 2026).
               </p>
-              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
-                <p>
-                  💡 Nous vous réclamerons l'argent que vous avez contribué lorsque l'objectif sera
-                  atteint et le développement terminé. En attendant, votre promesse de don nous aide
-                  à avancer !
-                </p>
+            </div>
+
+            {/* Objectifs de financement */}
+            <div className="border-t border-gray-200 pt-6 sm:pt-8 text-center px-2 sm:px-0">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Découvrez les fonctionalités ouvertes aux financements
+              </h2>
+              <div className="space-y-4 sm:space-y-6 mb-8">
+                {features
+                  .filter((feature) => feature.status === 'fundable')
+                  .map((feature, index) => {
+                    const progress = Math.round((feature.funded / feature.goal) * 100);
+                    const isEven = index % 2 === 0;
+
+                    return (
+                      <div
+                        key={feature.title}
+                        className={`bg-gradient-to-r ${
+                          isEven ? 'from-purple-50 to-indigo-50' : 'from-blue-50 to-purple-50'
+                        } rounded-lg p-3 sm:p-6 mx-0`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6 mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 hidden sm:block">{feature.icon}</div>
+                              <div>
+                                <h3
+                                  className={`text-lg font-semibold ${
+                                    isEven ? 'text-purple-900' : 'text-blue-900'
+                                  }`}
+                                >
+                                  {feature.title}
+                                </h3>
+                                <p
+                                  className={`text-sm mt-1 ${
+                                    isEven ? 'text-purple-700' : 'text-blue-700'
+                                  }`}
+                                >
+                                  {feature.description}
+                                </p>
+                                <a
+                                  href={feature.issue}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center mt-2 text-xs text-gray-500 hover:text-gray-700"
+                                >
+                                  <svg
+                                    className="w-3.5 h-3.5 mr-1"
+                                    fill="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                                  </svg>
+                                  Voir les spécifications
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div
+                              className={`text-xl sm:text-2xl font-bold ${
+                                isEven ? 'text-purple-900' : 'text-blue-900'
+                              }`}
+                            >
+                              {feature.goal}€
+                            </div>
+                            <div
+                              className={`text-sm ${isEven ? 'text-purple-700' : 'text-blue-700'}`}
+                            >
+                              Objectif
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Barre de progression et bouton */}
+                        <div className="space-y-4">
+                          <div>
+                            <div
+                              className={`w-full ${
+                                isEven ? 'bg-purple-100' : 'bg-blue-100'
+                              } rounded-full h-2 mb-2`}
+                            >
+                              <div
+                                className={`${
+                                  isEven ? 'bg-purple-600' : 'bg-blue-600'
+                                } h-2 rounded-full`}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <div
+                              className={`flex justify-between text-xs sm:text-sm ${
+                                isEven ? 'text-purple-700' : 'text-blue-700'
+                              }`}
+                            >
+                              <span>{feature.funded}€ collectés</span>
+                              <span>{progress}%</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              handleContribute(feature.title.toLowerCase(), feature.goal)
+                            }
+                            className={`w-full ${
+                              isEven
+                                ? 'bg-purple-600 hover:bg-purple-700'
+                                : 'bg-blue-600 hover:bg-blue-700'
+                            } text-white py-2 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base`}
+                          >
+                            Contribuer à cette fonctionnalité
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -485,7 +552,7 @@ const Premium = () => {
       <div className="max-w-3xl mx-auto mt-8 sm:mt-16 px-2 sm:px-0">
         <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-            Contribuez avec votre expertise
+            Contribuez avec votre expertise (ou juste votre créativité !)
           </h2>
           <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-6">
             Ces fonctionnalités sont en phase d'étude. Votre expérience, vos contacts ou vos idées
