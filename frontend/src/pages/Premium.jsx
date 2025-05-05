@@ -102,7 +102,7 @@ const Premium = () => {
       ),
       title: 'Lire des acticles payants',
       description:
-        "Au lieu de payer plusieurs abonnement payants à des médias, payer à l'article lu avec un crédit MédiaScan.",
+        "Au lieu de payer plusieurs abonnements payants à des médias, payer à l'article lu avec un crédit MédiaScan.",
       status: 'investigation',
       goal: 1000,
       funded: 200,
