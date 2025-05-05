@@ -24,7 +24,7 @@ const AddSourceForm = ({
       details: '',
     },
     orientation: {
-      political: 'centre',
+      political: '',
     },
   });
 
@@ -233,10 +233,14 @@ const AddSourceForm = ({
             <select
               id="orientation.political"
               name="orientation.political"
+              required
               value={customSource.orientation.political}
               onChange={handleCustomSourceChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
             >
+              <option value="" disabled>
+                Sélectionnez une orientation
+              </option>
               {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
                 <option key={key} value={key}>
                   {value.label}
