@@ -16,6 +16,18 @@ const TrashIcon = ({ className }) => (
   </svg>
 );
 
+// Déplacer la fonction au niveau du module
+const getFundingTypeLabel = (type) => {
+  const types = {
+    private: 'Privé',
+    public: 'Public',
+    cooperative: 'Coopératif',
+    association: 'Associatif',
+    independent: 'Indépendant',
+  };
+  return types[type] || type;
+};
+
 // Composant de base
 const SourceItemBase = ({ source, children, leftAction }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,18 +38,6 @@ const SourceItemBase = ({ source, children, leftAction }) => {
   const description = source.description || '';
   const words = description.split(' ');
   const shortDescription = words.length > 20 ? words.slice(0, 20).join(' ') + '...' : description;
-
-  // Helper pour afficher le type de financement
-  const getFundingTypeLabel = (type) => {
-    const types = {
-      private: 'Privé',
-      public: 'Public',
-      cooperative: 'Coopératif',
-      association: 'Associatif',
-      independent: 'Indépendant',
-    };
-    return types[type] || type;
-  };
 
   const handleClick = (e) => {
     // Ne pas ouvrir la modal si on clique sur un bouton ou un lien
@@ -165,52 +165,115 @@ const SourceItemBase = ({ source, children, leftAction }) => {
 
 // Variante sélectionnable pour l'onboarding
 export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = false }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
+
+  const handleClick = (e) => {
+    if (e.target.type === 'checkbox') {
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   return (
-    <div
-      className={`
-        flex items-center justify-between 
-        ${compact ? 'p-2' : 'p-4'} 
-        bg-white rounded-lg shadow-sm 
-        hover:bg-gray-50 transition-colors
-        ${isSelected ? 'border-2 border-blue-500' : 'border border-gray-200'}
-      `}
-    >
-      {/* Partie gauche : Logo et infos */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Logo */}
-        <div className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} flex-shrink-0`}>
-          {source.faviconUrl ? (
-            <img
-              src={source.faviconUrl}
-              alt={`Logo ${source.name}`}
-              className="w-full h-full object-contain rounded"
-            />
-          ) : (
-            <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-              {source.name.charAt(0)}
+    <>
+      <div
+        onClick={handleClick}
+        className={`
+          flex flex-col sm:flex-row items-start sm:items-center 
+          ${compact ? 'p-2' : 'p-3 sm:p-4'} 
+          bg-white rounded-lg shadow-sm 
+          hover:bg-gray-50 transition-colors cursor-pointer
+          ${isSelected ? 'border-2 border-blue-500' : 'border border-gray-200'}
+        `}
+      >
+        <div className="flex items-start w-full gap-3">
+          {/* Logo */}
+          <div className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} flex-shrink-0`}>
+            {source.faviconUrl ? (
+              <img
+                src={source.faviconUrl}
+                alt={`Logo ${source.name}`}
+                className="w-full h-full object-contain rounded"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : (
+              <div
+                className="w-full h-full rounded flex items-center justify-center text-sm font-medium"
+                style={{
+                  backgroundColor: `${bgColor}33`,
+                  color:
+                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
+                }}
+              >
+                {source.name.charAt(0)}
+              </div>
+            )}
+          </div>
+
+          {/* Infos */}
+          <div className="flex-1 min-w-0 space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className={`font-medium text-gray-900 ${compact ? 'text-sm' : 'text-base'}`}>
+                {source.name}
+              </h3>
+
+              {/* Checkbox en version mobile */}
+              <div className="sm:hidden flex-shrink-0">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => onToggle(source._id)}
+                  className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
             </div>
-          )}
+
+            <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">
+              {source.description}
+            </p>
+
+            {/* Orientation politique */}
+            <div className="flex items-center gap-2">
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: `${bgColor}33`,
+                  color:
+                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
+                }}
+              >
+                {source.orientation.political}
+              </span>
+              <span className="text-xs font-medium text-gray-500">
+                {getFundingTypeLabel(source.funding?.type)}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Infos */}
-        <div className="flex-1 min-w-0">
-          <h3 className={`font-medium text-gray-900 truncate ${compact ? 'text-sm' : 'text-base'}`}>
-            {source.name}
-          </h3>
-          {!compact && <p className="text-sm text-gray-500 truncate">{source.description}</p>}
+        {/* Checkbox en version desktop */}
+        <div className="hidden sm:block ml-4 flex-shrink-0">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggle(source._id)}
+            className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       </div>
 
-      {/* Checkbox */}
-      <div className="ml-4 flex-shrink-0">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => onToggle(source._id)}
-          className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-        />
-      </div>
-    </div>
+      <SourceDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        source={source}
+      />
+    </>
   );
 };
 

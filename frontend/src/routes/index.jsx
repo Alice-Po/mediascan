@@ -14,7 +14,7 @@ import Saved from '../pages/Saved';
 import Profile from '../pages/Profile';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
-import Onboarding from '../pages/auth/Onboarding';
+import Onboarding from '../pages/auth/onboarding/Onboarding';
 import VerifyEmail from '../pages/auth/VerifyEmail';
 import Premium from '../pages/Premium';
 import Feedback from '../pages/Feedback';

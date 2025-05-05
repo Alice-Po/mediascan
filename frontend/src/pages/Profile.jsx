@@ -380,7 +380,7 @@ const Profile = () => {
         {/* Section statistiques */}
         {/* <div className="mb-8">
           <UserAnalytics />
-        </div> */}
+      </div> */}
 
         {/* Paramètres de confidentialité */}
         <div className="bg-white rounded-lg shadow-sm p-6">
