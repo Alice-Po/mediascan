@@ -64,7 +64,7 @@ const Premium = () => {
       ),
       title: 'Radar de veille',
       description:
-        'Exprimez un sujet d\'intérêt en langage naturel, nous scannons le web pour vous fournir une veille efficace. Par exemple : "Je cherche des retours d\'expérience sur des SCI citoyennes qui fonctionnent bien". Recevez une notification quand un article correspond à votre recherche.',
+        'Exprimez un sujet d\'intérêt simplement, nous scannons le web pour vous fournir une veille efficace. Par exemple : "Je cherche des retours d\'expérience sur des SCI citoyennes qui fonctionnent bien". Recevez une notification quand un article correspond à votre recherche.',
       status: 'investigation',
       goal: 1500,
       funded: 300,
@@ -690,8 +690,8 @@ const Premium = () => {
                 Vous avez une expertise à partager ?
               </h2>
               <p className="text-sm sm:text-base text-gray-600 max-w-xl">
-                Que vous soyez journalistes, chercheurs, développeur, designer, expert en UX ou
-                simplement passionné par l'information, votre expérience peut enrichir le projet.
+                Que vous soyez dans le journalisme, la recherche, le développement, le design, l'UX
+                ou autre, votre expérience peut enrichir le projet.
               </p>
             </div>
 
