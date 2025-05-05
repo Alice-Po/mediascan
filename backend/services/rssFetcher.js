@@ -224,8 +224,53 @@ export const fetchSourceArticles = async (source) => {
   }
 };
 
-// Export par défaut si nécessaire
+/**
+ * Vérifie l'état de toutes les sources RSS
+ */
+export const checkAllSources = async () => {
+  console.log('\n=== Vérification des sources RSS ===');
+  try {
+    const sources = await Source.find({}).select('name rssUrl lastFetched fetchStatus');
+    console.log(`\n📊 Total des sources: ${sources.length}`);
+
+    const stats = {
+      total: sources.length,
+      ok: 0,
+      error: 0,
+      neverFetched: 0,
+    };
+
+    for (const source of sources) {
+      const status = source.fetchStatus || {};
+      const lastFetch = source.lastFetched
+        ? new Date(source.lastFetched).toLocaleString()
+        : 'jamais';
+
+      if (!source.lastFetched) {
+        stats.neverFetched++;
+        console.log(`❓ ${source.name}: Jamais synchronisée`);
+      } else if (!status.success) {
+        stats.error++;
+        console.log(`❌ ${source.name}: Erreur - ${status.message || 'Inconnue'}`);
+      } else {
+        stats.ok++;
+        console.log(`✅ ${source.name}: OK - Dernière synchro: ${lastFetch}`);
+      }
+    }
+
+    console.log('\n=== Résumé ===');
+    console.log(`✅ Sources valides: ${stats.ok}`);
+    console.log(`❌ Sources en erreur: ${stats.error}`);
+    console.log(`❓ Sources jamais synchronisées: ${stats.neverFetched}`);
+    console.log('================\n');
+  } catch (error) {
+    console.error('Erreur lors de la vérification des sources:', error);
+  }
+};
+
+// Export par défaut
 export default {
   fetchSourceArticles,
   fetchAllSources,
+  checkAllSources,
 };

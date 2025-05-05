@@ -2,7 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import mongoose from 'mongoose';
-import { fetchAllSources } from './services/rssFetcher.js';
+import { fetchAllSources, checkAllSources } from './services/rssFetcher.js';
 import config from './config/env.js';
 import express from 'express';
 import cors from 'cors';
@@ -168,8 +168,13 @@ mongoose
     const listenInterface =
       config.mode === 'production' ? '0.0.0.0' : config.security.listenInterface;
 
-    app.listen(config.port, listenInterface, () => {
+    app.listen(config.port, listenInterface, async () => {
       logAppInfo(config.mode);
+
+      // Lancer la vérification des sources uniquement en développement
+      if (process.env.NODE_ENV === 'development') {
+        await checkAllSources();
+      }
     });
   })
   .catch((err) => {

@@ -171,7 +171,7 @@ db.sources.insertMany([
   {
     name: 'Le Parisien',
     url: 'https://www.leparisien.fr/',
-    rssUrl: 'https://www.leparisien.fr/arc/outboundfeeds/rss/une/flux.xml',
+    rssUrl: 'https://feeds.leparisien.fr/leparisien/rss',
     faviconUrl: 'https://www.leparisien.fr/favicon.ico',
     description:
       "Quotidien populaire couvrant l'actualité nationale et francilienne, avec une approche accessible et pragmatique de l'information quotidienne.",
@@ -246,34 +246,6 @@ db.sources.insertMany([
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: "L'Express",
-    url: 'https://www.lexpress.fr/',
-    rssUrl: 'https://www.lexpress.fr/rss/',
-    faviconUrl: 'https://www.lexpress.fr/favicon.ico',
-    description:
-      "Hebdomadaire d'actualité proposant analyses et reportages sur la politique, l'économie et la société avec une approche libérale et européenne.",
-    funding: {
-      type: 'private',
-      details: 'Groupe Altice (actionnaire principal: Patrick Drahi)',
-    },
-    orientation: {
-      political: 'center-right',
-    },
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-
-  // Presse régionale
   {
     name: 'Ouest-France',
     url: 'https://www.ouest-france.fr/',
@@ -645,7 +617,7 @@ db.sources.insertMany([
   {
     name: 'BFMTV',
     url: 'https://www.bfmtv.com/',
-    rssUrl: 'https://www.bfmtv.com/rss/actualites/',
+    rssUrl: 'https://www.bfmtv.com/rss/news-24-7/',
     faviconUrl: 'https://www.bfmtv.com/favicon.ico',
     description:
       "Première chaîne d'information privée en continu, proposant une couverture intense de l'actualité avec un accent sur la politique et les faits divers.",
@@ -671,7 +643,7 @@ db.sources.insertMany([
   {
     name: 'Europe 1',
     url: 'https://www.europe1.fr/',
-    rssUrl: 'https://www.europe1.fr/rss',
+    rssUrl: 'https://www.europe1.fr/',
     faviconUrl: 'https://www.europe1.fr/favicon.ico',
     description:
       "Radio généraliste historique proposant information, débats et divertissement avec une couverture importante de l'actualité politique et sociale.",
@@ -803,7 +775,7 @@ db.sources.insertMany([
   {
     name: "L'Obs",
     url: 'https://www.nouvelobs.com/',
-    rssUrl: 'https://www.nouvelobs.com/rss/',
+    rssUrl: 'https://www.nouvelobs.com/rss',
     faviconUrl: 'https://www.nouvelobs.com/favicon.ico',
     description:
       'Hebdomadaire historique de la gauche intellectuelle française, proposant analyses politiques et culturelles avec une vision progressiste et sociale-démocrate.',
@@ -934,7 +906,7 @@ db.sources.insertMany([
   {
     name: 'Le Canard Enchaîné',
     url: 'https://www.lecanardenchaine.fr/',
-    rssUrl: '',
+    rssUrl: 'https://www.lecanardenchaine.fr/rss/index.xml',
     faviconUrl: 'https://www.lecanardenchaine.fr/favicon.ico',
     description:
       "Hebdomadaire satirique et d'investigation, connu pour ses révélations politiques et ses enquêtes sur les scandales financiers, avec une indépendance éditoriale totale.",
@@ -985,36 +957,11 @@ db.sources.insertMany([
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: "L'Équipe",
-    url: 'https://www.lequipe.fr/',
-    rssUrl: 'https://www.lequipe.fr/rss/',
-    faviconUrl: 'https://www.lequipe.fr/favicon.ico',
-    description:
-      'Premier quotidien sportif français, proposant une couverture exhaustive du sport français et international avec une expertise reconnue.',
-    funding: {
-      type: 'private',
-      details: 'Groupe Amaury',
-    },
-    orientation: {
-      political: 'center',
-    },
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'Télérama',
     url: 'https://www.telerama.fr/',
-    rssUrl: 'https://www.telerama.fr/rss',
+    rssUrl: 'https://www.telerama.fr/rss/une.xml',
     faviconUrl: 'https://www.telerama.fr/favicon.ico',
     description:
       'Hebdomadaire culturel de référence, proposant critiques, analyses et sélections dans tous les domaines culturels avec une approche exigeante et progressiste.',
@@ -1063,32 +1010,7 @@ db.sources.insertMany([
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'Le Journal du Dimanche',
-    url: 'https://www.lejdd.fr/',
-    rssUrl: 'https://www.lejdd.fr/Rss',
-    faviconUrl: 'https://www.lejdd.fr/favicon.ico',
-    description:
-      "Hebdomadaire dominical d'actualité, proposant analyses politiques et interviews exclusives avec une ligne éditoriale récemment orientée plus à droite.",
-    funding: {
-      type: 'private',
-      details: 'Groupe Lagardère (actionnaire principal: Vincent Bolloré via Vivendi)',
-    },
-    orientation: {
-      political: 'right',
-    },
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'Sciences et Avenir',
     url: 'https://www.sciencesetavenir.fr/',
@@ -1146,7 +1068,7 @@ db.sources.insertMany([
   {
     name: 'Decodex (Le Monde)',
     url: 'https://www.lemonde.fr/verification/',
-    rssUrl: 'https://www.lemonde.fr/verification/rss/',
+    rssUrl: 'https://www.lemonde.fr/les-decodeurs/rss_full.xml',
     faviconUrl: 'https://www.lemonde.fr/favicon.ico',
     description:
       'Section fact-checking du Monde, vérifiant informations et rumeurs circulant sur internet et les réseaux sociaux avec une méthodologie journalistique rigoureuse.',
@@ -1198,8 +1120,9 @@ db.sources.insertMany([
   },
   {
     name: 'CheckNews (Libération)',
-    url: 'https://www.liberation.fr/checknews/',
-    rssUrl: 'https://www.liberation.fr/checknews/rss/',
+    url: 'https://www.liberation.fr/arc/outboundfeeds/rss-all/?outputType=xml',
+    rssUrl:
+      'https://www.liberation.fr/arc/outboundfeeds/rss-all/category/checknews/?outputType=xml',
     faviconUrl: 'https://www.liberation.fr/favicon.ico',
     description:
       'Service de vérification factuelle de Libération, répondant aux questions des lecteurs et démystifiant les fausses informations avec une approche pédagogique.',
@@ -1227,7 +1150,7 @@ db.sources.insertMany([
   {
     name: 'Le Media',
     url: 'https://www.lemediatv.fr/',
-    rssUrl: 'https://www.lemediatv.fr/feed/',
+    rssUrl: 'https://api.lemediatv.fr/rss.xml',
     faviconUrl: 'https://www.lemediatv.fr/favicon.ico',
     description:
       'Média en ligne coopératif et indépendant, proposant reportages, débats et documentaires avec une ligne éditoriale engagée à gauche.',
@@ -1305,7 +1228,7 @@ db.sources.insertMany([
   {
     name: 'Frustration Magazine',
     url: 'https://frustrationmagazine.fr/',
-    rssUrl: 'https://frustrationmagazine.fr/feed/',
+    rssUrl: 'https://frustrationmagazine.fr/feed.xml',
     faviconUrl: 'https://frustrationmagazine.fr/favicon.ico',
     description:
       'Revue en ligne anticapitaliste, proposant analyses politiques et sociales avec une perspective radicale de gauche et un ton souvent satirique et critique du libéralisme.',
