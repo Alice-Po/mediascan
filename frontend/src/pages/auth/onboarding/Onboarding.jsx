@@ -9,6 +9,7 @@ import Step2Bibliography from './components/Step2Bibliography';
 import Step3Radar from './components/Step3Radar';
 import Step4Coverage from './components/Step4Coverage';
 import Step5Sources from './components/Step5Sources';
+import Step5Credits from './components/Step5Credits';
 
 const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);
@@ -97,7 +98,7 @@ const Onboarding = () => {
   };
 
   const nextStep = async () => {
-    if (step === 5) {
+    if (step === 6) {
       if (selectedSources.length < 3) {
         setError('Veuillez sélectionner au moins 3 sources pour continuer.');
         return;
@@ -121,7 +122,7 @@ const Onboarding = () => {
 
   const renderStep = () => {
     // Ne pas rendre Step5Sources si les sources ne sont pas encore chargées
-    if (step === 5 && loading) {
+    if (step === 6 && loading) {
       return (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -139,6 +140,8 @@ const Onboarding = () => {
       case 4:
         return <Step4Coverage />;
       case 5:
+        return <Step5Credits />;
+      case 6:
         return (
           <Step5Sources
             selectedSources={selectedSources}
@@ -165,11 +168,11 @@ const Onboarding = () => {
         {/* En-tête */}
         <div className="text-center mb-8" ref={titleRef}>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Bienvenue sur MédiaScan</h1>
-          <p className="text-gray-600">Étape {step} sur 5</p>
+          <p className="text-gray-600">Étape {step} sur 6</p>
 
           {/* Indicateur d'étapes */}
           <div className="flex justify-center mt-4 space-x-2">
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
@@ -206,7 +209,7 @@ const Onboarding = () => {
               }`}
               disabled={loading}
             >
-              {step === 5 ? 'Terminer' : 'Suivant'}
+              {step === 6 ? 'Terminer' : 'Suivant'}
             </button>
           </div>
         </div>

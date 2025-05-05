@@ -7,11 +7,11 @@ const Step5Sources = ({ selectedSources = [], allSources = [], onToggleSource })
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-          Personnalisez votre fil d'actualités
+          C'est parti !
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Sélectionnez au moins 3 sources pour commencer. Vous pourrez en ajouter d'autres plus
-          tard.
+          Commencer à personnaliser votre fils en sélectionnant au moins 3 sources pour commencer.
+          Vous pourrez en ajouter d'autres plus tard.
         </p>
       </div>
 
