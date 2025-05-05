@@ -146,6 +146,14 @@ const Register = () => {
               Veuillez vérifier votre boîte de réception et cliquer sur le lien pour activer votre
               compte.
             </p>
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <span role="img" aria-label="warning" className="mr-2">
+                  ⚠️
+                </span>
+                N'oubliez pas de vérifier votre dossier spam si vous ne trouvez pas l'email !
+              </p>
+            </div>
           </div>
           <div className="mt-6">
             <Link to="/login" className="text-primary hover:text-primary-dark font-medium">

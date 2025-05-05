@@ -92,7 +92,7 @@ const Login = () => {
             <AntennaIcon />
           </div>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Bon retour parmi nous</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion</h1>
         <h2 className="text-xl text-gray-600">Connectez-vous pour continuer</h2>
       </div>
 
