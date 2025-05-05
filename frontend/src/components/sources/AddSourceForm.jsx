@@ -4,6 +4,7 @@ import { ORIENTATIONS, getOrientationLabel } from '../../constants';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
 import { SimpleSourceItem } from './SourceItem';
+import { useSnackbar, SNACKBAR_TYPES } from '../../contexts/SnackbarContext';
 
 const AddSourceForm = ({
   onSubmit,
@@ -13,6 +14,7 @@ const AddSourceForm = ({
   suggestions = [],
   handleSelectSource = () => {},
 }) => {
+  const { showSnackbar } = useSnackbar();
   const [showRssHelp, setShowRssHelp] = useState(false);
   const [customSource, setCustomSource] = useState({
     name: '',
@@ -67,14 +69,45 @@ const AddSourceForm = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Form submission:', {
       formData: customSource,
       formValidity: e.target.checkValidity(),
       formElements: e.target.elements,
     });
-    onSubmit(customSource);
+
+    try {
+      await onSubmit(customSource);
+
+      // Afficher une notification de succès
+      showSnackbar(
+        `La source "${customSource.name}" a été ajoutée avec succès !`,
+        SNACKBAR_TYPES.SUCCESS
+      );
+
+      // Réinitialiser le formulaire si nécessaire
+      setCustomSource({
+        name: '',
+        url: '',
+        rssUrl: '',
+        description: '',
+        funding: {
+          type: '',
+          details: '',
+        },
+        orientation: {
+          political: '',
+        },
+      });
+    } catch (error) {
+      // Afficher une notification d'erreur en cas d'échec
+      showSnackbar(
+        `Erreur lors de l'ajout de la source: ${error.message || 'Veuillez réessayer'}`,
+        SNACKBAR_TYPES.ERROR
+      );
+      console.error('Error submitting source:', error);
+    }
   };
 
   // Log à chaque changement d'état
