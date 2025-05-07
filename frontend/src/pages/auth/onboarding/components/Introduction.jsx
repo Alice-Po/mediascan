@@ -5,45 +5,89 @@ const Step1Introduction = () => {
     <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-          Bienvenue sur Médiascan !
+          On vous propose un petit tour d'horizon des fonctionnalités à venir
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Votre nouvel espace d'information personnalisé gratuit.
+          Merci de votre intérêt pour Médiascan ! Nous sommes ravis de vous compter parmi nos
+          premiers utilisateurs.
         </p>
       </div>
 
-      {/* Visualisation des sources */}
-      <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
-        <h3 className="font-medium text-gray-900 mb-4 text-base sm:text-lg">
-          Centralisez toutes vos sources d'information
+      {/* État d'avancement */}
+      <div className="bg-blue-50 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
+          Où en sommes-nous aujourd'hui ?
         </h3>
+        <p className="text-gray-700 mb-4">
+          Médiascan est un projet en développement actif. Nous menons actuellement des tests
+          utilisateurs et l'interface évolue très rapidement en fonction de vos retours. Nous vous
+          remercions par avance pour votre indulgence face aux éventuels bugs ou fonctionnalités
+          manquantes.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <SourceType icon="📰" title="Médias" description="Journaux, magazines..." color="blue" />
-          <SourceType icon="✍️" title="Blogs" description="Articles, analyses..." color="purple" />
-          <SourceType
-            icon="📧"
-            title="Infolettres"
-            description="Newsletters, digests..."
-            color="green"
-          />
-          <SocialMediaType />
-          <SourceType icon="✨" title="Et plus" description="À venir..." color="gray" />
+      {/* Annonce applications mobiles */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="text-indigo-600 shrink-0 mt-1">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+              ></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900 mb-2 text-base sm:text-lg">
+              Applications mobiles en préparation
+            </h3>
+            <p className="text-gray-700 text-sm sm:text-base">
+              Les versions Android et iOS de Médiascan seront bientôt disponibles sur les stores.
+              Vous pourrez ainsi profiter de l'expérience Médiascan où que vous soyez !
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Comment ça marche */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-lg">
-        <h3 className="font-medium text-gray-900 mb-4 text-base sm:text-lg">Comment ça marche ?</h3>
-        <div className="space-y-3 sm:space-y-4">
-          <Step number={1} text="Choisissez vos sources d'information préférées" />
-          <Step number={2} text="Retrouvez tous vos contenus au même endroit" />
-          <Step number={3} text="Organisez vos sources par thèmes et partagez-les" />
-        </div>
+      {/* Remerciements */}
+      <div className="bg-amber-50 rounded-xl p-4 sm:p-6 shadow-sm">
+        <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
+          Merci pour votre participation !
+        </h3>
+        <p className="text-gray-700 mb-2">
+          Votre feedback est précieux pour nous aider à construire un outil qui répond vraiment à
+          vos besoins. N'hésitez pas à nous faire part de vos impressions et suggestions.
+        </p>
+        <p className="text-gray-700 italic">
+          L'équipe Médiascan vous remercie pour votre intérêt et votre indulgence pendant cette
+          phase de développement.
+        </p>
       </div>
     </div>
   );
 };
+
+// Composant pour afficher l'état des fonctionnalités
+const FeatureStatus = ({ title, items, color }) => (
+  <div className={`bg-${color}-100 p-3 rounded-lg`}>
+    <h4 className={`font-medium text-${color}-800 mb-2`}>{title}</h4>
+    <ul className="space-y-1">
+      {items.map((item, index) => (
+        <li key={index} className={`text-sm text-${color}-700 flex items-center gap-2`}>
+          <span>•</span> {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 // Composants utilitaires
 const SourceType = ({ icon, title, description, color }) => (

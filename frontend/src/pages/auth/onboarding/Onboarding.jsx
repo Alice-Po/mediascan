@@ -168,7 +168,7 @@ const Onboarding = () => {
         {/* En-tête */}
         <div className="text-center mb-8" ref={titleRef}>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Bienvenue sur MédiaScan</h1>
-          <p className="text-gray-600">Étape {step} sur 6</p>
+          {/* <p className="text-gray-600">Étape {step} sur 6</p> */}
 
           {/* Indicateur d'étapes */}
           <div className="flex justify-center mt-4 space-x-2">
@@ -209,7 +209,7 @@ const Onboarding = () => {
               }`}
               disabled={loading}
             >
-              {step === 6 ? 'Terminer' : 'Suivant'}
+              {step === 6 ? 'Terminer' : step === 1 ? "C'est parti !" : 'Suivant'}
             </button>
           </div>
         </div>
