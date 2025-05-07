@@ -1,20 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showThanks, setShowThanks] = useState(false);
 
-  if (!isOpen) return null;
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    amount: amount || '',
+    paymentMethod: 'card',
+    saveInfo: true,
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prevData) => ({
+        ...prevData,
+        name: user.displayName || prevData.name,
+        email: user.email || prevData.email,
+        amount: amount || prevData.amount,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        amount: amount || prevData.amount,
+      }));
+    }
+  }, [user, amount, isOpen]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const form = e.target;
       const response = await fetch('https://formspree.io/f/xwpokrvp', {
         method: 'POST',
-        body: new FormData(form),
+        body: new FormData(e.target),
         headers: {
           Accept: 'application/json',
         },
@@ -22,7 +53,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
 
       if (response.ok) {
         setShowThanks(true);
-        // Redirection après 3 secondes
         setTimeout(() => {
           window.location.href = '/premium';
         }, 3000);
@@ -31,6 +61,8 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
       console.error('Erreur:', error);
     }
   };
+
+  if (!isOpen) return null;
 
   if (showThanks) {
     return (
@@ -74,7 +106,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
         className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="px-8 py-6 border-b border-gray-100">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-900">Contribuer au développement</h3>
@@ -97,20 +128,41 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
           </p>
         </div>
 
-        {/* Formulaire */}
         <form onSubmit={handleSubmit}>
           <div className="px-8 py-6 space-y-6">
-            {/* Champs cachés pour le contexte */}
             <input type="hidden" name="feature" value={feature} />
             <input type="hidden" name="targetAmount" value={amount} />
 
             <div className="space-y-5">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                  placeholder="Sophie Dupont"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                  placeholder="vous@example.com"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Montant de votre contribution
                 </label>
 
-                {/* Paliers de contribution */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {[
                     { value: 10, label: null },
@@ -142,7 +194,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
                   ))}
                 </div>
 
-                {/* Input pour montant personnalisé */}
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <span className="text-gray-500">€</span>
@@ -150,6 +201,8 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
                   <input
                     type="number"
                     name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
                     required
                     min="1"
                     className="pl-8 pr-4 py-3 w-full border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
@@ -161,43 +214,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
                 </p>
               </div>
 
-              {/* Nom et Prénom */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                    placeholder="Sophie"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                    placeholder="Dupont"
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                  placeholder="vous@example.com"
-                />
-              </div>
-
-              {/* Message */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Message (optionnel)
@@ -210,7 +226,6 @@ const ContributionModal = ({ isOpen, onClose, feature, amount }) => {
                 ></textarea>
               </div>
 
-              {/* Newsletter */}
               <div className="pt-2">
                 <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
