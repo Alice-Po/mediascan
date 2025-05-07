@@ -10,7 +10,7 @@ const Step4Coverage = () => {
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
         <div className="relative z-10">
           <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">
-            Perspective 360° sur l'actualité
+            Fonctionnalité "Couverture complète"
           </h2>
           <p className="text-sm sm:text-base text-purple-100">
             Découvrez toutes les facettes d'un sujet d'actualité
@@ -65,7 +65,7 @@ const Step4Coverage = () => {
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
         <div className="p-5 bg-gradient-to-r from-purple-50 to-pink-50">
           <h3 className="font-semibold text-gray-900 text-lg mb-1">
-            Exemple de couverture médiatique à 360°
+            Exemple de couverture complète
           </h3>
           <p className="text-gray-600 text-sm mb-4">
             Sujet d'actualité : La prolifération des chats errants non castrés en zones urbaines
@@ -230,7 +230,7 @@ const Step4Coverage = () => {
       {/* Explication des bénéfices */}
       <div className="bg-white rounded-xl p-6 shadow-md">
         <h3 className="font-semibold text-gray-900 mb-4 text-lg text-center">
-          Les bénéfices de la perspective 360°
+          Les bénéfices de la fonctionnalité "Couverture complète"
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

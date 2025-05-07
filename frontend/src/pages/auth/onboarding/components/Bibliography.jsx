@@ -30,7 +30,7 @@ const Step2Bibliography = () => {
       {/* Présentation visuelle du concept */}
       <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
         <div className="flex flex-col md:flex-row gap-6 items-center">
-          <div className="w-full md:w-1/2">
+          <div className="w-full ">
             <h3 className="font-semibold text-gray-900 mb-3 text-lg">
               Le concept en un coup d'œil
             </h3>
@@ -44,33 +44,6 @@ const Step2Bibliography = () => {
               <Feature text="Partagez votre expertise avec la communauté" />
               <Feature text="Découvrez les meilleures sources sur vos sujets favoris" />
               <Feature text="Collaborez avec d'autres utilisateurs" />
-            </div>
-          </div>
-          <div className="w-full md:w-1/2">
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100">
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-3">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      ></path>
-                    </svg>
-                  </div>
-                  <h4 className="font-medium text-gray-900">Transition écologique</h4>
-                </div>
-                <div className="space-y-2 pl-11">
-                  <SourceItem name="Reporterre" type="Média indépendant" />
-                  <SourceItem name="The Conversation" type="Analyses académiques" />
-                  <SourceItem name="Bon Pote" type="Blog spécialisé" />
-                  <div className="text-center pt-1">
-                    <span className="text-xs text-indigo-500">+ 12 autres sources</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
