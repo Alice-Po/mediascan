@@ -6,16 +6,18 @@
         "status": "fundable",
         "goal": 3000,
         "funded": 15,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/32"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/32",
+        "modal": ""
     },
     {
         "icon": "search",
         "title": "Radar de veille",
-        "description": "Exprimez un sujet d'intérêt simplement, nous scannons le web pour vous fournir une veille efficace. Par exemple : \"Je cherche des retours d'expérience sur des SCI citoyennes qui fonctionnent bien\". Recevez une notification quand un article correspond à votre recherche.",
+        "description": "Exprimez un sujet d'intérêt simplement, nous scannons la base de données des sources de Médiascanpour vous fournir une veille efficace. Par exemple, dites simplement : : \"Je cherche des retours d'expérience sur des SCI citoyennes qui fonctionnent bien\". Recevez une notification quand un article correspond à votre recherche.",
         "status": "investigation",
         "goal": 5000,
         "funded": 300,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/33"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/33",
+        "modal": "Radar"
     },
     {
         "icon": "plus-circle",
@@ -24,7 +26,8 @@
         "status": "fundable",
         "goal": 1500,
         "funded": 5,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/34"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/34",
+        "modal": ""
     },
     {
         "icon": "plus-circle",
@@ -33,7 +36,8 @@
         "status": "investigation",
         "goal": 5000,
         "funded": 200,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/35"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/35",
+        "modal": "Credits"
     },
     {
         "icon": "users",
@@ -42,7 +46,8 @@
         "status": "investigation",
         "goal": 10000,
         "funded": 0,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/36"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/36",
+        "modal": ""
     },
     {
         "icon": "globe",
@@ -51,7 +56,8 @@
         "status": "investigation",
         "goal": 5000,
         "funded": 0,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/39"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/39",
+        "modal": "Coverage"
     },
     {
         "icon": "archive",
@@ -60,6 +66,7 @@
         "status": "investigation",
         "goal": 5000,
         "funded": 0,
-        "issue": "https://github.com/Alice-Po/mediascan/issues/40"
+        "issue": "https://github.com/Alice-Po/mediascan/issues/40",
+        "modal": "Bibliography"
     }
 ]

@@ -4,12 +4,12 @@ import { AuthContext } from '../../../context/AuthContext';
 import { fetchAllSources } from '../../../api/sourcesApi';
 import { completeOnboarding } from '../../../api/authApi';
 
-import Step1Introduction from './components/Step1Introduction';
-import Step2Bibliography from './components/Step2Bibliography';
-import Step3Radar from './components/Step3Radar';
-import Step4Coverage from './components/Step4Coverage';
-import Step5Sources from './components/Step5Sources';
-import Step5Credits from './components/Step5Credits';
+import Step1Introduction from './components/Introduction';
+import Step2Bibliography from './components/Bibliography';
+import Step3Radar from './components/Radar';
+import Step4Coverage from './components/Coverage';
+import Step5Sources from './components/Sources';
+import Step5Credits from './components/Credits';
 
 const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);

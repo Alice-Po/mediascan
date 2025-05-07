@@ -58,8 +58,9 @@ const LandingPage = () => {
               Redécouvrez le plaisir de l'information
             </h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Médiascan est un agrégateur d'actualités qui vous permet d'explorer l'information sous
-              toutes ses perspectives, en toute transparence et sans algorithmes manipulateurs.
+              Médiascan est un agrégateur d'actualités open source qui vous permet d'explorer
+              l'information sous toutes ses perspectives, en toute transparence et sans algorithmes
+              manipulateurs.
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-4">
