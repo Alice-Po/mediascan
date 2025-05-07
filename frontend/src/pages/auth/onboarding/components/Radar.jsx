@@ -84,23 +84,11 @@ const Step3Radar = () => {
               </div>
             </div>
           </div>
-
-          {/* Avantages */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <FeatureCard
-              icon="🔍"
-              title="Découverte intelligente"
-              description="Trouvez de nouvelles sources fiables au-delà de vos abonnements"
-              color="emerald"
-            />
-            <FeatureCard
-              icon="🎯"
-              title="Veille ciblée"
-              description="Soyez précis dans votre veille"
-              color="emerald"
-            />
-          </div>
         </div>
+        <p className="text-sm text-gray-600 mt-4">
+          Nous utiliserons trés probablement des outils de machine learning pour vous proposer des
+          contenus qui vous correspondent mais les fonctionalités ne sont pas encore spécifiées.
+        </p>
       </div>
     </div>
   );
