@@ -19,13 +19,14 @@ import VerifyEmail from '../pages/auth/VerifyEmail';
 import Premium from '../pages/Premium';
 import Feedback from '../pages/Feedback';
 import TermsOfService from '../pages/TermsOfService';
+import Funding from '../pages/Funding';
+import LandingPage from '../pages/LandingPage';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
-
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       {/* Routes publiques */}
       <Route element={<PublicAuthLayout />}>
         <Route path="/login" element={<Login />} />
@@ -35,6 +36,7 @@ const AppRoutes = () => {
         <Route element={<MainLayout />}>
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/funding" element={<Funding />} />
         </Route>
       </Route>
 
@@ -42,7 +44,7 @@ const AppRoutes = () => {
       <Route element={<AuthLayout />}>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/app" element={<Dashboard />} />
           <Route path="/sources" element={<Sources />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/profile" element={<Profile />} />

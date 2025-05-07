@@ -12,7 +12,7 @@ const MainLayout = () => {
   // Déterminer le titre de la page en fonction du chemin actuel
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/':
+      case '/app':
         return "Fil d'actualités";
       case '/sources':
         return 'Mes sources';
@@ -28,7 +28,7 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[104px]">
+    <div className="min-h-screen bg-gray-50 ms:pt-[104px]">
       <Navbar />
       <main className="container mx-auto px-4 md:max-w-4xl">
         <Outlet />

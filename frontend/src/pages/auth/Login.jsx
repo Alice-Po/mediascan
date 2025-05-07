@@ -71,7 +71,7 @@ const Login = () => {
 
     try {
       await login(formData);
-      navigate('/');
+      navigate('/app');
     } catch (error) {
       setError(error.message);
       if (error.message.includes('vérifier votre email')) {

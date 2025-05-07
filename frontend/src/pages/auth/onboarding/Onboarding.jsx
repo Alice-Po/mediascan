@@ -25,7 +25,7 @@ const Onboarding = () => {
   // Rediriger si l'onboarding est déjà complété
   useEffect(() => {
     if (user?.onboardingCompleted) {
-      navigate('/');
+      navigate('/app');
     }
   }, [user, navigate]);
 
@@ -88,7 +88,7 @@ const Onboarding = () => {
         });
       }
 
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       console.error('Erreur:', err);
       setError("Erreur lors de la finalisation de l'onboarding");

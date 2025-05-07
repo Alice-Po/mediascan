@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
       if (data.user && !data.user.onboardingCompleted) {
         window.location.href = '/onboarding';
       } else {
-        window.location.href = '/';
+        window.location.href = '/app';
       }
 
       return data;

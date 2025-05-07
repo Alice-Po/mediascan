@@ -151,7 +151,7 @@ const Navbar = () => {
 
   // Navigation items (sans le bouton de déconnexion)
   const navItems = [
-    { to: '/', label: 'Accueil', icon: <HomeIcon /> },
+    { to: '/app', label: 'Accueil', icon: <HomeIcon /> },
     { to: '/sources', label: 'Mes sources', icon: <SourcesIcon /> },
     { to: '/saved', label: 'Sauvegardés', icon: <SavedIcon /> },
     { to: '/profile', label: 'Profil', icon: <ProfileIcon /> },
@@ -163,7 +163,7 @@ const Navbar = () => {
       <nav className="hidden md:block bg-white shadow-sm fixed w-full top-[44px] z-40">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            <NavLink to="/" className="flex items-center">
+            <NavLink to="/app" className="flex items-center">
               <div className="text-gray-800 w-8 h-8 mr-2">
                 <AntennaIcon />
               </div>
@@ -188,7 +188,7 @@ const Navbar = () => {
               ))}
 
               <NavLink
-                to="/premium"
+                to="/funding"
                 className={({ isActive }) =>
                   `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive
@@ -197,7 +197,7 @@ const Navbar = () => {
                   }`
                 }
               >
-                Premium
+                Financement participatif
               </NavLink>
 
               <button
@@ -229,7 +229,7 @@ const Navbar = () => {
             </NavLink>
           ))}
           <NavLink
-            to="/premium"
+            to="/funding"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center py-2 transition-colors ${
                 isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
@@ -239,7 +239,7 @@ const Navbar = () => {
             <div className="h-6 w-6">
               <PremiumIcon />
             </div>
-            <span className="text-xs mt-1">Premium</span>
+            <span className="text-xs mt-1">Soutenir </span>
           </NavLink>
         </div>
       </nav>
