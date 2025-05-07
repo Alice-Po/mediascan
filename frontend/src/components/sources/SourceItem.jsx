@@ -16,6 +16,18 @@ const TrashIcon = ({ className }) => (
   </svg>
 );
 
+// Icône d'information
+const InfoIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
 // Déplacer la fonction au niveau du module
 const getFundingTypeLabel = (type) => {
   const types = {
@@ -26,6 +38,11 @@ const getFundingTypeLabel = (type) => {
     independent: 'Indépendant',
   };
   return types[type] || type;
+};
+
+// Fonction pour obtenir le label traduit de l'orientation politique
+const getPoliticalOrientationLabel = (orientation) => {
+  return ORIENTATIONS.political[orientation]?.label || orientation;
 };
 
 // Composant de base
@@ -111,7 +128,7 @@ const SourceItemBase = ({ source, children, leftAction }) => {
                     ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
                 }}
               >
-                {source.orientation.political}
+                {getPoliticalOrientationLabel(source.orientation.political)}
               </span>
               {source.categories?.map((category) => (
                 <span
@@ -133,7 +150,7 @@ const SourceItemBase = ({ source, children, leftAction }) => {
                 color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
               }}
             >
-              {source.orientation.political}
+              {getPoliticalOrientationLabel(source.orientation.political)}
             </span>
             {source.categories?.map((category) => (
               <span
@@ -144,6 +161,21 @@ const SourceItemBase = ({ source, children, leftAction }) => {
               </span>
             ))}
           </div>
+        </div>
+
+        {/* Bouton d'information */}
+        <div className="flex-shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded-full hover:bg-indigo-50"
+            title="Voir les détails de cette source"
+            aria-label="Voir les détails de cette source"
+          >
+            <InfoIcon className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Actions à droite */}
@@ -247,7 +279,7 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
                     ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
                 }}
               >
-                {source.orientation.political}
+                {getPoliticalOrientationLabel(source.orientation.political)}
               </span>
               <span className="text-xs font-medium text-gray-500">
                 {getFundingTypeLabel(source.funding?.type)}
@@ -265,6 +297,21 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
             className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+
+        {/* Bouton d'information */}
+        <div className="flex-shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded-full hover:bg-indigo-50"
+            title="Voir les détails de cette source"
+            aria-label="Voir les détails de cette source"
+          >
+            <InfoIcon className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
