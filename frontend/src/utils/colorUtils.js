@@ -38,3 +38,21 @@ export const generateColorFromId = (id) => {
     .toString(16)
     .padStart(2, '0')}`;
 };
+
+/**
+ * Génère un nombre aléatoire mais déterministe de followers basé sur un ID
+ * @param {string} id - Identifiant à utiliser pour générer le nombre
+ * @returns {number} - Nombre de followers entre 1 et 1000
+ */
+export const generateFollowersFromId = (id) => {
+  // Utiliser l'ID comme seed pour avoir un nombre constant pour le même ID
+  const seed = id
+    .toString()
+    .split('')
+    .reduce((a, b) => {
+      return a + b.charCodeAt(0);
+    }, 0);
+
+  // Générer un nombre pseudo-aléatoire mais déterministe basé sur l'ID
+  return Math.floor((Math.sin(seed) * 10000) % 1000) + 1;
+};

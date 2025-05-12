@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
-import { generateColorFromId } from '../../utils/colorUtils';
+import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 
 /**
@@ -99,11 +99,30 @@ const CollectionsList = () => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{collection.name}</p>
+                <div className="flex items-center">
+                  <p className="font-medium text-gray-900 truncate mr-2">{collection.name}</p>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded-full ${
+                      collection.isPublic
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {collection.isPublic ? 'Public' : 'Privé'}
+                  </span>
+                </div>
                 <p className="text-xs text-gray-500">
                   {collection.sources?.length || 0} source
-                  {collection.sources?.length !== 1 ? 's' : ''}
+                  {collection.sources?.length > 1 ? 's' : ''}
+                  {collection.isPublic ? (
+                    <>- {generateFollowersFromId(collection._id)} suiveurs</>
+                  ) : (
+                    ''
+                  )}
                 </p>
+                {collection.description && (
+                  <p className="text-xs text-gray-700 mt-1 truncate">{collection.description}</p>
+                )}
               </div>
               <div className="flex space-x-1">
                 <Link

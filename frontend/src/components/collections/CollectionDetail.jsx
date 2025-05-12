@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { generateFollowersFromId } from '../../utils/colorUtils';
 
 /**
  * Composant pour afficher le détail d'une collection
@@ -132,11 +133,18 @@ const CollectionDetail = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">{currentCollection.name}</h1>
-            {currentCollection.isPublic && (
-              <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mt-1">
-                Public
-              </span>
-            )}
+            <div className="flex items-center mt-1">
+              {currentCollection.isPublic ? (
+                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mr-2">
+                  Public
+                </span>
+              ) : (
+                <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full mr-2">
+                  Privé
+                </span>
+              )}
+              <span className="text-xs text-gray-500">{generateFollowersFromId(id)} suiveurs</span>
+            </div>
           </div>
         </div>
 
