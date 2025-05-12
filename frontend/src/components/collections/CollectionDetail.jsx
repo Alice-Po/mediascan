@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 /**
  * Composant pour afficher le détail d'une collection
@@ -118,12 +119,14 @@ const CollectionDetail = () => {
                 : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              backgroundColor: currentCollection.colorHex,
+              backgroundColor: !currentCollection.imageUrl
+                ? currentCollection.colorHex || 'none'
+                : undefined,
             }}
           >
             {!currentCollection.imageUrl && (
-              <span className="text-gray-600 text-xl">
-                {currentCollection.name.substring(0, 2).toUpperCase()}
+              <span className="text-white text-xl">
+                {currentCollection.name.substring(0, 1).toUpperCase()}
               </span>
             )}
           </div>
@@ -226,33 +229,17 @@ const CollectionDetail = () => {
         )}
       </div>
 
-      {/* Modal de confirmation de suppression */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Confirmer la suppression</h3>
-            <p className="mb-6">
-              Êtes-vous sûr de vouloir supprimer la collection{' '}
-              <span className="font-semibold">{currentCollection.name}</span> ? Cette action est
-              irréversible.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Utilisation du composant ConfirmationModal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer la collection"
+        itemName={currentCollection?.name}
+        confirmButtonText="Supprimer"
+        cancelButtonText="Annuler"
+      />
     </div>
   );
 };

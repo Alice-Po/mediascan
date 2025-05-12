@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { generateColorFromId } from '../../utils/colorUtils';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 /**
  * Composant pour afficher la liste des collections de l'utilisateur
@@ -189,33 +190,17 @@ const CollectionsList = () => {
         </div>
       )}
 
-      {/* Modal de confirmation de suppression */}
-      {showDeleteModal && collectionToDelete && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Confirmer la suppression</h3>
-            <p className="mb-6">
-              Êtes-vous sûr de vouloir supprimer la collection{' '}
-              <span className="font-semibold">{collectionToDelete.name}</span> ? Cette action est
-              irréversible.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={handleCancelDelete}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                Supprimer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Utilisation du composant ConfirmationModal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal && !!collectionToDelete}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer la collection"
+        itemName={collectionToDelete?.name}
+        confirmButtonText="Supprimer"
+        cancelButtonText="Annuler"
+      />
     </div>
   );
 };

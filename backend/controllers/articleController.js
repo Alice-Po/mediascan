@@ -348,11 +348,6 @@ export const createOrUpdateArticles = async (articles) => {
     }));
 
     const result = await Article.bulkWrite(bulkOps);
-    console.log('Bulk write result:', {
-      matched: result.matchedCount,
-      modified: result.modifiedCount,
-      upserted: result.upsertedCount,
-    });
 
     return result;
   } catch (error) {
