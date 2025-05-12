@@ -17,9 +17,14 @@ const api = axios.create({
 // Log pour debug
 api.interceptors.request.use((request) => {
   const token = localStorage.getItem('token');
+  console.log(`API Request to ${request.url} - Token ${token ? 'présent' : 'ABSENT'}`);
+
   if (token) {
     request.headers.Authorization = `Bearer ${token}`;
+  } else {
+    console.warn(`Requête sans authentification vers ${request.url}`);
   }
+
   return request;
 });
 

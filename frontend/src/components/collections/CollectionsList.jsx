@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
@@ -8,12 +8,49 @@ import ConfirmationModal from '../common/ConfirmationModal';
  * Composant pour afficher la liste des collections de l'utilisateur
  */
 const CollectionsList = () => {
-  const { collections, loadingCollections, filterByCollection, filters, deleteCollection } =
-    useContext(AppContext);
+  const {
+    collections,
+    loadingCollections,
+    filterByCollection,
+    filters,
+    deleteCollection,
+    loadCollections,
+  } = useContext(AppContext);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [collectionToShare, setCollectionToShare] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+
+  // Rafraîchir les collections au montage et périodiquement
+  useEffect(() => {
+    // Charger les collections au montage
+    loadCollections();
+
+    // Rafraîchir toutes les 30 secondes
+    const refreshInterval = setInterval(() => {
+      loadCollections();
+      setLastRefresh(Date.now());
+    }, 30000);
+
+    return () => clearInterval(refreshInterval);
+  }, [loadCollections]);
+
+  // Rafraîchir quand le composant devient visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastRefresh > 10000) {
+        loadCollections();
+        setLastRefresh(Date.now());
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadCollections, lastRefresh]);
 
   const handleDeleteClick = (e, collection) => {
     e.stopPropagation();

@@ -41,15 +41,29 @@ export function useCollections(user, setGlobalError) {
    * Charger toutes les collections de l'utilisateur
    */
   const loadCollections = useCallback(async () => {
-    if (!user) return;
+    // Log pour déboguer le problème de chargement des collections
+    console.log(
+      'loadCollections appelé avec user:',
+      user ? `ID: ${user._id}` : 'aucun utilisateur'
+    );
+
+    if (!user) {
+      console.warn('Tentative de chargement des collections sans utilisateur connecté');
+      return;
+    }
 
     try {
+      console.log('Début du chargement des collections pour', user._id);
       setLoading(true);
       const collectionsData = await fetchCollections();
+      console.log('Collections récupérées:', collectionsData.length);
       setCollections(collectionsData);
       setError(null);
+      return collectionsData;
     } catch (err) {
+      console.error('Erreur détaillée lors du chargement des collections:', err);
       handleError('Impossible de charger les collections', err);
+      return [];
     } finally {
       setLoading(false);
     }

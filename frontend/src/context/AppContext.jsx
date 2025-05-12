@@ -47,16 +47,44 @@ export const AppProvider = ({ children }) => {
     collections,
     currentCollection,
     loading: loadingCollections,
-    loadCollections,
+    loadCollections: fetchCollectionsData,
     createCollection,
     updateCollection,
     deleteCollection,
     loadCollectionById,
     setCurrentCollection,
-    addSourceToCollection,
+    addSourceToCollection: addSourceToCollectionApi,
     removeSourceFromCollection,
     createFilterByCollection,
   } = useCollections(user, setError);
+
+  // Fonction améliorée pour charger les collections et mettre à jour l'état global
+  const loadCollections = useCallback(async () => {
+    try {
+      console.log('AppContext: Rechargement des collections');
+      const data = await fetchCollectionsData();
+      console.log(`AppContext: ${data?.length || 0} collections chargées`);
+      return data;
+    } catch (error) {
+      console.error('AppContext: Erreur lors du rechargement des collections', error);
+      return null;
+    }
+  }, [fetchCollectionsData]);
+
+  // Fonction améliorée pour ajouter une source à une collection
+  const addSourceToCollection = useCallback(
+    async (collectionId, sourceId) => {
+      try {
+        const result = await addSourceToCollectionApi(collectionId, sourceId);
+        // Recharger les collections pour mettre à jour les compteurs partout
+        await loadCollections();
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    },
+    [addSourceToCollectionApi, loadCollections]
+  );
 
   // Création de la fonction de filtrage par collection
   const filterByCollection = createFilterByCollection(setFilters);

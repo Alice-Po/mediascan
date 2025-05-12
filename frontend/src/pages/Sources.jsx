@@ -4,8 +4,10 @@ import { DeletableSourceItem, SimpleSourceItem } from '../components/sources/Sou
 import AddSourceForm from '../components/sources/AddSourceForm';
 import PremiumBanner from '../components/premium/PremiumBanner';
 import { useCollections } from '../hooks/useCollections';
+import { AuthContext } from '../context/AuthContext';
 
 const Sources = () => {
+  const { user } = useContext(AuthContext);
   const {
     sources: userSources,
     allSources,
@@ -24,7 +26,7 @@ const Sources = () => {
     loadingCollections,
     addSourceToCollection,
     createCollection,
-  } = useCollections();
+  } = useCollections(user);
 
   // State local pour l'UI
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,6 +41,7 @@ const Sources = () => {
   const [showNewCollectionForm, setShowNewCollectionForm] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   // Charger les sources au montage
   useEffect(() => {
@@ -46,12 +49,23 @@ const Sources = () => {
     loadAllSources();
   }, [loadUserSources, loadAllSources]);
 
-  // Charger les collections lorsque la modal est ouverte
+  // Charger les collections lors du montage initial ET lorsque la modal est ouverte
+  useEffect(() => {
+    loadCollections();
+  }, [loadCollections]);
+
+  // Charger les collections spécifiquement quand la modale s'ouvre
   useEffect(() => {
     if (showCollectionModal) {
       loadCollections();
+      // Enregistrer des informations de débogage
+      setDebugInfo({
+        user: user ? 'Utilisateur connecté' : "Pas d'utilisateur",
+        collectionsCount: collections.length,
+        timestamp: new Date().toISOString(),
+      });
     }
-  }, [showCollectionModal, loadCollections]);
+  }, [showCollectionModal, loadCollections, user, collections.length]);
 
   // Gérer la recherche et les suggestions
   const handleSearchChange = (e) => {
@@ -96,12 +110,27 @@ const Sources = () => {
   };
 
   // Handler pour l'ajout à une collection
-  const handleAddToCollection = (source) => {
+  const handleAddToCollection = async (source) => {
     setSelectedSource(source);
+
+    // Force un chargement des collections avant d'ouvrir la modale
+    try {
+      console.log('Chargement forcé des collections...');
+      await loadCollections();
+      console.log(`${collections.length} collections chargées`);
+
+      if (collections.length === 0 && user) {
+        console.warn("Collections vides malgré l'utilisateur connecté:", user);
+        setActionError('Problème de chargement des collections. Veuillez réessayer.');
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des collections:', error);
+      setActionError('Impossible de charger vos collections');
+    }
+
     setShowCollectionModal(true);
     setShowNewCollectionForm(false);
     setNewCollectionName('');
-    setActionError(null);
   };
 
   // Ajouter à une collection existante
@@ -112,6 +141,10 @@ const Sources = () => {
       setActionLoading(true);
       setActionError(null);
       await addSourceToCollection(collectionId, selectedSource._id);
+
+      // Forcer le rechargement des collections pour mettre à jour le nombre de sources partout
+      await loadCollections();
+
       setShowCollectionModal(false);
       setSelectedSource(null);
     } catch (err) {
@@ -141,6 +174,9 @@ const Sources = () => {
         description: '',
         sources: [selectedSource._id],
       });
+
+      // Forcer le rechargement des collections pour mettre à jour l'interface
+      await loadCollections();
 
       setShowCollectionModal(false);
       setSelectedSource(null);
@@ -300,6 +336,15 @@ const Sources = () => {
             {/* Affichage d'erreur */}
             {actionError && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border-b">{actionError}</div>
+            )}
+
+            {/* Info de débogage (temporaire) */}
+            {debugInfo && (
+              <div className="p-2 text-xs text-gray-500 bg-gray-50 border-b">
+                <p>État: {debugInfo.user}</p>
+                <p>Collections: {debugInfo.collectionsCount}</p>
+                <p>Mise à jour: {debugInfo.timestamp}</p>
+              </div>
             )}
 
             {/* Liste des collections */}
