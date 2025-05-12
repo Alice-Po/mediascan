@@ -98,14 +98,21 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-3 sm:p-6">
-      <h2 className="text-xl mb-4">Bienvenue, {user?.name}</h2>
-      {/* <InterestsList /> */}
-      {/* Filtres */}
-      <ArticleFilters />
+    <div className="bg-gray-50 min-h-screen">
+      {/* Layout responsive avec sidebar à l'extrême gauche sur desktop */}
+      <div className="flex flex-col lg:flex-row">
+        {/* Sidebar de filtres (à l'extrême gauche sur desktop) */}
+        <div className="w-full lg:w-64 lg:min-h-screen lg:border-r lg:border-gray-200 lg:sticky lg:top-0">
+          <div className="p-4">
+            <ArticleFilters />
+          </div>
+        </div>
 
-      {/* Liste des articles */}
-      <ArticleList />
+        {/* Contenu principal (feed) occupant tout l'espace central */}
+        <div className="flex-1 p-3 sm:p-6 lg:max-w-none lg:px-8 xl:px-12">
+          <ArticleList />
+        </div>
+      </div>
     </div>
   );
 };

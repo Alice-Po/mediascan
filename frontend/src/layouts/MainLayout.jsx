@@ -30,7 +30,7 @@ const MainLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50 ms:pt-[104px]">
       <Navbar />
-      <main className="container mx-auto px-4 md:max-w-4xl">
+      <main className="container mx-auto px-4 md:max-w-6xl mt-25 ">
         <Outlet />
       </main>
     </div>

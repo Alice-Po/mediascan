@@ -10,18 +10,16 @@ const Accordion = ({ title, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border rounded-lg">
+    <div className="border-b border-gray-200 py-3">
       <button
-        className="w-full px-4 py-2 flex justify-between items-center bg-gray-50 hover:bg-gray-100 rounded-t-lg"
+        className="w-full flex justify-between items-center text-left"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="font-medium">{title}</span>
+        <span className="font-medium text-sm text-gray-700">{title}</span>
         <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
       </button>
       <div
-        className={`px-4 py-2 transition-all duration-200 ease-in-out ${
-          isOpen ? 'block' : 'hidden'
-        }`}
+        className={`pt-3 transition-all duration-200 ease-in-out ${isOpen ? 'block' : 'hidden'}`}
       >
         {children}
       </div>
@@ -90,44 +88,21 @@ const ArticleFilters = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
-      {/* En-tête des filtres avec explication */}
-      <div className="border-b pb-4 mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold text-gray-900">Filtrer mes articles</h2>
-          <button
-            className="p-2 hover:bg-gray-100 rounded-full lg:hidden"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <span
-              className={`transform transition-transform block ${isExpanded ? 'rotate-180' : ''}`}
-            >
-              ▼
-            </span>
-          </button>
-        </div>
-        <p className="text-sm text-gray-600">
-          Affinez les articles de vos {userSources.length} sources sélectionnées
-        </p>
-      </div>
-
+    <div className="h-full">
       {/* Barre de recherche avec contexte */}
       <div className="mb-6">
-        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-          Rechercher dans mes articles
-        </label>
         <div className="relative">
           <input
             id="search"
             type="text"
             value={searchInput}
             onChange={handleSearch}
-            placeholder="Ex: climat, économie, europe..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500"
+            placeholder="Rechercher dans mes articles..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 text-sm"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg
-              className="h-5 w-5 text-gray-400"
+              className="h-4 w-4 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -147,8 +122,9 @@ const ArticleFilters = () => {
                 setFilters((prev) => ({ ...prev, searchTerm: '' }));
               }}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              aria-label="Effacer la recherche"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -159,18 +135,11 @@ const ArticleFilters = () => {
             </button>
           )}
         </div>
-        <p className="mt-1 text-xs text-gray-500">
-          {searchInput
-            ? 'Recherche dans les titres et le contenu des articles'
-            : "La recherche s'effectue uniquement dans les articles de vos sources"}
-        </p>
       </div>
 
-      {/* Filtres toujours visibles sur desktop */}
-      <div className={`space-y-4 lg:block ${isExpanded ? 'block' : 'hidden'}`}>
-        {/* Orientations politiques */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Orientation politique</h3>
+      {/* Filtres dans des accordéons style Feedly */}
+      <div className="space-y-1">
+        <Accordion title="Orientation politique" defaultOpen={true}>
           <div className="flex flex-wrap gap-2">
             {Object.entries(ORIENTATIONS.political).map(([key, value]) => {
               const bgColor = getOrientationColor(key);
@@ -181,7 +150,7 @@ const ArticleFilters = () => {
                 <button
                   key={key}
                   onClick={() => handlePoliticalOrientationChange(key)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200`}
+                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-200`}
                   style={{
                     backgroundColor: filters.orientation.political?.includes(key)
                       ? bgColor
@@ -195,59 +164,65 @@ const ArticleFilters = () => {
               );
             })}
           </div>
-        </div>
+        </Accordion>
 
-        {/* Sources */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Mes sources ({userSources.length})
-          </h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+        <Accordion title={`Mes sources (${userSources.length})`} defaultOpen={true}>
+          <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
             {userSources.map((source) => (
               <label
                 key={source._id}
-                className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                className="flex items-center py-1.5 px-1 hover:bg-gray-50 rounded cursor-pointer text-sm"
               >
                 <input
                   type="checkbox"
                   checked={filters.sources.includes(source._id)}
                   onChange={(e) => handleSourceChange(e, source._id)}
-                  className="mr-2"
+                  className="mr-2 h-3.5 w-3.5"
                 />
                 <div className="flex items-center">
                   {source.faviconUrl && (
-                    <img src={source.faviconUrl} alt="" className="w-4 h-4 mr-1" />
+                    <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
                   )}
-                  <span className="text-sm">{source.name}</span>
+                  <span className="text-sm truncate">{source.name}</span>
                 </div>
               </label>
             ))}
           </div>
-        </div>
+        </Accordion>
+      </div>
 
-        {/* Indicateur de filtres actifs */}
-        {(filters.searchTerm ||
-          filters.orientation.political.length > 0 ||
-          filters.sources.length !== userSources.length) && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Filtres actifs</span>
-              <button
-                onClick={() => {
-                  setSearchInput('');
-                  setFilters({
-                    searchTerm: '',
-                    sources: userSources.map((s) => s._id),
-                    orientation: { political: [] },
-                  });
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Réinitialiser tout
-              </button>
-            </div>
+      {/* Indicateur de filtres actifs */}
+      {(filters.searchTerm ||
+        filters.orientation.political.length > 0 ||
+        filters.sources.length !== userSources.length) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-600">Filtres actifs</span>
+            <button
+              onClick={() => {
+                setSearchInput('');
+                setFilters({
+                  searchTerm: '',
+                  sources: userSources.map((s) => s._id),
+                  orientation: { political: [] },
+                });
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              Réinitialiser tout
+            </button>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Bouton d'expansion pour mobile uniquement */}
+      <div className="mt-4 lg:hidden">
+        <button
+          className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-center"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? 'Masquer les filtres' : 'Plus de filtres'}
+        </button>
       </div>
     </div>
   );
