@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
+import { generateColorFromId } from '../../utils/colorUtils';
 
 /**
  * Composant pour afficher la liste des collections de l'utilisateur
@@ -80,16 +81,19 @@ const CollectionsList = () => {
           >
             <div className="flex items-center space-x-3">
               <div
-                className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden"
+                className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
                 style={{
+                  backgroundColor: !collection.imageUrl
+                    ? collection.colorHex || generateColorFromId(collection._id)
+                    : undefined,
                   backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
               >
                 {!collection.imageUrl && (
-                  <span className="text-gray-500 text-xs">
-                    {collection.name.substring(0, 2).toUpperCase()}
+                  <span className="text-white font-medium">
+                    {collection.name.substring(0, 1).toUpperCase()}
                   </span>
                 )}
               </div>

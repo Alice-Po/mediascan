@@ -1,6 +1,7 @@
 import Collection from '../models/Collection.js';
 import User from '../models/User.js';
 import mongoose from 'mongoose';
+import { generateColorFromId } from '../utils/colorUtils.js';
 
 // @desc    Récupérer toutes les collections de l'utilisateur connecté
 // @route   GET /api/collections
@@ -40,15 +41,37 @@ export const createCollection = async (req, res) => {
       });
     }
 
-    // Créer la collection
-    const collection = await Collection.create({
+    // Préparer les données de la collection
+    const collectionData = {
       name,
       description: description || '',
-      imageUrl: imageUrl || '/default-collection.png',
+      imageUrl: imageUrl || '',
       sources: sources || [],
       userId: req.user._id,
       isPublic: isPublic || false,
-    });
+    };
+
+    // Si pas d'image fournie, générer une couleur basée sur un ID temporaire
+    // La couleur sera mise à jour avec l'ID réel après création
+    // if (!imageUrl || imageUrl === '') {
+    //   const tempId = new mongoose.Types.ObjectId().toString();
+    //   collectionData.colorHex = generateColorFromId(tempId);
+    // }
+
+    // Créer la collection
+    const collection = await Collection.create(collectionData);
+
+    console.log('ID collection:', collection._id);
+    console.log('Couleur générée:', generateColorFromId(collection._id.toString()));
+    console.log('collection:', collection);
+    // Si pas d'image, mettre à jour la couleur avec l'ID réel de la collection
+    if (!imageUrl || imageUrl === '') {
+      collection.colorHex = generateColorFromId(collection._id.toString());
+      console.log('ID collection:', collection._id);
+      console.log('Couleur générée:', generateColorFromId(collection._id.toString()));
+      console.log('collection:', collection);
+      await collection.save();
+    }
 
     // Ajouter la collection à l'utilisateur
     await User.findByIdAndUpdate(req.user._id, { $push: { collections: collection._id } });
@@ -117,7 +140,7 @@ export const updateCollection = async (req, res) => {
     const updateData = {};
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-    if (imageUrl) updateData.imageUrl = imageUrl;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
     if (isPublic !== undefined) updateData.isPublic = isPublic;
 
     // Trouver la collection et vérifier que l'utilisateur en est le propriétaire
@@ -136,6 +159,11 @@ export const updateCollection = async (req, res) => {
         success: false,
         message: "Vous n'avez pas l'autorisation de modifier cette collection",
       });
+    }
+
+    // Si l'imageUrl a été supprimée et qu'aucune couleur n'est définie, générer une couleur
+    if (imageUrl === '' && (!collection.colorHex || collection.colorHex === '')) {
+      updateData.colorHex = generateColorFromId(collection._id);
     }
 
     // Mettre à jour la collection

@@ -162,7 +162,7 @@ const CollectionForm = () => {
                 alt="Aperçu"
                 className="w-16 h-16 object-cover rounded-md"
                 onError={(e) => {
-                  e.target.src = '/default-collection.png';
+                  e.target.src = '';
                 }}
               />
             </div>

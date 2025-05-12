@@ -206,10 +206,7 @@ export const fetchSourceArticles = async (source) => {
 
     return validArticles.length;
   } catch (error) {
-    console.error(`Erreur complète pour ${source.name}:`, {
-      error: error.message,
-      stack: error.stack,
-    });
+    console.error(`Erreur pour ${source.name}`);
 
     await Source.findByIdAndUpdate(source._id, {
       lastFetched: new Date(),

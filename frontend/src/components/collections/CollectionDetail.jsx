@@ -118,6 +118,7 @@ const CollectionDetail = () => {
                 : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              backgroundColor: currentCollection.colorHex,
             }}
           >
             {!currentCollection.imageUrl && (

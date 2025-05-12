@@ -82,12 +82,6 @@ app.use(
 // Middleware de debug CORS en développement
 if (config.mode === 'development') {
   app.use((req, res, next) => {
-    console.log('CORS Debug:', {
-      origin: req.headers.origin,
-      method: req.method,
-      path: req.path,
-      headers: req.headers,
-    });
     next();
   });
 }

@@ -13,7 +13,10 @@ const CollectionSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      default: '/default-collection.png',
+    },
+    colorHex: {
+      type: String,
+      default: '',
     },
     sources: [
       {
