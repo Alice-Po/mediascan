@@ -28,6 +28,18 @@ const InfoIcon = ({ className }) => (
   </svg>
 );
 
+// Ajouter l'icône de collection
+const CollectionIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+    />
+  </svg>
+);
+
 // Déplacer la fonction au niveau du module
 const getFundingTypeLabel = (type) => {
   const types = {
@@ -46,7 +58,7 @@ const getPoliticalOrientationLabel = (orientation) => {
 };
 
 // Composant de base
-const SourceItemBase = ({ source, children, leftAction }) => {
+const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
   const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
@@ -163,8 +175,24 @@ const SourceItemBase = ({ source, children, leftAction }) => {
           </div>
         </div>
 
-        {/* Bouton d'information */}
-        <div className="flex-shrink-0">
+        {/* Boutons d'action */}
+        <div className="flex flex-shrink-0 gap-2">
+          {/* Bouton "Ajouter à une collection" */}
+          {onAddToCollection && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCollection(source);
+              }}
+              className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded-full hover:bg-indigo-50"
+              title="Ajouter à une collection"
+              aria-label="Ajouter à une collection"
+            >
+              <CollectionIcon className="h-5 w-5" />
+            </button>
+          )}
+
+          {/* Bouton d'information */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -325,8 +353,38 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
 };
 
 // Variante avec bouton de suppression pour la page Sources
-export const DeletableSourceItem = ({ source, onDelete }) => (
-  <SourceItemBase source={source}>
+export const DeletableSourceItem = ({ source, onDelete, onAddToCollection }) => (
+  <SourceItemBase source={source} onAddToCollection={onAddToCollection}>
+    <div className="flex space-x-2">
+      {/* Bouton pour ajouter à une collection
+      {onAddToCollection && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCollection(source);
+          }}
+          className="text-gray-400 hover:text-indigo-600 transition-colors"
+          title="Ajouter à une collection"
+        >
+          <CollectionIcon className="h-5 w-5" />
+        </button>
+      )} */}
+
+      {/* Bouton pour supprimer */}
+      <button
+        onClick={onDelete}
+        className="text-gray-400 hover:text-red-600 transition-colors"
+        title="Retirer cette source"
+      >
+        <TrashIcon className="h-5 w-5" />
+      </button>
+    </div>
+  </SourceItemBase>
+);
+
+// Variante avec bouton de suppression et ajout à une collection pour la page Sources
+export const CollectibleDeletableSourceItem = ({ source, onDelete, onAddToCollection }) => (
+  <SourceItemBase source={source} onAddToCollection={onAddToCollection}>
     <div className="flex-shrink-0">
       <button
         onClick={onDelete}
@@ -341,6 +399,11 @@ export const DeletableSourceItem = ({ source, onDelete }) => (
 
 // Variante simple pour l'autocomplétion
 export const SimpleSourceItem = ({ source }) => <SourceItemBase source={source} />;
+
+// Variante avec bouton d'ajout à une collection
+export const CollectibleSourceItem = ({ source, onAddToCollection }) => (
+  <SourceItemBase source={source} onAddToCollection={onAddToCollection} />
+);
 
 // PropTypes
 const sourceShape = {
@@ -357,6 +420,7 @@ SourceItemBase.propTypes = {
   source: PropTypes.shape(sourceShape).isRequired,
   children: PropTypes.node,
   leftAction: PropTypes.node,
+  onAddToCollection: PropTypes.func,
 };
 
 SelectableSourceItem.propTypes = {
@@ -369,10 +433,22 @@ SelectableSourceItem.propTypes = {
 DeletableSourceItem.propTypes = {
   source: PropTypes.shape(sourceShape).isRequired,
   onDelete: PropTypes.func.isRequired,
+  onAddToCollection: PropTypes.func,
+};
+
+CollectibleDeletableSourceItem.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAddToCollection: PropTypes.func.isRequired,
 };
 
 SimpleSourceItem.propTypes = {
   source: PropTypes.shape(sourceShape).isRequired,
+};
+
+CollectibleSourceItem.propTypes = {
+  source: PropTypes.shape(sourceShape).isRequired,
+  onAddToCollection: PropTypes.func.isRequired,
 };
 
 export default SimpleSourceItem;

@@ -3,6 +3,7 @@ import { useSources } from '../hooks/useSources';
 import { DeletableSourceItem, SimpleSourceItem } from '../components/sources/SourceItem';
 import AddSourceForm from '../components/sources/AddSourceForm';
 import PremiumBanner from '../components/premium/PremiumBanner';
+import { useCollections } from '../hooks/useCollections';
 
 const Sources = () => {
   const {
@@ -17,6 +18,14 @@ const Sources = () => {
     loadAllSources,
   } = useSources();
 
+  const {
+    collections,
+    loadCollections,
+    loadingCollections,
+    addSourceToCollection,
+    createCollection,
+  } = useCollections();
+
   // State local pour l'UI
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -24,12 +33,25 @@ const Sources = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [selectedSource, setSelectedSource] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [showNewCollectionForm, setShowNewCollectionForm] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   // Charger les sources au montage
   useEffect(() => {
     loadUserSources();
     loadAllSources();
   }, [loadUserSources, loadAllSources]);
+
+  // Charger les collections lorsque la modal est ouverte
+  useEffect(() => {
+    if (showCollectionModal) {
+      loadCollections();
+    }
+  }, [showCollectionModal, loadCollections]);
 
   // Gérer la recherche et les suggestions
   const handleSearchChange = (e) => {
@@ -70,6 +92,64 @@ const Sources = () => {
       setFormErrors({});
     } catch (error) {
       setFormErrors(error.response?.data?.errors || {});
+    }
+  };
+
+  // Handler pour l'ajout à une collection
+  const handleAddToCollection = (source) => {
+    setSelectedSource(source);
+    setShowCollectionModal(true);
+    setShowNewCollectionForm(false);
+    setNewCollectionName('');
+    setActionError(null);
+  };
+
+  // Ajouter à une collection existante
+  const handleAddToExistingCollection = async (collectionId) => {
+    if (!selectedSource) return;
+
+    try {
+      setActionLoading(true);
+      setActionError(null);
+      await addSourceToCollection(collectionId, selectedSource._id);
+      setShowCollectionModal(false);
+      setSelectedSource(null);
+    } catch (err) {
+      setActionError("Impossible d'ajouter la source à cette collection");
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Créer une nouvelle collection
+  const handleCreateCollection = async (e) => {
+    e.preventDefault();
+    if (!selectedSource) return;
+
+    if (!newCollectionName.trim()) {
+      setActionError('Le nom de la collection est requis');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      setActionError(null);
+
+      await createCollection({
+        name: newCollectionName,
+        description: '',
+        sources: [selectedSource._id],
+      });
+
+      setShowCollectionModal(false);
+      setSelectedSource(null);
+      setNewCollectionName('');
+    } catch (err) {
+      setActionError('Impossible de créer la collection');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -136,16 +216,160 @@ const Sources = () => {
           ) : (
             <ul className="divide-y divide-gray-200">
               {userSources.map((source) => (
-                <DeletableSourceItem
-                  key={source._id}
-                  source={source}
-                  onDelete={() => disableSource(source._id)}
-                />
+                <li key={source._id} className="p-4 hover:bg-gray-50">
+                  <DeletableSourceItem
+                    source={source}
+                    onDelete={() => disableSource(source._id)}
+                    onAddToCollection={() => handleAddToCollection(source)}
+                  />
+                </li>
               ))}
             </ul>
           )}
         </div>
       </section>
+
+      {/* Modal pour ajouter à une collection style Spotify */}
+      {showCollectionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full overflow-hidden">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-medium">Ajouter à une collection</h3>
+              <button
+                onClick={() => setShowCollectionModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Formulaire de recherche et nouvelle collection */}
+            <div className="p-4 border-b">
+              {showNewCollectionForm ? (
+                <form onSubmit={handleCreateCollection} className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Nom de la collection"
+                    value={newCollectionName}
+                    onChange={(e) => setNewCollectionName(e.target.value)}
+                    className="w-full p-2 text-sm border border-gray-300 rounded"
+                    required
+                  />
+                  <div className="flex justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setShowNewCollectionForm(false)}
+                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={actionLoading}
+                      className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      Créer
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setShowNewCollectionForm(true)}
+                  className="w-full flex items-center p-3 text-left text-indigo-600 hover:bg-indigo-50 rounded-md"
+                >
+                  <svg className="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Nouvelle collection
+                </button>
+              )}
+            </div>
+
+            {/* Affichage d'erreur */}
+            {actionError && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border-b">{actionError}</div>
+            )}
+
+            {/* Liste des collections */}
+            <div className="max-h-60 overflow-y-auto">
+              {loadingCollections || actionLoading ? (
+                <div className="flex justify-center items-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : collections.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  Vous n'avez pas encore de collections
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {collections.map((collection) => {
+                    const isSourceInCollection = collection.sources?.some(
+                      (source) =>
+                        selectedSource &&
+                        (source._id === selectedSource._id || source === selectedSource._id)
+                    );
+
+                    return (
+                      <div
+                        key={collection._id}
+                        className={`p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer ${
+                          isSourceInCollection ? 'bg-green-50' : ''
+                        }`}
+                        onClick={() =>
+                          !isSourceInCollection && handleAddToExistingCollection(collection._id)
+                        }
+                      >
+                        <div className="flex items-center">
+                          <div
+                            className="w-10 h-10 rounded bg-gray-200 mr-3 flex items-center justify-center"
+                            style={{
+                              backgroundImage: collection.imageUrl
+                                ? `url(${collection.imageUrl})`
+                                : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                            }}
+                          >
+                            {!collection.imageUrl && (
+                              <span className="text-gray-500 font-medium">
+                                {collection.name.charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium">{collection.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {collection.sources?.length || 0} source
+                              {collection.sources?.length !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+                        {isSourceInCollection && (
+                          <span className="text-green-600 px-2 py-1 text-sm bg-green-100 rounded-full">
+                            Ajouté
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

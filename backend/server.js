@@ -21,6 +21,7 @@ import authRoutes from './routes/authRoutes.js';
 import sourceRoutes from './routes/sourceRoutes.js';
 import articleRoutes from './routes/articleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import collectionRoutes from './routes/collectionRoutes.js';
 
 // Fonction pour logger les infos de l'application selon le mode
 const logAppInfo = (mode) => {
@@ -103,6 +104,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/sources', sourceRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/collections', collectionRoutes);
 
 // Route de test API uniquement en développement
 if (config.mode === 'development') {

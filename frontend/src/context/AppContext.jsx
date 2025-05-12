@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext, useCallback } fr
 import { AuthContext } from './AuthContext';
 import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
+import { useCollections } from '../hooks/useCollections';
 
 // Création du contexte et du hook dans des constantes nommées
 export const AppContext = createContext(null);
@@ -38,13 +39,40 @@ export const AppProvider = ({ children }) => {
     orientation: {
       political: [],
     },
+    collection: null,
   });
+
+  // Utilisation du hook personnalisé pour les collections
+  const {
+    collections,
+    currentCollection,
+    loading: loadingCollections,
+    loadCollections,
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    loadCollectionById,
+    setCurrentCollection,
+    addSourceToCollection,
+    removeSourceFromCollection,
+    createFilterByCollection,
+  } = useCollections(user, setError);
+
+  // Création de la fonction de filtrage par collection
+  const filterByCollection = createFilterByCollection(setFilters);
 
   // Memoize les articles filtrés
   const filteredArticles = React.useMemo(() => {
     const filtered = articles.filter((article) => {
+      // Filtre par collection (prioritaire sur les sources individuelles)
+      if (filters.collection) {
+        const collection = collections.find((c) => c._id === filters.collection);
+        if (collection && !collection.sources.some((s) => s._id === article.sourceId._id)) {
+          return false;
+        }
+      }
       // Si aucune source n'est sélectionnée, ne pas filtrer par source
-      if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId._id)) {
+      else if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId._id)) {
         return false;
       }
 
@@ -69,7 +97,7 @@ export const AppProvider = ({ children }) => {
     });
 
     return filtered;
-  }, [articles, filters]);
+  }, [articles, filters, collections]);
 
   // Sauvegarder les filtres dans localStorage à chaque changement
   useEffect(() => {
@@ -196,6 +224,7 @@ export const AppProvider = ({ children }) => {
       if (
         prev.sources.length === 0 &&
         !prev.searchTerm &&
+        !prev.collection &&
         (!prev.orientation || Object.values(prev.orientation).every((arr) => arr.length === 0))
       ) {
         return prev;
@@ -206,6 +235,7 @@ export const AppProvider = ({ children }) => {
           political: [],
         },
         searchTerm: '',
+        collection: null,
       };
     });
   };
@@ -250,6 +280,19 @@ export const AppProvider = ({ children }) => {
     setArticles,
     updateArticle,
     loadUserSources,
+    // Fonctionnalités de collections fournies par le hook
+    collections,
+    currentCollection,
+    loadingCollections,
+    loadCollections,
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    loadCollectionById,
+    setCurrentCollection,
+    addSourceToCollection,
+    removeSourceFromCollection,
+    filterByCollection,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
