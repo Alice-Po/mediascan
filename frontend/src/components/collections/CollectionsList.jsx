@@ -12,11 +12,19 @@ const CollectionsList = () => {
     useContext(AppContext);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [collectionToShare, setCollectionToShare] = useState(null);
 
   const handleDeleteClick = (e, collection) => {
     e.stopPropagation();
     setCollectionToDelete(collection);
     setShowDeleteModal(true);
+  };
+
+  const handleShareClick = (e, collection) => {
+    e.stopPropagation();
+    setCollectionToShare(collection);
+    setShowShareModal(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -34,6 +42,11 @@ const CollectionsList = () => {
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setCollectionToDelete(null);
+  };
+
+  const handleCloseShareModal = () => {
+    setShowShareModal(false);
+    setCollectionToShare(null);
   };
 
   if (loadingCollections) {
@@ -125,6 +138,28 @@ const CollectionsList = () => {
                 )}
               </div>
               <div className="flex space-x-1">
+                {collection.isPublic && (
+                  <button
+                    className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100"
+                    onClick={(e) => handleShareClick(e, collection)}
+                    title="Partager cette collection"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                      />
+                    </svg>
+                  </button>
+                )}
                 <Link
                   to={`/collections/${collection._id}`}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
@@ -209,7 +244,20 @@ const CollectionsList = () => {
         </div>
       )}
 
-      {/* Utilisation du composant ConfirmationModal */}
+      {/* Modale de partage */}
+      <ConfirmationModal
+        isOpen={showShareModal && !!collectionToShare}
+        onClose={handleCloseShareModal}
+        onConfirm={handleCloseShareModal}
+        title="Partager la collection"
+        message="Le système de partage de collections sera bientôt disponible ! Vous pourrez partager"
+        itemName={collectionToShare?.name}
+        confirmButtonText="D'accord"
+        cancelButtonText="Fermer"
+        confirmButtonClass="bg-blue-600 text-white hover:bg-blue-700"
+      />
+
+      {/* Utilisation du composant ConfirmationModal pour suppression */}
       <ConfirmationModal
         isOpen={showDeleteModal && !!collectionToDelete}
         onClose={handleCancelDelete}
