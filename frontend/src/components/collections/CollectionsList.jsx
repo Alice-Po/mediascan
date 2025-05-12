@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 
@@ -6,7 +6,33 @@ import { AppContext } from '../../context/AppContext';
  * Composant pour afficher la liste des collections de l'utilisateur
  */
 const CollectionsList = () => {
-  const { collections, loadingCollections, filterByCollection, filters } = useContext(AppContext);
+  const { collections, loadingCollections, filterByCollection, filters, deleteCollection } =
+    useContext(AppContext);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState(null);
+
+  const handleDeleteClick = (e, collection) => {
+    e.stopPropagation();
+    setCollectionToDelete(collection);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!collectionToDelete) return;
+
+    try {
+      await deleteCollection(collectionToDelete._id);
+      setShowDeleteModal(false);
+      setCollectionToDelete(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setCollectionToDelete(null);
+  };
 
   if (loadingCollections) {
     return (
@@ -102,7 +128,7 @@ const CollectionsList = () => {
                   </svg>
                 </Link>
                 <Link
-                  to={`/collections/${collection._id}/edit`}
+                  to={`/collections/edit/${collection._id}`}
                   className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -121,6 +147,26 @@ const CollectionsList = () => {
                     />
                   </svg>
                 </Link>
+                <button
+                  className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100"
+                  onClick={(e) => handleDeleteClick(e, collection)}
+                  title="Supprimer cette collection"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -136,6 +182,34 @@ const CollectionsList = () => {
           >
             Voir toutes les sources
           </button>
+        </div>
+      )}
+
+      {/* Modal de confirmation de suppression */}
+      {showDeleteModal && collectionToDelete && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">Confirmer la suppression</h3>
+            <p className="mb-6">
+              Êtes-vous sûr de vouloir supprimer la collection{' '}
+              <span className="font-semibold">{collectionToDelete.name}</span> ? Cette action est
+              irréversible.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
