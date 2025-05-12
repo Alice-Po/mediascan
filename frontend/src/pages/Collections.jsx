@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { CollectionsList } from '../components/collections';
 import { useCollections } from '../hooks/useCollections';
+import { AuthContext } from '../context/AuthContext';
 
 const Collections = () => {
-  const { collections, loading, loadCollections } = useCollections();
+  const { user } = useContext(AuthContext);
+  const { collections, loading, loadCollections } = useCollections(user);
 
   useEffect(() => {
     loadCollections();

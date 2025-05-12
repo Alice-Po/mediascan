@@ -4,7 +4,7 @@ import { ORIENTATIONS, getOrientationLabel } from '../../constants';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
 import { SimpleSourceItem } from './SourceItem';
-import { useSnackbar, SNACKBAR_TYPES } from '../../contexts/SnackbarContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 const AddSourceForm = ({
   onSubmit,

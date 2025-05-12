@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSnackbar, SNACKBAR_TYPES } from '../../contexts/SnackbarContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 const Snackbar = () => {
   const { snackbars, hideSnackbar } = useSnackbar();

@@ -3,7 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AppProvider } from './context/AppContext';
 import AppRoutes from './routes/index';
-import { SnackbarProvider } from './contexts/SnackbarContext';
+import { SnackbarProvider } from './context/SnackbarContext';
 import Snackbar from './components/common/Snackbar';
 
 function App() {
