@@ -59,6 +59,11 @@ const getPoliticalOrientationLabel = (orientation) => {
 
 const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [faviconLoaded, setFaviconLoaded] = React.useState(true);
+
+  // Log pour débogage
+  console.log('SourceCard - source:', source._id, source.name);
+  console.log('SourceCard - faviconUrl:', source.faviconUrl);
 
   const bgColor = ORIENTATIONS.political[source.orientation?.political]?.color || '#f3f4f6';
   const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
@@ -67,6 +72,14 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
   const description = source.description || '';
   const words = description.split(' ');
   const shortDescription = words.length > 15 ? words.slice(0, 15).join(' ') + '...' : description;
+
+  // Générer les initiales à partir du nom de la source
+  const initials = source.name
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
+
+  console.log('SourceCard - initials:', initials);
 
   const handleCardClick = (e) => {
     // Don't open modal if clicking on a button
@@ -82,7 +95,7 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
         className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer overflow-hidden flex flex-col h-full"
         onClick={handleCardClick}
       >
-        {/* Header with image/logo - réduction de la hauteur de 36 à 24 */}
+        {/* Header with image/logo */}
         <div className="relative h-24 bg-gray-100 overflow-hidden">
           {source.imageUrl ? (
             <img
@@ -98,23 +111,28 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
               className="w-full h-full flex items-center justify-center"
               style={{ backgroundColor: bgColor }}
             >
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                {source.faviconUrl ? (
-                  <img
-                    src={source.faviconUrl}
-                    alt={`Logo ${source.name}`}
-                    className="w-10 h-10 object-contain"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'block';
-                    }}
-                  />
-                ) : (
-                  <span className="text-2xl font-bold" style={{ color: textColor }}>
-                    {source.name.charAt(0).toUpperCase()}
+              {source.faviconUrl && faviconLoaded ? (
+                <img
+                  src={source.faviconUrl}
+                  alt={`Logo ${source.name}`}
+                  className="w-20 h-20 object-contain p-1"
+                  onLoad={() => {
+                    console.log('SourceCard - favicon loaded:', source.faviconUrl);
+                    setFaviconLoaded(true);
+                  }}
+                  onError={(e) => {
+                    console.log('SourceCard - favicon error:', source.faviconUrl);
+                    e.target.style.display = 'none';
+                    setFaviconLoaded(false);
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-3xl font-bold tracking-tight" style={{ color: textColor }}>
+                    {initials || source.name.charAt(0).toUpperCase()}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
 
