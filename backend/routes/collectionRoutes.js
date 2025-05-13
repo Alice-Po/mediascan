@@ -7,6 +7,7 @@ import {
   deleteCollection,
   addSourceToCollection,
   removeSourceFromCollection,
+  getPublicCollections,
 } from '../controllers/collectionController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -14,6 +15,9 @@ const router = express.Router();
 
 // Toutes les routes nécessitent une authentification
 router.use(protect);
+
+// Route pour les collections publiques
+router.get('/public', getPublicCollections);
 
 // Routes pour les collections
 router

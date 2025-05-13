@@ -27,6 +27,35 @@ export const getUserCollections = async (req, res) => {
   }
 };
 
+// @desc    Récupérer toutes les collections publiques
+// @route   GET /api/collections/public
+// @access  Private
+export const getPublicCollections = async (req, res) => {
+  try {
+    const collections = await Collection.find({ isPublic: true })
+      .populate('sources', 'name url faviconUrl')
+      .populate('userId', 'username') // Pour afficher le nom du créateur
+      .sort({ updatedAt: -1 })
+      .limit(10); // Limiter à 10 collections pour l'affichage dans l'onboarding
+
+    res.status(200).json({
+      success: true,
+      count: collections.length,
+      data: collections.map((collection) => ({
+        ...collection.toObject(),
+        createdBy: collection.userId, // Renommer userId en createdBy pour le frontend
+      })),
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des collections publiques:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des collections publiques',
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Créer une nouvelle collection
 // @route   POST /api/collections
 // @access  Private
@@ -61,15 +90,11 @@ export const createCollection = async (req, res) => {
     // Créer la collection
     const collection = await Collection.create(collectionData);
 
-    console.log('ID collection:', collection._id);
-    console.log('Couleur générée:', generateColorFromId(collection._id.toString()));
     console.log('collection:', collection);
     // Si pas d'image, mettre à jour la couleur avec l'ID réel de la collection
     if (!imageUrl || imageUrl === '') {
       collection.colorHex = generateColorFromId(collection._id.toString());
-      console.log('ID collection:', collection._id);
-      console.log('Couleur générée:', generateColorFromId(collection._id.toString()));
-      console.log('collection:', collection);
+
       await collection.save();
     }
 
