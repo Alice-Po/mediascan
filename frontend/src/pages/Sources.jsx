@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useSources } from '../hooks/useSources';
 import { DeletableSourceItem, SimpleSourceItem } from '../components/sources/SourceItem';
 import AddSourceForm from '../components/sources/AddSourceForm';
+import SourceCatalog from '../components/sources/SourceCatalog';
 import PremiumBanner from '../components/premium/PremiumBanner';
 import { useCollections } from '../hooks/useCollections';
 import { AuthContext } from '../context/AuthContext';
@@ -42,6 +43,7 @@ const Sources = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [debugInfo, setDebugInfo] = useState(null);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   // Charger les sources au montage
   useEffect(() => {
@@ -189,6 +191,11 @@ const Sources = () => {
     }
   };
 
+  // Toggle pour afficher/masquer le catalogue
+  const toggleCatalog = () => {
+    setShowCatalog(!showCatalog);
+  };
+
   if (loadingSources) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -238,8 +245,31 @@ const Sources = () => {
           />
         )}
       </div>
-
-      <section>
+      {/* Section du catalogue de sources */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Catalogue de sources</h2>
+          <button
+            onClick={toggleCatalog}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            {showCatalog ? 'Masquer le catalogue' : 'Afficher le catalogue'}
+          </button>
+        </div>
+        {showCatalog && (
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <SourceCatalog onAddToCollection={handleAddToCollection} userSources={userSources} />
+          </div>
+        )}
+        {!showCatalog && (
+          <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
+            <p className="text-gray-600">
+              Découvrez de nouvelles sources à ajouter à votre flux d'actualités.
+            </p>
+          </div>
+        )}
+      </section>
+      <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Mes sources ({userSources?.length || 0})</h2>
         <div className="bg-white rounded-lg shadow-sm">
           {userSources.length === 0 ? (
