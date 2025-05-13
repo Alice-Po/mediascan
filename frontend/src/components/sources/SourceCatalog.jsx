@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAllSources } from '../../api/sourcesApi';
-import { CollectibleSourceItem } from './SourceItem';
 import AddSourceForm from './AddSourceForm';
+import SourceCard from './SourceCard';
 
 /**
  * Composant qui affiche un catalogue de toutes les sources disponibles
@@ -206,19 +206,15 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource, on
       </div>
 
       {/* Liste des sources */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {filteredSources.map((source) => {
           const active = isSourceActive(source._id);
           return (
-            <div key={source._id} className="relative">
-              {active && (
-                <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Activée
-                  </span>
-                </div>
-              )}
-              <CollectibleSourceItem
+            <div
+              key={source._id}
+              className={`relative ${active ? 'border-2 border-blue-500 rounded-lg' : ''}`}
+            >
+              <SourceCard
                 source={source}
                 onAddToCollection={() => handleAddToCollection(source)}
                 onEnableSource={!active ? () => handleEnableSource(source) : undefined}
