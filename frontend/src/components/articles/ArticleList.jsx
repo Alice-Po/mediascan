@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useRef, useCallback } from 'react';
+import React, { useContext, useEffect, useRef, useCallback, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import ArticleCard from './ArticleCard';
 import { saveArticle, unsaveArticle } from '../../api/articlesApi';
+import { useDebounce } from '../../hooks/useDebounce';
 
 /**
  * Composant d'affichage de la liste des articles
@@ -10,8 +11,20 @@ const ArticleList = () => {
   const { articles, loadingArticles, hasMoreArticles, loadMoreArticles, updateArticle } =
     useContext(AppContext);
 
+  // État pour déclencher le chargement d'articles supplémentaires
+  const [intersectionTrigger, setIntersectionTrigger] = useState(0);
+  // Utilisation du hook de debounce sur le déclencheur d'intersection
+  const debouncedTrigger = useDebounce(intersectionTrigger, 300);
+
   // Référence pour l'élément observé pour l'infinite scroll
   const observer = useRef();
+
+  // Effet pour charger plus d'articles lorsque le déclencheur debounced change
+  useEffect(() => {
+    if (debouncedTrigger > 0 && hasMoreArticles && !loadingArticles) {
+      loadMoreArticles();
+    }
+  }, [debouncedTrigger, hasMoreArticles, loadingArticles, loadMoreArticles]);
 
   // Fonction pour gérer le partage d'un article
   const handleShare = (url) => {
@@ -60,13 +73,14 @@ const ArticleList = () => {
 
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMoreArticles) {
-          loadMoreArticles();
+          // Incrémenter le déclencheur au lieu d'appeler directement loadMoreArticles
+          setIntersectionTrigger((prev) => prev + 1);
         }
       });
 
       if (node) observer.current.observe(node);
     },
-    [loadingArticles, hasMoreArticles, loadMoreArticles]
+    [loadingArticles, hasMoreArticles]
   );
 
   // Fonction pour afficher un message si aucun article
