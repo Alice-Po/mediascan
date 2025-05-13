@@ -1,11 +1,8 @@
 import React from 'react';
-import { ORIENTATIONS } from '../../constants';
+import Badge from '../common/Badge';
 
 const SourceDetailsModal = ({ isOpen, onClose, source }) => {
   if (!isOpen) return null;
-
-  const bgColor = ORIENTATIONS.political[source.orientation?.political]?.color || '#f3f4f6';
-  const textColor = ORIENTATIONS.political[source.orientation?.political]?.textColor || 'inherit';
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-50 flex items-center justify-center p-4">
@@ -61,19 +58,13 @@ const SourceDetailsModal = ({ isOpen, onClose, source }) => {
 
         {/* Contenu */}
         <div className="px-8 py-6 space-y-6">
-          {/* Orientation politique */}
-          {source.orientation?.political && (
+          {/* Orientation  */}
+          {source.orientation && (
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Orientation politique</h3>
-              <span
-                className="inline-flex px-3 py-1 rounded-full text-sm"
-                style={{
-                  backgroundColor: `${bgColor}33`,
-                  color: textColor,
-                }}
-              >
-                {source.orientation.political}
-              </span>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Orientation </h3>
+              {source.orientation.map((orientation) => (
+                <Badge text={orientation} />
+              ))}
             </div>
           )}
 

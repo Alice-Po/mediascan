@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { VALID_ORIENTATIONS } from '../config/constants.js';
 
 const ArticleSchema = new mongoose.Schema(
   {
@@ -54,16 +53,8 @@ const ArticleSchema = new mongoose.Schema(
     sourceFavicon: {
       type: String,
     },
-    categories: [
-      {
-        type: String,
-      },
-    ],
-    orientation: {
-      political: {
-        type: String,
-        enum: VALID_ORIENTATIONS,
-      },
+    orientations: {
+      type: [String],
     },
     userInteractions: [
       {
@@ -99,7 +90,6 @@ const ArticleSchema = new mongoose.Schema(
 );
 
 ArticleSchema.index({ sourceId: 1, publishedAt: -1 });
-ArticleSchema.index({ categories: 1 });
 ArticleSchema.index({ title: 1, sourceId: 1 }, { unique: true });
 ArticleSchema.index({ language: 1, publishedAt: -1 });
 ArticleSchema.index({ tags: 1, publishedAt: -1 });

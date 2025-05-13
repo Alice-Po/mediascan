@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { ORIENTATIONS, getOrientationLabel } from '../../constants';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
 import { SimpleSourceItem } from './SourceItem';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
-
+import TagInputForm from '../common/TagInputForm';
 const AddSourceForm = ({
   onSubmit,
   onCancel,
@@ -26,9 +25,7 @@ const AddSourceForm = ({
       type: '',
       details: '',
     },
-    orientation: {
-      political: '',
-    },
+    orientation: [],
     collectionId: '',
   });
 
@@ -98,9 +95,7 @@ const AddSourceForm = ({
           type: '',
           details: '',
         },
-        orientation: {
-          political: '',
-        },
+        orientation: [],
         collectionId: '',
       });
     } catch (error) {
@@ -120,15 +115,15 @@ const AddSourceForm = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <form onSubmit={handleSubmit} noValidate className="p-2 sm:p-4 md:p-6">
-        <div className="space-y-3 sm:space-y-4 md:space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="p-4 sm:p-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Section 1: URL du flux RSS */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-blue-50 px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-b border-gray-200">
+            <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
               <div className="flex items-center">
-                <div className="bg-blue-100 rounded-full p-1.5 sm:p-2 mr-2 sm:mr-3">
+                <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+                    className="w-5 h-5 text-blue-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -142,13 +137,11 @@ const AddSourceForm = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-sm sm:text-base text-gray-900">
-                    Adresse du flux RSS
-                  </h3>
+                  <h3 className="font-medium text-gray-900">Adresse du flux RSS</h3>
                 </div>
               </div>
             </div>
-            <div className="p-2 sm:p-3 md:p-4">
+            <div className="p-3 sm:p-4">
               <div>
                 <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   URL du flux RSS <span className="text-red-500">*</span>
@@ -234,11 +227,11 @@ const AddSourceForm = ({
 
           {/* Section 2: Description */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-blue-50 px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-b border-gray-200">
+            <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
               <div className="flex items-center">
-                <div className="bg-blue-100 rounded-full p-1.5 sm:p-2 mr-2 sm:mr-3">
+                <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+                    className="w-5 h-5 text-blue-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -252,13 +245,11 @@ const AddSourceForm = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-sm sm:text-base text-gray-900">
-                    Description éditoriale
-                  </h3>
+                  <h3 className="font-medium text-gray-900">Description éditoriale</h3>
                 </div>
               </div>
             </div>
-            <div className="p-2 sm:p-3 md:p-4">
+            <div className="p-3 sm:p-4">
               <div>
                 <label
                   htmlFor="description"
@@ -307,11 +298,11 @@ const AddSourceForm = ({
           {/* Section 3: Collections */}
           {collections.length > 0 && (
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="bg-indigo-50 px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-b border-gray-200">
+              <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
                 <div className="flex items-center">
-                  <div className="bg-indigo-100 rounded-full p-1.5 sm:p-2 mr-2 sm:mr-3">
+                  <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
                     <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600"
+                      className="w-5 h-5 text-indigo-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -325,11 +316,11 @@ const AddSourceForm = ({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-medium text-sm sm:text-base text-gray-900">Collection</h3>
+                    <h3 className="font-medium text-gray-900">Collection</h3>
                   </div>
                 </div>
               </div>
-              <div className="p-2 sm:p-3 md:p-4">
+              <div className="p-3 sm:p-4">
                 <div>
                   <label
                     htmlFor="collectionId"
@@ -396,115 +387,94 @@ const AddSourceForm = ({
               </div>
             </div>
           )}
+          {/* Section 4: Orientation */}
+          <div className="space-y-4 mt-4 md:mt-0">
+            <div>
+              <label htmlFor="orientation" className="block text-sm font-medium text-gray-700 mb-1">
+                Orientation
+              </label>
+              <TagInputForm
+                tags={customSource.orientation}
+                setTags={setCustomSource}
+                error={formErrors.orientation}
+              />
+            </div>
+          </div>
+        </div>
 
-          {/* Section 4: Paramètres */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-blue-50 px-2 sm:px-3 md:px-4 py-2 sm:py-3 border-b border-gray-200">
-              <div className="flex items-center">
-                <div className="bg-blue-100 rounded-full p-1.5 sm:p-2 mr-2 sm:mr-3">
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-sm sm:text-base text-gray-900">
-                    Paramètres additionnels
-                  </h3>
-                </div>
+        {/* Section 5: Paramètres */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+            <div className="flex items-center">
+              <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
+                <svg
+                  className="w-5 h-5 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">Paramètres additionnels</h3>
               </div>
             </div>
-            <div className="p-2 sm:p-3 md:p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                {/* Colonne 1 */}
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="funding.type"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Type de financement
-                    </label>
-                    <select
-                      id="funding.type"
-                      name="funding.type"
-                      value={customSource.funding?.type}
-                      onChange={handleCustomSourceChange}
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white"
-                    >
-                      <option value="">Sélectionner un type</option>
-                      <option value="independent">Média indépendant</option>
-                      <option value="public">Service public</option>
-                      <option value="private">Groupe privé / Industriel</option>
-                      <option value="cooperative">Coopérative de journalistes</option>
-                      <option value="association">Association / ONG</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="funding.details"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Précisions (optionnel)
-                    </label>
-                    <input
-                      type="text"
-                      id="funding.details"
-                      name="funding.details"
-                      value={customSource.funding?.details || ''}
-                      onChange={handleCustomSourceChange}
-                      placeholder="Ex: Appartient au groupe Bouygues..."
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    />
-                  </div>
+          </div>
+          <div className="p-3 sm:p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="funding.type"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Type de financement
+                  </label>
+                  <select
+                    id="funding.type"
+                    name="funding.type"
+                    value={customSource.funding?.type}
+                    onChange={handleCustomSourceChange}
+                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white"
+                  >
+                    <option value="">Sélectionner un type</option>
+                    <option value="independent">Média indépendant</option>
+                    <option value="public">Service public</option>
+                    <option value="private">Groupe privé / Industriel</option>
+                    <option value="cooperative">Coopérative de journalistes</option>
+                    <option value="association">Association / ONG</option>
+                    <option value="other">Autre</option>
+                  </select>
                 </div>
 
-                {/* Colonne 2 */}
-                <div className="space-y-4 mt-4 md:mt-0">
-                  <div>
-                    <label
-                      htmlFor="orientation.political"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Orientation politique
-                    </label>
-                    <select
-                      id="orientation.political"
-                      name="orientation.political"
-                      value={customSource.orientation.political}
-                      onChange={handleCustomSourceChange}
-                      className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white"
-                    >
-                      <option value="" disabled>
-                        Sélectionnez une orientation
-                      </option>
-                      {Object.entries(ORIENTATIONS.political).map(([key, value]) => (
-                        <option key={key} value={key}>
-                          {value.label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-1 text-xs text-gray-500">
-                      Cette information aide à diversifier les sources
-                    </p>
-                  </div>
+                <div>
+                  <label
+                    htmlFor="funding.details"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Précisions (optionnel)
+                  </label>
+                  <input
+                    type="text"
+                    id="funding.details"
+                    name="funding.details"
+                    value={customSource.funding?.details || ''}
+                    onChange={handleCustomSourceChange}
+                    placeholder="Ex: Appartient au groupe Bouygues..."
+                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  />
                 </div>
               </div>
 
@@ -531,7 +501,7 @@ const AddSourceForm = ({
         </div>
 
         {/* Actions */}
-        <div className="mt-4 sm:mt-6 md:mt-8 flex justify-end space-x-3">
+        <div className="mt-6 sm:mt-8 flex justify-end space-x-3">
           <button
             type="button"
             onClick={onCancel}
@@ -560,7 +530,7 @@ const AddSourceForm = ({
         </div>
       </form>
 
-      <div className="bg-gray-50 p-2 sm:p-3 md:p-4 border-t border-gray-200">
+      <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200">
         <PremiumBanner
           title="Vous trouvez cette gestion de sources un peu légère ?"
           description="Nous réfléchissons à une approche intelligente de modération communautaire pour enrichir et valider collectivement les descriptions des sources."

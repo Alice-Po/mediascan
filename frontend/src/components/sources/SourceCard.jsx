@@ -1,44 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ORIENTATIONS } from '../../constants';
-import { isLightColor } from '../../utils/colorUtils';
 import SourceDetailsModal from './SourceDetailsModal';
-
-// Icône d'information
-const InfoIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-// Icône de collection
-const CollectionIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-    />
-  </svg>
-);
-
-// Icône pour activer une source
-const PlusIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-    />
-  </svg>
-);
+import Badge from '../common/Badge';
+import { InfoIcon, CollectionIcon, PlusIcon } from '../common/icons';
 
 // Fonction pour obtenir le label traduit du type de financement
 const getFundingTypeLabel = (type) => {
@@ -52,21 +16,9 @@ const getFundingTypeLabel = (type) => {
   return types[type] || type;
 };
 
-// Fonction pour obtenir le label traduit de l'orientation politique
-const getPoliticalOrientationLabel = (orientation) => {
-  return ORIENTATIONS.political[orientation]?.label || orientation;
-};
-
 const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [faviconLoaded, setFaviconLoaded] = React.useState(true);
-
-  // Log pour débogage
-  console.log('SourceCard - source:', source._id, source.name);
-  console.log('SourceCard - faviconUrl:', source.faviconUrl);
-
-  const bgColor = ORIENTATIONS.political[source.orientation?.political]?.color || '#f3f4f6';
-  const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
 
   // Truncate description if needed
   const description = source.description || '';
@@ -109,7 +61,7 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
           ) : (
             <div
               className="w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: bgColor }}
+              style={{ backgroundColor: 'black' }}
             >
               {source.faviconUrl && faviconLoaded ? (
                 <img
@@ -128,7 +80,7 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-3xl font-bold tracking-tight" style={{ color: textColor }}>
+                  <span className="text-3xl font-bold tracking-tight" style={{ color: 'white' }}>
                     {initials || source.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -176,16 +128,11 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
 
           {/* Tags - simplification */}
           <div className="flex flex-wrap gap-1 mb-2">
-            <span
-              className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: `${bgColor}33`,
-                color:
-                  ORIENTATIONS.political[source.orientation?.political]?.textColor || 'inherit',
-              }}
-            >
-              {getPoliticalOrientationLabel(source.orientation?.political)}
-            </span>
+            {source.orientations &&
+              source.orientations.length > 0 &&
+              source.orientations.map((orientation, index) => (
+                <Badge key={index} text={orientation} />
+              ))}
 
             {source.funding && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">

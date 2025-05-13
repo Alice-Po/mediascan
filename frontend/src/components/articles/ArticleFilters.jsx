@@ -1,10 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { ORIENTATIONS } from '../../constants';
-import { getOrientationColor, getOrientationLabel } from '../../constants';
-import { isLightColor } from '../../utils/colorUtils';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AuthContext } from '../../context/AuthContext';
+import Badge from '../common/Badge';
 
 // Composant Accordion réutilisable
 const Accordion = ({ title, children, defaultOpen = false }) => {
@@ -347,19 +345,6 @@ const ArticleFilters = () => {
     return 'un utilisateur';
   };
 
-  // Nouveau handler pour les orientations politiques
-  const handlePoliticalOrientationChange = (orientation) => {
-    setFilters((prev) => ({
-      ...prev,
-      orientation: {
-        ...prev.orientation,
-        political: prev.orientation.political?.includes(orientation)
-          ? prev.orientation.political.filter((v) => v !== orientation)
-          : [...(prev.orientation.political || []), orientation],
-      },
-    }));
-  };
-
   // Gérer la recherche
   const handleSearch = (e) => {
     const { value } = e.target;
@@ -416,184 +401,149 @@ const ArticleFilters = () => {
         </div>
       </div>
 
-      {/* Filtres dans des accordéons style Feedly */}
-      <div className="space-y-1">
-        <Accordion title="Orientation politique" defaultOpen={true}>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(ORIENTATIONS.political).map(([key, value]) => {
-              const bgColor = getOrientationColor(key);
-              const isLight = isLightColor(bgColor);
-              const textColor = isLight ? '#000000' : '#ffffff';
+      {/* Collections */}
+      <Accordion title="Collections" defaultOpen={true}>
+        <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+          {/* Option pour "Toutes les collections" */}
+          <div
+            className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
+              selectedCollection === null ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+            }`}
+            onClick={() => handleSelectCollection(null)}
+          >
+            <div className="flex items-center flex-1">
+              <div
+                className="w-3.5 h-3.5 rounded-full mr-1.5"
+                style={{ backgroundColor: '#64748b' }}
+              />
+              <span
+                className={`text-sm font-medium ${
+                  selectedCollection === null ? 'text-blue-700' : ''
+                }`}
+              >
+                Toutes les collections
+              </span>
+            </div>
+          </div>
 
-              return (
-                <button
-                  key={key}
-                  onClick={() => handlePoliticalOrientationChange(key)}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors duration-200`}
-                  style={{
-                    backgroundColor: filters.orientation.political?.includes(key)
-                      ? bgColor
-                      : 'transparent',
-                    color: filters.orientation.political?.includes(key) ? textColor : '#666666',
-                    border: `1px solid ${bgColor}`,
+          {/* Afficher les collections */}
+          {collections.map((collection) => (
+            <CollectionItem
+              key={collection._id}
+              collection={collection}
+              selectedCollection={selectedCollection}
+              selectedSource={selectedSource}
+              onSelectCollection={handleSelectCollection}
+              expandedCollections={expandedCollections}
+              toggleCollection={toggleCollection}
+              getCreatorName={getCreatorName}
+              onSelectSource={handleSelectSource}
+              userSources={userSources}
+            />
+          ))}
+
+          {/* Sources sans collection */}
+          {uncategorizedSources.length > 0 && (
+            <div className="mt-2">
+              <div
+                className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
+                  isUncategorizedSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+                }`}
+                onClick={() =>
+                  setExpandedCollections((prev) =>
+                    prev.includes('uncategorized')
+                      ? prev.filter((id) => id !== 'uncategorized')
+                      : [...prev, 'uncategorized']
+                  )
+                }
+              >
+                {/* Icône pour déplier/replier */}
+                <span
+                  className={`mr-1.5 transform transition-transform text-xs text-gray-500 ${
+                    expandedCollections.includes('uncategorized') ? 'rotate-90' : ''
+                  }`}
+                >
+                  ▶
+                </span>
+
+                {/* Titre */}
+                <div
+                  className="flex items-center flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectUncategorized();
                   }}
                 >
-                  {value.label}
-                </button>
-              );
-            })}
-          </div>
-        </Accordion>
-
-        <Accordion title="Collections" defaultOpen={true}>
-          <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
-            {/* Option pour "Toutes les collections" */}
-            <div
-              className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
-                selectedCollection === null ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-              }`}
-              onClick={() => handleSelectCollection(null)}
-            >
-              <div className="flex items-center flex-1">
-                <div
-                  className="w-3.5 h-3.5 rounded-full mr-1.5"
-                  style={{ backgroundColor: '#64748b' }}
-                />
-                <span
-                  className={`text-sm font-medium ${
-                    selectedCollection === null ? 'text-blue-700' : ''
-                  }`}
-                >
-                  Toutes les collections
-                </span>
-              </div>
-            </div>
-
-            {/* Afficher les collections */}
-            {collections.map((collection) => (
-              <CollectionItem
-                key={collection._id}
-                collection={collection}
-                selectedCollection={selectedCollection}
-                selectedSource={selectedSource}
-                onSelectCollection={handleSelectCollection}
-                expandedCollections={expandedCollections}
-                toggleCollection={toggleCollection}
-                getCreatorName={getCreatorName}
-                onSelectSource={handleSelectSource}
-                userSources={userSources}
-              />
-            ))}
-
-            {/* Sources sans collection */}
-            {uncategorizedSources.length > 0 && (
-              <div className="mt-2">
-                <div
-                  className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
-                    isUncategorizedSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() =>
-                    setExpandedCollections((prev) =>
-                      prev.includes('uncategorized')
-                        ? prev.filter((id) => id !== 'uncategorized')
-                        : [...prev, 'uncategorized']
-                    )
-                  }
-                >
-                  {/* Icône pour déplier/replier */}
+                  <div className="w-3.5 h-3.5 rounded-full mr-1.5 bg-gray-300" />
                   <span
-                    className={`mr-1.5 transform transition-transform text-xs text-gray-500 ${
-                      expandedCollections.includes('uncategorized') ? 'rotate-90' : ''
+                    className={`text-sm font-medium ${
+                      isUncategorizedSelected ? 'text-blue-700' : 'text-gray-700'
                     }`}
                   >
-                    ▶
+                    Sources sans collection
                   </span>
-
-                  {/* Titre */}
-                  <div
-                    className="flex items-center flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectUncategorized();
-                    }}
-                  >
-                    <div className="w-3.5 h-3.5 rounded-full mr-1.5 bg-gray-300" />
-                    <span
-                      className={`text-sm font-medium ${
-                        isUncategorizedSelected ? 'text-blue-700' : 'text-gray-700'
-                      }`}
-                    >
-                      Sources sans collection
-                    </span>
-                  </div>
-
-                  {/* Badge du nombre de sources */}
-                  <div className="ml-auto flex items-center text-xs">
-                    <span className="text-gray-400">
-                      {uncategorizedSources.length}{' '}
-                      {uncategorizedSources.length > 1 ? 'sources' : 'source'}
-                    </span>
-                  </div>
                 </div>
 
-                {/* Liste des sources sans collection */}
-                {expandedCollections.includes('uncategorized') && (
-                  <div className="ml-6 space-y-1 mt-1">
-                    {uncategorizedSources.map((source) => {
-                      const sourceId = source._id;
-                      const isSourceSelected = selectedSource === sourceId;
-
-                      console.log('Source sans collection dans la liste:', {
-                        sourceId,
-                        name: source.name,
-                        isSelected: isSourceSelected,
-                      });
-
-                      return (
-                        <div
-                          key={sourceId}
-                          className={`flex items-center py-1 px-1 rounded cursor-pointer ${
-                            isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-                          }`}
-                          onClick={(e) => {
-                            console.log(
-                              'Clic sur la source sans collection:',
-                              sourceId,
-                              source.name
-                            );
-                            e.stopPropagation(); // Empêcher la propagation
-                            handleSelectUncategorizedSource(sourceId);
-                          }}
-                        >
-                          <div className="flex items-center">
-                            {source.faviconUrl ? (
-                              <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
-                            ) : (
-                              <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
-                            )}
-                            <span
-                              className={`text-sm truncate ${
-                                isSourceSelected ? 'font-medium text-blue-700' : ''
-                              }`}
-                            >
-                              {source.name}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                {/* Badge du nombre de sources */}
+                <div className="ml-auto flex items-center text-xs">
+                  <span className="text-gray-400">
+                    {uncategorizedSources.length}{' '}
+                    {uncategorizedSources.length > 1 ? 'sources' : 'source'}
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
-        </Accordion>
-      </div>
+
+              {/* Liste des sources sans collection */}
+              {expandedCollections.includes('uncategorized') && (
+                <div className="ml-6 space-y-1 mt-1">
+                  {uncategorizedSources.map((source) => {
+                    const sourceId = source._id;
+                    const isSourceSelected = selectedSource === sourceId;
+
+                    console.log('Source sans collection dans la liste:', {
+                      sourceId,
+                      name: source.name,
+                      isSelected: isSourceSelected,
+                    });
+
+                    return (
+                      <div
+                        key={sourceId}
+                        className={`flex items-center py-1 px-1 rounded cursor-pointer ${
+                          isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+                        }`}
+                        onClick={(e) => {
+                          console.log('Clic sur la source sans collection:', sourceId, source.name);
+                          e.stopPropagation(); // Empêcher la propagation
+                          handleSelectUncategorizedSource(sourceId);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          {source.faviconUrl ? (
+                            <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
+                          ) : (
+                            <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
+                          )}
+                          <span
+                            className={`text-sm truncate ${
+                              isSourceSelected ? 'font-medium text-blue-700' : ''
+                            }`}
+                          >
+                            {source.name}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </Accordion>
 
       {/* Indicateur de filtres actifs */}
-      {(filters.searchTerm ||
-        filters.orientation.political.length > 0 ||
-        selectedCollection !== null) && (
+      {(filters.searchTerm || selectedCollection !== null) && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-600">Filtres actifs</span>
@@ -605,7 +555,6 @@ const ArticleFilters = () => {
                 setFilters({
                   searchTerm: '',
                   sources: userSources.map((s) => s._id),
-                  orientation: { political: [] },
                   collection: null,
                 });
               }}

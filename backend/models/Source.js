@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { VALID_ORIENTATIONS } from '../config/constants.js';
 
 const SourceSchema = new mongoose.Schema(
   {
@@ -20,7 +19,6 @@ const SourceSchema = new mongoose.Schema(
     },
     faviconUrl: {
       type: String,
-      default: '/default-favicon.png',
     },
     description: {
       type: String,
@@ -36,11 +34,8 @@ const SourceSchema = new mongoose.Schema(
         trim: true,
       },
     },
-    orientation: {
-      political: {
-        type: String,
-        enum: VALID_ORIENTATIONS,
-      },
+    orientations: {
+      type: [String],
     },
     defaultEnabled: {
       type: Boolean,

@@ -1,58 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ORIENTATIONS } from '../../constants';
-import { isLightColor } from '../../utils/colorUtils';
 import SourceDetailsModal from './SourceDetailsModal';
+import Badge from '../common/Badge';
+import { TrashIcon, InfoIcon, CollectionIcon, PlusIcon } from '../common/icons';
 
-// Icône de poubelle personnalisée
-const TrashIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-    />
-  </svg>
-);
-
-// Icône d'information
-const InfoIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-// Ajouter l'icône de collection
-const CollectionIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-    />
-  </svg>
-);
-
-// Ajouter l'icône pour activer une source
-const PlusIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-    />
-  </svg>
-);
-
-// Déplacer la fonction au niveau du module
+// Fonction pour obtenir le label traduit du type de financement
 const getFundingTypeLabel = (type) => {
   const types = {
     private: 'Privé',
@@ -64,17 +16,28 @@ const getFundingTypeLabel = (type) => {
   return types[type] || type;
 };
 
-// Fonction pour obtenir le label traduit de l'orientation politique
-const getPoliticalOrientationLabel = (orientation) => {
-  return ORIENTATIONS.political[orientation]?.label || orientation;
+/**
+ * Récupère la première orientation d'une source
+ * @param {Object} source - La source
+ * @returns {string} La première orientation ou undefined
+ */
+const getFirstOrientation = (source) => {
+  // Vérifier si la source a des orientations sous forme de tableau
+  if (source.orientations && Array.isArray(source.orientations) && source.orientations.length > 0) {
+    return source.orientations[0];
+  }
+
+  // Si aucune orientation n'est trouvée
+  return undefined;
 };
 
 // Composant de base
 const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   console.log('source', source);
-  const bgColor = ORIENTATIONS.political[source.orientation?.political]?.color || '#f3f4f6';
-  const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
+
+  // Récupérer l'orientation principale
+  const primaryOrientation = getFirstOrientation(source);
 
   // S'assurer que la description existe et est une chaîne
   const description = source.description || '';
@@ -117,7 +80,7 @@ const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => 
               className={`w-12 h-12 rounded flex items-center justify-center text-lg font-semibold ${
                 source.faviconUrl ? 'hidden' : ''
               }`}
-              style={{ backgroundColor: bgColor, color: textColor }}
+              style={{ backgroundColor: 'black', color: 'white' }}
             >
               {source.name.charAt(0).toUpperCase()}
             </div>
@@ -145,46 +108,13 @@ const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => 
 
             {/* Tags et orientation en version mobile */}
             <div className="flex flex-wrap gap-2 sm:hidden mt-2">
-              <span
-                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                style={{
-                  backgroundColor: `${bgColor}33`, // Ajoute une transparence
-                  color:
-                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
-                }}
-              >
-                {getPoliticalOrientationLabel(source.orientation.political)}
-              </span>
-              {source.categories?.map((category) => (
-                <span
-                  key={category}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  {category}
-                </span>
-              ))}
+              {primaryOrientation && <Badge text={primaryOrientation} />}
             </div>
           </div>
 
           {/* Tags et orientation en version desktop */}
           <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
-            <span
-              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: `${bgColor}33`,
-                color: ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
-              }}
-            >
-              {getPoliticalOrientationLabel(source.orientation.political)}
-            </span>
-            {source.categories?.map((category) => (
-              <span
-                key={category}
-                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-              >
-                {category}
-              </span>
-            ))}
+            {primaryOrientation && <Badge text={primaryOrientation} />}
           </div>
         </div>
 
@@ -239,7 +169,9 @@ const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => 
 // Variante sélectionnable pour l'onboarding
 export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
+
+  // Récupérer l'orientation principale
+  const primaryOrientation = getFirstOrientation(source);
 
   const handleClick = (e) => {
     if (e.target.type === 'checkbox') {
@@ -277,9 +209,8 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
               <div
                 className="w-full h-full rounded flex items-center justify-center text-sm font-medium"
                 style={{
-                  backgroundColor: `${bgColor}33`,
-                  color:
-                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
+                  backgroundColor: bgColor,
+                  color: getContrastTextColor(bgColor),
                 }}
               >
                 {source.name.charAt(0)}
@@ -312,16 +243,7 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
 
             {/* Orientation politique */}
             <div className="flex items-center gap-2">
-              <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{
-                  backgroundColor: `${bgColor}33`,
-                  color:
-                    ORIENTATIONS.political[source.orientation.political]?.textColor || 'inherit',
-                }}
-              >
-                {getPoliticalOrientationLabel(source.orientation.political)}
-              </span>
+              {primaryOrientation && <Badge text={primaryOrientation} />}
               <span className="text-xs font-medium text-gray-500">
                 {getFundingTypeLabel(source.funding?.type)}
               </span>
@@ -364,25 +286,10 @@ export const SelectableSourceItem = ({ source, isSelected, onToggle, compact = f
     </>
   );
 };
-
 // Variante avec bouton de suppression pour la page Sources
 export const DeletableSourceItem = ({ source, onDelete, onAddToCollection }) => (
   <SourceItemBase source={source} onAddToCollection={onAddToCollection}>
     <div className="flex space-x-2">
-      {/* Bouton pour ajouter à une collection
-      {onAddToCollection && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToCollection(source);
-          }}
-          className="text-gray-400 hover:text-indigo-600 transition-colors"
-          title="Ajouter à une collection"
-        >
-          <CollectionIcon className="h-5 w-5" />
-        </button>
-      )} */}
-
       {/* Bouton pour supprimer */}
       <button
         onClick={onDelete}
