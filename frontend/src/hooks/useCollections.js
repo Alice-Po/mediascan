@@ -57,9 +57,23 @@ export function useCollections(user, setGlobalError) {
       setLoading(true);
       const collectionsData = await fetchCollections();
       console.log('Collections récupérées:', collectionsData.length);
-      setCollections(collectionsData);
+
+      // Ajouter le nom du créateur à chaque collection
+      const enhancedCollections = collectionsData.map((collection) => {
+        // Si la collection appartient à l'utilisateur actuel, ajouter son nom
+        // Sinon, laisser le creator comme undefined ou tel qu'il est
+        if (collection.userId === user._id) {
+          return {
+            ...collection,
+            creator: user.name || 'Vous',
+          };
+        }
+        return collection;
+      });
+
+      setCollections(enhancedCollections);
       setError(null);
-      return collectionsData;
+      return enhancedCollections;
     } catch (err) {
       console.error('Erreur détaillée lors du chargement des collections:', err);
       handleError('Impossible de charger les collections', err);

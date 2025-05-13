@@ -4,6 +4,7 @@ import { ORIENTATIONS } from '../../constants';
 import { getOrientationColor, getOrientationLabel } from '../../constants';
 import { isLightColor } from '../../utils/colorUtils';
 import { useDebounce } from '../../hooks/useDebounce';
+import { AuthContext } from '../../context/AuthContext';
 
 // Composant Accordion réutilisable
 const Accordion = ({ title, children, defaultOpen = false }) => {
@@ -34,6 +35,7 @@ const CollectionItem = ({
   onSelectCollection,
   expandedCollections,
   toggleCollection,
+  getCreatorName,
 }) => {
   const isExpanded = expandedCollections.includes(collection._id);
 
@@ -62,21 +64,26 @@ const CollectionItem = ({
 
         {/* Nom de la collection */}
         <div
-          className="flex items-center flex-1"
+          className="flex flex-col flex-1"
           onClick={(e) => {
             e.stopPropagation();
             onSelectCollection(collection._id);
           }}
         >
-          <div
-            className="w-3.5 h-3.5 rounded-full mr-1.5"
-            style={{
-              backgroundColor: collection.colorHex || '#e5e7eb',
-            }}
-          />
-          <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : ''}`}>
-            {collection.name}
-          </span>
+          <div className="flex items-center">
+            <div
+              className="w-3.5 h-3.5 rounded-full mr-1.5"
+              style={{
+                backgroundColor: collection.colorHex || '#e5e7eb',
+              }}
+            />
+            <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : ''}`}>
+              {collection.name}
+            </span>
+          </div>
+
+          {/* Information sur le créateur */}
+          <span className="text-xs text-gray-500 ml-5">Par {getCreatorName(collection)}</span>
         </div>
 
         {/* Badge du nombre de sources */}
@@ -113,6 +120,7 @@ const CollectionItem = ({
  */
 const ArticleFilters = () => {
   const { filters, setFilters, userSources, collections, loadCollections } = useContext(AppContext);
+  const { user } = useContext(AuthContext);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchInput, setSearchInput] = useState(filters.searchTerm);
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -219,6 +227,20 @@ const ArticleFilters = () => {
 
   // Vérifier si les sources sans collection sont sélectionnées
   const isUncategorizedSelected = selectedCollection === 'uncategorized';
+
+  // Fonction pour afficher le nom du créateur de la collection
+  const getCreatorName = (collection) => {
+    // Si la collection appartient à l'utilisateur courant
+    if (user && collection.userId === user._id) {
+      return 'vous';
+    }
+    // Si la collection a un creator défini
+    if (collection.creator) {
+      return collection.creator;
+    }
+    // Fallback
+    return 'un utilisateur';
+  };
 
   // Nouveau handler pour les orientations politiques
   const handlePoliticalOrientationChange = (orientation) => {
@@ -351,6 +373,7 @@ const ArticleFilters = () => {
                 onSelectCollection={handleSelectCollection}
                 expandedCollections={expandedCollections}
                 toggleCollection={toggleCollection}
+                getCreatorName={getCreatorName}
               />
             ))}
 
