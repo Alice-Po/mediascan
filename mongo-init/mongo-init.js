@@ -17,7 +17,7 @@ if (!systemUser) {
   try {
     db.users.insertOne({
       email: 'system@news-aggregator.app',
-      username: 'System',
+      username: 'Alice',
       password: '$2a$10$qnIjKn5XIQh42wN8IhNBxeT.NG2xgDlHJpLKxn8heFNpJ7W7P8Sw.', // Hash pour "123456"
       role: 'admin',
       isActive: true,
@@ -65,7 +65,7 @@ db.sources.insertMany([
     url: 'https://www.cnews.fr/',
     rssUrl: 'https://www.cnews.fr/rss.xml',
     faviconUrl: 'https://www.cnews.fr/favicon.ico',
-    description: 
+    description:
       "Chaîne d'information en continu française, anciennement connue sous le nom d'iTélé, proposant des journaux télévisés, débats et reportages sur l'actualité nationale et internationale.",
     funding: {
       type: 'private',

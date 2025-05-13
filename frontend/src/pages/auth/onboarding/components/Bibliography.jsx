@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPublicCollections } from '../../../../api/collectionsApi';
+import {
+  fetchPublicCollections,
+  followCollection,
+  unfollowCollection,
+  checkIfFollowing,
+} from '../../../../api/collectionsApi';
 
 const Step2Bibliography = () => {
   const [publicCollections, setPublicCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [followStatus, setFollowStatus] = useState({});
+  const [followLoading, setFollowLoading] = useState({});
 
   useEffect(() => {
     const loadPublicCollections = async () => {
@@ -13,6 +20,22 @@ const Step2Bibliography = () => {
         const collections = await fetchPublicCollections();
         console.log('Collections publiques chargées:', collections);
         setPublicCollections(collections);
+
+        // Vérifier le statut de suivi pour chaque collection
+        const statusObj = {};
+        for (const collection of collections) {
+          try {
+            const isFollowing = await checkIfFollowing(collection._id);
+            statusObj[collection._id] = isFollowing;
+          } catch (err) {
+            console.error(
+              `Erreur lors de la vérification du statut de suivi pour ${collection._id}:`,
+              err
+            );
+            statusObj[collection._id] = false;
+          }
+        }
+        setFollowStatus(statusObj);
       } catch (err) {
         console.error('Erreur lors du chargement des collections publiques:', err);
         setError('Impossible de charger les collections publiques.');
@@ -23,6 +46,28 @@ const Step2Bibliography = () => {
 
     loadPublicCollections();
   }, []);
+
+  // Gérer le suivi d'une collection
+  const handleFollowToggle = async (collectionId) => {
+    try {
+      setFollowLoading((prev) => ({ ...prev, [collectionId]: true }));
+
+      if (followStatus[collectionId]) {
+        // Si déjà suivi, désabonner
+        await unfollowCollection(collectionId);
+        setFollowStatus((prev) => ({ ...prev, [collectionId]: false }));
+      } else {
+        // Sinon, suivre
+        await followCollection(collectionId);
+        setFollowStatus((prev) => ({ ...prev, [collectionId]: true }));
+      }
+    } catch (err) {
+      console.error('Erreur lors du changement de statut de suivi:', err);
+      // Afficher une notification d'erreur si nécessaire
+    } finally {
+      setFollowLoading((prev) => ({ ...prev, [collectionId]: false }));
+    }
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -104,7 +149,7 @@ const Step2Bibliography = () => {
                   >
                     {collection.name.slice(0, 2).toUpperCase()}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-bold text-gray-900 text-lg">{collection.name}</h4>
                     <div className="flex items-center text-sm text-gray-600">
                       <span>Par {collection.createdBy?.username || 'Utilisateur anonyme'}</span>
@@ -120,9 +165,41 @@ const Step2Bibliography = () => {
                   </div>
                 )}
 
-                <button className="w-full mt-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors">
-                  Voir les détails
-                </button>
+                <div className="flex items-center gap-2 mt-3">
+                  <button className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Voir les détails
+                  </button>
+                  <button
+                    className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      followStatus[collection._id]
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+                    }`}
+                    onClick={() => handleFollowToggle(collection._id)}
+                    disabled={followLoading[collection._id]}
+                  >
+                    {followLoading[collection._id] ? (
+                      <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
+                    ) : (
+                      <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        {followStatus[collection._id] ? (
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        ) : (
+                          <path
+                            fillRule="evenodd"
+                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                            clipRule="evenodd"
+                          />
+                        )}
+                      </svg>
+                    )}
+                    {followStatus[collection._id] ? 'Suivi' : 'Suivre'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>

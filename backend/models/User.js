@@ -32,6 +32,12 @@ const UserSchema = new mongoose.Schema(
         ref: 'Collection',
       },
     ],
+    followedCollections: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Collection',
+      },
+    ],
     isVerified: {
       type: Boolean,
       default: false,

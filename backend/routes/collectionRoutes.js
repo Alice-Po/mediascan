@@ -8,6 +8,10 @@ import {
   addSourceToCollection,
   removeSourceFromCollection,
   getPublicCollections,
+  followCollection,
+  unfollowCollection,
+  checkIfFollowing,
+  getFollowedCollections,
 } from '../controllers/collectionController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -18,6 +22,9 @@ router.use(protect);
 
 // Route pour les collections publiques
 router.get('/public', getPublicCollections);
+
+// Route pour les collections suivies
+router.get('/followed', getFollowedCollections);
 
 // Routes pour les collections
 router
@@ -34,5 +41,10 @@ router
 // Routes pour les sources dans les collections
 router.post('/:id/sources', addSourceToCollection); // POST /api/collections/:id/sources
 router.delete('/:id/sources/:sourceId', removeSourceFromCollection); // DELETE /api/collections/:id/sources/:sourceId
+
+// Routes pour suivre/ne plus suivre une collection
+router.post('/:id/follow', followCollection); // POST /api/collections/:id/follow
+router.delete('/:id/follow', unfollowCollection); // DELETE /api/collections/:id/follow
+router.get('/:id/following', checkIfFollowing); // GET /api/collections/:id/following
 
 export default router;

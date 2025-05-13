@@ -390,3 +390,205 @@ export const removeSourceFromCollection = async (req, res) => {
     });
   }
 };
+
+/**
+ * Suivre une collection publique
+ * @route   POST /api/collections/:id/follow
+ * @access  Private
+ */
+export const followCollection = async (req, res) => {
+  try {
+    const collectionId = req.params.id;
+
+    // Vérifier si la collection existe
+    const collection = await Collection.findById(collectionId);
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        message: 'Collection non trouvée',
+      });
+    }
+
+    // Vérifier si la collection est publique
+    if (!collection.isPublic) {
+      return res.status(403).json({
+        success: false,
+        message: 'Vous ne pouvez pas suivre une collection privée',
+      });
+    }
+
+    // Vérifier si l'utilisateur ne suit pas déjà cette collection
+    const user = await User.findById(req.user._id);
+
+    // S'assurer que la propriété followedCollections existe
+    if (!user.followedCollections) {
+      // Si elle n'existe pas encore, l'initialiser
+      user.followedCollections = [];
+      await user.save();
+    }
+
+    if (user.followedCollections.includes(collectionId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vous suivez déjà cette collection',
+      });
+    }
+
+    // Ajouter la collection aux collections suivies par l'utilisateur
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: { followedCollections: collectionId },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Collection suivie avec succès',
+    });
+  } catch (error) {
+    console.error('Erreur lors du suivi de la collection:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du suivi de la collection',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Ne plus suivre une collection
+ * @route   DELETE /api/collections/:id/follow
+ * @access  Private
+ */
+export const unfollowCollection = async (req, res) => {
+  try {
+    const collectionId = req.params.id;
+
+    // Vérifier si l'utilisateur suit cette collection
+    const user = await User.findById(req.user._id);
+
+    // S'assurer que la propriété followedCollections existe
+    if (!user.followedCollections) {
+      // Si elle n'existe pas encore, l'initialiser
+      user.followedCollections = [];
+      await user.save();
+
+      return res.status(400).json({
+        success: false,
+        message: 'Vous ne suivez pas cette collection',
+      });
+    }
+
+    if (!user.followedCollections.includes(collectionId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vous ne suivez pas cette collection',
+      });
+    }
+
+    // Retirer la collection des collections suivies par l'utilisateur
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { followedCollections: collectionId },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Collection retirée des suivis avec succès',
+    });
+  } catch (error) {
+    console.error('Erreur lors du retrait du suivi:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du retrait du suivi',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Vérifier si l'utilisateur suit une collection
+ * @route   GET /api/collections/:id/following
+ * @access  Private
+ */
+export const checkIfFollowing = async (req, res) => {
+  try {
+    const collectionId = req.params.id;
+
+    // Vérifier si l'utilisateur suit cette collection
+    const user = await User.findById(req.user._id);
+
+    // S'assurer que la propriété followedCollections existe
+    if (!user.followedCollections) {
+      // Si elle n'existe pas encore, l'initialiser
+      user.followedCollections = [];
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        following: false,
+      });
+    }
+
+    const isFollowing = user.followedCollections.includes(collectionId);
+
+    res.status(200).json({
+      success: true,
+      following: isFollowing,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la vérification du suivi:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la vérification du suivi',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Récupérer toutes les collections suivies par l'utilisateur
+ * @route   GET /api/collections/followed
+ * @access  Private
+ */
+export const getFollowedCollections = async (req, res) => {
+  try {
+    // Récupérer l'utilisateur avec ses collections suivies
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé',
+      });
+    }
+
+    // S'assurer que la propriété followedCollections existe
+    if (!user.followedCollections) {
+      // Si elle n'existe pas encore, l'initialiser
+      user.followedCollections = [];
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        data: [],
+      });
+    }
+
+    // Récupérer les collections avec population
+    const collections = await Collection.find({
+      _id: { $in: user.followedCollections },
+    }).populate('sources', 'name url faviconUrl');
+
+    res.status(200).json({
+      success: true,
+      count: collections.length,
+      data: collections,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des collections suivies:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des collections suivies',
+      error: error.message,
+    });
+  }
+};
