@@ -335,6 +335,7 @@ const Sources = () => {
                 userSources={userSources}
                 onEnableSource={(source) => enableSource(source._id)}
                 onAddSource={addSource}
+                userCollections={collections}
               />
             </div>
           </div>

@@ -7,7 +7,13 @@ import SourceCard from './SourceCard';
  * Composant qui affiche un catalogue de toutes les sources disponibles
  * avec la possibilité de les ajouter à une collection
  */
-const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource, onAddSource }) => {
+const SourceCatalog = ({
+  onAddToCollection,
+  userSources = [],
+  onEnableSource,
+  onAddSource,
+  userCollections = [],
+}) => {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -240,9 +246,9 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource, on
 
       {/* Modale pour le formulaire d'ajout de source */}
       {showAddSourceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-white/30 animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-white/30 animate-fadeIn">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center p-4 border-b">
+            <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
               <h3 className="text-lg font-medium">Ajouter une nouvelle source</h3>
               <button
                 onClick={() => setShowAddSourceModal(false)}
@@ -258,12 +264,13 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource, on
                 </svg>
               </button>
             </div>
-            <div className="p-4">
+            <div className="p-0">
               <AddSourceForm
                 onSubmit={handleSubmitSource}
                 onCancel={() => setShowAddSourceModal(false)}
                 formErrors={formErrors}
                 loading={false}
+                collections={userCollections}
               />
             </div>
           </div>
