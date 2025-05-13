@@ -5,6 +5,7 @@ import {
   unfollowCollection,
   checkIfFollowing,
 } from '../../../../api/collectionsApi';
+import PublicCollectionModal from '../../../../components/collections/PublicCollectionModal';
 
 const Step2Bibliography = () => {
   const [publicCollections, setPublicCollections] = useState([]);
@@ -12,6 +13,8 @@ const Step2Bibliography = () => {
   const [error, setError] = useState(null);
   const [followStatus, setFollowStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const loadPublicCollections = async () => {
@@ -67,6 +70,22 @@ const Step2Bibliography = () => {
     } finally {
       setFollowLoading((prev) => ({ ...prev, [collectionId]: false }));
     }
+  };
+
+  // Gérer l'ouverture de la modale de détails
+  const handleViewDetails = (collection) => {
+    setSelectedCollection(collection);
+    setShowModal(true);
+  };
+
+  // Fermer la modale
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // Gérer le changement de statut de suivi depuis la modale
+  const handleFollowFromModal = (collectionId, isFollowing) => {
+    setFollowStatus((prev) => ({ ...prev, [collectionId]: isFollowing }));
   };
 
   return (
@@ -166,7 +185,10 @@ const Step2Bibliography = () => {
                 )}
 
                 <div className="flex items-center gap-2 mt-3">
-                  <button className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors"
+                    onClick={() => handleViewDetails(collection)}
+                  >
                     Voir les détails
                   </button>
                   <button
@@ -205,6 +227,18 @@ const Step2Bibliography = () => {
           </div>
         )}
       </div>
+
+      {/* Modale de détail de collection */}
+      {selectedCollection && (
+        <PublicCollectionModal
+          collectionId={selectedCollection._id}
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          onFollow={handleFollowFromModal}
+          followStatus={followStatus[selectedCollection._id]}
+          isFollowLoading={followLoading[selectedCollection._id]}
+        />
+      )}
     </div>
   );
 };

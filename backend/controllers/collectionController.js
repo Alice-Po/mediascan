@@ -120,10 +120,10 @@ export const createCollection = async (req, res) => {
 // @access  Private
 export const getCollectionById = async (req, res) => {
   try {
-    const collection = await Collection.findById(req.params.id).populate(
-      'sources',
-      'name url rssUrl faviconUrl'
-    );
+    const collection = await Collection.findById(req.params.id).populate({
+      path: 'sources',
+      select: 'name url rssUrl faviconUrl description orientations funding categories',
+    });
 
     if (!collection) {
       return res.status(404).json({

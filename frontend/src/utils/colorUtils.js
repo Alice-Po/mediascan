@@ -56,7 +56,31 @@ export const generateColorFromLabel = (label) => {
 };
 
 // Maintenir l'ancienne fonction pour la compatibilité
-export const generateColorFromId = generateColorFromLabel;
+export const generateColorFromId = (id) => {
+  // Si aucun ID n'est fourni, générer une couleur aléatoire
+  if (!id) {
+    return (
+      '#' +
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')
+    );
+  }
+
+  // Utiliser l'ID pour générer une couleur stable
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += value.toString(16).padStart(2, '0');
+  }
+
+  return color;
+};
 
 /**
  * Obtient la couleur associée à une orientation
@@ -141,19 +165,20 @@ const hslToHex = (h, s, l) => {
 };
 
 /**
- * Génère un nombre aléatoire mais déterministe de followers basé sur un ID
- * @param {string} id - Identifiant à utiliser pour générer le nombre
- * @returns {number} - Nombre de followers entre 1 et 1000
+ * Génère un nombre fictif de followers basé sur l'ID
+ * Utilisé uniquement pour la démo/UI
  */
 export const generateFollowersFromId = (id) => {
-  // Utiliser l'ID comme seed pour avoir un nombre constant pour le même ID
-  const seed = id
-    .toString()
-    .split('')
-    .reduce((a, b) => {
-      return a + b.charCodeAt(0);
-    }, 0);
+  if (!id) return '0';
 
-  // Générer un nombre pseudo-aléatoire mais déterministe basé sur l'ID
-  return Math.floor((Math.sin(seed) * 10000) % 1000) + 1;
+  // Utiliser l'ID pour générer un nombre stable mais fictif
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Faire en sorte que le nombre soit positif et pas trop grand
+  const followers = Math.abs(hash % 200);
+
+  return followers.toString();
 };
