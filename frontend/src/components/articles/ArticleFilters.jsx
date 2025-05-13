@@ -100,45 +100,45 @@ const CollectionItem = ({
       {/* Sources de la collection */}
       {isExpanded && sources.length > 0 && (
         <div className="ml-6 space-y-1 mt-1">
-          {sources.map((source) => {
-            const sourceId = source._id || source;
-            const isSourceSelected = selectedSource === sourceId;
+          {/* Utiliser un Set pour dédupliquer les sources */}
+          {Array.from(new Set(sources.map((s) => (typeof s === 'string' ? s : s._id)))).map(
+            (sourceId) => {
+              const isSourceSelected = selectedSource === sourceId;
 
-            // Trouver l'objet source complet si nous n'avons que l'ID
-            const sourceObj =
-              typeof source === 'string' || !source.name
-                ? userSources.find((s) => s._id === sourceId) || { name: 'Source inconnue' }
-                : source;
+              // Trouver l'objet source complet
+              const sourceObj = userSources.find((s) => s._id === sourceId) || {
+                name: 'Source inconnue',
+              };
 
-            return (
-              <div
-                key={sourceId}
-                className={`flex items-center py-1 px-1 rounded cursor-pointer ${
-                  isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-                }`}
-                onClick={(e) => {
-                  console.log('Clic sur la source dans CollectionItem:', sourceId, sourceObj.name);
-                  e.stopPropagation(); // Empêcher l'événement de remonter
-                  onSelectSource(sourceId);
-                }}
-              >
-                <div className="flex items-center">
-                  {sourceObj.faviconUrl ? (
-                    <img src={sourceObj.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
-                  ) : (
-                    <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
-                  )}
-                  <span
-                    className={`text-sm truncate ${
-                      isSourceSelected ? 'font-medium text-blue-700' : ''
-                    }`}
-                  >
-                    {sourceObj.name}
-                  </span>
+              return (
+                <div
+                  key={`${sourceId}-${collection._id}`} // Utiliser une clé composée
+                  className={`flex items-center py-1 px-1 rounded cursor-pointer ${
+                    isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectSource(sourceId);
+                  }}
+                >
+                  <div className="flex items-center">
+                    {sourceObj.faviconUrl ? (
+                      <img src={sourceObj.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
+                    ) : (
+                      <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
+                    )}
+                    <span
+                      className={`text-sm truncate ${
+                        isSourceSelected ? 'font-medium text-blue-700' : ''
+                      }`}
+                    >
+                      {sourceObj.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
       )}
     </div>

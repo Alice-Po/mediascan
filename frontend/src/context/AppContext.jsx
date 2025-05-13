@@ -214,18 +214,45 @@ export const AppProvider = ({ children }) => {
   // Charger les articles une seule fois au montage ou quand l'utilisateur change
   useEffect(() => {
     if (user) {
-      loadArticles();
+      console.log('Utilisateur connecté, chargement initial des articles');
+      loadAllArticles(); // Charger tous les articles une seule fois
     }
   }, [user]);
 
   // Recharger les articles quand les filtres changent
-  useEffect(() => {
-    if (user && (filters.sources.length > 0 || filters.collection)) {
-      loadArticles();
-    }
-  }, [filters.sources, filters.collection, user]);
+  // useEffect(() => {
+  //   if (user && (filters.sources.length > 0 || filters.collection)) {
+  //     loadArticles();
+  //   }
+  // }, [filters.sources, filters.collection, user]);
 
   // Fonction pour charger les articles
+  const loadAllArticles = async () => {
+    try {
+      setLoadingArticles(true);
+      console.log('Chargement de tous les articles pertinents...');
+
+      // Ici, nous ne spécifions pas de sources spécifiques pour obtenir tous les articles
+      // de toutes les sources de l'utilisateur
+      const response = await fetchArticles({
+        // Ne pas filtrer par sources spécifiques
+        page: 1,
+        limit: 50, // Augmenter la limite pour obtenir plus d'articles en une fois
+      });
+
+      console.log(`${response.articles.length} articles chargés`);
+      setArticles(response.articles);
+      setHasMoreArticles(response.hasMore);
+      setArticlesPage(1); // Réinitialiser la page
+    } catch (error) {
+      console.error('Erreur lors du chargement des articles:', error);
+      setError(error.message);
+    } finally {
+      setLoadingArticles(false);
+    }
+  };
+
+  // Fonction pour charger plus d'articles
   const loadArticles = async () => {
     try {
       setLoadingArticles(true);
@@ -240,33 +267,6 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error('AppContext - Erreur loadArticles:', error);
       setError(error.message);
-    } finally {
-      setLoadingArticles(false);
-    }
-  };
-
-  // Fonction pour charger plus d'articles
-  const loadMoreArticles = async () => {
-    if (loadingArticles || !hasMoreArticles) return;
-
-    try {
-      setLoadingArticles(true);
-      const nextPage = articlesPage + 1;
-
-      const data = await fetchArticles({
-        page: nextPage,
-        limit: 20,
-        sources: filters.sources,
-        orientation: Object.entries(filters.orientation).flatMap(([key, values]) =>
-          values.map((v) => `${key}:${v}`)
-        ),
-      });
-
-      setArticles((prev) => [...prev, ...data.articles]);
-      setHasMoreArticles(data.hasMore);
-      setArticlesPage(nextPage);
-    } catch (err) {
-      console.error("Erreur lors du chargement de plus d'articles:", err);
     } finally {
       setLoadingArticles(false);
     }
@@ -318,6 +318,35 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Ajouter une fonction pour rafraîchir manuellement les articles
+  const refreshArticles = () => {
+    loadAllArticles();
+  };
+
+  // Modifier loadMoreArticles pour charger plus d'articles avec les mêmes filtres
+  const loadMoreArticles = async () => {
+    if (loadingArticles || !hasMoreArticles) return;
+
+    try {
+      setLoadingArticles(true);
+      const nextPage = articlesPage + 1;
+
+      const data = await fetchArticles({
+        page: nextPage,
+        limit: 20,
+        // Ne pas filtrer par sources ici pour obtenir tous les articles supplémentaires
+      });
+
+      setArticles((prev) => [...prev, ...data.articles]);
+      setHasMoreArticles(data.hasMore);
+      setArticlesPage(nextPage);
+    } catch (err) {
+      console.error("Erreur lors du chargement de plus d'articles:", err);
+    } finally {
+      setLoadingArticles(false);
+    }
+  };
+
   // Valeur du contexte
   const value = {
     userSources,
@@ -329,7 +358,7 @@ export const AppProvider = ({ children }) => {
     filters,
     setFilters,
     resetFilters,
-    loadMoreArticles,
+    loadMoreArticles: loadMoreArticles,
     error,
     setArticles,
     updateArticle,
@@ -347,6 +376,7 @@ export const AppProvider = ({ children }) => {
     addSourceToCollection,
     removeSourceFromCollection,
     filterByCollection,
+    refreshArticles,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

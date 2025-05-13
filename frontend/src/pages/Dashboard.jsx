@@ -9,7 +9,8 @@ import ArticleList from '../components/articles/ArticleList';
  */
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
-  const { resetFilters, loadingArticles, articles, filters } = useContext(AppContext);
+  const { resetFilters, loadingArticles, articles, filters, hasMoreArticles, refreshArticles } =
+    useContext(AppContext);
   const [error, setError] = useState(null);
 
   // Réinitialiser les filtres au montage de la page
@@ -111,6 +112,16 @@ const Dashboard = () => {
         {/* Contenu principal (feed) occupant tout l'espace central */}
         <div className="flex-1 p-3 sm:p-6 lg:max-w-none lg:px-8 xl:px-12">
           <ArticleList />
+          {!loadingArticles && !hasMoreArticles && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={refreshArticles}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
+              >
+                Charger de nouveaux articles
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
