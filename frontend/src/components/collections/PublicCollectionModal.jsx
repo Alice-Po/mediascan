@@ -36,6 +36,7 @@ const PublicCollectionModal = ({
       try {
         setLoading(true);
         const data = await fetchCollectionById(collectionId);
+        console.log('Détails de la collection:', data);
         setCollection(data);
 
         // Vérifier si l'utilisateur suit déjà cette collection si status non fourni
@@ -153,7 +154,10 @@ const PublicCollectionModal = ({
                   <h1 className="text-xl font-bold">{collection.name}</h1>
                   <div className="flex items-center mt-1">
                     <span className="text-sm text-gray-500">
-                      Par {collection.createdBy?.username || 'Utilisateur anonyme'}
+                      Par{' '}
+                      {collection.createdBy?.username ||
+                        collection.userId?.username ||
+                        'Utilisateur anonyme'}
                     </span>
                     <span className="mx-2">•</span>
                     <span className="text-sm text-gray-500">

@@ -120,10 +120,12 @@ export const createCollection = async (req, res) => {
 // @access  Private
 export const getCollectionById = async (req, res) => {
   try {
-    const collection = await Collection.findById(req.params.id).populate({
-      path: 'sources',
-      select: 'name url rssUrl faviconUrl description orientations funding categories',
-    });
+    const collection = await Collection.findById(req.params.id)
+      .populate({
+        path: 'sources',
+        select: 'name url rssUrl faviconUrl description orientations funding categories',
+      })
+      .populate('userId', 'username'); // Populer les informations de l'utilisateur créateur
 
     if (!collection) {
       return res.status(404).json({
@@ -133,16 +135,22 @@ export const getCollectionById = async (req, res) => {
     }
 
     // Vérifier que l'utilisateur est le propriétaire de la collection ou qu'elle est publique
-    if (collection.userId.toString() !== req.user._id.toString() && !collection.isPublic) {
+    if (collection.userId._id.toString() !== req.user._id.toString() && !collection.isPublic) {
       return res.status(403).json({
         success: false,
         message: "Vous n'avez pas l'autorisation d'accéder à cette collection",
       });
     }
 
+    // Transformer la collection pour avoir le même format que fetchPublicCollections
+    const collectionData = {
+      ...collection.toObject(),
+      createdBy: collection.userId, // Ajouter createdBy pour être cohérent avec fetchPublicCollections
+    };
+
     res.status(200).json({
       success: true,
-      data: collection,
+      data: collectionData,
     });
   } catch (error) {
     console.error('Erreur lors de la récupération de la collection:', error);
