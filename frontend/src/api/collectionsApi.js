@@ -19,6 +19,24 @@ export const fetchCollections = async () => {
 };
 
 /**
+ * Récupérer toutes les collections publiques
+ * @returns {Promise} Liste des collections publiques
+ */
+export const fetchPublicCollections = async () => {
+  try {
+    const response = await api.get('/collections/public');
+    return response.data.data;
+  } catch (error) {
+    console.error(
+      'API: Error fetching public collections:',
+      error.response?.status,
+      error.response?.data?.message || error.message
+    );
+    throw error;
+  }
+};
+
+/**
  * Récupérer une collection par son ID
  * @param {string} collectionId - ID de la collection
  * @returns {Promise} Détails de la collection
@@ -112,6 +130,69 @@ export const removeSourceFromCollection = async (collectionId, sourceId) => {
     return response.data.data;
   } catch (error) {
     console.error('Error removing source from collection:', error);
+    throw error;
+  }
+};
+
+/**
+ * Suivre une collection publique
+ * @param {string} collectionId - ID de la collection à suivre
+ * @returns {Promise} Résultat de l'opération
+ */
+export const followCollection = async (collectionId) => {
+  try {
+    const response = await api.post(`/collections/${collectionId}/follow`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error following collection:', error);
+    throw error;
+  }
+};
+
+/**
+ * Ne plus suivre une collection publique
+ * @param {string} collectionId - ID de la collection à ne plus suivre
+ * @returns {Promise} Résultat de l'opération
+ */
+export const unfollowCollection = async (collectionId) => {
+  try {
+    const response = await api.delete(`/collections/${collectionId}/follow`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error unfollowing collection:', error);
+    throw error;
+  }
+};
+
+/**
+ * Vérifier si l'utilisateur suit une collection
+ * @param {string} collectionId - ID de la collection à vérifier
+ * @returns {Promise} Résultat de la vérification
+ */
+export const checkIfFollowing = async (collectionId) => {
+  try {
+    const response = await api.get(`/collections/${collectionId}/following`);
+    return response.data.following;
+  } catch (error) {
+    console.error('Error checking if following collection:', error);
+    throw error;
+  }
+};
+
+/**
+ * Récupérer toutes les collections suivies par l'utilisateur
+ * @returns {Promise} Liste des collections suivies
+ */
+export const fetchFollowedCollections = async () => {
+  try {
+    const response = await api.get('/collections/followed');
+    return response.data.data;
+  } catch (error) {
+    console.error(
+      'API: Error fetching followed collections:',
+      error.response?.status,
+      error.response?.data?.message || error.message
+    );
     throw error;
   }
 };

@@ -24,6 +24,7 @@ const Step1Introduction = () => {
           remercions par avance pour votre indulgence face aux éventuels bugs ou fonctionnalités
           manquantes.
         </p>
+        <p className="text-gray-900 mb-4">Merci de vos retours !</p>
       </div>
 
       {/* Annonce applications mobiles */}
@@ -55,21 +56,6 @@ const Step1Introduction = () => {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Remerciements */}
-      <div className="bg-amber-50 rounded-xl p-4 sm:p-6 shadow-sm">
-        <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
-          Merci pour votre participation !
-        </h3>
-        <p className="text-gray-700 mb-2">
-          Votre feedback est précieux pour nous aider à construire un outil qui répond vraiment à
-          vos besoins. N'hésitez pas à nous faire part de vos impressions et suggestions.
-        </p>
-        <p className="text-gray-700 italic">
-          L'équipe Médiascan vous remercie pour votre intérêt et votre indulgence pendant cette
-          phase de développement.
-        </p>
       </div>
     </div>
   );
