@@ -253,14 +253,9 @@ const Sources = () => {
             onClick={toggleCatalog}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            {showCatalog ? 'Masquer le catalogue' : 'Afficher le catalogue'}
+            {showCatalog ? 'Fermer le catalogue' : 'Afficher le catalogue'}
           </button>
         </div>
-        {showCatalog && (
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <SourceCatalog onAddToCollection={handleAddToCollection} userSources={userSources} />
-          </div>
-        )}
         {!showCatalog && (
           <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
             <p className="text-gray-600">
@@ -269,6 +264,54 @@ const Sources = () => {
           </div>
         )}
       </section>
+
+      {/* Modale du catalogue en plein écran */}
+      {showCatalog && (
+        <div className="fixed inset-0 z-50 bg-white overflow-auto animate-fadeIn">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-white py-4 z-20">
+              <h2 className="text-2xl font-bold">Catalogue de sources</h2>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => {
+                    // Ici on peut ajouter une logique pour activer une source sélectionnée
+                    toggleCatalog();
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors hidden sm:block"
+                >
+                  Fermer et revenir
+                </button>
+                <button
+                  onClick={toggleCatalog}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Fermer le catalogue"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="bg-gray-50 p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">
+                Explorez notre catalogue complet de sources d'information. Ajoutez-les à votre flux
+                ou regroupez-les dans vos collections.
+              </p>
+              <SourceCatalog
+                onAddToCollection={handleAddToCollection}
+                userSources={userSources}
+                onEnableSource={(source) => enableSource(source._id)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Mes sources ({userSources?.length || 0})</h2>
         <div className="bg-white rounded-lg shadow-sm">

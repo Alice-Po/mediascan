@@ -40,6 +40,18 @@ const CollectionIcon = ({ className }) => (
   </svg>
 );
 
+// Ajouter l'icône pour activer une source
+const PlusIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+    />
+  </svg>
+);
+
 // Déplacer la fonction au niveau du module
 const getFundingTypeLabel = (type) => {
   const types = {
@@ -402,8 +414,27 @@ export const CollectibleDeletableSourceItem = ({ source, onDelete, onAddToCollec
 export const SimpleSourceItem = ({ source }) => <SourceItemBase source={source} />;
 
 // Variante avec bouton d'ajout à une collection
-export const CollectibleSourceItem = ({ source, onAddToCollection }) => (
-  <SourceItemBase source={source} onAddToCollection={onAddToCollection} />
+export const CollectibleSourceItem = ({
+  source,
+  onAddToCollection,
+  onEnableSource,
+  isActive = false,
+}) => (
+  <SourceItemBase source={source} onAddToCollection={onAddToCollection}>
+    {!isActive && onEnableSource && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onEnableSource(source);
+        }}
+        className="text-gray-400 hover:text-green-600 transition-colors p-1 rounded-full hover:bg-green-50 mr-2"
+        title="Activer cette source"
+        aria-label="Activer cette source"
+      >
+        <PlusIcon className="h-5 w-5" />
+      </button>
+    )}
+  </SourceItemBase>
 );
 
 // PropTypes
@@ -450,6 +481,8 @@ SimpleSourceItem.propTypes = {
 CollectibleSourceItem.propTypes = {
   source: PropTypes.shape(sourceShape).isRequired,
   onAddToCollection: PropTypes.func.isRequired,
+  onEnableSource: PropTypes.func,
+  isActive: PropTypes.bool,
 };
 
 export default SimpleSourceItem;

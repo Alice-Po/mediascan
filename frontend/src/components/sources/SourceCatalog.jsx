@@ -6,7 +6,7 @@ import { CollectibleSourceItem } from './SourceItem';
  * Composant qui affiche un catalogue de toutes les sources disponibles
  * avec la possibilité de les ajouter à une collection
  */
-const SourceCatalog = ({ onAddToCollection, userSources = [] }) => {
+const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) => {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,6 +60,15 @@ const SourceCatalog = ({ onAddToCollection, userSources = [] }) => {
     }
   };
 
+  // Gérer l'activation d'une source
+  const handleEnableSource = (source) => {
+    if (onEnableSource) {
+      onEnableSource(source);
+    } else {
+      console.log("Fonctionnalité d'activation de source non implémentée", source);
+    }
+  };
+
   // Afficher un indicateur de chargement
   if (loading) {
     return (
@@ -96,81 +105,94 @@ const SourceCatalog = ({ onAddToCollection, userSources = [] }) => {
   return (
     <div className="source-catalog">
       {/* Barre de recherche */}
-      <div className="mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Rechercher une source..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 text-sm"
-          />
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="h-4 w-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-              aria-label="Effacer la recherche"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="sticky top-0 bg-gray-50 pt-2 pb-4 mb-8 z-10">
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Rechercher une source..."
+              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 text-sm shadow-sm"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </button>
-          )}
+            </div>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                aria-label="Effacer la recherche"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Compteur de résultats */}
+        <div className="mb-2">
+          <p className="text-sm text-gray-600">
+            {filteredSources.length}{' '}
+            {filteredSources.length > 1 ? 'sources trouvées' : 'source trouvée'}
+            {searchTerm && ` pour "${searchTerm}"`}
+          </p>
         </div>
       </div>
 
-      {/* Compteur de résultats */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-600">
-          {filteredSources.length}{' '}
-          {filteredSources.length > 1 ? 'sources trouvées' : 'source trouvée'}
-          {searchTerm && ` pour "${searchTerm}"`}
-        </p>
-      </div>
-
       {/* Liste des sources */}
-      <div className="space-y-4">
-        {filteredSources.map((source) => (
-          <div key={source._id} className="relative">
-            {isSourceActive(source._id) && (
-              <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Activée
-                </span>
-              </div>
-            )}
-            <CollectibleSourceItem
-              source={source}
-              onAddToCollection={() => handleAddToCollection(source)}
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredSources.map((source) => {
+          const active = isSourceActive(source._id);
+          return (
+            <div key={source._id} className="relative">
+              {active && (
+                <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Activée
+                  </span>
+                </div>
+              )}
+              <CollectibleSourceItem
+                source={source}
+                onAddToCollection={() => handleAddToCollection(source)}
+                onEnableSource={!active ? () => handleEnableSource(source) : undefined}
+                isActive={active}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Message si aucun résultat */}
       {filteredSources.length === 0 && searchTerm && (
-        <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-          <p className="text-gray-600">Aucune source ne correspond à votre recherche.</p>
+        <div className="p-8 bg-gray-50 border border-gray-200 rounded-lg text-center my-8">
+          <p className="text-gray-600 mb-2">Aucune source ne correspond à votre recherche.</p>
+          <button
+            onClick={() => setSearchTerm('')}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Effacer la recherche
+          </button>
         </div>
       )}
     </div>
