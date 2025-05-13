@@ -32,10 +32,13 @@ const Accordion = ({ title, children, defaultOpen = false }) => {
 const CollectionItem = ({
   collection,
   selectedCollection,
+  selectedSource,
   onSelectCollection,
   expandedCollections,
   toggleCollection,
   getCreatorName,
+  onSelectSource,
+  userSources,
 }) => {
   const isExpanded = expandedCollections.includes(collection._id);
 
@@ -97,18 +100,45 @@ const CollectionItem = ({
       {/* Sources de la collection */}
       {isExpanded && sources.length > 0 && (
         <div className="ml-6 space-y-1 mt-1">
-          {sources.map((source) => (
-            <div key={source._id} className="flex items-center py-1 px-1 rounded hover:bg-gray-50">
-              <div className="flex items-center">
-                {source.faviconUrl ? (
-                  <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
-                ) : (
-                  <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
-                )}
-                <span className="text-sm truncate">{source.name}</span>
+          {sources.map((source) => {
+            const sourceId = source._id || source;
+            const isSourceSelected = selectedSource === sourceId;
+
+            // Trouver l'objet source complet si nous n'avons que l'ID
+            const sourceObj =
+              typeof source === 'string' || !source.name
+                ? userSources.find((s) => s._id === sourceId) || { name: 'Source inconnue' }
+                : source;
+
+            return (
+              <div
+                key={sourceId}
+                className={`flex items-center py-1 px-1 rounded cursor-pointer ${
+                  isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+                }`}
+                onClick={(e) => {
+                  console.log('Clic sur la source dans CollectionItem:', sourceId, sourceObj.name);
+                  e.stopPropagation(); // Empêcher l'événement de remonter
+                  onSelectSource(sourceId);
+                }}
+              >
+                <div className="flex items-center">
+                  {sourceObj.faviconUrl ? (
+                    <img src={sourceObj.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
+                  ) : (
+                    <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
+                  )}
+                  <span
+                    className={`text-sm truncate ${
+                      isSourceSelected ? 'font-medium text-blue-700' : ''
+                    }`}
+                  >
+                    {sourceObj.name}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -126,6 +156,7 @@ const ArticleFilters = () => {
   const debouncedSearch = useDebounce(searchInput, 300);
   const [expandedCollections, setExpandedCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState(filters.collection || null);
+  const [selectedSource, setSelectedSource] = useState(null);
 
   // Charger les collections au montage du composant
   useEffect(() => {
@@ -167,6 +198,7 @@ const ArticleFilters = () => {
     // Si la collection était déjà sélectionnée, la désélectionner (tous les articles)
     if (selectedCollection === collectionId) {
       setSelectedCollection(null);
+      setSelectedSource(null);
       setFilters((prev) => ({
         ...prev,
         collection: null,
@@ -175,6 +207,7 @@ const ArticleFilters = () => {
     } else {
       // Sélectionner la nouvelle collection
       setSelectedCollection(collectionId);
+      setSelectedSource(null);
 
       // Trouver toutes les sources de cette collection
       const collection = collections.find((c) => c._id === collectionId);
@@ -189,6 +222,40 @@ const ArticleFilters = () => {
     }
   };
 
+  // Handler pour sélectionner une source spécifique dans une collection
+  const handleSelectSource = (sourceId) => {
+    // S'assurer que sourceId est une chaîne de caractères
+    const sourceIdString = String(sourceId);
+
+    // Si la source est déjà sélectionnée, revenir à toute la collection
+    if (selectedSource === sourceIdString) {
+      setSelectedSource(null);
+      // Trouver toutes les sources de la collection actuelle
+      const collection = collections.find((c) => c._id === selectedCollection);
+      const collectionSources = collection
+        ? (collection.sources || []).map((s) => (typeof s === 'string' ? s : s._id))
+        : [];
+
+      setFilters((prev) => {
+        const newFilters = {
+          ...prev,
+          sources: collectionSources,
+        };
+        return newFilters;
+      });
+    } else {
+      // Sélectionner uniquement cette source
+      setSelectedSource(sourceIdString);
+      setFilters((prev) => {
+        const newFilters = {
+          ...prev,
+          sources: [sourceIdString],
+        };
+        return newFilters;
+      });
+    }
+  };
+
   // Sélectionner les sources sans collection
   const handleSelectUncategorized = () => {
     // Créer un ID virtuel pour les sources sans collection
@@ -197,6 +264,7 @@ const ArticleFilters = () => {
     // Si "Sans collection" était déjà sélectionné, désélectionner (tous les articles)
     if (selectedCollection === uncategorizedId) {
       setSelectedCollection(null);
+      setSelectedSource(null);
       setFilters((prev) => ({
         ...prev,
         collection: null,
@@ -205,6 +273,7 @@ const ArticleFilters = () => {
     } else {
       // Sélectionner les sources sans collection
       setSelectedCollection(uncategorizedId);
+      setSelectedSource(null);
 
       // Trouver toutes les sources sans collection
       const uncategorizedSources = userSources
@@ -217,6 +286,42 @@ const ArticleFilters = () => {
         collection: uncategorizedId,
         sources: uncategorizedSources,
       }));
+    }
+  };
+
+  // Handler pour sélectionner une source sans collection
+  const handleSelectUncategorizedSource = (sourceId) => {
+    // Si la source est déjà sélectionnée, revenir à toutes les sources sans collection
+    if (selectedSource === sourceId) {
+      console.log(
+        'La source sans collection était déjà sélectionnée, revenir à toutes les sources sans collection'
+      );
+      setSelectedSource(null);
+
+      // Récupérer toutes les sources sans collection
+      const uncategorizedSources = userSources
+        .filter((source) => !collections.some((c) => c.sources?.some((s) => s._id === source._id)))
+        .map((s) => s._id);
+      console.log('Sources sans collection:', uncategorizedSources);
+
+      setFilters((prev) => {
+        const newFilters = {
+          ...prev,
+          sources: uncategorizedSources,
+        };
+        console.log('Nouveaux filtres après désélection de source sans collection:', newFilters);
+        return newFilters;
+      });
+    } else {
+      // Sélectionner uniquement cette source
+      setSelectedSource(sourceId);
+      setFilters((prev) => {
+        const newFilters = {
+          ...prev,
+          sources: [sourceId],
+        };
+        return newFilters;
+      });
     }
   };
 
@@ -370,10 +475,13 @@ const ArticleFilters = () => {
                 key={collection._id}
                 collection={collection}
                 selectedCollection={selectedCollection}
+                selectedSource={selectedSource}
                 onSelectCollection={handleSelectCollection}
                 expandedCollections={expandedCollections}
                 toggleCollection={toggleCollection}
                 getCreatorName={getCreatorName}
+                onSelectSource={handleSelectSource}
+                userSources={userSources}
               />
             ))}
 
@@ -431,21 +539,49 @@ const ArticleFilters = () => {
                 {/* Liste des sources sans collection */}
                 {expandedCollections.includes('uncategorized') && (
                   <div className="ml-6 space-y-1 mt-1">
-                    {uncategorizedSources.map((source) => (
-                      <div
-                        key={source._id}
-                        className="flex items-center py-1 px-1 rounded hover:bg-gray-50"
-                      >
-                        <div className="flex items-center">
-                          {source.faviconUrl ? (
-                            <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
-                          ) : (
-                            <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
-                          )}
-                          <span className="text-sm truncate">{source.name}</span>
+                    {uncategorizedSources.map((source) => {
+                      const sourceId = source._id;
+                      const isSourceSelected = selectedSource === sourceId;
+
+                      console.log('Source sans collection dans la liste:', {
+                        sourceId,
+                        name: source.name,
+                        isSelected: isSourceSelected,
+                      });
+
+                      return (
+                        <div
+                          key={sourceId}
+                          className={`flex items-center py-1 px-1 rounded cursor-pointer ${
+                            isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+                          }`}
+                          onClick={(e) => {
+                            console.log(
+                              'Clic sur la source sans collection:',
+                              sourceId,
+                              source.name
+                            );
+                            e.stopPropagation(); // Empêcher la propagation
+                            handleSelectUncategorizedSource(sourceId);
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {source.faviconUrl ? (
+                              <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
+                            ) : (
+                              <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
+                            )}
+                            <span
+                              className={`text-sm truncate ${
+                                isSourceSelected ? 'font-medium text-blue-700' : ''
+                              }`}
+                            >
+                              {source.name}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -465,6 +601,7 @@ const ArticleFilters = () => {
               onClick={() => {
                 setSearchInput('');
                 setSelectedCollection(null);
+                setSelectedSource(null);
                 setFilters({
                   searchTerm: '',
                   sources: userSources.map((s) => s._id),

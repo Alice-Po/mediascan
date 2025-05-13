@@ -6,14 +6,7 @@ import api from './index';
  */
 export const fetchCollections = async () => {
   try {
-    console.log('API: fetchCollections - Début de la requête');
     const response = await api.get('/collections');
-    console.log(
-      'API: fetchCollections - Réponse reçue:',
-      response.status,
-      response.data?.data?.length,
-      'collections'
-    );
     return response.data.data;
   } catch (error) {
     console.error(

@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-console.log('Environment variables:', import.meta.env);
-
 // URL de base de l'API avec import.meta.env
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -17,7 +15,6 @@ const api = axios.create({
 // Log pour debug
 api.interceptors.request.use((request) => {
   const token = localStorage.getItem('token');
-  console.log(`API Request to ${request.url} - Token ${token ? 'présent' : 'ABSENT'}`);
 
   if (token) {
     request.headers.Authorization = `Bearer ${token}`;

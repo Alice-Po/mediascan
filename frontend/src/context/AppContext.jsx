@@ -61,9 +61,7 @@ export const AppProvider = ({ children }) => {
   // Fonction améliorée pour charger les collections et mettre à jour l'état global
   const loadCollections = useCallback(async () => {
     try {
-      console.log('AppContext: Rechargement des collections');
       const data = await fetchCollectionsData();
-      console.log(`AppContext: ${data?.length || 0} collections chargées`);
       return data;
     } catch (error) {
       console.error('AppContext: Erreur lors du rechargement des collections', error);
@@ -95,7 +93,29 @@ export const AppProvider = ({ children }) => {
       // Filtre par collection (prioritaire sur les sources individuelles)
       if (filters.collection) {
         const collection = collections.find((c) => c._id === filters.collection);
-        if (collection && !collection.sources.some((s) => s._id === article.sourceId._id)) {
+
+        // Vérifie si la collection existe et si les sources sont disponibles
+        if (!collection) {
+          return false;
+        }
+
+        // Si filters.sources contient un seul ID, on filtre spécifiquement par cette source
+        if (filters.sources.length === 1) {
+          const sourceId = filters.sources[0];
+          const matches = article.sourceId._id === sourceId;
+
+          return matches;
+        }
+
+        // Sinon, on utilise toutes les sources de la collection
+        const collectionSources = Array.isArray(collection.sources)
+          ? collection.sources.map((s) => (typeof s === 'string' ? s : s._id))
+          : [];
+
+        const sourceInCollection = collectionSources.some((s) => s === article.sourceId._id);
+
+        if (!sourceInCollection) {
+          // console.log(`Article rejeté: source ${article.sourceId._id} pas dans la collection`, article.title);
           return false;
         }
       }
@@ -111,7 +131,9 @@ export const AppProvider = ({ children }) => {
           article.title?.toLowerCase().includes(searchTermLower) ||
           article.contentSnippet?.toLowerCase().includes(searchTermLower);
 
-        if (!matchesSearch) return false;
+        if (!matchesSearch) {
+          return false;
+        }
       }
 
       // Filtre par orientation
@@ -121,6 +143,7 @@ export const AppProvider = ({ children }) => {
       ) {
         return false;
       }
+
       return true;
     });
 
@@ -191,13 +214,16 @@ export const AppProvider = ({ children }) => {
   // Charger les articles une seule fois au montage ou quand l'utilisateur change
   useEffect(() => {
     if (user) {
-      console.log('AppContext - Chargement initial des articles', {
-        user: user._id,
-        filters,
-      });
       loadArticles();
     }
   }, [user]);
+
+  // Recharger les articles quand les filtres changent
+  useEffect(() => {
+    if (user && (filters.sources.length > 0 || filters.collection)) {
+      loadArticles();
+    }
+  }, [filters.sources, filters.collection, user]);
 
   // Fonction pour charger les articles
   const loadArticles = async () => {
@@ -205,7 +231,7 @@ export const AppProvider = ({ children }) => {
       setLoadingArticles(true);
 
       const response = await fetchArticles({
-        sources: filters.sources.map((s) => s._id).join(','),
+        sources: filters.sources.join(','),
         page: articlesPage,
       });
 
