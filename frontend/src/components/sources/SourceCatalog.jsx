@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAllSources } from '../../api/sourcesApi';
 import { CollectibleSourceItem } from './SourceItem';
+import AddSourceForm from './AddSourceForm';
 
 /**
  * Composant qui affiche un catalogue de toutes les sources disponibles
  * avec la possibilité de les ajouter à une collection
  */
-const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) => {
+const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource, onAddSource }) => {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddSourceModal, setShowAddSourceModal] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   // Charger toutes les sources disponibles au montage du composant
   useEffect(() => {
@@ -33,6 +36,17 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) 
 
     loadSources();
   }, []);
+
+  // Recharger les sources quand le formulaire est fermé
+  const reloadSources = async () => {
+    try {
+      const response = await fetchAllSources();
+      const sourceData = response.data || response;
+      setSources(Array.isArray(sourceData) ? sourceData : []);
+    } catch (err) {
+      console.error('Erreur lors du rechargement des sources:', err);
+    }
+  };
 
   // Filtrer les sources en fonction du terme de recherche
   const filteredSources = searchTerm
@@ -66,6 +80,24 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) 
       onEnableSource(source);
     } else {
       console.log("Fonctionnalité d'activation de source non implémentée", source);
+    }
+  };
+
+  // Gérer la soumission du formulaire d'ajout de source
+  const handleSubmitSource = async (sourceData) => {
+    try {
+      if (onAddSource) {
+        await onAddSource(sourceData);
+        setShowAddSourceModal(false);
+        setFormErrors({});
+        // Recharger les sources pour mettre à jour la liste
+        await reloadSources();
+      } else {
+        console.log("Fonctionnalité d'ajout de source non implémentée", sourceData);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la source:", error);
+      setFormErrors(error.response?.data?.errors || {});
     }
   };
 
@@ -149,13 +181,27 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) 
           </div>
         </div>
 
-        {/* Compteur de résultats */}
-        <div className="mb-2">
+        {/* Compteur de résultats et bouton d'ajout de source */}
+        <div className="flex justify-between items-center mb-4">
           <p className="text-sm text-gray-600">
             {filteredSources.length}{' '}
             {filteredSources.length > 1 ? 'sources trouvées' : 'source trouvée'}
             {searchTerm && ` pour "${searchTerm}"`}
           </p>
+          <button
+            onClick={() => setShowAddSourceModal(true)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md flex items-center shadow-sm transition-colors"
+          >
+            <svg className="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            Ajouter une source
+          </button>
         </div>
       </div>
 
@@ -193,6 +239,38 @@ const SourceCatalog = ({ onAddToCollection, userSources = [], onEnableSource }) 
           >
             Effacer la recherche
           </button>
+        </div>
+      )}
+
+      {/* Modale pour le formulaire d'ajout de source */}
+      {showAddSourceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-white/30 animate-fadeIn">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-medium">Ajouter une nouvelle source</h3>
+              <button
+                onClick={() => setShowAddSourceModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <AddSourceForm
+                onSubmit={handleSubmitSource}
+                onCancel={() => setShowAddSourceModal(false)}
+                formErrors={formErrors}
+                loading={false}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

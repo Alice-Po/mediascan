@@ -306,6 +306,7 @@ const Sources = () => {
                 onAddToCollection={handleAddToCollection}
                 userSources={userSources}
                 onEnableSource={(source) => enableSource(source._id)}
+                onAddSource={addSource}
               />
             </div>
           </div>
