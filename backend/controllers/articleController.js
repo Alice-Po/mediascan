@@ -52,13 +52,6 @@ export const getArticles = async (req, res) => {
       }
     }
 
-    // Log pour débugger
-    console.log('Query sources:', {
-      userActiveSources: user.activeSources.map((s) => s._id),
-      requestedSources: sources,
-      finalQuery: query.sourceId,
-    });
-
     // Filtrer par catégories si spécifiées
     if (categories && categories.length) {
       query.categories = { $in: categories.split(',') };

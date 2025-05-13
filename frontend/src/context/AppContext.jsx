@@ -337,9 +337,23 @@ export const AppProvider = ({ children }) => {
         // Ne pas filtrer par sources ici pour obtenir tous les articles supplémentaires
       });
 
-      setArticles((prev) => [...prev, ...data.articles]);
+      // Extraire les IDs des articles existants
+      const existingIds = articles.map((article) => article._id);
+
+      // Filtrer les nouveaux articles pour éviter les doublons
+      const uniqueNewArticles = data.articles.filter(
+        (article) => !existingIds.includes(article._id)
+      );
+
+      // N'ajouter que les articles uniques
+      setArticles((prev) => [...prev, ...uniqueNewArticles]);
       setHasMoreArticles(data.hasMore);
       setArticlesPage(nextPage);
+
+      // Log pour debug
+      console.log(
+        `Chargé ${data.articles.length} articles, ${uniqueNewArticles.length} uniques ajoutés`
+      );
     } catch (err) {
       console.error("Erreur lors du chargement de plus d'articles:", err);
     } finally {
