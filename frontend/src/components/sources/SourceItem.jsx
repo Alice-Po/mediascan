@@ -60,7 +60,8 @@ const getPoliticalOrientationLabel = (orientation) => {
 // Composant de base
 const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const bgColor = ORIENTATIONS.political[source.orientation.political]?.color || '#f3f4f6';
+  console.log('source', source);
+  const bgColor = ORIENTATIONS.political[source.orientation?.political]?.color || '#f3f4f6';
   const textColor = isLightColor(bgColor) ? '#000000' : '#ffffff';
 
   // S'assurer que la description existe et est une chaîne
