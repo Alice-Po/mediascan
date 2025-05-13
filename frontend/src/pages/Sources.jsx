@@ -214,53 +214,81 @@ const Sources = () => {
         linkText="En savoir plus sur l'intégration des infolettres"
       />
 
-      <div className="relative mb-8">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          placeholder="Rechercher une source..."
-          className="w-full p-2 border rounded-lg"
-        />
-
-        {showSuggestions && (
-          <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg">
-            {suggestions.map((source) => (
-              <li
-                key={source._id}
-                onClick={() => handleSuggestionSelect(source)}
-                className="cursor-pointer hover:bg-gray-50"
-              >
-                <SimpleSourceItem source={source} />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {showAddForm && (
-          <AddSourceForm
-            onSubmit={handleSubmit}
-            onCancel={() => setShowAddForm(false)}
-            formErrors={formErrors}
-          />
-        )}
-      </div>
-      {/* Section du catalogue de sources */}
+      {/* Section du catalogue de sources - CTA */}
       <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Catalogue de sources</h2>
-          <button
-            onClick={toggleCatalog}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            {showCatalog ? 'Fermer le catalogue' : 'Afficher le catalogue'}
-          </button>
-        </div>
         {!showCatalog && (
-          <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-            <p className="text-gray-600">
-              Découvrez de nouvelles sources à ajouter à votre flux d'actualités.
-            </p>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center">
+              <div className="p-6 md:p-8 flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Découvrez notre catalogue de sources
+                </h2>
+                <p className="text-gray-600 mb-4 max-w-2xl">
+                  Explorez une sélection diversifiée de médias, blogs et sites d'actualités triés
+                  sur le volet. Enrichissez votre flux avec de nouvelles perspectives et restez
+                  informé(e) sur tous les sujets qui vous intéressent.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={toggleCatalog}
+                    className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center"
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16m-7 6h7"
+                      />
+                    </svg>
+                    Parcourir le catalogue
+                  </button>
+                  <span className="text-gray-500 text-sm flex items-center">
+                    {allSources.length} sources disponibles
+                  </span>
+                </div>
+              </div>
+              <div className="hidden md:block w-64 p-6 self-stretch">
+                <div className="bg-white rounded-lg p-4 h-full shadow-inner flex flex-col justify-center items-center">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    {allSources.slice(0, 4).map((source, index) => (
+                      <div
+                        key={index}
+                        className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden"
+                      >
+                        {source.faviconUrl ? (
+                          <img
+                            src={source.faviconUrl}
+                            alt={source.name}
+                            className="w-8 h-8 object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="%23${Math.floor(
+                                Math.random() * 16777215
+                              ).toString(
+                                16
+                              )}" viewBox="0 0 16 16"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="10">${source.name.charAt(
+                                0
+                              )}</text></svg>`;
+                            }}
+                          />
+                        ) : (
+                          <span className="text-lg font-medium text-gray-600">
+                            {source.name.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-xs text-gray-500 text-center">Et bien plus encore...</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </section>
@@ -341,7 +369,7 @@ const Sources = () => {
 
       {/* Modal pour ajouter à une collection style Spotify */}
       {showCollectionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b">

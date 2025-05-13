@@ -117,26 +117,6 @@ const AddSourceForm = ({
 
   return (
     <div className="mt-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-      {/* En-tête explicatif */}
-      <div className="mb-6 border-b border-gray-100 pb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          La source que vous cherchez ne semble pas encore dans notre base de données. Ajoutez-la !
-        </h3>
-        <p className="text-sm text-gray-600">
-          Vous pouvez l'ajouter et la rendre disponible pour tous les utilisateurs. Il suffit de
-          renseigner son flux RSS et quelques informations complémentaires.
-        </p>
-      </div>
-
-      {/* Bannière Premium - Détection RSS */}
-      <PremiumBanner
-        className="mb-6"
-        variant="coming"
-        title="Fini la recherche manuelle des flux RSS !"
-        description="Bientôt, vous n'aurez plus qu'à entrer l'URL du site web et nous détecterons automatiquement le flux RSS correspondant."
-        linkText="En savoir plus sur la détection intelligente de flux RSS"
-      />
-
       <form onSubmit={handleSubmit} noValidate={false}>
         <div className="space-y-4">
           {/* RSS URL avec aide */}

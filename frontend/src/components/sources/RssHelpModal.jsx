@@ -1,5 +1,5 @@
 import React from 'react';
-
+import PremiumBanner from '../premium/PremiumBanner';
 const RssHelpModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -47,52 +47,60 @@ const RssHelpModal = ({ isOpen, onClose }) => {
                     <span className="px-1 py-0.5 bg-orange-100 text-orange-700 rounded">RSS</span>
                   </li>
                   <li>
-                    <span className="font-medium">Extensions communes</span> : Essayez d'ajouter
-                    <code className="mx-1 px-1 py-0.5 bg-gray-100 rounded">/feed</code>,
-                    <code className="mx-1 px-1 py-0.5 bg-gray-100 rounded">/rss</code> ou
-                    <code className="mx-1 px-1 py-0.5 bg-gray-100 rounded">/feed.xml</code>à l'URL
-                    du site
-                  </li>
-                  <li>
-                    <span className="font-medium">Inspecter le code source</span> : Cherchez
-                    <code className="mx-1 px-1 py-0.5 bg-gray-100 rounded">
-                      application/rss+xml
-                    </code>
-                    ou{' '}
-                    <code className="mx-1 px-1 py-0.5 bg-gray-100 rounded">
-                      application/atom+xml
-                    </code>
+                    <span className="font-medium">Utiliser une extension de navigateur</span> : Des
+                    extensions peuvent automatiquement détecter les flux RSS disponibles sur un site
+                    web.
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+                        <img
+                          src="https://www.mozilla.org/favicon.ico"
+                          alt="Firefox"
+                          className="w-5 h-5"
+                        />
+                        <a
+                          href="https://addons.mozilla.org/fr/firefox/addon/get-rss-feed-url/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Get RSS Feed URL pour Firefox
+                        </a>
+                      </div>
+                      <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+                        <img
+                          src="https://www.google.com/chrome/static/images/chrome-logo.svg"
+                          alt="Chrome"
+                          className="w-5 h-5"
+                        />
+                        <a
+                          href="https://chromewebstore.google.com/detail/rss-feed-finder/gneplfjjnfmbgimbgonejfoaiphdfkcp"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          RSS Feed Finder pour Chrome
+                        </a>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Ces extensions révèlent tous les flux disponibles sur une page web, y
+                        compris pour les chaînes YouTube, permettant de copier facilement leur URL.
+                      </p>
+                    </div>
                   </li>
                 </ol>
               </div>
             </div>
-
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-700 mb-3">
-                <strong>Besoin d'aide pour trouver un flux RSS ?</strong> Si vous ne trouvez pas le
-                flux RSS, vous pouvez toujours nous contacter et nous vous aiderons à l'identifier.
-              </p>
-              <a
-                href="/feedback"
-                className="inline-flex items-center text-sm text-blue-700 hover:text-blue-800 bg-white px-3 py-1.5 rounded-lg border border-blue-100 hover:border-blue-200 transition-colors group"
-              >
-                <span>Contactez-nous</span>
-                <svg
-                  className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </a>
-            </div>
           </div>
+
+          <br></br>
+          {/* Bannière Premium - Détection RSS */}
+          <PremiumBanner
+            className="mb-6"
+            variant="coming"
+            title="Fini la recherche manuelle des flux RSS !"
+            description="Bientôt, vous n'aurez plus qu'à entrer l'URL du site web et nous détecterons automatiquement le flux RSS correspondant."
+            linkText="En savoir plus sur la détection intelligente de flux RSS"
+          />
         </div>
       </div>
     </div>
