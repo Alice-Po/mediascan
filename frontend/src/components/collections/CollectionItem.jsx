@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
 import { AuthContext } from '../../context/AuthContext';
@@ -27,6 +27,7 @@ const CollectionItem = ({
   currentUserId,
   showActionButtons = true,
 }) => {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [collection, setCollection] = useState(initialCollection);
   const { loadCollectionById, removeSourceFromCollection, loading } = useCollections(user);
@@ -104,6 +105,24 @@ const CollectionItem = ({
     setShowDetailsModal(false);
   };
 
+  const handleItemClick = (e) => {
+    // Vérifier si l'événement provient d'un élément qui doit empêcher la navigation
+    const isActionButton = e.target.closest('button') || e.target.closest('a');
+
+    if (isActionButton) {
+      return; // Ne pas traiter le clic si ça vient d'un bouton d'action
+    }
+
+    // 1. Toujours naviguer vers la page de détail de la collection
+    navigate(`/collections/${collection._id}`);
+
+    // 2. Si la fonction onClick est fournie, l'appeler après la navigation
+    // pour appliquer le filtrage en arrivant sur la page
+    if (onClick) {
+      onClick(collection);
+    }
+  };
+
   const handleSourceRemove = async (collectionId, sourceId) => {
     try {
       // Mettre à jour la collection localement pour un affichage immédiat
@@ -133,7 +152,7 @@ const CollectionItem = ({
         className={`p-3 hover:bg-gray-50 cursor-pointer transition ${
           isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
         }`}
-        onClick={() => onClick && onClick(collection)}
+        onClick={handleItemClick}
       >
         <div className="flex items-center space-x-3">
           {/* Avatar de la collection */}

@@ -110,6 +110,7 @@ const CollectionsList = ({ collections: externalCollections }) => {
 
   // Gérer le clic sur une collection
   const handleCollectionClick = (collection) => {
+    // On filtre simplement par collection, la navigation est déjà gérée dans CollectionItem
     filterByCollection(collection._id);
   };
 

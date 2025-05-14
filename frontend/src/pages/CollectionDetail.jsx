@@ -7,7 +7,12 @@ import { DeletableSourceItem } from '../components/sources/SourceItem';
 const CollectionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { loadCollectionById, removeSourceFromCollection, deleteCollection } = useCollections();
+  const {
+    loadCollectionById,
+    removeSourceFromCollection,
+    deleteCollection,
+    addSourceToCollection,
+  } = useCollections();
   const [collection, setCollection] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +43,17 @@ const CollectionDetail = () => {
       }));
     } catch (error) {
       console.error('Error removing source:', error);
+    }
+  };
+
+  const handleAddSource = async (sourceId) => {
+    try {
+      await addSourceToCollection(id, sourceId);
+      // Recharger la collection pour avoir la liste à jour des sources
+      const updatedCollection = await loadCollectionById(id);
+      setCollection(updatedCollection);
+    } catch (error) {
+      console.error('Error adding source:', error);
     }
   };
 
@@ -91,6 +107,7 @@ const CollectionDetail = () => {
           onEdit={handleEditCollection}
           onDelete={handleDeleteCollection}
           onRemoveSource={handleRemoveSource}
+          onAddSource={handleAddSource}
           onBrowseArticles={handleBrowseArticles}
           withSourcesList={false}
         />

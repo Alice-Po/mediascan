@@ -34,7 +34,6 @@ const getFirstOrientation = (source) => {
 // Composant de base
 const SourceItemBase = ({ source, children, leftAction, onAddToCollection }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log('source', source);
 
   // Récupérer l'orientation principale
   const primaryOrientation = getFirstOrientation(source);

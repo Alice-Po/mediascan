@@ -18,6 +18,7 @@ const CollectionDetailComponent = ({
   followLoading = false,
   onFollowToggle,
   onRemoveSource,
+  onAddSource,
   onDelete,
   onEdit,
   onBrowseArticles,
@@ -72,12 +73,8 @@ const CollectionDetailComponent = ({
   // Ajouter une source à la collection
   const handleAddToCollection = async (source) => {
     try {
-      if (onRemoveSource) {
-        // Nous utilisons la même fonction qui est utilisée pour supprimer une source
-        // mais dans ce cas, c'est pour ajouter une source à la collection
-        // La fonction onRemoveSource est généralement passée par le composant parent
-        // et implique une API pour ajouter/supprimer des sources
-        await onRemoveSource(source._id, true); // true indique que c'est un ajout
+      if (onAddSource) {
+        await onAddSource(source._id);
       }
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source à la collection:", error);
