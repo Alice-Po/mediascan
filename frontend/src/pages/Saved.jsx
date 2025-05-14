@@ -1,49 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { fetchSavedArticles, unsaveArticle } from '../api/articlesApi';
+import React from 'react';
 import ArticleCard from '../components/articles/ArticleCard';
+import { useSavedArticles } from '../context/SavedArticlesContext';
 
 /**
  * Page des articles sauvegardés
  */
 const Saved = () => {
-  // State pour les articles sauvegardés
-  const [savedArticles, setSavedArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Charger les articles sauvegardés
-  useEffect(() => {
-    const loadSavedArticles = async () => {
-      try {
-        setLoading(true);
-        const response = await fetchSavedArticles();
-
-        // S'assurer que nous utilisons le bon chemin pour accéder aux articles
-        const articles = response.articles || [];
-        setSavedArticles(articles);
-      } catch (err) {
-        console.error('Error loading saved articles:', err);
-        setError('Erreur lors du chargement des articles sauvegardés');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSavedArticles();
-  }, []);
+  const { savedArticles, loading, error, unsaveArticle } = useSavedArticles();
 
   // Gérer la désauvegarde d'un article
   const handleUnsave = async (articleId) => {
-    try {
-      await unsaveArticle(articleId);
-
-      // Mettre à jour la liste des articles sauvegardés
-      // Utiliser _id au lieu de id
-      setSavedArticles(savedArticles.filter((article) => article._id !== articleId));
-    } catch (err) {
-      console.error("Erreur lors de la désauvegarde de l'article:", err);
-      setError('Impossible de désauvegarder cet article.');
-    }
+    await unsaveArticle(articleId);
   };
 
   // Gérer le partage d'un article

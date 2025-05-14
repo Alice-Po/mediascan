@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
-import ArticleFilters from '../components/articles/ArticleFilters';
+import Sidebar from '../components/sidebar/Sidebar';
 import ArticleList from '../components/articles/ArticleList';
 
 /**
@@ -105,7 +105,7 @@ const Dashboard = () => {
         {/* Sidebar de filtres (à l'extrême gauche sur desktop) */}
         <div className="w-full lg:w-80 lg:min-h-screen lg:border-r lg:border-gray-200 lg:sticky lg:top-0">
           <div className="p-4">
-            <ArticleFilters />
+            <Sidebar />
           </div>
         </div>
 

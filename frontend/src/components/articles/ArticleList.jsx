@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useCallback, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import ArticleCard from './ArticleCard';
-import { saveArticle, unsaveArticle } from '../../api/articlesApi';
+import { useSavedArticles } from '../../context/SavedArticlesContext';
 import { useDebounce } from '../../hooks/useDebounce';
 
 /**
@@ -10,6 +10,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 const ArticleList = () => {
   const { articles, loadingArticles, hasMoreArticles, loadMoreArticles, updateArticle } =
     useContext(AppContext);
+  const { saveArticle, unsaveArticle, isArticleSaved } = useSavedArticles();
 
   // État pour déclencher le chargement d'articles supplémentaires
   const [intersectionTrigger, setIntersectionTrigger] = useState(0);
