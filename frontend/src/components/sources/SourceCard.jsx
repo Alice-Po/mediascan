@@ -31,8 +31,6 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
     .map((word) => word.charAt(0).toUpperCase())
     .join('');
 
-  console.log('SourceCard - initials:', initials);
-
   const handleCardClick = (e) => {
     // Don't open modal if clicking on a button
     if (e.target.closest('button') || e.target.closest('a')) {

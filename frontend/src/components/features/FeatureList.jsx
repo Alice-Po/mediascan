@@ -4,10 +4,11 @@ import functionalities from './functionalities.json';
 import ContributionModal from '../common/ContributionModal';
 import FeatureDetailModal from '../common/FeatureDetailModal';
 // Importation dynamique des composants de détail
-import Bibliography from '../../pages/auth/onboarding/components/Bibliography';
-import Radar from '../../pages/auth/onboarding/components/Radar';
-import Coverage from '../../pages/auth/onboarding/components/Coverage';
-import Credits from '../../pages/auth/onboarding/components/Credits';
+import PublicCollections from '../../pages/auth/onboarding/components/PublicCollections';
+import CreateCollection from '../../pages/auth/onboarding/components/CreateCollection';
+import Step3Radar from '../../pages/auth/onboarding/components/Radar';
+import Step4Coverage from '../../pages/auth/onboarding/components/Coverage';
+import Step5Credits from '../../pages/auth/onboarding/components/Credits';
 
 const FeatureList = () => {
   const [showFundingModal, setShowFundingModal] = useState(false);
@@ -29,14 +30,16 @@ const FeatureList = () => {
   // Fonction pour obtenir le composant de détail en fonction du nom
   const getDetailComponent = (modalName) => {
     switch (modalName) {
-      case 'Bibliography':
-        return <Bibliography />;
+      case 'PublicCollections':
+        return <PublicCollections />;
+      case 'CreateCollection':
+        return <CreateCollection />;
       case 'Radar':
-        return <Radar />;
+        return <Step3Radar />;
       case 'Coverage':
-        return <Coverage />;
+        return <Step4Coverage />;
       case 'Credits':
-        return <Credits />;
+        return <Step5Credits />;
       default:
         return <div>Détails non disponibles</div>;
     }

@@ -12,11 +12,12 @@ const Step1Introduction = ({ onValidationChange }) => {
     <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-          On vous propose un petit tour d'horizon des fonctionnalités à venir
+          On vous propose un petit tour d'horizon pour commencer la configuration de votre premier
+          fils d'actualité
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Merci de votre intérêt pour Médiascan ! Nous sommes ravis de vous compter parmi nos
-          premiers utilisateurs.
+          Tout d'abord, un grand <strong>MERCI</strong> à vous de faire partie de nos premiers
+          utilisateurs test :)
         </p>
       </div>
 
@@ -26,12 +27,14 @@ const Step1Introduction = ({ onValidationChange }) => {
           Où en sommes-nous aujourd'hui ?
         </h3>
         <p className="text-gray-700 mb-4">
-          Médiascan est un projet en développement actif. Nous menons actuellement des tests
-          utilisateurs et l'interface évolue très rapidement en fonction de vos retours. Nous vous
-          remercions par avance pour votre indulgence face aux éventuels bugs ou fonctionnalités
-          manquantes.
+          Médiascan est un projet en développement actif. Nous sommes actuellement dans une phase
+          d'aller retours avec de nombreux tests à la fois technique et fonctionnel. Le projet et
+          son interface évoluent trés rapidement. Nous vous remercions par avance pour votre
+          indulgence face aux éventuels bugs ou fonctionnalités manquantes.
         </p>
-        <p className="text-gray-900 mb-4">Merci de vos retours !</p>
+        <p className="text-gray-900 mb-4">
+          <strong>Tous vos retours sont les bienvenus !</strong>
+        </p>
       </div>
 
       {/* Annonce applications mobiles */}
@@ -57,10 +60,21 @@ const Step1Introduction = ({ onValidationChange }) => {
             <h3 className="font-medium text-gray-900 mb-2 text-base sm:text-lg">
               Applications mobiles en préparation
             </h3>
-            <p className="text-gray-700 text-sm sm:text-base">
+            <p className="text-gray-700 text-sm sm:text-base mb-4">
               Les versions Android et iOS de Médiascan seront bientôt disponibles sur les stores.
-              Vous pourrez ainsi profiter de l'expérience Médiascan où que vous soyez !
             </p>
+            <div className="flex items-center gap-4">
+              <img
+                src="/App-Store-Logo-2013-2017.png"
+                alt="Apple App Store"
+                className="h-10 object-contain"
+              />
+              <img
+                src="/AND2020082101.png"
+                alt="Google Play Store"
+                className="h-10 object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>

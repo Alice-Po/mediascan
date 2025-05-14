@@ -17,6 +17,9 @@ const PublicCollections = ({ onValidationChange }) => {
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  // Nombre minimum de sources requises pour afficher une collection
+  const MIN_SOURCES_REQUIRED = 5;
+
   // Vérifier si l'étape est valide (au moins une collection suivie)
   const hasFollowedCollections = () => {
     return Object.values(followStatus).some((status) => status === true);
@@ -35,11 +38,17 @@ const PublicCollections = ({ onValidationChange }) => {
         setIsLoading(true);
         const collections = await fetchPublicCollections();
         console.log('Collections publiques chargées:', collections);
-        setPublicCollections(collections);
 
-        // Vérifier le statut de suivi pour chaque collection
+        // Filtrer pour ne garder que les collections avec au moins 5 sources
+        const filteredCollections = collections.filter(
+          (collection) => (collection.sources?.length || 0) >= MIN_SOURCES_REQUIRED
+        );
+
+        setPublicCollections(filteredCollections);
+
+        // Vérifier le statut de suivi pour chaque collection filtrée
         const statusObj = {};
-        for (const collection of collections) {
+        for (const collection of filteredCollections) {
           try {
             const isFollowing = await checkIfFollowing(collection._id);
             statusObj[collection._id] = isFollowing;
@@ -108,7 +117,7 @@ const PublicCollections = ({ onValidationChange }) => {
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
         <div className="relative z-10">
           <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">
-            Bibliographies thématiques partagées
+            Collections de sources thématiques partagées
           </h2>
           <p className="text-sm sm:text-base text-indigo-100">
             Créer des collections de sources d'information sur n'importe quel sujet, comme vous le
@@ -171,10 +180,11 @@ const PublicCollections = ({ onValidationChange }) => {
         {!isLoading && !error && publicCollections.length === 0 && (
           <div className="bg-gray-50 p-6 rounded-md text-center">
             <p className="text-gray-700">
-              Aucune collection publique n'est disponible pour le moment.
+              Aucune collection publique avec au moins {MIN_SOURCES_REQUIRED} sources n'est
+              disponible pour le moment.
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              Soyez le premier à créer et partager une collection !
+              Les collections avec moins de {MIN_SOURCES_REQUIRED} sources ne sont pas affichées.
             </p>
           </div>
         )}
@@ -269,83 +279,5 @@ const PublicCollections = ({ onValidationChange }) => {
     </div>
   );
 };
-
-// Composant pour les caractéristiques
-const Feature = ({ text }) => (
-  <div className="flex items-center">
-    <svg
-      className="w-5 h-5 text-indigo-500 mr-2"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-    </svg>
-    <span className="text-gray-700">{text}</span>
-  </div>
-);
-
-// Composant pour les sources dans l'exemple
-const SourceItem = ({ name, type }) => (
-  <div className="flex items-center justify-between">
-    <span className="font-medium text-gray-800">{name}</span>
-    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{type}</span>
-  </div>
-);
-
-// Composant pour les cartes de fonctionnalités
-const FeatureCard = ({ icon, title, description }) => (
-  <div className="bg-white p-4 rounded-lg border border-blue-100 flex items-start gap-3 shadow-sm hover:shadow-md transition-shadow">
-    <div className="text-blue-600 shrink-0 mt-0.5 bg-blue-50 p-2 rounded-lg">{icon}</div>
-    <div>
-      <h4 className="font-medium text-gray-900 mb-1">{title}</h4>
-      <p className="text-sm text-gray-700">{description}</p>
-    </div>
-  </div>
-);
-
-// Composant pour les exemples de bibliographies
-const BibliographyExample = ({ title, color, count, author }) => (
-  <div
-    className={`bg-white p-4 rounded-lg shadow-sm border border-${color}-100 hover:shadow-md transition-shadow`}
-  >
-    <div
-      className={`w-8 h-8 bg-${color}-100 rounded-full flex items-center justify-center text-${color}-600 mb-3`}
-    >
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-        ></path>
-      </svg>
-    </div>
-    <h4 className={`font-medium text-${color}-900 mb-1`}>{title}</h4>
-    <div className="flex justify-between items-center">
-      <span className="text-xs text-gray-500">{count} sources</span>
-      <span className="text-xs font-medium text-gray-700">Par {author}</span>
-    </div>
-  </div>
-);
-
-// Composant pour les options de financement
-const FundingOption = ({ amount, title, description, highlighted = false }) => (
-  <div
-    className={`rounded-lg p-4 ${
-      highlighted
-        ? 'bg-white text-indigo-900 shadow-lg transform scale-105'
-        : 'bg-white/20 text-white'
-    }`}
-  >
-    <div className="text-center mb-2">
-      <span className={`text-2xl font-bold ${highlighted ? 'text-indigo-600' : ''}`}>{amount}</span>
-    </div>
-    <h4 className="font-medium text-center mb-2">{title}</h4>
-    <p className={`text-sm text-center ${highlighted ? 'text-gray-700' : 'text-indigo-100'}`}>
-      {description}
-    </p>
-  </div>
-);
 
 export default PublicCollections;

@@ -6,10 +6,10 @@ import { completeOnboarding } from '../../../api/authApi';
 
 import Step1Introduction from './components/Introduction';
 import PublicCollections from './components/PublicCollections';
-import Step3Radar from './components/Radar';
-import Step4Coverage from './components/Coverage';
-import Step5Sources from './components/Sources';
-import Step5Credits from './components/Credits';
+import CreateCollection from './components/CreateCollection';
+import AddSourcesToCollection from './components/AddSourcesToCollection';
+import UpcomingFeatures from './components/UpcomingFeatures';
+import Conclusion from './components/Conclusion';
 
 const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);
@@ -19,17 +19,16 @@ const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedSources, setSelectedSources] = useState([]);
   const [allSources, setAllSources] = useState([]);
 
   // Gestion de la validation des étapes
   const [stepValidation, setStepValidation] = useState({
     1: true, // Introduction est toujours valide
-    2: false, // Bibliography requiert au moins une collection suivie
-    3: true, // Radar est toujours valide pour l'instant
-    4: true, // Coverage est toujours valide pour l'instant
-    5: true, // Credits est toujours valide pour l'instant
-    6: false, // Sources requiert au moins 3 sources
+    2: false, // PublicCollections requiert au moins une collection suivie
+    3: false, // CreateCollection requiert la création d'une collection
+    4: false, // AddSourcesToCollection requiert au moins 3 sources
+    5: true, // UpcomingFeatures est toujours valide
+    6: true, // Conclusion est toujours valide
   });
 
   // Vérifier si l'étape actuelle est valide
@@ -44,15 +43,6 @@ const Onboarding = () => {
       [stepNumber]: isValid,
     }));
   };
-
-  // Pour l'étape des sources, vérifier si suffisamment de sources sont sélectionnées
-  useEffect(() => {
-    // Mettre à jour la validation de l'étape 6 en fonction du nombre de sources sélectionnées
-    setStepValidation((prev) => ({
-      ...prev,
-      6: selectedSources.length >= 3,
-    }));
-  }, [selectedSources]);
 
   // Rediriger si l'onboarding est déjà complété
   useEffect(() => {
@@ -81,34 +71,15 @@ const Onboarding = () => {
     loadSources();
   }, []);
 
-  const toggleSource = (sourceId) => {
-    setSelectedSources((prev) => {
-      if (prev.includes(sourceId)) {
-        return prev.filter((id) => id !== sourceId);
-      }
-      return [...prev, sourceId];
-    });
-  };
-
   // Terminer le processus d'onboarding
   const completeOnboardingProcess = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      console.log('État final avant envoi:', {
-        selectedSources,
-        // recommendedSources: recommendedSources.map((s) => ({
-        //   id: s._id,
-        //   name: s.name,
-        // })),
-      });
-
       const dataToSend = {
-        sources: selectedSources,
+        sources: [], // Simplified data, sources are now added in step 4
       };
-
-      console.log('Données à envoyer au serveur:', dataToSend);
 
       const userData = await completeOnboarding(dataToSend);
 
@@ -155,8 +126,8 @@ const Onboarding = () => {
   };
 
   const renderStep = () => {
-    // Ne pas rendre Step5Sources si les sources ne sont pas encore chargées
-    if (step === 6 && loading) {
+    // No need for special loading handling for Conclusion component
+    if (loading && step < 6) {
       return (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -174,20 +145,24 @@ const Onboarding = () => {
           <PublicCollections onValidationChange={(isValid) => handleStepValidation(2, isValid)} />
         );
       case 3:
-        return <Step3Radar onValidationChange={(isValid) => handleStepValidation(3, isValid)} />;
-      case 4:
-        return <Step4Coverage onValidationChange={(isValid) => handleStepValidation(4, isValid)} />;
-      case 5:
-        return <Step5Credits onValidationChange={(isValid) => handleStepValidation(5, isValid)} />;
-      case 6:
         return (
-          <Step5Sources
-            selectedSources={selectedSources}
+          <CreateCollection
             allSources={allSources}
-            onToggleSource={toggleSource}
-            onValidationChange={(isValid) => handleStepValidation(6, isValid)}
+            onValidationChange={(isValid) => handleStepValidation(3, isValid)}
           />
         );
+      case 4:
+        return (
+          <AddSourcesToCollection
+            onValidationChange={(isValid) => handleStepValidation(4, isValid)}
+          />
+        );
+      case 5:
+        return (
+          <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(5, isValid)} />
+        );
+      case 6:
+        return <Conclusion onValidationChange={(isValid) => handleStepValidation(6, isValid)} />;
       default:
         return null;
     }
