@@ -21,6 +21,7 @@ import Funding from '../pages/Funding';
 import LandingPage from '../pages/LandingPage';
 import Collections from '../pages/Collections';
 import CollectionForm from '../pages/CollectionForm';
+import CollectionDetail from '../pages/CollectionDetail';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
@@ -48,6 +49,7 @@ const AppRoutes = () => {
           <Route path="/collections" element={<Collections />} />
           <Route path="/collections/new" element={<CollectionForm />} />
           <Route path="/collections/edit/:id" element={<CollectionForm />} />
+          <Route path="/collections/:id" element={<CollectionDetail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/premium" element={<Premium />} />
         </Route>

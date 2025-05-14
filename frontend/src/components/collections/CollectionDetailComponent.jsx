@@ -1,0 +1,330 @@
+import React, { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
+import { generateFollowersFromId } from '../../utils/colorUtils';
+import ConfirmationModal from '../common/ConfirmationModal';
+import SourceDetailsModal from '../sources/SourceDetailsModal';
+import { CollectionShareIcon } from '../common/icons';
+
+/**
+ * Composant réutilisable pour afficher les détails d'une collection
+ * Peut être utilisé à la fois dans une modal et dans une page complète
+ */
+const CollectionDetailComponent = ({
+  collection,
+  isOwner,
+  isFollowing = false,
+  followLoading = false,
+  onFollowToggle,
+  onRemoveSource,
+  onDelete,
+  onEdit,
+  onBrowseArticles,
+  withSourcesList = true,
+  layoutType = 'full', // 'full' ou 'compact'
+}) => {
+  const { user } = useContext(AuthContext);
+
+  // États pour la gestion des modales
+  const [selectedSource, setSelectedSource] = useState(null);
+  const [showSourceModal, setShowSourceModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Déterminer si l'utilisateur est le propriétaire si non spécifié
+  const isUserOwner = isOwner !== undefined ? isOwner : user && collection?.userId === user._id;
+
+  // Gestion des actions
+  const handleSourceClick = (source) => {
+    setSelectedSource(source);
+    setShowSourceModal(true);
+  };
+
+  const handleRemoveSource = (sourceId) => {
+    if (onRemoveSource) {
+      onRemoveSource(sourceId);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleEditClick = () => {
+    if (onEdit) {
+      onEdit();
+    }
+  };
+
+  const handleCloseSourceModal = () => {
+    setShowSourceModal(false);
+    setSelectedSource(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDelete) {
+      onDelete();
+    }
+    setShowDeleteModal(false);
+  };
+
+  if (!collection) return null;
+
+  return (
+    <div className={`collection-details ${layoutType === 'compact' ? 'compact' : ''}`}>
+      {/* En-tête de la collection */}
+      <div className="flex flex-col sm:flex-row sm:items-center mb-6">
+        <div className="flex items-center mb-4 sm:mb-0">
+          <div
+            className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden mr-4"
+            style={{
+              backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundColor: !collection.imageUrl ? collection.colorHex || '#6366F1' : undefined,
+            }}
+          >
+            {!collection.imageUrl && (
+              <span className="text-white text-xl font-bold">
+                {collection.name.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold">{collection.name}</h1>
+            <div className="flex flex-wrap items-center mt-1">
+              <span className="text-sm text-gray-500">
+                Par {isUserOwner ? 'vous' : collection.createdBy?.username || 'Utilisateur anonyme'}
+              </span>
+              <span className="mx-2">•</span>
+              <span className="text-sm text-gray-500">
+                {collection.sources?.length || 0} sources
+              </span>
+              {collection.isPublic && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span className="text-sm text-gray-500">
+                    {generateFollowersFromId(collection._id)} suiveurs
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+          {/* Bouton Voir les articles */}
+          {onBrowseArticles && (
+            <button
+              onClick={onBrowseArticles}
+              className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
+            >
+              Voir les articles
+            </button>
+          )}
+
+          {/* Bouton Suivre/Suivi (si collection publique et non propriétaire) */}
+          {collection.isPublic && !isUserOwner && onFollowToggle && (
+            <button
+              className={`flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                isFollowing
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+              }`}
+              onClick={onFollowToggle}
+              disabled={followLoading}
+            >
+              {followLoading ? (
+                <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
+              ) : (
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  {isFollowing ? (
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  ) : (
+                    <path
+                      fillRule="evenodd"
+                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  )}
+                </svg>
+              )}
+              {isFollowing ? 'Suivi' : 'Suivre'}
+            </button>
+          )}
+
+          {/* Bouton Partager (si collection publique) */}
+          {collection.isPublic && (
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="px-3 py-1.5 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 flex items-center text-sm font-medium"
+            >
+              <CollectionShareIcon className="h-4 w-4 mr-1" />
+              Partager
+            </button>
+          )}
+
+          {/* Boutons d'édition et de suppression (si propriétaire) */}
+          {isUserOwner && (
+            <>
+              {onEdit ? (
+                <button
+                  onClick={handleEditClick}
+                  className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+                >
+                  Modifier
+                </button>
+              ) : (
+                <Link
+                  to={`/collections/edit/${collection._id}`}
+                  className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+                >
+                  Modifier
+                </Link>
+              )}
+              {onDelete && (
+                <button
+                  onClick={handleDeleteClick}
+                  className="px-3 py-1.5 border border-red-300 text-red-700 rounded-md hover:bg-red-50 text-sm font-medium"
+                >
+                  Supprimer
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Badges de statut */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {collection.isPublic ? (
+          <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+            Public
+          </span>
+        ) : (
+          <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+            Privé
+          </span>
+        )}
+        {isFollowing && !isUserOwner && (
+          <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+            Suivie
+          </span>
+        )}
+      </div>
+
+      {/* Description */}
+      {collection.description && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-md">
+          <h2 className="text-sm font-semibold text-gray-500 mb-2">Description</h2>
+          <p className="text-gray-700">{collection.description}</p>
+        </div>
+      )}
+
+      {/* Liste des sources - conditionnelle */}
+      {withSourcesList && collection.sources && (
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Sources ({collection.sources.length || 0})</h2>
+
+          {collection.sources.length === 0 ? (
+            <div className="text-center p-6 bg-gray-50 rounded-md">
+              <p className="text-gray-500">Cette collection ne contient aucune source</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-1">
+              {collection.sources.map((source) => (
+                <div
+                  key={source._id}
+                  className="p-3 border border-gray-200 rounded-md flex items-center cursor-pointer"
+                  onClick={() => handleSourceClick(source)}
+                >
+                  <div
+                    className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center overflow-hidden mr-3 flex-shrink-0"
+                    style={{
+                      backgroundImage: source.faviconUrl ? `url(${source.faviconUrl})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  >
+                    {!source.faviconUrl && (
+                      <span className="text-gray-500 text-xs">
+                        {source.name.substring(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 truncate">{source.name}</h3>
+                    <p className="text-xs text-gray-500 truncate">{source.url}</p>
+                  </div>
+
+                  {/* Bouton de suppression (visible uniquement pour le propriétaire) */}
+                  {isUserOwner && onRemoveSource && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveSource(source._id);
+                      }}
+                      className="ml-2 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100"
+                      title="Retirer de la collection"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modales */}
+      {selectedSource && (
+        <SourceDetailsModal
+          isOpen={showSourceModal}
+          onClose={handleCloseSourceModal}
+          source={selectedSource}
+        />
+      )}
+
+      <ConfirmationModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        onConfirm={() => setShowShareModal(false)}
+        title="Partager la collection"
+        message="Le système de partage de collections sera bientôt disponible ! Vous pourrez partager"
+        itemName={collection?.name}
+        confirmButtonText="D'accord"
+        cancelButtonText="Fermer"
+        confirmButtonClass="bg-blue-600 text-white hover:bg-blue-700"
+      />
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer la collection"
+        itemName={collection?.name}
+        confirmButtonText="Supprimer"
+        cancelButtonText="Annuler"
+      />
+    </div>
+  );
+};
+
+export default CollectionDetailComponent;

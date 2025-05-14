@@ -16,10 +16,15 @@ const CollectionsList = ({ collections: externalCollections }) => {
     loadCollections,
     loading: loadingCollections,
     deleteCollection,
+    removeSourceFromCollection,
   } = useCollections(user);
 
   // Utiliser les collections externes si fournies, sinon celles du hook
-  const collections = externalCollections || hookCollections;
+  const [collections, setCollections] = useState([]);
+
+  useEffect(() => {
+    setCollections(externalCollections || hookCollections);
+  }, [externalCollections, hookCollections]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
@@ -108,6 +113,22 @@ const CollectionsList = ({ collections: externalCollections }) => {
     filterByCollection(collection._id);
   };
 
+  // Gérer la suppression d'une source depuis la liste des collections
+  const handleSourceRemoved = (collectionId, sourceId) => {
+    // Mettre à jour la liste des collections localement
+    setCollections((prevCollections) =>
+      prevCollections.map((collection) => {
+        if (collection._id === collectionId) {
+          return {
+            ...collection,
+            sources: collection.sources ? collection.sources.filter((s) => s._id !== sourceId) : [],
+          };
+        }
+        return collection;
+      })
+    );
+  };
+
   if (loadingCollections && !externalCollections) {
     return (
       <div className="p-4 flex justify-center">
@@ -143,6 +164,7 @@ const CollectionsList = ({ collections: externalCollections }) => {
               onClick={handleCollectionClick}
               onDelete={handleDeleteClick}
               onShare={handleShareClick}
+              onSourceRemove={handleSourceRemoved}
               currentUserId={user?._id}
               showActionButtons={true}
             />
@@ -165,6 +187,7 @@ const CollectionsList = ({ collections: externalCollections }) => {
                 isSelected={filters.collection === collection._id}
                 onClick={handleCollectionClick}
                 onShare={handleShareClick}
+                onSourceRemove={handleSourceRemoved}
                 currentUserId={user?._id}
                 showActionButtons={true}
               />

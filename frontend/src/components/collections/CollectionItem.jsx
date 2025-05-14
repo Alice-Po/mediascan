@@ -23,12 +23,13 @@ const CollectionItem = ({
   onClick,
   onDelete,
   onShare,
+  onSourceRemove,
   currentUserId,
   showActionButtons = true,
 }) => {
   const { user } = useContext(AuthContext);
   const [collection, setCollection] = useState(initialCollection);
-  const { loadCollectionById, loading } = useCollections(user);
+  const { loadCollectionById, removeSourceFromCollection, loading } = useCollections(user);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
@@ -55,6 +56,13 @@ const CollectionItem = ({
       fetchCollection();
     }
   }, [collectionId, initialCollection, loadCollectionById]);
+
+  // Mettre à jour la collection dans l'état local lorsque initialCollection change
+  useEffect(() => {
+    if (initialCollection) {
+      setCollection(initialCollection);
+    }
+  }, [initialCollection]);
 
   // Ne rien afficher si la collection n'est pas encore chargée
   if (!collection) {
@@ -96,6 +104,29 @@ const CollectionItem = ({
 
   const handleCloseModal = () => {
     setShowDetailsModal(false);
+  };
+
+  const handleSourceRemove = async (collectionId, sourceId) => {
+    try {
+      // Mettre à jour la collection localement pour un affichage immédiat
+      setCollection((prev) => {
+        if (!prev || !prev.sources) return prev;
+        return {
+          ...prev,
+          sources: prev.sources.filter((s) => s._id !== sourceId),
+        };
+      });
+
+      // Propager la mise à jour au composant parent s'il a fourni une fonction onSourceRemove
+      if (onSourceRemove) {
+        onSourceRemove(collectionId, sourceId);
+      }
+    } catch (error) {
+      console.error(
+        'Erreur lors de la mise à jour de la collection après suppression de source:',
+        error
+      );
+    }
   };
 
   return (
@@ -233,6 +264,7 @@ const CollectionItem = ({
           isOpen={showDetailsModal}
           onClose={handleCloseModal}
           externalCollection={collection}
+          onSourceRemove={handleSourceRemove}
           standalone={true}
         />
       )}
