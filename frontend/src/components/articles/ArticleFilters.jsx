@@ -37,6 +37,7 @@ const CollectionItem = ({
   getCreatorName,
   onSelectSource,
   userSources,
+  user,
 }) => {
   const isExpanded = expandedCollections.includes(collection._id);
 
@@ -45,6 +46,9 @@ const CollectionItem = ({
 
   // Déterminer si cette collection est la collection sélectionnée
   const isSelected = selectedCollection === collection._id;
+
+  // Déterminer si c'est une collection publique que l'utilisateur suit
+  const isPublicFollowed = collection.isPublic && user && collection.userId !== user._id;
 
   return (
     <div className="mb-1">
@@ -80,11 +84,44 @@ const CollectionItem = ({
             />
             <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : ''}`}>
               {collection.name}
+              {isPublicFollowed && (
+                <span className="inline-flex ml-1.5 items-center">
+                  <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"
+                      clipRule="evenodd"
+                    />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 4a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 4z"
+                      clipRule="evenodd"
+                    />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 12a1 1 0 100-2 1 1 0 000 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              )}
             </span>
           </div>
 
-          {/* Information sur le créateur */}
-          <span className="text-xs text-gray-500 ml-5">Par {getCreatorName(collection)}</span>
+          {/* Information sur le créateur et indicateur pour les collections publiques */}
+          <div className="flex items-center ml-5 mt-0.5">
+            <span className="text-xs text-gray-500">Par {getCreatorName(collection)}</span>
+            {collection.isPublic && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
+                Public
+              </span>
+            )}
+            {isPublicFollowed && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-medium">
+                Suivi
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Badge du nombre de sources */}
@@ -439,106 +476,9 @@ const ArticleFilters = () => {
               getCreatorName={getCreatorName}
               onSelectSource={handleSelectSource}
               userSources={userSources}
+              user={user}
             />
           ))}
-
-          {/* Sources sans collection */}
-          {uncategorizedSources.length > 0 && (
-            <div className="mt-2">
-              <div
-                className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
-                  isUncategorizedSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-                }`}
-                onClick={() =>
-                  setExpandedCollections((prev) =>
-                    prev.includes('uncategorized')
-                      ? prev.filter((id) => id !== 'uncategorized')
-                      : [...prev, 'uncategorized']
-                  )
-                }
-              >
-                {/* Icône pour déplier/replier */}
-                <span
-                  className={`mr-1.5 transform transition-transform text-xs text-gray-500 ${
-                    expandedCollections.includes('uncategorized') ? 'rotate-90' : ''
-                  }`}
-                >
-                  ▶
-                </span>
-
-                {/* Titre */}
-                <div
-                  className="flex items-center flex-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectUncategorized();
-                  }}
-                >
-                  <div className="w-3.5 h-3.5 rounded-full mr-1.5 bg-gray-300" />
-                  <span
-                    className={`text-sm font-medium ${
-                      isUncategorizedSelected ? 'text-blue-700' : 'text-gray-700'
-                    }`}
-                  >
-                    Sources sans collection
-                  </span>
-                </div>
-
-                {/* Badge du nombre de sources */}
-                <div className="ml-auto flex items-center text-xs">
-                  <span className="text-gray-400">
-                    {uncategorizedSources.length}{' '}
-                    {uncategorizedSources.length > 1 ? 'sources' : 'source'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Liste des sources sans collection */}
-              {expandedCollections.includes('uncategorized') && (
-                <div className="ml-6 space-y-1 mt-1">
-                  {uncategorizedSources.map((source) => {
-                    const sourceId = source._id;
-                    const isSourceSelected = selectedSource === sourceId;
-
-                    console.log('Source sans collection dans la liste:', {
-                      sourceId,
-                      name: source.name,
-                      isSelected: isSourceSelected,
-                    });
-
-                    return (
-                      <div
-                        key={sourceId}
-                        className={`flex items-center py-1 px-1 rounded cursor-pointer ${
-                          isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
-                        }`}
-                        onClick={(e) => {
-                          console.log('Clic sur la source sans collection:', sourceId, source.name);
-                          e.stopPropagation(); // Empêcher la propagation
-                          handleSelectUncategorizedSource(sourceId);
-                        }}
-                      >
-                        <div className="flex items-center">
-                          {source.faviconUrl ? (
-                            <img src={source.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
-                          ) : (
-                            <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
-                          )}
-                          <span
-                            className={`text-sm truncate ${
-                              isSourceSelected ? 'font-medium text-blue-700' : ''
-                            }`}
-                          >
-                            {source.name}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </Accordion>
 
