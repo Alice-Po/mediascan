@@ -7,6 +7,7 @@ import {
   deleteCollection as apiDeleteCollection,
   addSourceToCollection as apiAddSourceToCollection,
   removeSourceFromCollection as apiRemoveSourceFromCollection,
+  fetchFollowedCollections,
 } from '../api/collectionsApi';
 
 /**
@@ -50,22 +51,34 @@ export function useCollections(user, setGlobalError) {
       setLoading(true);
       const collectionsData = await fetchCollections();
 
-      // Ajouter le nom du créateur à chaque collection
-      const enhancedCollections = collectionsData.map((collection) => {
-        // Si la collection appartient à l'utilisateur actuel, ajouter son nom
-        // Sinon, laisser le creator comme undefined ou tel qu'il est
-        if (collection.userId === user._id) {
-          return {
-            ...collection,
-            creator: user.name || 'Vous',
-          };
-        }
-        return collection;
+      // Récupérer les collections suivies
+      const followedCollectionsData = await fetchFollowedCollections();
+
+      // Ajouter le nom du créateur et propriété isFollowed=false aux collections personnelles
+      const enhancedPersonalCollections = collectionsData.map((collection) => {
+        return {
+          ...collection,
+          creator:
+            collection.userId === user._id ? user.name || 'Vous' : collection.createdBy?.username,
+          isFollowed: false,
+        };
       });
 
-      setCollections(enhancedCollections);
+      // Marquer les collections suivies avec isFollowed=true
+      const enhancedFollowedCollections = followedCollectionsData.map((collection) => {
+        return {
+          ...collection,
+          creator: collection.createdBy?.username || 'Utilisateur anonyme',
+          isFollowed: true,
+        };
+      });
+
+      // Combiner les collections personnelles et suivies
+      const allCollections = [...enhancedPersonalCollections, ...enhancedFollowedCollections];
+
+      setCollections(allCollections);
       setError(null);
-      return enhancedCollections;
+      return allCollections;
     } catch (err) {
       console.error('Erreur détaillée lors du chargement des collections:', err);
       handleError('Impossible de charger les collections', err);
