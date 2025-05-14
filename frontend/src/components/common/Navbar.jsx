@@ -1,10 +1,19 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { AntennaIcon, HomeIcon, CollectionsIcon, ProfileIcon, PremiumIcon } from './icons';
+import { AppContext } from '../../context/AppContext';
+import {
+  AntennaIcon,
+  HomeIcon,
+  CollectionsIcon,
+  ProfileIcon,
+  PremiumIcon,
+  SidebarToggleIcon,
+} from './icons';
 
 const Navbar = () => {
   const { logout } = useContext(AuthContext);
+  const { isSidebarCollapsed, toggleSidebar } = useContext(AppContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -84,7 +93,20 @@ const Navbar = () => {
 
       {/* Navigation mobile */}
       <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-50">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-4">
+          {/* Bouton Toggle Sidebar */}
+          <button
+            onClick={toggleSidebar}
+            className="flex flex-col items-center justify-center py-2 text-gray-500 hover:text-primary"
+            aria-label={isSidebarCollapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
+          >
+            <div className="h-6 w-6">
+              <SidebarToggleIcon collapsed={isSidebarCollapsed} />
+            </div>
+            <span className="text-xs mt-1">Menu</span>
+          </button>
+
+          {/* Items de navigation */}
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -110,7 +132,7 @@ const Navbar = () => {
             <div className="h-6 w-6">
               <PremiumIcon />
             </div>
-            <span className="text-xs mt-1">Soutenir </span>
+            <span className="text-xs mt-1">Soutenir</span>
           </NavLink>
         </div>
       </nav>
