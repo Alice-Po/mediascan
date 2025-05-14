@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookmarkIcon } from '../common/icons';
 import { useSavedArticles } from '../../context/SavedArticlesContext';
+import ArticleItem from '../articles/ArticleItem';
 
 /**
  * Composant pour afficher les articles sauvegardés dans la sidebar
@@ -50,48 +50,16 @@ const SavedArticles = () => {
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
             {savedArticles.map((article) => (
-              <div
-                key={article._id}
-                className="p-2 hover:bg-gray-50 rounded-md border border-gray-100"
-              >
-                <Link to={`/article/${article._id}`} className="block">
-                  <div className="flex items-start gap-2">
-                    {article.imageUrl && (
-                      <img
-                        src={article.imageUrl}
-                        alt=""
-                        className="w-12 h-12 object-cover rounded flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium line-clamp-2 leading-tight mb-1">
-                        {article.title}
-                      </h4>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">
-                          {new Date(article.publishedAt).toLocaleDateString()}
-                        </span>
-                        <button
-                          onClick={(e) => handleUnsave(article._id, e)}
-                          className="text-gray-400 hover:text-red-500"
-                          title="Retirer des sauvegardés"
-                        >
-                          <BookmarkIcon className="w-4 h-4" filled={true} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
+              <ArticleItem key={article._id} article={article} onUnsave={handleUnsave} />
             ))}
           </div>
         )}
 
-        <div className="mt-2 border-t border-gray-100 pt-2">
+        {/* <div className="mt-2 border-t border-gray-100 pt-2">
           <Link to="/saved" className="text-xs text-blue-600 hover:text-blue-800 block text-center">
             Voir tous les articles sauvegardés
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );
