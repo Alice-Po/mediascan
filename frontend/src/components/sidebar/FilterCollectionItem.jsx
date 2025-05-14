@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { GlobeIcon, LockIcon } from '../common/icons';
+import { AppContext } from '../../context/AppContext';
 
 /**
  * Composant pour une collection dépliable avec ses sources dans le filtre
@@ -16,7 +17,9 @@ const FilterCollectionItem = ({
   userSources,
   user,
 }) => {
+  const { toggleSidebar } = useContext(AppContext);
   const isExpanded = expandedCollections.includes(collection._id);
+  const isMobile = window.innerWidth < 768;
 
   // S'assurer que collection.sources est un tableau
   const sources = collection.sources || [];
@@ -26,6 +29,24 @@ const FilterCollectionItem = ({
 
   // Déterminer si c'est une collection publique que l'utilisateur suit
   const isPublicFollowed = collection.isPublic && user && collection.userId !== user._id;
+
+  // Handler pour sélectionner une collection et fermer la sidebar sur mobile
+  const handleCollectionClick = (e) => {
+    e.stopPropagation();
+    onSelectCollection(collection._id);
+    if (isMobile) {
+      toggleSidebar();
+    }
+  };
+
+  // Handler pour sélectionner une source et fermer la sidebar sur mobile
+  const handleSourceClick = (e, sourceId) => {
+    e.stopPropagation();
+    onSelectSource(sourceId);
+    if (isMobile) {
+      toggleSidebar();
+    }
+  };
 
   return (
     <div className="mb-1">
@@ -45,13 +66,7 @@ const FilterCollectionItem = ({
         </span>
 
         {/* Conteneur principal incluant l'icône de couleur et le nom */}
-        <div
-          className="flex-1 min-w-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelectCollection(collection._id);
-          }}
-        >
+        <div className="flex-1 min-w-0" onClick={handleCollectionClick}>
           {/* Première ligne avec le nom et l'icône de couleur */}
           <div className="flex items-center">
             <div
@@ -121,10 +136,7 @@ const FilterCollectionItem = ({
                   className={`flex items-center py-1 px-1 rounded cursor-pointer ${
                     isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
                   }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectSource(sourceId);
-                  }}
+                  onClick={(e) => handleSourceClick(e, sourceId)}
                 >
                   <div className="flex items-center min-w-0 w-full">
                     {sourceObj.faviconUrl ? (
