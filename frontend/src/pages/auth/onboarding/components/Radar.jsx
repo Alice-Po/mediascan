@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const Step3Radar = () => {
+const Step3Radar = ({ onValidationChange }) => {
+  // Cette étape est toujours valide, informer le parent
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(true);
+    }
+  }, [onValidationChange]);
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* En-tête avec animation */}

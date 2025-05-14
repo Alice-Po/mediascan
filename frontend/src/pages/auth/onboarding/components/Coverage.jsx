@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Step4Coverage = () => {
+const Step4Coverage = ({ onValidationChange }) => {
   const [activeTab, setActiveTab] = useState('main');
+
+  // Cette étape est toujours valide, informer le parent
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(true);
+    }
+  }, [onValidationChange]);
 
   return (
     <div className="space-y-6 sm:space-y-8">

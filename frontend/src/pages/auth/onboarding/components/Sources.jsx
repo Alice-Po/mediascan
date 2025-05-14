@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { SelectableSourceItem } from '../../../../components/sources/SourceItem';
 
-const Step5Sources = ({ selectedSources = [], allSources = [], onToggleSource }) => {
+const Step5Sources = ({
+  selectedSources = [],
+  allSources = [],
+  onToggleSource,
+  onValidationChange,
+}) => {
+  const isStepValid = selectedSources.length >= 3;
+
+  // Informer le composant parent lorsque la validation change
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(isStepValid);
+    }
+  }, [isStepValid, onValidationChange]);
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -14,6 +28,30 @@ const Step5Sources = ({ selectedSources = [], allSources = [], onToggleSource })
           Vous pourrez en ajouter d'autres plus tard.
         </p>
       </div>
+
+      {/* Message de validation */}
+      {!isStepValid && (
+        <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
+          <div className="flex items-start">
+            <svg
+              className="w-5 h-5 text-amber-500 mt-0.5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-sm text-amber-800">
+              Veuillez sélectionner au moins 3 sources pour continuer.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Compteur de sources sélectionnées */}
       <div className="mb-4 text-sm text-center">
@@ -76,6 +114,7 @@ Step5Sources.propTypes = {
     })
   ).isRequired,
   onToggleSource: PropTypes.func.isRequired,
+  onValidationChange: PropTypes.func,
 };
 
 export default Step5Sources;

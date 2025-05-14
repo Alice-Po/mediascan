@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const Step5Credits = () => {
+const Step5Credits = ({ onValidationChange }) => {
+  // Cette étape est toujours valide, informer le parent
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(true);
+    }
+  }, [onValidationChange]);
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* En-tête avec animation */}

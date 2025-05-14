@@ -7,7 +7,7 @@ import {
 } from '../../../../api/collectionsApi';
 import PublicCollectionModal from '../../../../components/collections/PublicCollectionModal';
 
-const Step2Bibliography = () => {
+const Step2Bibliography = ({ onValidationChange }) => {
   const [publicCollections, setPublicCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,6 +15,18 @@ const Step2Bibliography = () => {
   const [followLoading, setFollowLoading] = useState({});
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  // Vérifier si l'étape est valide (au moins une collection suivie)
+  const hasFollowedCollections = () => {
+    return Object.values(followStatus).some((status) => status === true);
+  };
+
+  useEffect(() => {
+    // Informer le composant parent du changement de validation
+    if (onValidationChange) {
+      onValidationChange(hasFollowedCollections());
+    }
+  }, [followStatus, onValidationChange]);
 
   useEffect(() => {
     const loadPublicCollections = async () => {
@@ -98,7 +110,8 @@ const Step2Bibliography = () => {
             Bibliographies thématiques partagées
           </h2>
           <p className="text-sm sm:text-base text-indigo-100">
-            Comme une playlist Spotify, mais pour vos sources d'information !
+            Créer des collections de sources d'information sur n'importe quel sujet, comme vous le
+            feriez avec une playlist musicale et partager les.{' '}
           </p>
           <div className="mt-4 flex justify-center space-x-2">
             {/* <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
@@ -114,25 +127,36 @@ const Step2Bibliography = () => {
         <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-500 rounded-full opacity-50 blur-xl"></div>
         <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-500 rounded-full opacity-50 blur-xl"></div>
       </div>
-      {/* Présentation visuelle du concept */}
-      <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-6 items-center">
-          <div className="w-full ">
-            <h3 className="font-semibold text-gray-900 mb-3 text-lg">
-              Le concept en un coup d'œil
-            </h3>
-            <p className="text-gray-700 mb-4">
-              Créer des collections de sources d'information sur n'importe quel sujet, comme vous le
-              feriez avec une playlist musicale et partager les.
+
+      {/* Message d'instruction si aucune collection n'est suivie */}
+      {!isLoading && !hasFollowedCollections() && (
+        <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
+          <div className="flex items-start">
+            <svg
+              className="w-5 h-5 text-amber-500 mt-0.5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="text-sm text-amber-800">
+              Pour continuer, veuillez suivre au moins une collection publique. Cliquez sur le
+              bouton "Suivre" d'une collection qui vous intéresse.
             </p>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Collections populaires disponibles */}
       <div className="bg-white p-5 rounded-lg shadow-sm">
         <h3 className="font-semibold text-gray-900 mb-4 text-lg text-center">
-          Collections publiques disponibles
+          Commencer à suivre une collection publique
         </h3>
 
         {isLoading && (

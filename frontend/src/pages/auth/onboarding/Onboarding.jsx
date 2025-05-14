@@ -22,6 +22,38 @@ const Onboarding = () => {
   const [selectedSources, setSelectedSources] = useState([]);
   const [allSources, setAllSources] = useState([]);
 
+  // Gestion de la validation des étapes
+  const [stepValidation, setStepValidation] = useState({
+    1: true, // Introduction est toujours valide
+    2: false, // Bibliography requiert au moins une collection suivie
+    3: true, // Radar est toujours valide pour l'instant
+    4: true, // Coverage est toujours valide pour l'instant
+    5: true, // Credits est toujours valide pour l'instant
+    6: false, // Sources requiert au moins 3 sources
+  });
+
+  // Vérifier si l'étape actuelle est valide
+  const isCurrentStepValid = () => {
+    return stepValidation[step];
+  };
+
+  // Mettre à jour l'état de validation d'une étape
+  const handleStepValidation = (stepNumber, isValid) => {
+    setStepValidation((prev) => ({
+      ...prev,
+      [stepNumber]: isValid,
+    }));
+  };
+
+  // Pour l'étape des sources, vérifier si suffisamment de sources sont sélectionnées
+  useEffect(() => {
+    // Mettre à jour la validation de l'étape 6 en fonction du nombre de sources sélectionnées
+    setStepValidation((prev) => ({
+      ...prev,
+      6: selectedSources.length >= 3,
+    }));
+  }, [selectedSources]);
+
   // Rediriger si l'onboarding est déjà complété
   useEffect(() => {
     if (user?.onboardingCompleted) {
@@ -98,11 +130,13 @@ const Onboarding = () => {
   };
 
   const nextStep = async () => {
+    // Vérifier que l'étape actuelle est valide avant de continuer
+    if (!isCurrentStepValid()) {
+      // Ne pas afficher d'erreur ici car chaque composant d'étape affiche déjà son propre message de validation
+      return;
+    }
+
     if (step === 6) {
-      if (selectedSources.length < 3) {
-        setError('Veuillez sélectionner au moins 3 sources pour continuer.');
-        return;
-      }
       await completeOnboardingProcess();
     } else {
       setStep((prev) => prev + 1);
@@ -132,21 +166,26 @@ const Onboarding = () => {
 
     switch (step) {
       case 1:
-        return <Step1Introduction />;
+        return (
+          <Step1Introduction onValidationChange={(isValid) => handleStepValidation(1, isValid)} />
+        );
       case 2:
-        return <Step2Bibliography />;
+        return (
+          <Step2Bibliography onValidationChange={(isValid) => handleStepValidation(2, isValid)} />
+        );
       case 3:
-        return <Step3Radar />;
+        return <Step3Radar onValidationChange={(isValid) => handleStepValidation(3, isValid)} />;
       case 4:
-        return <Step4Coverage />;
+        return <Step4Coverage onValidationChange={(isValid) => handleStepValidation(4, isValid)} />;
       case 5:
-        return <Step5Credits />;
+        return <Step5Credits onValidationChange={(isValid) => handleStepValidation(5, isValid)} />;
       case 6:
         return (
           <Step5Sources
             selectedSources={selectedSources}
             allSources={allSources}
             onToggleSource={toggleSource}
+            onValidationChange={(isValid) => handleStepValidation(6, isValid)}
           />
         );
       default:
@@ -204,10 +243,12 @@ const Onboarding = () => {
 
             <button
               onClick={nextStep}
-              className={`px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 ${
-                step === 1 ? 'ml-auto' : ''
-              }`}
-              disabled={loading}
+              className={`px-4 py-2 rounded-md font-medium ${
+                isCurrentStepValid()
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-blue-300 text-white cursor-not-allowed'
+              } ${step === 1 ? 'ml-auto' : ''}`}
+              disabled={loading || !isCurrentStepValid()}
             >
               {step === 6 ? 'Terminer' : step === 1 ? "C'est parti !" : 'Suivant'}
             </button>

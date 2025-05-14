@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const Step1Introduction = () => {
+const Step1Introduction = ({ onValidationChange }) => {
+  // L'introduction est toujours valide, informer le parent
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(true);
+    }
+  }, [onValidationChange]);
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
