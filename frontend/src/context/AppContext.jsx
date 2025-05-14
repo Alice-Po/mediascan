@@ -32,6 +32,18 @@ export const AppProvider = ({ children }) => {
   const [articlesPage, setArticlesPage] = useState(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
 
+  // State pour la sidebar
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    localStorage.getItem('sidebarCollapsed') === 'true'
+  );
+
+  // Toggle sidebar collapse
+  const toggleSidebar = useCallback(() => {
+    const newState = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', newState.toString());
+  }, [isSidebarCollapsed]);
+
   // State pour les filtres
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -361,7 +373,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Valeur du contexte
+  // Retourner les valeurs dans le contexte
   const value = {
     userSources,
     allSources,
@@ -372,7 +384,7 @@ export const AppProvider = ({ children }) => {
     filters,
     setFilters,
     resetFilters,
-    loadMoreArticles: loadMoreArticles,
+    loadMoreArticles,
     error,
     setArticles,
     updateArticle,
@@ -391,6 +403,9 @@ export const AppProvider = ({ children }) => {
     removeSourceFromCollection,
     filterByCollection,
     refreshArticles,
+    // Ajouter les fonctionnalités pour la sidebar
+    isSidebarCollapsed,
+    toggleSidebar,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

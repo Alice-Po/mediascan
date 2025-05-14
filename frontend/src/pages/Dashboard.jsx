@@ -9,8 +9,15 @@ import ArticleList from '../components/articles/ArticleList';
  */
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
-  const { resetFilters, loadingArticles, articles, filters, hasMoreArticles, refreshArticles } =
-    useContext(AppContext);
+  const {
+    resetFilters,
+    loadingArticles,
+    articles,
+    filters,
+    hasMoreArticles,
+    refreshArticles,
+    isSidebarCollapsed,
+  } = useContext(AppContext);
   const [error, setError] = useState(null);
 
   // Réinitialiser les filtres au montage de la page
@@ -103,14 +110,18 @@ const Dashboard = () => {
       {/* Layout responsive avec sidebar à l'extrême gauche sur desktop */}
       <div className="flex flex-col md:flex-row max-w-screen-2xl mx-auto">
         {/* Sidebar de filtres (à l'extrême gauche sur desktop) */}
-        <div className="w-full md:w-[280px] md:min-h-screen">
+        <div className="w-full md:w-auto md:min-h-screen">
           <div className="p-4 md:p-0">
             <Sidebar />
           </div>
         </div>
 
         {/* Contenu principal (feed) avec largeur maximale pour améliorer la lisibilité sur grands écrans */}
-        <div className="flex-1 p-3 sm:p-6  md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] mx-auto">
+        <div
+          className={`flex-1 p-3 sm:p-6 ${
+            isSidebarCollapsed ? 'md:ml-[60px]' : 'md:ml-[320px]'
+          } md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] mx-auto transition-all duration-300 ease-in-out`}
+        >
           <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
             <ArticleList />
             {!loadingArticles && !hasMoreArticles && (

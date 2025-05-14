@@ -14,10 +14,6 @@ const MainLayout = () => {
     switch (location.pathname) {
       case '/app':
         return "Fil d'actualités";
-      case '/sources':
-        return 'Mes sources';
-      case '/saved':
-        return 'Articles sauvegardés';
       case '/statistics':
         return 'Statistiques de lecture';
       case '/profile':
