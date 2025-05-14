@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AuthContext } from '../../context/AuthContext';
@@ -44,6 +45,8 @@ const Sidebar = () => {
     toggleSidebar,
   } = useContext(AppContext);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchInput, setSearchInput] = useState(filters.searchTerm);
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -110,6 +113,9 @@ const Sidebar = () => {
         collection: null,
         sources: userSources.map((s) => s._id), // Sélectionner toutes les sources
       }));
+
+      // Mettre à jour l'URL pour supprimer le paramètre collection
+      navigate('/app');
     } else {
       // Sélectionner la nouvelle collection
       setSelectedCollection(collectionId);
@@ -125,6 +131,9 @@ const Sidebar = () => {
         collection: collectionId,
         sources: collectionSources,
       }));
+
+      // Mettre à jour l'URL avec le paramètre collection
+      navigate(`/app?collection=${collectionId}`);
     }
   };
 
@@ -149,6 +158,11 @@ const Sidebar = () => {
         };
         return newFilters;
       });
+
+      // Mettre à jour l'URL avec juste la collection
+      if (selectedCollection) {
+        navigate(`/app?collection=${selectedCollection}`);
+      }
     } else {
       // Sélectionner uniquement cette source
       setSelectedSource(sourceIdString);
@@ -159,6 +173,11 @@ const Sidebar = () => {
         };
         return newFilters;
       });
+
+      // Mettre à jour l'URL pour inclure la collection et la source
+      if (selectedCollection) {
+        navigate(`/app?collection=${selectedCollection}&source=${sourceIdString}`);
+      }
     }
   };
 

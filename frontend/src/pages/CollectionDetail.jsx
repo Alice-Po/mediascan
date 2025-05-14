@@ -73,7 +73,7 @@ const CollectionDetail = () => {
   };
 
   const handleBrowseArticles = () => {
-    navigate(`/?collection=${id}`);
+    navigate(`/app?collection=${id}`);
   };
 
   if (loading) {

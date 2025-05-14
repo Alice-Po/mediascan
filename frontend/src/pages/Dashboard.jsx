@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
 import Sidebar from '../components/sidebar/Sidebar';
@@ -17,23 +18,50 @@ const Dashboard = () => {
     hasMoreArticles,
     refreshArticles,
     isSidebarCollapsed,
+    filterByCollection,
+    setFilters,
   } = useContext(AppContext);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
 
-  // Réinitialiser les filtres au montage de la page
+  // Référence pour suivre le paramètre collection déjà appliqué
+  const appliedCollectionRef = useRef(null);
+
+  // Récupérer les paramètres d'URL et appliquer les filtres correspondants
   useEffect(() => {
-    const init = async () => {
-      try {
-        if (user) {
-          await resetFilters();
+    if (user) {
+      const collectionId = searchParams.get('collection');
+      const sourceId = searchParams.get('source');
+
+      // Seulement appliquer le filtre si le collectionId est présent et
+      // différent de celui déjà appliqué pour éviter les boucles infinies
+      if (collectionId && appliedCollectionRef.current !== collectionId) {
+        console.log("Paramètre collection détecté dans l'URL:", collectionId);
+
+        // Mettre à jour la référence avant d'appliquer le filtre
+        appliedCollectionRef.current = collectionId;
+
+        // Appliquer le filtre de collection
+        filterByCollection(collectionId);
+
+        // Si un sourceId est spécifié, filtrer par cette source spécifique
+        if (sourceId) {
+          console.log("Paramètre source détecté dans l'URL:", sourceId);
+          // Attendre un peu que le filtre par collection soit appliqué avant d'appliquer le filtre par source
+          setTimeout(() => {
+            setFilters((prev) => ({
+              ...prev,
+              sources: [sourceId],
+            }));
+          }, 100);
         }
-      } catch (err) {
-        setError("Erreur lors de l'initialisation du dashboard");
-        console.error(err);
+      } else if (!collectionId && appliedCollectionRef.current) {
+        // Réinitialiser si pas de collection dans l'URL mais une précédemment appliquée
+        appliedCollectionRef.current = null;
+        resetFilters();
       }
-    };
-    init();
-  }, [user]);
+    }
+  }, [user, searchParams, filterByCollection, resetFilters, setFilters]);
 
   // Configurer le pull-to-refresh
   useEffect(() => {

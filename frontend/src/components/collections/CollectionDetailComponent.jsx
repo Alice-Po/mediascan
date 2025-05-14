@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
@@ -26,6 +26,7 @@ const CollectionDetailComponent = ({
   layoutType = 'full', // 'full' ou 'compact'
 }) => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // États pour la gestion des modales
   const [selectedSource, setSelectedSource] = useState(null);
@@ -78,6 +79,17 @@ const CollectionDetailComponent = ({
       }
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source à la collection:", error);
+    }
+  };
+
+  // Nouvelle fonction pour gérer le clic sur "Voir les articles"
+  const handleBrowseArticles = () => {
+    if (onBrowseArticles) {
+      // Si une fonction personnalisée est fournie, l'utiliser
+      onBrowseArticles();
+    } else {
+      // Sinon, naviguer vers le dashboard avec le paramètre de collection
+      navigate(`/app?collection=${collection._id}`);
     }
   };
 
@@ -139,7 +151,7 @@ const CollectionDetailComponent = ({
           {/* Bouton Voir les articles */}
           {onBrowseArticles && (
             <button
-              onClick={onBrowseArticles}
+              onClick={handleBrowseArticles}
               className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
             >
               Voir les articles
