@@ -42,22 +42,6 @@ if (!systemUser) {
 
 print("ID de l'utilisateur système: " + systemUser._id);
 
-// const SYSTEM_PASSWORD_HASH = process.env.SYSTEM_PASSWORD_HASH;
-
-// // Création d'un utilisateur système pour les collections publiques
-// db.users.insertOne({
-//   email: 'a@ik.me',
-//   username: 'System',
-//   password: '$2a$10$randomHashForSystemUser', // Ceci devrait être un vrai hash en production
-//   role: 'admin',
-//   isActive: true,
-//   createdAt: new Date(),
-//   updatedAt: new Date(),
-// });
-
-// // Récupération de l'ID de l'utilisateur système
-// const systemUser = db.users.findOne({ email: 'system@news-aggregator.app' });
-
 // Ajout des sources préconfigurées
 db.sources.insertMany([
   {

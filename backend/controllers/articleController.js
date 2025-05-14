@@ -1,32 +1,66 @@
 import Article from '../models/Article.js';
-import Source from '../models/Source.js';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
-import config from '../config/env.js';
 
 // @desc    Récupérer les articles (avec filtres)
 // @route   GET /api/articles
 // @access  Private
 export const getArticles = async (req, res) => {
   try {
-    const { page = 1, limit = 20, sources, categories } = req.query;
+    const { page = 1, limit = 20, sources } = req.query;
     const userId = req.user._id;
 
-    // Récupérer l'utilisateur avec ses sources actives et ses intérêts
+    // Récupérer l'utilisateur avec ses collections et collections suivies
     const user = await User.findById(userId)
-      .populate('activeSources')
-      .select('activeSources interests savedArticles');
+      .populate('collections')
+      .populate('followedCollections')
+      .select('collections followedCollections savedArticles');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé',
+      });
+    }
+
+    // Récupérer toutes les sources disponibles pour l'utilisateur depuis ses collections
+    let userSourceIds = new Set();
+
+    // Ajouter les sources des collections propres à l'utilisateur
+    if (user.collections && user.collections.length > 0) {
+      for (const collection of user.collections) {
+        if (collection.sources && collection.sources.length > 0) {
+          for (const sourceId of collection.sources) {
+            userSourceIds.add(sourceId.toString());
+          }
+        }
+      }
+    }
+
+    // Ajouter les sources des collections suivies par l'utilisateur
+    if (user.followedCollections && user.followedCollections.length > 0) {
+      for (const collection of user.followedCollections) {
+        if (collection.sources && collection.sources.length > 0) {
+          for (const sourceId of collection.sources) {
+            userSourceIds.add(sourceId.toString());
+          }
+        }
+      }
+    }
+
+    // Convertir le Set en tableau
+    const availableSourceIds = Array.from(userSourceIds);
 
     // Construire la requête
     const query = {};
 
-    // Filtrer par sources actives
+    // Filtrer par sources spécifiées
     if (sources && sources.length) {
       // Filtrer les sourceIds vides et invalides
       const validSourceIds = sources
         .split(',')
         .filter((id) => id && id.trim().length === 24)
-        .filter((id) => user.activeSources.some((s) => s._id.toString() === id)); // Ne garder que les sources actives
+        .filter((id) => availableSourceIds.includes(id)); // Ne garder que les sources disponibles
 
       if (validSourceIds.length > 0) {
         query.sourceId = { $in: validSourceIds };
@@ -39,22 +73,17 @@ export const getArticles = async (req, res) => {
         });
       }
     } else {
-      // Si aucune source n'est spécifiée, utiliser toutes les sources actives
-      if (user.activeSources.length) {
-        query.sourceId = { $in: user.activeSources.map((s) => s._id) };
+      // Si aucune source n'est spécifiée, utiliser toutes les sources disponibles
+      if (availableSourceIds.length) {
+        query.sourceId = { $in: availableSourceIds };
       } else {
-        // Si l'utilisateur n'a aucune source active, retourner un tableau vide
+        // Si l'utilisateur n'a aucune source disponible, retourner un tableau vide
         return res.json({
           articles: [],
           hasMore: false,
           total: 0,
         });
       }
-    }
-
-    // Filtrer par catégories si spécifiées
-    if (categories && categories.length) {
-      query.categories = { $in: categories.split(',') };
     }
 
     // Récupérer les articles
@@ -132,9 +161,6 @@ export const markArticleAsRead = async (req, res) => {
         message: 'Article non trouvé',
       });
     }
-
-    // Mise à jour des interactions de l'utilisateur avec l'article
-    let updated = false;
 
     // Recherche si l'utilisateur a déjà interagi avec cet article
     const userInteractionIndex = article.userInteractions.findIndex(

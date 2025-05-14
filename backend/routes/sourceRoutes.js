@@ -3,11 +3,10 @@ import {
   getAllSources,
   getUserSources,
   addUserSource,
-  enableUserSource,
-  disableUserSource,
   deleteUserSource,
   validateRssUrl,
   getSourceById,
+  removeSourceFromAllCollections,
 } from '../controllers/sourceController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -21,8 +20,7 @@ router.get('/user', protect, getUserSources);
 router.post('/user', protect, addUserSource);
 router.delete('/user/:id', protect, deleteUserSource);
 router.post('/validate-rss', protect, validateRssUrl);
-router.post('/user/:sourceId/enable', protect, enableUserSource);
-router.post('/user/:sourceId/disable', protect, disableUserSource);
+router.post('/user/:sourceId/remove-from-collections', protect, removeSourceFromAllCollections);
 router.get('/:id', protect, getSourceById);
 
 export default router;

@@ -47,7 +47,7 @@ npm run preview
 
 ```bash
 # Connect to Atlas
-mongosh "mongodb+srv://<username>:<password>@<cluster>.mongodb.net/news_aggregator"
+mongosh "mongodb://admin:password@localhost:27017/news_aggregator?authSource=admin"
 
 # Paste the script content
 load('mongo-init/mongo-init.js')

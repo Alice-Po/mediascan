@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
 import config from '../config/env.js';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import { sendVerificationEmail } from '../services/emailService.js';
 
 // Génération du token JWT
@@ -44,6 +45,31 @@ export const register = async (req, res) => {
       token: verificationToken,
       expiration: user.verificationTokenExpires,
     });
+
+    // Créer une collection par défaut "Mes sources" pour le nouvel utilisateur
+    try {
+      const Collection = mongoose.model('Collection');
+      const defaultCollection = await Collection.create({
+        name: 'Mes sources',
+        description: 'Collection par défaut pour vos sources',
+        userId: user._id,
+        sources: [],
+        colorHex: '#3B82F6', // Bleu par défaut
+      });
+
+      // Ajouter la collection à l'utilisateur
+      await User.findByIdAndUpdate(user._id, {
+        $addToSet: { collections: defaultCollection._id },
+      });
+
+      console.log('Collection par défaut créée:', {
+        id: defaultCollection._id,
+        name: defaultCollection.name,
+      });
+    } catch (collectionError) {
+      console.error('Erreur lors de la création de la collection par défaut:', collectionError);
+      // On continue malgré l'erreur pour ne pas bloquer l'inscription
+    }
 
     try {
       // Envoyer l'email de vérification
@@ -165,8 +191,6 @@ export const login = async (req, res) => {
         email: user.email,
         name: user.name,
         isVerified: user.isVerified,
-        interests: user.interests,
-        activeSources: user.activeSources,
         onboardingCompleted: user.onboardingCompleted || false,
       },
     });
@@ -280,16 +304,10 @@ export const completeOnboarding = async (req, res) => {
   try {
     const { sources } = req.body;
 
-    // Vérifier que sources est un tableau
-    if (!Array.isArray(sources)) {
-      return res.status(400).json({ message: 'Les sources doivent être un tableau' });
-    }
-
-    // Mettre à jour l'utilisateur
+    // Mise à jour de l'utilisateur pour marquer l'onboarding comme complété
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
-        activeSources: sources,
         onboardingCompleted: true,
       },
       { new: true }

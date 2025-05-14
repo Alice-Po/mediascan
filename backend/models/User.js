@@ -20,22 +20,18 @@ const UserSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    activeSources: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Source',
-      },
-    ],
     collections: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Collection',
+        description: "Collections privées de l'utilisateur et collections publiques qu'il a créées",
       },
     ],
     followedCollections: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Collection',
+        description: "Collections publiques que l'utilisateur suit",
       },
     ],
     isVerified: {
@@ -85,7 +81,6 @@ UserSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     console.log('Sauvegarde utilisateur:', {
       id: this._id,
-      activeSources: this.activeSources,
       onboardingCompleted: this.onboardingCompleted,
     });
     next();

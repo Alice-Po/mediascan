@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
 import Parser from 'rss-parser';
 import config from '../config/env.js';
+import mongoose from 'mongoose';
 
 const parser = new Parser();
 
@@ -104,22 +105,17 @@ export const getAllSources = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les sources activées par l'utilisateur
+// @desc    Récupérer les sources de l'utilisateur qu'elles soient dans ses collections ou les collections qu'il suit. L'objectif est d'optimiser le chargement des sources nécéssaires au parcours utilisateurs.
 // @route   GET /api/sources/user
 // @access  Private
 export const getUserSources = async (req, res) => {
   try {
     const userId = req.user._id;
-    // console.log('Getting sources for user:', userId);
 
-    // Récupérer l'utilisateur avec ses sources actives
-    const user = await User.findById(userId).populate('activeSources').select('activeSources');
-
-    // console.log('Found user sources:', {
-    //   userId,
-    //   activeSources: user?.activeSources,
-    //   sourceCount: user?.activeSources?.length,
-    // });
+    // Récupérer l'utilisateur avec ses collections et collections suivies
+    const user = await User.findById(userId)
+      .populate('collections')
+      .populate('followedCollections');
 
     if (!user) {
       console.log('User not found:', userId);
@@ -129,14 +125,42 @@ export const getUserSources = async (req, res) => {
       });
     }
 
-    // Marquer les sources comme enabled
-    const enabledSources = user.activeSources.map((source) => ({
-      ...source.toObject(),
-      enabled: true,
-    }));
+    // Récupérer les sources depuis les collections de l'utilisateur
+    // et les collections qu'il suit
+    let userSourceIds = new Set();
+    let userSources = [];
+
+    // Ajouter les sources des collections propres à l'utilisateur
+    if (user.collections && user.collections.length > 0) {
+      for (const collection of user.collections) {
+        if (collection.sources && collection.sources.length > 0) {
+          for (const sourceId of collection.sources) {
+            userSourceIds.add(sourceId.toString());
+          }
+        }
+      }
+    }
+
+    // Ajouter les sources des collections suivies par l'utilisateur
+    if (user.followedCollections && user.followedCollections.length > 0) {
+      for (const collection of user.followedCollections) {
+        if (collection.sources && collection.sources.length > 0) {
+          for (const sourceId of collection.sources) {
+            userSourceIds.add(sourceId.toString());
+          }
+        }
+      }
+    }
+
+    // Récupérer les données complètes des sources
+    if (userSourceIds.size > 0) {
+      userSources = await Source.find({
+        _id: { $in: Array.from(userSourceIds) },
+      });
+    }
 
     // Retourner les sources actives
-    res.status(200).json(enabledSources);
+    res.status(200).json(userSources);
   } catch (error) {
     console.error('Error in getUserSources:', error);
     res.status(500).json({
@@ -216,10 +240,47 @@ export const addUserSource = async (req, res) => {
     });
 
     try {
-      // 5. Ajouter aux sources de l'utilisateur
-      await User.findByIdAndUpdate(userId, {
-        $addToSet: { activeSources: source._id },
+      // 5. Rechercher la collection par défaut "Mes sources" de l'utilisateur
+      const Collection = mongoose.model('Collection');
+      let defaultCollection = await Collection.findOne({
+        userId,
+        name: 'Mes sources',
       });
+
+      // Créer la collection par défaut si elle n'existe pas
+      if (!defaultCollection) {
+        console.log(
+          'Création de la collection par défaut "Mes sources" pour l\'utilisateur:',
+          userId
+        );
+        defaultCollection = await Collection.create({
+          name: 'Mes sources',
+          description: 'Collection par défaut pour vos sources',
+          userId,
+          sources: [source._id],
+          colorHex: '#3B82F6', // Bleu par défaut
+        });
+
+        // Ajouter la collection à l'utilisateur
+        await User.findByIdAndUpdate(userId, {
+          $addToSet: { collections: defaultCollection._id },
+        });
+
+        console.log('Collection par défaut créée avec succès:', {
+          id: defaultCollection._id,
+          name: defaultCollection.name,
+        });
+      } else {
+        // Ajouter la source à la collection existante si elle n'y est pas déjà
+        if (!defaultCollection.sources.some((s) => s.toString() === source._id.toString())) {
+          console.log('Ajout de la source à la collection par défaut existante');
+          await Collection.findByIdAndUpdate(defaultCollection._id, {
+            $addToSet: { sources: source._id },
+          });
+        } else {
+          console.log('La source est déjà dans la collection par défaut');
+        }
+      }
 
       // 6. Enregistrer l'événement analytics
       if (sourceCreated) {
@@ -257,64 +318,38 @@ export const addUserSource = async (req, res) => {
   }
 };
 
-// @desc    Activer une source pour l'utilisateur courant
-// @route   POST /api/sources/user/:sourceId/enable
-// @access  Private
-export const enableUserSource = async (req, res) => {
-  try {
-    const sourceId = req.params.sourceId;
-    const userId = req.user._id;
-
-    // Ajouter la source aux sources actives de l'utilisateur
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $addToSet: { activeSources: sourceId } },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
-
-    res.json({ message: 'Source activée avec succès' });
-  } catch (error) {
-    console.error('Error enabling source:', error);
-    res.status(500).json({ message: "Erreur lors de l'activation de la source" });
-  }
-};
-
-// @desc    Désactiver une source pour l'utilisateur courant
-// @route   POST /api/sources/user/:sourceId/disable
-// @access  Private
-export const disableUserSource = async (req, res) => {
-  try {
-    const sourceId = req.params.sourceId;
-    const userId = req.user._id;
-
-    // Retirer la source des sources actives de l'utilisateur
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $pull: { activeSources: sourceId } },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
-
-    res.json({ message: 'Source désactivée avec succès' });
-  } catch (error) {
-    console.error('Error disabling source:', error);
-    res.status(500).json({ message: 'Erreur lors de la désactivation de la source' });
-  }
-};
-
-// @desc    Supprimer une source personnalisée
-// @route   DELETE /api/sources/user/:id
-// @access  Private
+/**
+ * @desc    Supprimer définitivement une source personnalisée ajoutée par l'utilisateur
+ * @route   DELETE /api/sources/user/:id
+ * @access  Private
+ *
+ * @example
+ * // Utilisation côté frontend:
+ * await axios.delete(`/api/sources/user/${sourceId}`);
+ *
+ * @description
+ * Cette fonction supprime DÉFINITIVEMENT une source de la base de données.
+ * Elle ne doit être utilisée que pour les sources personnalisées créées par l'utilisateur.
+ *
+ * ATTENTION:
+ * - Cette fonction supprime la source de toutes les collections de l'utilisateur
+ * - La source est complètement effacée de la base de données
+ * - Ne pas utiliser pour les sources système/prédéfinies (utiliser removeSourceFromAllCollections)
+ * - Vérifier la propriété isUserAdded=true avant suppression
+ *
+ * Cas d'usage:
+ * - Lorsqu'un utilisateur souhaite supprimer une source RSS personnalisée qu'il a lui-même créée
+ * - Lorsqu'une source personnalisée n'est plus fonctionnelle et doit être retirée
+ */
 export const deleteUserSource = async (req, res) => {
   try {
     const sourceId = req.params.id;
+    const userId = req.user._id;
+
+    console.log('Tentative de suppression de source:', {
+      sourceId,
+      userId,
+    });
 
     // Vérification que la source existe et appartient à l'utilisateur
     const source = await Source.findOne({
@@ -324,17 +359,37 @@ export const deleteUserSource = async (req, res) => {
     });
 
     if (!source) {
+      console.log('Source non trouvée ou non autorisée:', sourceId);
       return res.status(404).json({
         success: false,
         message: 'Source non trouvée ou non autorisée',
       });
     }
 
+    // Supprimer la référence dans toutes les collections
+    const Collection = mongoose.model('Collection');
+    const userCollections = await Collection.find({
+      userId,
+      sources: sourceId,
+    });
+
+    console.log('Collections contenant la source à supprimer:', {
+      sourceId,
+      collectionCount: userCollections.length,
+      collections: userCollections.map((c) => ({ id: c._id, name: c.name })),
+    });
+
+    // Retirer la source de chaque collection
+    const updatePromises = userCollections.map((collection) =>
+      Collection.findByIdAndUpdate(collection._id, { $pull: { sources: sourceId } }, { new: true })
+    );
+
+    await Promise.all(updatePromises);
+    console.log('Source retirée de toutes les collections');
+
     // Suppression de la source
     await Source.findByIdAndDelete(sourceId);
-
-    // Suppression de la référence dans les sources actives de l'utilisateur
-    await User.findByIdAndUpdate(req.user._id, { $pull: { activeSources: sourceId } });
+    console.log('Source supprimée avec succès:', sourceId);
 
     // Enregistrement de l'événement analytique
     await Analytics.create({
@@ -342,12 +397,15 @@ export const deleteUserSource = async (req, res) => {
       eventType: 'sourceRemove',
       metadata: {
         sourceId: sourceId,
+        collectionsUpdated: userCollections.length,
       },
     });
 
     res.status(200).json({
       success: true,
       message: 'Source supprimée avec succès',
+      collectionsUpdated: userCollections.length,
+      collections: userCollections.map((c) => ({ id: c._id, name: c.name })),
     });
   } catch (error) {
     console.error('Erreur lors de la suppression de la source:', error);
@@ -414,6 +472,100 @@ export const getSourceById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération de la source',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Retirer une source de toutes les collections de l'utilisateur
+ * @route   POST /api/sources/user/:sourceId/remove-from-collections
+ * @access  Private
+ *
+ * @example
+ * // Utilisation côté frontend:
+ * await axios.post(`/api/sources/user/${sourceId}/remove-from-collections`);
+ *
+ * @description
+ * Cette fonction retire la référence à une source de toutes les collections de l'utilisateur,
+ * SANS supprimer la source elle-même de la base de données.
+ *
+ * ATTENTION:
+ * - La source reste dans la base de données et reste disponible pour d'autres utilisateurs
+ * - À utiliser pour les sources système/prédéfinies que l'utilisateur ne veut plus suivre
+ * - Pour supprimer complètement une source personnalisée, utiliser deleteUserSource
+ *
+ * Cas d'usage:
+ * - Lorsqu'un utilisateur ne souhaite plus suivre une source dans ses collections
+ * - Lors du désabonnement à une source système que d'autres utilisateurs continuent à utiliser
+ * - Lorsqu'un utilisateur veut se désabonner d'une source sans la supprimer définitivement
+ */
+export const removeSourceFromAllCollections = async (req, res) => {
+  try {
+    const sourceId = req.params.sourceId;
+    const userId = req.user._id;
+
+    console.log('Tentative de retrait de la source de toutes les collections:', {
+      sourceId,
+      userId,
+    });
+
+    // Vérifier que la source existe
+    const sourceExists = await Source.findById(sourceId);
+    if (!sourceExists) {
+      console.log('Source non trouvée:', sourceId);
+      return res.status(404).json({
+        success: false,
+        message: 'Source non trouvée',
+      });
+    }
+
+    // Trouver toutes les collections de l'utilisateur qui contiennent cette source
+    const Collection = mongoose.model('Collection');
+    const userCollections = await Collection.find({
+      userId,
+      sources: sourceId,
+    });
+
+    console.log('Collections trouvées contenant la source:', {
+      sourceId,
+      collectionCount: userCollections.length,
+      collections: userCollections.map((c) => ({ id: c._id, name: c.name })),
+    });
+
+    // Retirer la source de chaque collection
+    const updateOperations = userCollections.map((collection) =>
+      Collection.findByIdAndUpdate(collection._id, { $pull: { sources: sourceId } }, { new: true })
+    );
+
+    const updatedCollections = await Promise.all(updateOperations);
+
+    console.log('Source retirée avec succès de toutes les collections:', {
+      sourceId,
+      collectionsUpdated: updatedCollections.length,
+    });
+
+    // Enregistrer l'événement analytics
+    await Analytics.create({
+      userId,
+      eventType: 'sourceRemoveFromCollections',
+      metadata: {
+        sourceId,
+        collectionsUpdated: userCollections.length,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Source retirée de toutes les collections',
+      collectionsUpdated: userCollections.length,
+      collections: userCollections.map((c) => ({ id: c._id, name: c.name })),
+    });
+  } catch (error) {
+    console.error('Erreur lors du retrait de la source:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du retrait de la source des collections',
       error: error.message,
     });
   }
