@@ -5,6 +5,7 @@ import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
 import { CollectionShareIcon } from '../common/icons';
+import SourceCatalog from '../sources/SourceCatalog';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -30,9 +31,9 @@ const CollectionDetailComponent = ({
   const [showSourceModal, setShowSourceModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showSourceCatalog, setShowSourceCatalog] = useState(false);
 
-  // Déterminer si l'utilisateur est le propriétaire si non spécifié
-  const isUserOwner = isOwner !== undefined ? isOwner : user && collection?.userId === user._id;
+  const isUserOwner = collection.createdBy && user._id && collection.createdBy._id === user._id;
 
   // Gestion des actions
   const handleSourceClick = (source) => {
@@ -68,7 +69,34 @@ const CollectionDetailComponent = ({
     setShowDeleteModal(false);
   };
 
+  // Ajouter une source à la collection
+  const handleAddToCollection = async (source) => {
+    try {
+      if (onRemoveSource) {
+        // Nous utilisons la même fonction qui est utilisée pour supprimer une source
+        // mais dans ce cas, c'est pour ajouter une source à la collection
+        // La fonction onRemoveSource est généralement passée par le composant parent
+        // et implique une API pour ajouter/supprimer des sources
+        await onRemoveSource(source._id, true); // true indique que c'est un ajout
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la source à la collection:", error);
+    }
+  };
+
   if (!collection) return null;
+
+  // Obtenir le nom du créateur
+  let creatorName = 'Utilisateur anonyme';
+  if (isUserOwner) {
+    creatorName = 'vous';
+  } else if (collection.createdBy?.username) {
+    creatorName = collection.createdBy.username;
+  } else if (collection.creator?.username) {
+    creatorName = collection.creator.username;
+  } else if (collection.user?.username) {
+    creatorName = collection.user.username;
+  }
 
   return (
     <div className={`collection-details ${layoutType === 'compact' ? 'compact' : ''}`}>
@@ -93,9 +121,7 @@ const CollectionDetailComponent = ({
           <div className="flex-1">
             <h1 className="text-xl font-bold">{collection.name}</h1>
             <div className="flex flex-wrap items-center mt-1">
-              <span className="text-sm text-gray-500">
-                Par {isUserOwner ? 'vous' : collection.createdBy?.username || 'Utilisateur anonyme'}
-              </span>
+              <span className="text-sm text-gray-500">Par {creatorName}</span>
               <span className="mx-2">•</span>
               <span className="text-sm text-gray-500">
                 {collection.sources?.length || 0} sources
@@ -154,6 +180,24 @@ const CollectionDetailComponent = ({
                 </svg>
               )}
               {isFollowing ? 'Suivi' : 'Suivre'}
+            </button>
+          )}
+
+          {/* Bouton pour ajouter des sources (uniquement si propriétaire) */}
+          {isUserOwner && (
+            <button
+              onClick={() => setShowSourceCatalog(!showSourceCatalog)}
+              className="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              {showSourceCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
             </button>
           )}
 
@@ -222,6 +266,18 @@ const CollectionDetailComponent = ({
         <div className="mb-6 p-4 bg-gray-50 rounded-md">
           <h2 className="text-sm font-semibold text-gray-500 mb-2">Description</h2>
           <p className="text-gray-700">{collection.description}</p>
+        </div>
+      )}
+
+      {/* Catalogue de sources (affiché uniquement si propriétaire et si showSourceCatalog est true) */}
+      {isUserOwner && showSourceCatalog && (
+        <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+          <h3 className="text-lg font-medium mb-4">Catalogue de sources</h3>
+          <SourceCatalog
+            onAddToCollection={handleAddToCollection}
+            collectionSources={collection.sources || []}
+            userCollections={[]}
+          />
         </div>
       )}
 
