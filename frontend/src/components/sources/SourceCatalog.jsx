@@ -9,10 +9,9 @@ import SourceCard from './SourceCard';
  */
 const SourceCatalog = ({
   onAddToCollection,
-  userSources = [],
-  onEnableSource,
   onAddSource,
-  userCollections = [],
+  collectionSources = [], // Sources déjà dans la collection
+  userCollections = [], // Collections de l'utilisateur
 }) => {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,9 +65,11 @@ const SourceCatalog = ({
       )
     : sources;
 
-  // Vérifier si une source est déjà activée par l'utilisateur
-  const isSourceActive = (sourceId) => {
-    return userSources.some((userSource) => userSource._id === sourceId);
+  // Vérifier si une source est déjà dans la collection
+  const isSourceInCollection = (sourceId) => {
+    return collectionSources.some(
+      (source) => (typeof source === 'string' ? source : source._id) === sourceId
+    );
   };
 
   // Gérer l'ajout d'une source à une collection
@@ -77,15 +78,6 @@ const SourceCatalog = ({
       onAddToCollection(source);
     } else {
       console.log("Fonctionnalité d'ajout à une collection non implémentée", source);
-    }
-  };
-
-  // Gérer l'activation d'une source
-  const handleEnableSource = (source) => {
-    if (onEnableSource) {
-      onEnableSource(source);
-    } else {
-      console.log("Fonctionnalité d'activation de source non implémentée", source);
     }
   };
 
@@ -214,17 +206,16 @@ const SourceCatalog = ({
       {/* Liste des sources */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {filteredSources.map((source) => {
-          const active = isSourceActive(source._id);
+          const isInCollection = isSourceInCollection(source._id);
           return (
             <div
               key={source._id}
-              className={`relative ${active ? 'border-2 border-blue-500 rounded-lg' : ''}`}
+              className={`relative ${isInCollection ? 'border-2 border-blue-500 rounded-lg' : ''}`}
             >
               <SourceCard
                 source={source}
                 onAddToCollection={() => handleAddToCollection(source)}
-                onEnableSource={!active ? () => handleEnableSource(source) : undefined}
-                isActive={active}
+                isActive={isInCollection}
               />
             </div>
           );

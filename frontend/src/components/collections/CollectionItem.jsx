@@ -33,11 +33,9 @@ const CollectionItem = ({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
-    console.log('la collection est', collection);
     // Si initialCollection est fourni directement, l'utiliser
     if (initialCollection) {
       setCollection(initialCollection);
-      console.log('la collection initial est fournie', initialCollection);
       return;
     }
 

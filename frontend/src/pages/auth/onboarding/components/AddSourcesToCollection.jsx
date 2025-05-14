@@ -90,11 +90,6 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
     }
   };
 
-  // Activer une source (identique à l'ajout à la collection pour cet écran)
-  const handleEnableSource = (source) => {
-    handleAddToCollection(source);
-  };
-
   // Gérer le changement de collection sélectionnée
   const handleCollectionChange = (e) => {
     const collectionId = e.target.value;
@@ -120,7 +115,7 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
   );
 
   // Transformer les IDs des sources en objets pour le catalogue
-  const userSourcesObjects = addedSources.map((id) => ({ _id: id }));
+  const collectionSourcesObjects = addedSources.map((id) => ({ _id: id }));
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -257,8 +252,7 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
             </p>
             <SourceCatalog
               onAddToCollection={handleAddToCollection}
-              userSources={userSourcesObjects}
-              onEnableSource={handleEnableSource}
+              collectionSources={collectionSourcesObjects}
               userCollections={collections}
             />
           </div>

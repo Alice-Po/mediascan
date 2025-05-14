@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import SourceDetailsModal from './SourceDetailsModal';
 import Badge from '../common/Badge';
-import { InfoIcon, CollectionIcon, PlusIcon } from '../common/icons';
+import { InfoIcon, PlusIcon } from '../common/icons';
 
 // Fonction pour obtenir le label traduit du type de financement
 const getFundingTypeLabel = (type) => {
@@ -16,7 +16,7 @@ const getFundingTypeLabel = (type) => {
   return types[type] || type;
 };
 
-const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => {
+const SourceCard = ({ source, onAddToCollection, isActive }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [faviconLoaded, setFaviconLoaded] = React.useState(true);
 
@@ -86,11 +86,11 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
             </div>
           )}
 
-          {/* Badge "Activée" si c'est le cas */}
+          {/* Badge "Dans la collection" si c'est le cas */}
           {isActive && (
             <div className="absolute top-1 right-1">
               <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Activée
+                Dans la collection
               </span>
             </div>
           )}
@@ -149,7 +149,7 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
           {/* Actions - rangées en ligne */}
           <div className="flex justify-between items-center mt-auto pt-1.5 border-t border-gray-100">
             {/* Ajouter à une collection */}
-            {onAddToCollection && (
+            {onAddToCollection && !isActive && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -157,20 +157,6 @@ const SourceCard = ({ source, onAddToCollection, onEnableSource, isActive }) => 
                 }}
                 className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded hover:bg-indigo-50"
                 title="Ajouter à une collection"
-              >
-                <CollectionIcon className="h-4 w-4" />
-              </button>
-            )}
-
-            {/* Activer la source */}
-            {!isActive && onEnableSource && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEnableSource(source);
-                }}
-                className="text-gray-400 hover:text-green-600 transition-colors p-1 rounded hover:bg-green-50"
-                title="Activer cette source"
               >
                 <PlusIcon className="h-4 w-4" />
               </button>
@@ -219,7 +205,6 @@ SourceCard.propTypes = {
     website: PropTypes.string,
   }).isRequired,
   onAddToCollection: PropTypes.func,
-  onEnableSource: PropTypes.func,
   isActive: PropTypes.bool,
 };
 
