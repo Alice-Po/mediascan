@@ -8,7 +8,7 @@ import {
 import PublicCollectionModal from '../../../../components/collections/PublicCollectionModal';
 import { generateFollowersFromId } from '../../../../utils/colorUtils';
 
-const Step2Bibliography = ({ onValidationChange }) => {
+const PublicCollections = ({ onValidationChange }) => {
   const [publicCollections, setPublicCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -348,4 +348,4 @@ const FundingOption = ({ amount, title, description, highlighted = false }) => (
   </div>
 );
 
-export default Step2Bibliography;
+export default PublicCollections;

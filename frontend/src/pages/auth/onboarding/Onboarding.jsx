@@ -5,7 +5,7 @@ import { fetchAllSources } from '../../../api/sourcesApi';
 import { completeOnboarding } from '../../../api/authApi';
 
 import Step1Introduction from './components/Introduction';
-import Step2Bibliography from './components/Bibliography';
+import PublicCollections from './components/PublicCollections';
 import Step3Radar from './components/Radar';
 import Step4Coverage from './components/Coverage';
 import Step5Sources from './components/Sources';
@@ -171,7 +171,7 @@ const Onboarding = () => {
         );
       case 2:
         return (
-          <Step2Bibliography onValidationChange={(isValid) => handleStepValidation(2, isValid)} />
+          <PublicCollections onValidationChange={(isValid) => handleStepValidation(2, isValid)} />
         );
       case 3:
         return <Step3Radar onValidationChange={(isValid) => handleStepValidation(3, isValid)} />;
