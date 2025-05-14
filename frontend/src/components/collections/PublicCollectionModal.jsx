@@ -140,66 +140,71 @@ const PublicCollectionModal = ({
 
           {!loading && !error && collection && (
             <>
-              {/* En-tête de la collection */}
-              <div className="flex items-center mb-6">
-                <div
-                  className="w-14 h-14 rounded-lg flex items-center justify-center text-white mr-4"
-                  style={{ backgroundColor: collection.colorHex || '#6366F1' }}
-                >
-                  <span className="text-xl font-bold">
-                    {collection.name.slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <h1 className="text-xl font-bold">{collection.name}</h1>
-                  <div className="flex items-center mt-1">
-                    <span className="text-sm text-gray-500">
-                      Par{' '}
-                      {collection.createdBy?.username ||
-                        collection.userId?.username ||
-                        'Utilisateur anonyme'}
+              {/* En-tête de la collection - Version mobile d'abord */}
+              <div className="flex flex-col sm:flex-row sm:items-center mb-6">
+                <div className="flex items-center mb-4 sm:mb-0">
+                  <div
+                    className="w-14 h-14 rounded-lg flex items-center justify-center text-white mr-4"
+                    style={{ backgroundColor: collection.colorHex || '#6366F1' }}
+                  >
+                    <span className="text-xl font-bold">
+                      {collection.name.slice(0, 2).toUpperCase()}
                     </span>
-                    <span className="mx-2">•</span>
-                    <span className="text-sm text-gray-500">
-                      {collection.sources?.length || 0} sources
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span className="text-sm text-gray-500">
-                      {generateFollowersFromId(collection._id)} suiveurs
-                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h1 className="text-xl font-bold">{collection.name}</h1>
+                    <div className="flex flex-wrap items-center mt-1">
+                      <span className="text-sm text-gray-500">
+                        Par{' '}
+                        {collection.createdBy?.username ||
+                          collection.userId?.username ||
+                          'Utilisateur anonyme'}
+                      </span>
+                      <span className="mx-2">•</span>
+                      <span className="text-sm text-gray-500">
+                        {collection.sources?.length || 0} sources
+                      </span>
+                      <span className="mx-2">•</span>
+                      <span className="text-sm text-gray-500">
+                        {generateFollowersFromId(collection._id)} suiveurs
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <button
-                  className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isFollowing
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-                  }`}
-                  onClick={handleFollowToggle}
-                  disabled={followLoading}
-                >
-                  {followLoading ? (
-                    <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
-                  ) : (
-                    <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      {isFollowing ? (
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      ) : (
-                        <path
-                          fillRule="evenodd"
-                          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                          clipRule="evenodd"
-                        />
-                      )}
-                    </svg>
-                  )}
-                  {isFollowing ? 'Suivi' : 'Suivre'}
-                </button>
+                {/* Bouton Suivre/Suivi adapté au mobile */}
+                <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                  <button
+                    className={`w-full sm:w-auto flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isFollowing
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+                    }`}
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                  >
+                    {followLoading ? (
+                      <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
+                    ) : (
+                      <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        {isFollowing ? (
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        ) : (
+                          <path
+                            fillRule="evenodd"
+                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                            clipRule="evenodd"
+                          />
+                        )}
+                      </svg>
+                    )}
+                    {isFollowing ? 'Suivi' : 'Suivre'}
+                  </button>
+                </div>
               </div>
 
               {/* Description */}

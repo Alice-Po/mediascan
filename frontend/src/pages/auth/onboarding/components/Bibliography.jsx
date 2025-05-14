@@ -6,6 +6,7 @@ import {
   checkIfFollowing,
 } from '../../../../api/collectionsApi';
 import PublicCollectionModal from '../../../../components/collections/PublicCollectionModal';
+import { generateFollowersFromId } from '../../../../utils/colorUtils';
 
 const Step2Bibliography = ({ onValidationChange }) => {
   const [publicCollections, setPublicCollections] = useState([]);
@@ -117,9 +118,9 @@ const Step2Bibliography = ({ onValidationChange }) => {
             {/* <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
               <span className="w-2 h-2 bg-green-400 rounded-full mr-1.5"></span>En développement
             </span> */}
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
+            {/* <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
               <span className="w-2 h-2 bg-yellow-400 rounded-full mr-1.5"></span>Finançable
-            </span>
+            </span> */}
           </div>
         </div>
 
@@ -194,10 +195,12 @@ const Step2Bibliography = ({ onValidationChange }) => {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-gray-900 text-lg">{collection.name}</h4>
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center text-sm text-gray-600">
                       <span>Par {collection.createdBy?.username || 'Utilisateur anonyme'}</span>
                       <span className="mx-2">•</span>
                       <span>{collection.sources?.length || 0} sources</span>
+                      <span className="mx-2">•</span>
+                      <span>{generateFollowersFromId(collection._id)} suiveurs</span>
                     </div>
                   </div>
                 </div>
@@ -208,7 +211,7 @@ const Step2Bibliography = ({ onValidationChange }) => {
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 mt-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-3">
                   <button
                     className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors"
                     onClick={() => handleViewDetails(collection)}
@@ -216,7 +219,7 @@ const Step2Bibliography = ({ onValidationChange }) => {
                     Voir les détails
                   </button>
                   <button
-                    className={`flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       followStatus[collection._id]
                         ? 'bg-purple-600 hover:bg-purple-700 text-white'
                         : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
