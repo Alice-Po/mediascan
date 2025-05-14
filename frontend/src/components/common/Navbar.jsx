@@ -170,7 +170,6 @@ const Navbar = () => {
   // Navigation items (sans le bouton de déconnexion)
   const navItems = [
     { to: '/app', label: 'Accueil', icon: <HomeIcon /> },
-    { to: '/sources', label: 'Mes sources', icon: <SourcesIcon /> },
     { to: '/collections', label: 'Collections', icon: <CollectionsIcon /> },
     { to: '/saved', label: 'Sauvegardés', icon: <SavedIcon /> },
     { to: '/profile', label: 'Profil', icon: <ProfileIcon /> },

@@ -9,7 +9,6 @@ import PublicAuthLayout from '../layouts/PublicAuthLayout';
 
 // Pages
 import Dashboard from '../pages/Dashboard';
-import Sources from '../pages/Sources';
 import Saved from '../pages/Saved';
 import Profile from '../pages/Profile';
 import Login from '../pages/auth/Login';
@@ -47,7 +46,6 @@ const AppRoutes = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<MainLayout />}>
           <Route path="/app" element={<Dashboard />} />
-          <Route path="/sources" element={<Sources />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="/collections/new" element={<CollectionForm />} />
