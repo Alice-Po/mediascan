@@ -5,7 +5,7 @@ import {
   unfollowCollection,
   checkIfFollowing,
 } from '../../../../api/collectionsApi';
-import PublicCollectionModal from '../../../../components/collections/PublicCollectionModal';
+import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
 import { generateFollowersFromId } from '../../../../utils/colorUtils';
 
 const PublicCollections = ({ onValidationChange }) => {
@@ -206,7 +206,7 @@ const PublicCollections = ({ onValidationChange }) => {
                   <div className="flex-1">
                     <h4 className="font-bold text-gray-900 text-lg">{collection.name}</h4>
                     <div className="flex flex-wrap items-center text-sm text-gray-600">
-                      <span>Par {collection.createdBy?.username || 'Utilisateur anonyme'}</span>
+                      <span>Par {collection.createdBy?.username}</span>
                       <span className="mx-2">•</span>
                       <span>{collection.sources?.length || 0} sources</span>
                       <span className="mx-2">•</span>

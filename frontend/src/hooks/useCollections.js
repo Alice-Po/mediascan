@@ -68,7 +68,7 @@ export function useCollections(user, setGlobalError) {
       const enhancedFollowedCollections = followedCollectionsData.map((collection) => {
         return {
           ...collection,
-          creator: collection.createdBy?.username || 'Utilisateur anonyme',
+          creator: collection.createdBy?.username,
           isFollowed: true,
         };
       });

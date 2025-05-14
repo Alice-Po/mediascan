@@ -103,7 +103,7 @@ const Dashboard = () => {
       {/* Layout responsive avec sidebar à l'extrême gauche sur desktop */}
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar de filtres (à l'extrême gauche sur desktop) */}
-        <div className="w-full lg:w-64 lg:min-h-screen lg:border-r lg:border-gray-200 lg:sticky lg:top-0">
+        <div className="w-full lg:w-80 lg:min-h-screen lg:border-r lg:border-gray-200 lg:sticky lg:top-0">
           <div className="p-4">
             <ArticleFilters />
           </div>

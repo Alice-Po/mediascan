@@ -26,8 +26,8 @@ const Accordion = ({ title, children, defaultOpen = false }) => {
   );
 };
 
-// Composant pour une collection dépliable avec ses sources
-const CollectionItem = ({
+// Composant pour une collection dépliable avec ses sources dans le filtre
+const FilterCollectionItem = ({
   collection,
   selectedCollection,
   selectedSource,
@@ -69,7 +69,7 @@ const CollectionItem = ({
 
         {/* Nom de la collection */}
         <div
-          className="flex flex-col flex-1"
+          className="flex flex-col flex-1 min-w-0"
           onClick={(e) => {
             e.stopPropagation();
             onSelectCollection(collection._id);
@@ -77,12 +77,16 @@ const CollectionItem = ({
         >
           <div className="flex items-center">
             <div
-              className="w-3.5 h-3.5 rounded-full mr-1.5"
+              className="w-3.5 h-3.5 rounded-full flex-shrink-0 mr-1.5"
               style={{
                 backgroundColor: collection.colorHex || '#e5e7eb',
               }}
             />
-            <span className={`text-sm font-medium ${isSelected ? 'text-blue-700' : ''}`}>
+            <span
+              className={`text-sm font-medium overflow-hidden whitespace-nowrap text-ellipsis ${
+                isSelected ? 'text-blue-700' : ''
+              }`}
+            >
               {collection.name}
               {isPublicFollowed && (
                 <span className="inline-flex ml-1.5 items-center">
@@ -109,24 +113,28 @@ const CollectionItem = ({
           </div>
 
           {/* Information sur le créateur et indicateur pour les collections publiques */}
-          <div className="flex items-center ml-5 mt-0.5">
-            <span className="text-xs text-gray-500">Par {getCreatorName(collection)}</span>
-            {collection.isPublic && (
-              <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
-                Public
-              </span>
-            )}
-            {isPublicFollowed && (
-              <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-medium">
-                Suivi
-              </span>
-            )}
+          <div className="flex flex-wrap items-center ml-5 mt-0.5 gap-1.5 overflow-hidden">
+            <span className="text-xs text-gray-500 whitespace-nowrap text-ellipsis overflow-hidden max-w-full">
+              Par {getCreatorName(collection)}
+            </span>
+            <div className="flex gap-1.5 flex-shrink-0 ml-auto">
+              {collection.isPublic && (
+                <span className="px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-medium whitespace-nowrap">
+                  Public
+                </span>
+              )}
+              {isPublicFollowed && (
+                <span className="px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-medium whitespace-nowrap">
+                  Suivi
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Badge du nombre de sources */}
-        <div className="ml-auto flex items-center text-xs">
-          <span className="text-gray-400">
+        <div className="ml-auto flex items-center text-xs flex-shrink-0">
+          <span className="text-gray-400 whitespace-nowrap">
             {sources.length} {sources.length > 1 ? 'sources' : 'source'}
           </span>
         </div>
@@ -156,11 +164,15 @@ const CollectionItem = ({
                     onSelectSource(sourceId);
                   }}
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center min-w-0 w-full">
                     {sourceObj.faviconUrl ? (
-                      <img src={sourceObj.faviconUrl} alt="" className="w-3.5 h-3.5 mr-1.5" />
+                      <img
+                        src={sourceObj.faviconUrl}
+                        alt=""
+                        className="w-3.5 h-3.5 mr-1.5 flex-shrink-0"
+                      />
                     ) : (
-                      <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5" />
+                      <div className="w-3.5 h-3.5 bg-gray-200 rounded-full mr-1.5 flex-shrink-0" />
                     )}
                     <span
                       className={`text-sm truncate ${
@@ -374,12 +386,9 @@ const ArticleFilters = () => {
     if (user && collection.userId === user._id) {
       return 'vous';
     }
-    // Si la collection a un creator défini
-    if (collection.creator) {
-      return collection.creator;
-    }
-    // Fallback
-    return 'un utilisateur';
+
+    // Utiliser la même approche que dans CollectionItem.jsx
+    return collection.createdBy?.username || 'Utilisateur anonyme';
   };
 
   // Gérer la recherche
@@ -389,7 +398,7 @@ const ArticleFilters = () => {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-full w-[280px]">
       {/* Barre de recherche avec contexte */}
       <div className="mb-6">
         <div className="relative">
@@ -440,7 +449,7 @@ const ArticleFilters = () => {
 
       {/* Collections */}
       <Accordion title="Collections" defaultOpen={true}>
-        <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+        <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
           {/* Option pour "Toutes les collections" */}
           <div
             className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
@@ -465,7 +474,7 @@ const ArticleFilters = () => {
 
           {/* Afficher les collections */}
           {collections.map((collection) => (
-            <CollectionItem
+            <FilterCollectionItem
               key={collection._id}
               collection={collection}
               selectedCollection={selectedCollection}
