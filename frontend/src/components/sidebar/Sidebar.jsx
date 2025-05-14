@@ -165,67 +165,73 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="h-full w-[280px]">
-      {/* Barre de recherche avec contexte */}
-      <SearchBar searchInput={searchInput} handleSearch={handleSearch} clearSearch={clearSearch} />
+    <div className="h-full w-[320px] md:fixed md:top-[110px] md:bottom-0 md:left-0 md:overflow-y-auto md:pb-20 md:border-r md:border-gray-200 bg-white">
+      <div className="p-4">
+        {/* Barre de recherche avec contexte */}
+        <SearchBar
+          searchInput={searchInput}
+          handleSearch={handleSearch}
+          clearSearch={clearSearch}
+        />
 
-      {/* Collections */}
-      <Accordion title="Collections" defaultOpen={true}>
-        <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
-          {/* Afficher les collections */}
-          {collections.map((collection) => (
-            <FilterCollectionItem
-              key={collection._id}
-              collection={collection}
-              selectedCollection={selectedCollection}
-              selectedSource={selectedSource}
-              onSelectCollection={handleSelectCollection}
-              expandedCollections={expandedCollections}
-              toggleCollection={toggleCollection}
-              getCreatorName={getCreatorName}
-              onSelectSource={handleSelectSource}
-              userSources={userSources}
-              user={user}
-            />
-          ))}
-        </div>
-      </Accordion>
-
-      {/* Articles sauvegardés */}
-      <SavedArticles />
-
-      {/* Indicateur de filtres actifs */}
-      {(filters.searchTerm || selectedCollection !== null) && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-600">Filtres actifs</span>
-            <button
-              onClick={() => {
-                setSearchInput('');
-                setSelectedCollection(null);
-                setSelectedSource(null);
-                setFilters({
-                  searchTerm: '',
-                  sources: userSources.map((s) => s._id),
-                  collection: null,
-                });
-              }}
-              className="text-xs text-blue-600 hover:text-blue-800"
-            >
-              Réinitialiser tout
-            </button>
+        {/* Collections */}
+        <Accordion title="Collections" defaultOpen={true}>
+          <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
+            {/* Afficher les collections */}
+            {collections.map((collection) => (
+              <FilterCollectionItem
+                key={collection._id}
+                collection={collection}
+                selectedCollection={selectedCollection}
+                selectedSource={selectedSource}
+                onSelectCollection={handleSelectCollection}
+                expandedCollections={expandedCollections}
+                toggleCollection={toggleCollection}
+                getCreatorName={getCreatorName}
+                onSelectSource={handleSelectSource}
+                userSources={userSources}
+                user={user}
+              />
+            ))}
           </div>
-        </div>
-      )}
+        </Accordion>
 
-      {/* Bouton d'expansion pour mobile uniquement */}
-      <div className="mt-4 lg:hidden">
-        <button
-          className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-center"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {isExpanded ? 'Masquer les filtres' : 'Plus de filtres'}
-        </button>
+        {/* Articles sauvegardés */}
+        <SavedArticles />
+
+        {/* Indicateur de filtres actifs */}
+        {(filters.searchTerm || selectedCollection !== null) && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-600">Filtres actifs</span>
+              <button
+                onClick={() => {
+                  setSearchInput('');
+                  setSelectedCollection(null);
+                  setSelectedSource(null);
+                  setFilters({
+                    searchTerm: '',
+                    sources: userSources.map((s) => s._id),
+                    collection: null,
+                  });
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800"
+              >
+                Réinitialiser tout
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Bouton d'expansion pour mobile uniquement */}
+        <div className="mt-4 lg:hidden">
+          <button
+            className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-center"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? 'Masquer les filtres' : 'Plus de filtres'}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -101,27 +101,29 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Layout responsive avec sidebar à l'extrême gauche sur desktop */}
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col md:flex-row max-w-screen-2xl mx-auto">
         {/* Sidebar de filtres (à l'extrême gauche sur desktop) */}
-        <div className="w-full lg:w-80 lg:min-h-screen lg:border-r lg:border-gray-200 lg:sticky lg:top-0">
-          <div className="p-4">
+        <div className="w-full md:w-[280px] md:min-h-screen">
+          <div className="p-4 md:p-0">
             <Sidebar />
           </div>
         </div>
 
-        {/* Contenu principal (feed) occupant tout l'espace central */}
-        <div className="flex-1 p-3 sm:p-6 lg:max-w-none lg:px-8 xl:px-12">
-          <ArticleList />
-          {!loadingArticles && !hasMoreArticles && (
-            <div className="flex justify-center py-4">
-              <button
-                onClick={refreshArticles}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
-              >
-                Charger de nouveaux articles
-              </button>
-            </div>
-          )}
+        {/* Contenu principal (feed) avec largeur maximale pour améliorer la lisibilité sur grands écrans */}
+        <div className="flex-1 p-3 sm:p-6  md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] mx-auto">
+          <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
+            <ArticleList />
+            {!loadingArticles && !hasMoreArticles && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={refreshArticles}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
+                >
+                  Charger de nouveaux articles
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

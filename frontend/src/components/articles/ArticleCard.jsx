@@ -151,19 +151,35 @@ const ArticleCard = ({ article, onSave, onShare }) => {
           <div className={`flex flex-col p-3 ${article.image ? 'sm:w-2/3' : 'w-full'}`}>
             {/* En-tête avec auteur et langue */}
             <h3 className="text-base font-semibold line-clamp-2 mb-1">{article.title}</h3>
-            <div className="flex items-center justify-between mb-2">
+
+            {/* Source, auteur et date - Regroupés en ligne */}
+            <div className="flex items-center gap-2 mb-2 flex-wrap text-xs text-gray-600">
+              <button
+                onClick={handleSourceClick}
+                className="flex items-center space-x-1 hover:text-blue-600 transition-colors"
+              >
+                {article.sourceFavicon && (
+                  <img src={article.sourceFavicon} alt={article.sourceName} className="w-4 h-4" />
+                )}
+                <span className="font-medium">{article.sourceName}</span>
+              </button>
               {article.creator && (
-                <span className="text-xs text-gray-600">Par {article.creator}</span>
+                <>
+                  <span className="text-gray-400">•</span>
+                  <span>Par {article.creator}</span>
+                </>
               )}
+              <span className="text-gray-400">•</span>
+              <span>{formatRelativeTime(article.publishedAt)}</span>
             </div>
 
             {/* Extrait de l'article */}
             <p className="text-sm text-gray-600 line-clamp-3 mb-2">{article.contentSnippet}</p>
 
             {/* Métadonnées et actions */}
-            <div className="mt-auto">
+            <div className="mt-auto flex items-center justify-between">
               {/* Tags et orientation politique */}
-              <div className="flex flex-wrap gap-1 mb-2">
+              <div className="flex flex-wrap gap-1">
                 {/* Orientation politique avec couleur */}
                 {politicalOrientation && (
                   <span
@@ -187,44 +203,22 @@ const ArticleCard = ({ article, onSave, onShare }) => {
                 )}
               </div>
 
-              {/* Source et date */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleSourceClick}
-                    className="flex items-center space-x-2 hover:text-blue-600 transition-colors"
-                  >
-                    {article.sourceFavicon && (
-                      <img
-                        src={article.sourceFavicon}
-                        alt={article.sourceName}
-                        className="w-4 h-4"
-                      />
-                    )}
-                    <span className="text-xs font-medium">{article.sourceName}</span>
-                  </button>
-                  <span className="text-xs text-gray-500">
-                    {formatRelativeTime(article.publishedAt)}
-                  </span>
-                </div>
-
-                {/* Boutons d'action */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={handleSaveClick}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-                    aria-label={article.isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                  >
-                    <BookmarkIcon filled={article.isSaved} />
-                  </button>
-                  <button
-                    onClick={handleShareClick}
-                    className="p-1 hover:bg-gray-100 rounded-full"
-                    aria-label="Partager l'article"
-                  >
-                    <ShareIcon />
-                  </button>
-                </div>
+              {/* Boutons d'action */}
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleSaveClick}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  aria-label={article.isSaved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                >
+                  <BookmarkIcon filled={article.isSaved} />
+                </button>
+                <button
+                  onClick={handleShareClick}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  aria-label="Partager l'article"
+                >
+                  <ShareIcon />
+                </button>
               </div>
             </div>
           </div>
