@@ -134,10 +134,6 @@ const CollectionsList = ({ collections: externalCollections }) => {
     <div className="collections-list">
       {/* Mes collections personnelles */}
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-4 px-4">
-          <h2 className="text-lg font-semibold">Mes Collections</h2>
-        </div>
-
         <div className="divide-y divide-gray-200">
           {personalCollections.map((collection) => (
             <CollectionItem

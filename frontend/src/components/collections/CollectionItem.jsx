@@ -11,6 +11,7 @@ import {
   EditIcon,
   TrashIcon,
 } from './../common/icons';
+import CollectionDetailsModal from './CollectionDetailsModal';
 /**
  * Composant réutilisable pour afficher un élément de collection
  * Adapté pour les collections personnelles, publiques et suivies
@@ -28,6 +29,7 @@ const CollectionItem = ({
   const { user } = useContext(AuthContext);
   const [collection, setCollection] = useState(initialCollection);
   const { loadCollectionById, loading } = useCollections(user);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     console.log('la collection est', collection);
@@ -86,132 +88,155 @@ const CollectionItem = ({
     if (onShare) onShare(collection);
   };
 
-  return (
-    <div
-      className={`p-3 hover:bg-gray-50 cursor-pointer transition ${
-        isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-      }`}
-      onClick={() => onClick && onClick(collection)}
-    >
-      <div className="flex items-center space-x-3">
-        {/* Avatar de la collection */}
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
-          style={{
-            backgroundColor: !collection.imageUrl
-              ? collection.colorHex || generateColorFromId(collection._id)
-              : undefined,
-            backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          {!collection.imageUrl && (
-            <span className="text-white font-medium">
-              {collection.name.substring(0, 1).toUpperCase()}
-            </span>
-          )}
-        </div>
+  const handleViewClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetailsModal(true);
+  };
 
-        {/* Informations sur la collection */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center">
-            <p className="font-medium text-gray-900 truncate mr-2">{collection.name}</p>
-            {collection.isPublic ? (
-              <span className="inline-flex ml-1.5 items-center">
-                <GlobeIcon />
-              </span>
-            ) : (
-              <span className="inline-flex ml-1.5 items-center">
-                <LockIcon />
+  const handleCloseModal = () => {
+    setShowDetailsModal(false);
+  };
+
+  return (
+    <>
+      <div
+        className={`p-3 hover:bg-gray-50 cursor-pointer transition ${
+          isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+        }`}
+        onClick={() => onClick && onClick(collection)}
+      >
+        <div className="flex items-center space-x-3">
+          {/* Avatar de la collection */}
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
+            style={{
+              backgroundColor: !collection.imageUrl
+                ? collection.colorHex || generateColorFromId(collection._id)
+                : undefined,
+              backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {!collection.imageUrl && (
+              <span className="text-white font-medium">
+                {collection.name.substring(0, 1).toUpperCase()}
               </span>
             )}
-            <div className="flex flex-wrap gap-1">
-              {isFollowed && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
-                  Suivie
+          </div>
+
+          {/* Informations sur la collection */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center">
+              <p className="font-medium text-gray-900 truncate mr-2">{collection.name}</p>
+              {collection.isPublic ? (
+                <span className="inline-flex ml-1.5 items-center">
+                  <GlobeIcon />
+                </span>
+              ) : (
+                <span className="inline-flex ml-1.5 items-center">
+                  <LockIcon />
                 </span>
               )}
+              <div className="flex flex-wrap gap-1">
+                {isFollowed && (
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+                    Suivie
+                  </span>
+                )}
+                {collection.isPublic && (
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-800">
+                    Public
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Créateur et statistiques */}
+            <p className="text-xs text-gray-500">
+              {/* Afficher "Par vous" ou le nom du créateur */}
+              Par{' '}
+              {collection.userId === currentUserId
+                ? 'vous'
+                : collection.creator?.username || 'Utilisateur anonyme'}
+              {/* Nombre de sources */}
+              <span className="mx-1">•</span>
+              {collection.sources?.length || 0} source
+              {collection.sources?.length !== 1 ? 's' : ''}
+              {/* Nombre de suiveurs pour les collections publiques */}
               {collection.isPublic && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-800">
-                  Public
-                </span>
+                <>
+                  <span className="mx-1">•</span>
+                  {generateFollowersFromId(collection._id)} suiveurs
+                </>
+              )}
+            </p>
+
+            {/* Description (si elle existe) */}
+            {collection.description && (
+              <p className="text-xs text-gray-700 mt-1 truncate">{collection.description}</p>
+            )}
+          </div>
+
+          {/* Boutons d'action */}
+          {showActionButtons && (
+            <div className="flex space-x-1">
+              {/* Bouton Partager (uniquement pour les collections publiques) */}
+              {collection.isPublic && (
+                <button
+                  className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100"
+                  onClick={handleShareClick}
+                  title="Partager cette collection"
+                >
+                  <CollectionShareIcon />
+                </button>
+              )}
+
+              {/* Bouton Voir (pour toutes les collections) */}
+              <button
+                className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                onClick={handleViewClick}
+                title="Voir les détails de la collection"
+              >
+                <ViewIcon />
+              </button>
+
+              {/* Boutons Modifier et Supprimer (uniquement pour les collections de l'utilisateur) */}
+              {canModify && (
+                <>
+                  <Link
+                    to={`/collections/edit/${collection._id}`}
+                    className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <EditIcon />
+                  </Link>
+                  <button
+                    className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100"
+                    onClick={handleDeleteClick}
+                    title="Supprimer cette collection"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </>
               )}
             </div>
-          </div>
-
-          {/* Créateur et statistiques */}
-          <p className="text-xs text-gray-500">
-            {/* Afficher "Par vous" ou le nom du créateur */}
-            Par{' '}
-            {collection.userId === currentUserId
-              ? 'vous'
-              : collection.creator?.username || 'Utilisateur anonyme'}
-            {/* Nombre de sources */}
-            <span className="mx-1">•</span>
-            {collection.sources?.length || 0} source
-            {collection.sources?.length !== 1 ? 's' : ''}
-            {/* Nombre de suiveurs pour les collections publiques */}
-            {collection.isPublic && (
-              <>
-                <span className="mx-1">•</span>
-                {generateFollowersFromId(collection._id)} suiveurs
-              </>
-            )}
-          </p>
-
-          {/* Description (si elle existe) */}
-          {collection.description && (
-            <p className="text-xs text-gray-700 mt-1 truncate">{collection.description}</p>
           )}
         </div>
-
-        {/* Boutons d'action */}
-        {showActionButtons && (
-          <div className="flex space-x-1">
-            {/* Bouton Partager (uniquement pour les collections publiques) */}
-            {collection.isPublic && (
-              <button
-                className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100"
-                onClick={handleShareClick}
-                title="Partager cette collection"
-              >
-                <CollectionShareIcon />
-              </button>
-            )}
-
-            {/* Bouton Voir (pour toutes les collections) */}
-            <Link
-              to={`/collections/${collection._id}`}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ViewIcon />
-            </Link>
-
-            {/* Boutons Modifier et Supprimer (uniquement pour les collections de l'utilisateur) */}
-            {canModify && (
-              <>
-                <Link
-                  to={`/collections/edit/${collection._id}`}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <EditIcon />
-                </Link>
-                <button
-                  className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100"
-                  onClick={handleDeleteClick}
-                  title="Supprimer cette collection"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </>
-            )}
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Modal de détails de la collection */}
+      {showDetailsModal && (
+        <CollectionDetailsModal
+          collectionId={collection._id}
+          isOpen={showDetailsModal}
+          onClose={handleCloseModal}
+          externalCollection={collection}
+          standalone={true}
+        />
+      )}
+    </>
   );
 };
 
