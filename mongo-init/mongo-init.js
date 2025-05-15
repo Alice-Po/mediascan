@@ -892,7 +892,7 @@ db.collections.insertOne({
   name: 'Les 10 plus gros médias français',
   description:
     "Une collection regroupant les flux des principaux médias français d'information généraliste.",
-  imageUrl: '/images/collections/main-media.jpg',
+  imageUrl: '',
   colorHex: '#3f51b5',
   sources: mainMediaSources,
   userId: systemUser._id,
@@ -924,7 +924,7 @@ db.collections.insertOne({
   name: 'Veille Écologie',
   description:
     'Une collection de sources traitant des enjeux écologiques, climatiques et environnementaux.',
-  imageUrl: '/images/collections/ecology.jpg',
+  imageUrl: '',
   colorHex: '#4caf50',
   sources: ecologySources,
   userId: systemUser._id,
@@ -964,7 +964,7 @@ db.collections.insertOne({
   name: 'Veille Web',
   description:
     "Une collection regroupant des sources d'actualités technologiques, numériques et de développement web.",
-  imageUrl: '/images/collections/web-tech.jpg',
+  imageUrl: '',
   colorHex: '#ff9800',
   sources: webSources,
   userId: systemUser._id,

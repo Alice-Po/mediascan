@@ -6,6 +6,7 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
 import { CollectionShareIcon } from '../common/icons';
 import SourceCatalog from '../sources/SourceCatalog';
+import CollectionAvatar from './CollectionAvatar';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -111,25 +112,28 @@ const CollectionDetailComponent = ({
   return (
     <div className={`collection-details ${layoutType === 'compact' ? 'compact' : ''}`}>
       {/* En-tête de la collection */}
-      <div className="flex flex-col sm:flex-row sm:items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center ">
         <div className="flex items-center mb-4 sm:mb-0">
-          <div
-            className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden mr-4"
-            style={{
-              backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundColor: !collection.imageUrl ? collection.colorHex || '#6366F1' : undefined,
-            }}
-          >
-            {!collection.imageUrl && (
-              <span className="text-white text-xl font-bold">
-                {collection.name.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-          </div>
+          <CollectionAvatar collection={collection} />
           <div className="flex-1">
             <h1 className="text-xl font-bold">{collection.name}</h1>
+
+            {/* Badges de statut */}
+            {collection.isPublic ? (
+              <span className="inline px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                Public
+              </span>
+            ) : (
+              <span className="inline px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                Privé
+              </span>
+            )}
+            {isFollowing && !isUserOwner && (
+              <span className="inline px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                Suivie
+              </span>
+            )}
+
             <div className="flex flex-wrap items-center mt-1">
               <span className="text-sm text-gray-500">Par {creatorName}</span>
               <span className="mx-2">•</span>
@@ -147,137 +151,118 @@ const CollectionDetailComponent = ({
             </div>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-          {/* Bouton Voir les articles - n'apparaît pas pendant l'onboarding */}
-          {onBrowseArticles && !isOnboarding && (
-            <button
-              onClick={handleBrowseArticles}
-              className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
-            >
-              Voir les articles
-            </button>
-          )}
-
-          {/* Bouton Suivre/Suivi (si collection publique et non propriétaire) */}
-          {collection.isPublic && !isUserOwner && onFollowToggle && (
-            <button
-              className={`flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                isFollowing
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-              }`}
-              onClick={onFollowToggle}
-              disabled={followLoading}
-            >
-              {followLoading ? (
-                <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
-              ) : (
-                <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  {isFollowing ? (
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  ) : (
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  )}
-                </svg>
-              )}
-              {isFollowing ? 'Suivi' : 'Suivre'}
-            </button>
-          )}
-
-          {/* Bouton pour ajouter des sources (uniquement si propriétaire) */}
-          {isUserOwner && (
-            <button
-              onClick={() => setShowSourceCatalog(!showSourceCatalog)}
-              className="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium flex items-center"
-            >
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              {showSourceCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
-            </button>
-          )}
-
-          {/* Bouton Partager (si collection publique) */}
-          {collection.isPublic && (
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="px-3 py-1.5 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 flex items-center text-sm font-medium"
-            >
-              <CollectionShareIcon className="h-4 w-4 mr-1" />
-              Partager
-            </button>
-          )}
-
-          {/* Boutons d'édition et de suppression (si propriétaire) */}
-          {isUserOwner && (
-            <>
-              {onEdit ? (
-                <button
-                  onClick={handleEditClick}
-                  className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
-                >
-                  Modifier
-                </button>
-              ) : (
-                <Link
-                  to={`/collections/edit/${collection._id}`}
-                  className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
-                >
-                  Modifier
-                </Link>
-              )}
-              {onDelete && (
-                <button
-                  onClick={handleDeleteClick}
-                  className="px-3 py-1.5 border border-red-300 text-red-700 rounded-md hover:bg-red-50 text-sm font-medium"
-                >
-                  Supprimer
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Badges de statut */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {collection.isPublic ? (
-          <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-            Public
-          </span>
-        ) : (
-          <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-            Privé
-          </span>
-        )}
-        {isFollowing && !isUserOwner && (
-          <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
-            Suivie
-          </span>
-        )}
       </div>
 
       {/* Description */}
       {collection.description && (
         <div className="mb-6 p-4 bg-gray-50 rounded-md">
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">Description</h2>
           <p className="text-gray-700">{collection.description}</p>
         </div>
       )}
+
+      <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 mb-2">
+        {/* Bouton Voir les articles - n'apparaît pas pendant l'onboarding */}
+        {onBrowseArticles && !isOnboarding && (
+          <button
+            onClick={handleBrowseArticles}
+            className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
+          >
+            Voir les articles
+          </button>
+        )}
+
+        {/* Bouton Suivre/Suivi (si collection publique et non propriétaire) */}
+        {collection.isPublic && !isUserOwner && onFollowToggle && (
+          <button
+            className={`flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              isFollowing
+                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+            }`}
+            onClick={onFollowToggle}
+            disabled={followLoading}
+          >
+            {followLoading ? (
+              <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
+            ) : (
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                {isFollowing ? (
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                ) : (
+                  <path
+                    fillRule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                )}
+              </svg>
+            )}
+            {isFollowing ? 'Suivi' : 'Suivre'}
+          </button>
+        )}
+
+        {/* Bouton pour ajouter des sources (uniquement si propriétaire) */}
+        {isUserOwner && (
+          <button
+            onClick={() => setShowSourceCatalog(!showSourceCatalog)}
+            className="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium flex items-center"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            {showSourceCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
+          </button>
+        )}
+
+        {/* Bouton Partager (si collection publique) */}
+        {collection.isPublic && (
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="px-3 py-1.5 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 flex items-center text-sm font-medium"
+          >
+            <CollectionShareIcon className="h-4 w-4 mr-1" />
+            Partager
+          </button>
+        )}
+
+        {/* Boutons d'édition et de suppression (si propriétaire) */}
+        {isUserOwner && (
+          <>
+            {onEdit ? (
+              <button
+                onClick={handleEditClick}
+                className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+              >
+                Modifier
+              </button>
+            ) : (
+              <Link
+                to={`/collections/edit/${collection._id}`}
+                className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium"
+              >
+                Modifier
+              </Link>
+            )}
+            {onDelete && (
+              <button
+                onClick={handleDeleteClick}
+                className="px-3 py-1.5 border border-red-300 text-red-700 rounded-md hover:bg-red-50 text-sm font-medium"
+              >
+                Supprimer
+              </button>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Catalogue de sources (affiché uniquement si propriétaire et si showSourceCatalog est true) */}
       {isUserOwner && showSourceCatalog && (

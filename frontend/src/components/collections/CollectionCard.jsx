@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CollectionDetailsModal from './CollectionDetailsModal';
+import CollectionAvatar from './CollectionAvatar';
+import { generateFollowersFromId } from '../../utils/colorUtils';
 
 /**
  * Composant pour afficher une carte de collection publique
@@ -10,6 +12,8 @@ import CollectionDetailsModal from './CollectionDetailsModal';
  * @param {boolean} isLoading - État de chargement du suivi
  * @param {Function} onViewDetails - Fonction appelée pour voir les détails (si fournie, plutôt que d'ouvrir la modal)
  * @param {Function} onFollowToggle - Fonction appelée pour suivre/désabonner
+ * @param {number} followersCount - Nombre de suiveurs (optionnel, généré depuis l'ID si non fourni)
+ * @param {boolean} showFollowers - Indique si le nombre de suiveurs doit être affiché
  */
 const CollectionCard = ({
   collection,
@@ -17,6 +21,8 @@ const CollectionCard = ({
   isLoading = false,
   onViewDetails,
   onFollowToggle,
+  followersCount,
+  showFollowers = true,
 }) => {
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -39,27 +45,32 @@ const CollectionCard = ({
     setShowDetailsModal(false);
   };
 
+  // Calculer le nombre de suiveurs si non fourni
+  const followers =
+    followersCount !== undefined ? followersCount : generateFollowersFromId(collection._id);
+
   return (
     <>
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
         {/* En-tête de la carte avec avatar et infos de base */}
         <div className="flex items-center mb-3">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3"
-            style={{ backgroundColor: collection.colorHex || '#6366F1' }}
-          >
-            {collection.name.slice(0, 2).toUpperCase()}
-          </div>
-          <div className="flex-1">
-            <h4 className="font-bold text-gray-900 text-lg line-clamp-1" title={collection.name}>
+          <CollectionAvatar collection={collection} className="mr-0" />
+          <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-gray-900 text-lg break-words" title={collection.name}>
               {collection.name}
             </h4>
             <div className="flex flex-wrap items-center text-sm text-gray-600">
-              <span className="line-clamp-1">
+              <span className="truncate max-w-[150px]">
                 Par {collection.createdBy?.username || 'Utilisateur anonyme'}
               </span>
               <span className="mx-2">•</span>
               <span>{collection.sources?.length || 0} sources</span>
+              {showFollowers && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span>{followers} suiveurs</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -67,7 +78,7 @@ const CollectionCard = ({
         {/* Description (si disponible) */}
         {collection.description && (
           <div className="bg-white rounded-lg shadow-sm p-3 mb-3">
-            <p className="text-gray-700 text-sm italic line-clamp-2" title={collection.description}>
+            <p className="text-gray-700 text-sm italic" title={collection.description}>
               "{collection.description}"
             </p>
           </div>

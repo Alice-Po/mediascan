@@ -12,6 +12,7 @@ import {
   TrashIcon,
 } from './../common/icons';
 import CollectionDetailsModal from './CollectionDetailsModal';
+import CollectionAvatar from './CollectionAvatar';
 /**
  * Composant réutilisable pour afficher un élément de collection
  * Adapté pour les collections personnelles, publiques et suivies
@@ -156,23 +157,7 @@ const CollectionItem = ({
       >
         <div className="flex">
           {/* Avatar de la collection */}
-          <div
-            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden mr-3"
-            style={{
-              backgroundColor: !collection.imageUrl
-                ? collection.colorHex || generateColorFromId(collection._id)
-                : undefined,
-              backgroundImage: collection.imageUrl ? `url(${collection.imageUrl})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            {!collection.imageUrl && (
-              <span className="text-white font-medium">
-                {collection.name.substring(0, 1).toUpperCase()}
-              </span>
-            )}
-          </div>
+          <CollectionAvatar collection={collection} size="md" className="mr-3" />
 
           <div className="flex-1 min-w-0 overflow-hidden">
             {/* Première ligne: titre et badges */}

@@ -7,6 +7,7 @@ import {
 } from '../../../../api/collectionsApi';
 import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
 import { generateFollowersFromId } from '../../../../utils/colorUtils';
+import CollectionCard from '../../../../components/collections/CollectionCard';
 
 const PublicCollections = ({ onValidationChange }) => {
   const [publicCollections, setPublicCollections] = useState([]);
@@ -118,7 +119,7 @@ const PublicCollections = ({ onValidationChange }) => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" title="Public Collections">
       {/* En-tête avec animation */}
       <div className="text-center relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 sm:p-8 text-white shadow-lg">
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
@@ -130,14 +131,7 @@ const PublicCollections = ({ onValidationChange }) => {
             Créer des collections de sources d'information sur n'importe quel sujet, comme vous le
             feriez avec une playlist musicale et partager les.{' '}
           </p>
-          <div className="mt-4 flex justify-center space-x-2">
-            {/* <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
-              <span className="w-2 h-2 bg-green-400 rounded-full mr-1.5"></span>En développement
-            </span> */}
-            {/* <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
-              <span className="w-2 h-2 bg-yellow-400 rounded-full mr-1.5"></span>Finançable
-            </span> */}
-          </div>
+          <div className="mt-4 flex justify-center space-x-2"></div>
         </div>
 
         {/* Éléments décoratifs */}
@@ -199,74 +193,14 @@ const PublicCollections = ({ onValidationChange }) => {
         {!isLoading && !error && publicCollections.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {publicCollections.map((collection) => (
-              <div
+              <CollectionCard
                 key={collection._id}
-                className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="flex items-center mb-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3"
-                    style={{ backgroundColor: collection.colorHex || '#6366F1' }}
-                  >
-                    {collection.name.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-gray-900 text-lg">{collection.name}</h4>
-                    <div className="flex flex-wrap items-center text-sm text-gray-600">
-                      <span>Par {collection.createdBy?.username}</span>
-                      <span className="mx-2">•</span>
-                      <span>{collection.sources?.length || 0} sources</span>
-                      <span className="mx-2">•</span>
-                      <span>{generateFollowersFromId(collection._id)} suiveurs</span>
-                    </div>
-                  </div>
-                </div>
-
-                {collection.description && (
-                  <div className="bg-white rounded-lg shadow-sm p-3 mb-3">
-                    <p className="text-gray-700 text-sm italic">"{collection.description}"</p>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-3">
-                  <button
-                    className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors"
-                    onClick={() => handleViewDetails(collection)}
-                  >
-                    Voir les détails
-                  </button>
-                  <button
-                    className={`flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      followStatus[collection._id]
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                        : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-                    }`}
-                    onClick={() => handleFollowToggle(collection._id)}
-                    disabled={followLoading[collection._id]}
-                  >
-                    {followLoading[collection._id] ? (
-                      <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
-                    ) : (
-                      <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        {followStatus[collection._id] ? (
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        ) : (
-                          <path
-                            fillRule="evenodd"
-                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                            clipRule="evenodd"
-                          />
-                        )}
-                      </svg>
-                    )}
-                    {followStatus[collection._id] ? 'Suivi' : 'Suivre'}
-                  </button>
-                </div>
-              </div>
+                collection={collection}
+                isFollowed={followStatus[collection._id]}
+                isLoading={followLoading[collection._id]}
+                onFollowToggle={handleFollowToggle}
+                onViewDetails={handleViewDetails}
+              />
             ))}
           </div>
         )}
