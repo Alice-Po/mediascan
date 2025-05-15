@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { AuthContext } from '../../context/AuthContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import CollectionItem from './CollectionItem';
 import { useCollections } from '../../hooks/useCollections';
@@ -28,6 +29,7 @@ const CollectionsList = ({
 }) => {
   const { filterByCollection, filters } = useContext(AppContext);
   const { user } = useContext(AuthContext);
+  const { showSnackbar } = useSnackbar();
   const {
     collections: hookCollections,
     loadCollections,
@@ -114,6 +116,12 @@ const CollectionsList = ({
 
       setShowDeleteModal(false);
       setCollectionToDelete(null);
+
+      // Afficher la notification de succès après suppression confirmée
+      showSnackbar(
+        `Collection "${collectionToDelete.name}" supprimée avec succès`,
+        SNACKBAR_TYPES.SUCCESS
+      );
 
       if (onCollectionDeleted) {
         onCollectionDeleted(collectionToDelete);

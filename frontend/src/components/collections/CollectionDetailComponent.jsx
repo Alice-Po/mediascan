@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
@@ -29,6 +30,7 @@ const CollectionDetailComponent = ({
 }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
 
   // États pour la gestion des modales
   const [selectedSource, setSelectedSource] = useState(null);
@@ -69,6 +71,8 @@ const CollectionDetailComponent = ({
   const handleConfirmDelete = () => {
     if (onDelete) {
       onDelete();
+      // Afficher une notification de succès après la suppression
+      showSnackbar(`Collection "${collection.name}" supprimée avec succès`, SNACKBAR_TYPES.SUCCESS);
     }
     setShowDeleteModal(false);
   };

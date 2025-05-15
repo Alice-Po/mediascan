@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/common/Footer';
+import Snackbar from '../components/common/Snackbar';
 import FeatureList from '../components/features/FeatureList';
 import FAQ from '../components/common/FAQ';
 
@@ -219,6 +220,7 @@ const Funding = () => {
       </div>
 
       <Footer />
+      <Snackbar />
     </div>
   );
 };

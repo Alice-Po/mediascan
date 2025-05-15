@@ -628,7 +628,7 @@ const WhoWeAre = () => (
     </div>
 
     {/* Fondatrice section */}
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 md:p-8">
+    <div className="bg-gradient-to-r  rounded-xl p-6 md:p-8">
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         {/* Photo avec bordure arrondie */}
         <div className="flex-shrink-0 mb-4 md:mb-0">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
 import { AuthContext } from '../../context/AuthContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import {
   GlobeIcon,
   LockIcon,
@@ -45,6 +46,7 @@ const CollectionItem = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { showSnackbar } = useSnackbar();
   const [collection, setCollection] = useState(initialCollection);
   const { loadCollectionById, removeSourceFromCollection, loading } = useCollections(user);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -103,7 +105,10 @@ const CollectionItem = ({
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
-    if (onDelete) onDelete(collection);
+    if (onDelete) {
+      // Suppression de la notification, on se contente de passer la collection au parent
+      onDelete(collection);
+    }
   };
 
   const handleShareClick = (e) => {

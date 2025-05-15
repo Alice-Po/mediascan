@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useImperativeHandle, forwardRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import SourceCatalog from '../sources/SourceCatalog';
 import Modal from '../common/Modal';
 import {
@@ -25,6 +26,7 @@ const CollectionForm = forwardRef(
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
+    const { showSnackbar } = useSnackbar();
 
     const {
       collections,
@@ -182,6 +184,9 @@ const CollectionForm = forwardRef(
             // si votre API le permet
           }
 
+          // Afficher une notification de succès pour la mise à jour
+          showSnackbar('Collection mise à jour avec succès', SNACKBAR_TYPES.SUCCESS);
+
           if (onSuccess) {
             onSuccess(savedCollection);
           } else {
@@ -197,6 +202,9 @@ const CollectionForm = forwardRef(
             }
           }
 
+          // Afficher une notification de succès pour la création
+          showSnackbar('Collection créée avec succès', SNACKBAR_TYPES.SUCCESS);
+
           if (onSuccess) {
             onSuccess(savedCollection);
           } else {
@@ -210,6 +218,8 @@ const CollectionForm = forwardRef(
 
         setError(errorMsg);
         if (onError) onError(errorMsg);
+        // Afficher une notification d'erreur
+        showSnackbar(errorMsg, SNACKBAR_TYPES.ERROR);
         console.error(err);
       } finally {
         setLoading(false);
