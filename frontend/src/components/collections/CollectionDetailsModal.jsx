@@ -203,14 +203,13 @@ const CollectionDetailsModal = ({
     }
   };
 
-  // Gérer le clic sur "Voir les articles"
-  const handleBrowseArticles = () => {
+  // Créer une fonction pour filtrer par collection et fermer la modal
+  const handleFilterAndClose = () => {
     if (filterByCollection && !standalone) {
       filterByCollection(collectionId);
       navigate('/');
     } else {
-      // Alternative pour le mode standalone
-      window.location.href = `/?collection=${collectionId}`;
+      navigate(`/app?collection=${collectionId}`);
     }
     onClose();
   };
@@ -263,7 +262,7 @@ const CollectionDetailsModal = ({
                 onFollowToggle={handleFollowToggle}
                 onRemoveSource={handleRemoveSource}
                 onDelete={handleDelete}
-                onBrowseArticles={handleBrowseArticles}
+                onBrowseArticles={handleFilterAndClose}
                 withSourcesList={true}
                 isOnboarding={isOnboarding}
               />

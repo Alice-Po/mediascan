@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
-import { CollectionShareIcon } from '../common/icons';
+import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon } from '../common/icons';
 import SourceCatalog from '../sources/SourceCatalog';
 import CollectionAvatar from './CollectionAvatar';
 
@@ -185,21 +185,7 @@ const CollectionDetailComponent = ({
             {followLoading ? (
               <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
             ) : (
-              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                {isFollowing ? (
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                ) : (
-                  <path
-                    fillRule="evenodd"
-                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                )}
-              </svg>
+              <CheckIcon className="w-4 h-4 mr-1" />
             )}
             {isFollowing ? 'Suivi' : 'Suivre'}
           </button>
@@ -211,14 +197,7 @@ const CollectionDetailComponent = ({
             onClick={() => setShowSourceCatalog(!showSourceCatalog)}
             className="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium flex items-center"
           >
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
+            <AddSourceIcon className="w-4 h-4 mr-1.5" />
             {showSourceCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
           </button>
         )}
@@ -322,18 +301,7 @@ const CollectionDetailComponent = ({
                       className="ml-2 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100"
                       title="Retirer de la collection"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <XIcon className="h-5 w-5" />
                     </button>
                   )}
                 </div>
