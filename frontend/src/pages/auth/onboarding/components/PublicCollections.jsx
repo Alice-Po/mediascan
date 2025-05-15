@@ -8,6 +8,7 @@ import {
 import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
 import { generateFollowersFromId } from '../../../../utils/colorUtils';
 import CollectionCard from '../../../../components/collections/CollectionCard';
+import WarningBanner from '../../../../components/common/WarningBanner';
 
 const PublicCollections = ({ onValidationChange }) => {
   const [publicCollections, setPublicCollections] = useState([]);
@@ -119,7 +120,7 @@ const PublicCollections = ({ onValidationChange }) => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8" title="Public Collections">
+    <div className="space-y-6 sm:space-y-8" id="public-collections-container">
       {/* En-tête avec animation */}
       <div className="text-center relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 sm:p-8 text-white shadow-lg">
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
@@ -141,27 +142,7 @@ const PublicCollections = ({ onValidationChange }) => {
 
       {/* Message d'instruction si aucune collection n'est suivie */}
       {!isLoading && !hasFollowedCollections() && (
-        <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
-          <div className="flex items-start">
-            <svg
-              className="w-5 h-5 text-amber-500 mt-0.5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="text-sm text-amber-800">
-              Pour continuer, veuillez suivre au moins une collection publique. Cliquez sur le
-              bouton "Suivre" d'une collection qui vous intéresse.
-            </p>
-          </div>
-        </div>
+        <WarningBanner message='Pour continuer, veuillez suivre au moins une collection publique. Cliquez sur le bouton "Suivre" d&apos;une collection qui vous intéresse.' />
       )}
 
       {/* Collections populaires disponibles */}
@@ -200,6 +181,7 @@ const PublicCollections = ({ onValidationChange }) => {
                 isLoading={followLoading[collection._id]}
                 onFollowToggle={handleFollowToggle}
                 onViewDetails={handleViewDetails}
+                showFull={true}
               />
             ))}
           </div>

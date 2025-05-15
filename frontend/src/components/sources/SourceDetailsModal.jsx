@@ -58,13 +58,15 @@ const SourceDetailsModal = ({ isOpen, onClose, source }) => {
 
         {/* Contenu */}
         <div className="px-8 py-6 space-y-6">
-          {/* Orientation  */}
-          {source.orientation && (
+          {/* Orientations */}
+          {source.orientations && source.orientations.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Orientation </h3>
-              {source.orientation.map((orientation) => (
-                <Badge text={orientation} />
-              ))}
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Orientation</h3>
+              <div className="flex flex-wrap gap-2">
+                {source.orientations.map((orientation, index) => (
+                  <Badge key={`${orientation}-${index}`} text={orientation} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -90,6 +92,8 @@ const SourceDetailsModal = ({ isOpen, onClose, source }) => {
                     ? 'Associatif'
                     : source.funding.type === 'independent'
                     ? 'Indépendant'
+                    : source.funding.type === 'non-profit'
+                    ? 'Association'
                     : source.funding.type}
                 </span>
                 <p className="text-sm text-gray-600">{source.funding.details}</p>

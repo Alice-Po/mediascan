@@ -14,6 +14,7 @@ import { generateFollowersFromId } from '../../utils/colorUtils';
  * @param {Function} onFollowToggle - Fonction appelée pour suivre/désabonner
  * @param {number} followersCount - Nombre de suiveurs (optionnel, généré depuis l'ID si non fourni)
  * @param {boolean} showFollowers - Indique si le nombre de suiveurs doit être affiché
+ * @param {boolean} showFull - Affiche le texte complet (titre et description) sans troncature
  */
 const CollectionCard = ({
   collection,
@@ -23,6 +24,7 @@ const CollectionCard = ({
   onFollowToggle,
   followersCount,
   showFollowers = true,
+  showFull = false,
 }) => {
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -49,18 +51,22 @@ const CollectionCard = ({
   const followers =
     followersCount !== undefined ? followersCount : generateFollowersFromId(collection._id);
 
+  // Classes pour le titre et la description selon la propriété showFull
+  const titleClass = `font-bold text-gray-900 text-lg ${showFull ? 'break-words' : 'truncate'}`;
+  const descriptionClass = `text-gray-700 text-sm italic ${showFull ? '' : 'truncate'}`;
+
   return (
     <>
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
         {/* En-tête de la carte avec avatar et infos de base */}
         <div className="flex items-center mb-3">
-          <CollectionAvatar collection={collection} className="mr-0" />
+          <CollectionAvatar collection={collection} className="mr-3" />
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-gray-900 text-lg break-words" title={collection.name}>
+            <h4 className={titleClass} title={collection.name}>
               {collection.name}
             </h4>
             <div className="flex flex-wrap items-center text-sm text-gray-600">
-              <span className="truncate max-w-[150px]">
+              <span className={showFull ? '' : 'truncate max-w-[150px]'}>
                 Par {collection.createdBy?.username || 'Utilisateur anonyme'}
               </span>
               <span className="mx-2">•</span>
@@ -78,7 +84,7 @@ const CollectionCard = ({
         {/* Description (si disponible) */}
         {collection.description && (
           <div className="bg-white rounded-lg shadow-sm p-3 mb-3">
-            <p className="text-gray-700 text-sm italic" title={collection.description}>
+            <p className={descriptionClass} title={collection.description}>
               "{collection.description}"
             </p>
           </div>
