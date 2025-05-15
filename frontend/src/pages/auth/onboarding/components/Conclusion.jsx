@@ -7,7 +7,7 @@ const Conclusion = ({ onValidationChange }) => {
     if (onValidationChange) {
       onValidationChange(true);
     }
-  }, [onValidationChange]);
+  }, []);
 
   return (
     <div className="space-y-6">

@@ -6,7 +6,7 @@ const Step1Introduction = ({ onValidationChange }) => {
     if (onValidationChange) {
       onValidationChange(true);
     }
-  }, [onValidationChange]);
+  }, []); // Tableau de dépendances vide pour n'exécuter qu'une seule fois
 
   return (
     <div className="space-y-6 sm:space-y-8">

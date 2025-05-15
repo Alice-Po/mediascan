@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   fetchPublicCollections,
   followCollection,
@@ -16,21 +16,28 @@ const PublicCollections = ({ onValidationChange }) => {
   const [followLoading, setFollowLoading] = useState({});
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const lastValidationValue = useRef(false);
 
   // Nombre minimum de sources requises pour afficher une collection
   const MIN_SOURCES_REQUIRED = 5;
 
   // Vérifier si l'étape est valide (au moins une collection suivie)
-  const hasFollowedCollections = () => {
+  const hasFollowedCollections = useCallback(() => {
     return Object.values(followStatus).some((status) => status === true);
-  };
+  }, [followStatus]);
 
+  // Informer le composant parent quand le statut de validation change
   useEffect(() => {
-    // Informer le composant parent du changement de validation
     if (onValidationChange) {
-      onValidationChange(hasFollowedCollections());
+      const isCurrentlyValid = hasFollowedCollections();
+
+      // Seulement mettre à jour si la valeur a changé
+      if (isCurrentlyValid !== lastValidationValue.current) {
+        lastValidationValue.current = isCurrentlyValid;
+        onValidationChange(isCurrentlyValid);
+      }
     }
-  }, [followStatus, onValidationChange]);
+  }, [onValidationChange, hasFollowedCollections]);
 
   useEffect(() => {
     const loadPublicCollections = async () => {

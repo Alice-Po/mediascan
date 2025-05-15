@@ -10,7 +10,7 @@ import CreateCollection from './components/CreateCollection';
 import AddSourcesToCollection from './components/AddSourcesToCollection';
 import UpcomingFeatures from './components/UpcomingFeatures';
 import Conclusion from './components/Conclusion';
-
+import { useCallback } from 'react';
 const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -37,12 +37,12 @@ const Onboarding = () => {
   };
 
   // Mettre à jour l'état de validation d'une étape
-  const handleStepValidation = (stepNumber, isValid) => {
+  const handleStepValidation = useCallback((stepNumber, isValid) => {
     setStepValidation((prev) => ({
       ...prev,
       [stepNumber]: isValid,
     }));
-  };
+  }, []);
 
   // Rediriger si l'onboarding est déjà complété
   useEffect(() => {
