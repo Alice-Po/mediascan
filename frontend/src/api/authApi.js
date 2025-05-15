@@ -109,3 +109,32 @@ export const deleteAccount = async () => {
     throw error;
   }
 };
+
+/**
+ * Récupération de la collection par défaut de l'utilisateur
+ * @returns {Promise} Collection par défaut de l'utilisateur
+ */
+export const getDefaultCollection = async () => {
+  try {
+    const response = await api.get('/auth/default-collection');
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la collection par défaut:', error);
+    throw error;
+  }
+};
+
+/**
+ * Mise à jour de la collection par défaut de l'utilisateur
+ * @param {string} collectionId - ID de la nouvelle collection par défaut
+ * @returns {Promise} Données utilisateur mises à jour
+ */
+export const updateDefaultCollection = async (collectionId) => {
+  try {
+    const response = await api.put('/auth/default-collection', { collectionId });
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la collection par défaut:', error);
+    throw error;
+  }
+};

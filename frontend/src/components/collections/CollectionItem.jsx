@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
 import { AuthContext } from '../../context/AuthContext';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import {
   GlobeIcon,
@@ -11,6 +12,7 @@ import {
   ViewIcon,
   EditIcon,
   TrashIcon,
+  StarIcon,
 } from './../common/icons';
 import CollectionDetailsModal from './CollectionDetailsModal';
 import CollectionAvatar from './CollectionAvatar';
@@ -46,6 +48,7 @@ const CollectionItem = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { isDefaultCollection, setAsDefault } = useDefaultCollection();
   const { showSnackbar } = useSnackbar();
   const [collection, setCollection] = useState(initialCollection);
   const { loadCollectionById, removeSourceFromCollection, loading } = useCollections(user);
@@ -173,6 +176,34 @@ const CollectionItem = ({
     }
   };
 
+  // Gérer le clic sur l'étoile pour définir comme collection par défaut
+  const handleSetAsDefault = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!collection) return;
+
+    // Permettre la définition comme collection par défaut pour les collections suivies aussi
+    const canSetAsDefault = canModify || isFollowed;
+
+    if (!canSetAsDefault) return;
+
+    try {
+      const success = await setAsDefault(collection._id);
+      if (success) {
+        showSnackbar(
+          `"${collection.name}" définie comme collection par défaut`,
+          SNACKBAR_TYPES.SUCCESS
+        );
+      } else {
+        showSnackbar('Impossible de définir la collection par défaut', SNACKBAR_TYPES.ERROR);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la définition de la collection par défaut:', error);
+      showSnackbar('Une erreur est survenue', SNACKBAR_TYPES.ERROR);
+    }
+  };
+
   return (
     <>
       <div
@@ -192,10 +223,56 @@ const CollectionItem = ({
               {collection.isPublic ? (
                 <span className="inline-flex items-center">
                   <GlobeIcon />
+                  {(canModify || isFollowed) && (
+                    <span
+                      onClick={handleSetAsDefault}
+                      className={`cursor-pointer ml-1 ${
+                        isDefaultCollection(collection._id)
+                          ? 'text-yellow-500'
+                          : 'text-gray-300 hover:text-yellow-500'
+                      }`}
+                      title={
+                        isDefaultCollection(collection._id)
+                          ? 'Collection par défaut'
+                          : 'Définir comme collection par défaut'
+                      }
+                    >
+                      <StarIcon className="h-3 w-3" filled={isDefaultCollection(collection._id)} />
+                    </span>
+                  )}
+                  {!(canModify || isFollowed) && isDefaultCollection(collection._id) && (
+                    <StarIcon
+                      className="h-3 w-3 ml-1 text-yellow-500"
+                      title="Collection par défaut"
+                    />
+                  )}
                 </span>
               ) : (
                 <span className="inline-flex items-center">
                   <LockIcon />
+                  {(canModify || isFollowed) && (
+                    <span
+                      onClick={handleSetAsDefault}
+                      className={`cursor-pointer ml-1 ${
+                        isDefaultCollection(collection._id)
+                          ? 'text-yellow-500'
+                          : 'text-gray-300 hover:text-yellow-500'
+                      }`}
+                      title={
+                        isDefaultCollection(collection._id)
+                          ? 'Collection par défaut'
+                          : 'Définir comme collection par défaut'
+                      }
+                    >
+                      <StarIcon className="h-3 w-3" filled={isDefaultCollection(collection._id)} />
+                    </span>
+                  )}
+                  {!(canModify || isFollowed) && isDefaultCollection(collection._id) && (
+                    <StarIcon
+                      className="h-3 w-3 ml-1 text-yellow-500"
+                      title="Collection par défaut"
+                    />
+                  )}
                 </span>
               )}
               <div className="flex flex-wrap gap-1 ml-1">
@@ -207,6 +284,11 @@ const CollectionItem = ({
                 {collection.isPublic && (
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-800">
                     Public
+                  </span>
+                )}
+                {isDefaultCollection(collection._id) && (
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+                    Par défaut
                   </span>
                 )}
               </div>

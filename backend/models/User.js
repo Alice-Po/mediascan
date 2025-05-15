@@ -20,6 +20,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    defaultCollection: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Collection',
+      description: "Collection par défaut de l'utilisateur ('Mes sources')",
+    },
     collections: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -92,6 +97,44 @@ UserSchema.pre('save', async function (next) {
 // Méthode: Vérification du mot de passe
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Méthode: Récupération de la collection par défaut
+UserSchema.methods.getDefaultCollection = async function () {
+  const Collection = mongoose.model('Collection');
+
+  // Si l'utilisateur a déjà une collection par défaut définie
+  if (this.defaultCollection) {
+    return await Collection.findById(this.defaultCollection);
+  }
+
+  // Sinon, trouver la première collection de l'utilisateur nommée "Mes sources"
+  const defaultCollection = await Collection.findOne({
+    userId: this._id,
+    name: 'Mes sources',
+  });
+
+  // Si trouvée, définir cette collection comme collection par défaut
+  if (defaultCollection) {
+    this.defaultCollection = defaultCollection._id;
+    await this.save();
+    return defaultCollection;
+  }
+
+  // Si aucune collection par défaut n'est trouvée, en créer une nouvelle
+  const newDefaultCollection = await Collection.create({
+    name: 'Mes sources',
+    description: 'Collection par défaut pour vos sources',
+    userId: this._id,
+    sources: [],
+    colorHex: '#3B82F6',
+  });
+
+  this.defaultCollection = newDefaultCollection._id;
+  this.collections.push(newDefaultCollection._id);
+  await this.save();
+
+  return newDefaultCollection;
 };
 
 export default mongoose.model('User', UserSchema);

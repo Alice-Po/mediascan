@@ -28,7 +28,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Créer l'utilisateur
+    // Créer l'utilisateur sans sauvegarder immédiatement
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = new User({
       email,
@@ -38,28 +38,16 @@ export const register = async (req, res) => {
       verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    // Sauvegarder l'utilisateur
-    await user.save();
-    console.log('Utilisateur créé:', {
-      id: user._id,
-      token: verificationToken,
-      expiration: user.verificationTokenExpires,
-    });
-
     // Créer une collection par défaut "Mes sources" pour le nouvel utilisateur
+    let defaultCollection;
     try {
       const Collection = mongoose.model('Collection');
-      const defaultCollection = await Collection.create({
+      defaultCollection = await Collection.create({
         name: 'Mes sources',
         description: 'Collection par défaut pour vos sources',
         userId: user._id,
         sources: [],
         colorHex: '#3B82F6', // Bleu par défaut
-      });
-
-      // Ajouter la collection à l'utilisateur
-      await User.findByIdAndUpdate(user._id, {
-        $addToSet: { collections: defaultCollection._id },
       });
 
       console.log('Collection par défaut créée:', {
@@ -68,8 +56,24 @@ export const register = async (req, res) => {
       });
     } catch (collectionError) {
       console.error('Erreur lors de la création de la collection par défaut:', collectionError);
-      // On continue malgré l'erreur pour ne pas bloquer l'inscription
+      return res.status(500).json({
+        message: "Erreur lors de la création de la collection par défaut. L'inscription a échoué.",
+        error: collectionError.message,
+      });
     }
+
+    // Associer la collection par défaut à l'utilisateur
+    user.defaultCollection = defaultCollection._id;
+    user.collections = [defaultCollection._id];
+
+    // Sauvegarder l'utilisateur avec sa collection par défaut
+    await user.save();
+    console.log('Utilisateur créé:', {
+      id: user._id,
+      token: verificationToken,
+      expiration: user.verificationTokenExpires,
+      defaultCollection: user.defaultCollection,
+    });
 
     try {
       // Envoyer l'email de vérification
@@ -259,6 +263,116 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la mise à jour du profil',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Mise à jour de la collection par défaut de l'utilisateur
+// @route   PUT /api/auth/default-collection
+// @access  Private
+export const updateDefaultCollection = async (req, res) => {
+  try {
+    const { collectionId } = req.body;
+
+    if (!collectionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de collection non fourni',
+      });
+    }
+
+    // Vérifier que l'ID est un ObjectId MongoDB valide
+    if (!mongoose.Types.ObjectId.isValid(collectionId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de collection invalide',
+      });
+    }
+
+    // Vérifier que la collection existe
+    const Collection = mongoose.model('Collection');
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        message: 'Collection non trouvée',
+      });
+    }
+
+    // Vérifier que l'utilisateur a accès à cette collection
+    // (soit il en est le propriétaire, soit il la suit)
+    const isOwner = collection.userId.toString() === req.user._id.toString();
+    const isFollowing = req.user.followedCollections.includes(collectionId);
+
+    if (!isOwner && !isFollowing) {
+      return res.status(403).json({
+        success: false,
+        message: "Vous n'avez pas le droit d'utiliser cette collection comme collection par défaut",
+      });
+    }
+
+    // Mettre à jour la collection par défaut
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { defaultCollection: collectionId },
+      { new: true }
+    ).select('-password');
+
+    // Si l'utilisateur est propriétaire, s'assurer que la collection est dans ses collections
+    if (isOwner && !updatedUser.collections.includes(collectionId)) {
+      await User.findByIdAndUpdate(req.user._id, { $addToSet: { collections: collectionId } });
+    }
+
+    // Si l'utilisateur suit la collection, s'assurer qu'elle est dans ses collections suivies
+    if (!isOwner && !updatedUser.followedCollections.includes(collectionId)) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { followedCollections: collectionId },
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Collection par défaut mise à jour avec succès',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la collection par défaut:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la mise à jour de la collection par défaut',
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Récupération de la collection par défaut de l'utilisateur
+// @route   GET /api/auth/default-collection
+// @access  Private
+export const getDefaultCollection = async (req, res) => {
+  try {
+    // Utiliser la méthode du modèle User pour récupérer la collection par défaut
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé',
+      });
+    }
+
+    const defaultCollection = await user.getDefaultCollection();
+
+    res.status(200).json({
+      success: true,
+      defaultCollection,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la collection par défaut:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération de la collection par défaut',
       error: error.message,
     });
   }

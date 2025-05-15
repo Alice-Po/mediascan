@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
-import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon } from '../common/icons';
+import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '../common/icons';
 import SourceCatalog from '../sources/SourceCatalog';
 import CollectionAvatar from './CollectionAvatar';
 
@@ -29,6 +30,7 @@ const CollectionDetailComponent = ({
   isOnboarding = false, // Nouvelle prop pour indiquer le contexte d'onboarding
 }) => {
   const { user } = useContext(AuthContext);
+  const { isDefaultCollection } = useDefaultCollection();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
 
@@ -38,8 +40,11 @@ const CollectionDetailComponent = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSourceCatalog, setShowSourceCatalog] = useState(false);
+  const [defaultSettingLoading] = useState(false);
 
   const isUserOwner = collection.createdBy && user._id && collection.createdBy._id === user._id;
+  const isDefault = isDefaultCollection(collection._id);
+  const canSetAsDefault = isUserOwner || isFollowing;
 
   // Gestion des actions
   const handleSourceClick = (source) => {
@@ -133,8 +138,13 @@ const CollectionDetailComponent = ({
               </span>
             )}
             {isFollowing && !isUserOwner && (
-              <span className="inline px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+              <span className="inline px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full ml-1">
                 Suivie
+              </span>
+            )}
+            {isDefault && (
+              <span className="inline px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full ml-1">
+                Par défaut
               </span>
             )}
 

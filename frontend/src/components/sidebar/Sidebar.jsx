@@ -1,8 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AuthContext } from '../../context/AuthContext';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import Badge from '../common/Badge';
 import { GlobeIcon, LockIcon, SidebarToggleIcon, CloseIcon } from '../common/icons';
 import FilterCollectionItem from './FilterCollectionItem';
@@ -45,6 +46,7 @@ const Sidebar = () => {
     toggleSidebar,
   } = useContext(AppContext);
   const { user } = useContext(AuthContext);
+  const { defaultCollection, isDefaultCollection } = useDefaultCollection();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -103,39 +105,66 @@ const Sidebar = () => {
   };
 
   // Handler pour sélectionner une collection
-  const handleSelectCollection = (collectionId) => {
-    // Si la collection était déjà sélectionnée, la désélectionner (tous les articles)
-    if (selectedCollection === collectionId) {
-      setSelectedCollection(null);
-      setSelectedSource(null);
-      setFilters((prev) => ({
-        ...prev,
-        collection: null,
-        sources: userSources.map((s) => s._id), // Sélectionner toutes les sources
-      }));
+  const handleSelectCollection = useCallback(
+    (collectionId) => {
+      // Si la collection était déjà sélectionnée, vérifier si c'est la collection par défaut
+      if (selectedCollection === collectionId) {
+        // Si c'est la collection par défaut, ne pas la désélectionner
+        if (defaultCollection && collectionId === defaultCollection._id) {
+          return; // Ne rien faire, garder la collection par défaut sélectionnée
+        }
 
-      // Mettre à jour l'URL pour supprimer le paramètre collection
-      navigate('/app');
-    } else {
-      // Sélectionner la nouvelle collection
-      setSelectedCollection(collectionId);
-      setSelectedSource(null);
+        setSelectedCollection(null);
+        setSelectedSource(null);
+        setFilters((prev) => ({
+          ...prev,
+          collection: null,
+          sources: userSources.map((s) => s._id), // Sélectionner toutes les sources
+        }));
 
-      // Trouver toutes les sources de cette collection
-      const collection = collections.find((c) => c._id === collectionId);
-      const collectionSources = collection ? (collection.sources || []).map((s) => s._id || s) : [];
+        // Mettre à jour l'URL pour supprimer le paramètre collection
+        navigate('/app');
+      } else {
+        // Sélectionner la nouvelle collection
+        setSelectedCollection(collectionId);
+        setSelectedSource(null);
 
-      // Mettre à jour les filtres
-      setFilters((prev) => ({
-        ...prev,
-        collection: collectionId,
-        sources: collectionSources,
-      }));
+        // Trouver toutes les sources de cette collection
+        const collection = collections.find((c) => c._id === collectionId);
+        const collectionSources = collection
+          ? (collection.sources || []).map((s) => s._id || s)
+          : [];
 
-      // Mettre à jour l'URL avec le paramètre collection
-      navigate(`/app?collection=${collectionId}`);
+        // Mettre à jour les filtres
+        setFilters((prev) => ({
+          ...prev,
+          collection: collectionId,
+          sources: collectionSources,
+        }));
+
+        // Mettre à jour l'URL avec le paramètre collection
+        navigate(`/app?collection=${collectionId}`);
+      }
+    },
+    [
+      selectedCollection,
+      defaultCollection,
+      setSelectedSource,
+      setFilters,
+      userSources,
+      navigate,
+      collections,
+    ]
+  );
+
+  // Effet pour sélectionner la collection par défaut si aucune collection n'est sélectionnée
+  useEffect(() => {
+    // Si aucune collection n'est sélectionnée et que le defaultCollection est chargé
+    if (!selectedCollection && defaultCollection && collections.length > 0) {
+      // Sélectionner la collection par défaut
+      handleSelectCollection(defaultCollection._id);
     }
-  };
+  }, [collections, defaultCollection, selectedCollection, handleSelectCollection]);
 
   // Handler pour sélectionner une source spécifique dans une collection
   const handleSelectSource = (sourceId) => {
@@ -213,6 +242,17 @@ const Sidebar = () => {
     isSidebarCollapsed ? 'w-[60px]' : 'w-[320px]'
   } md:fixed md:top-[110px] md:bottom-0 md:left-0 md:overflow-y-auto md:pb-20 md:border-r md:border-gray-200 bg-white transition-all duration-300 ease-in-out relative`;
 
+  // Trier les collections pour que la collection par défaut soit toujours en premier
+  const sortedCollections = useMemo(() => {
+    if (!defaultCollection || !collections.length) return collections;
+
+    return [...collections].sort((a, b) => {
+      if (a._id === defaultCollection._id) return -1;
+      if (b._id === defaultCollection._id) return 1;
+      return 0;
+    });
+  }, [collections, defaultCollection]);
+
   return (
     <>
       {/* Overlay pour la version mobile */}
@@ -248,7 +288,7 @@ const Sidebar = () => {
           <Accordion title="Collections" defaultOpen={true}>
             <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
               {/* Afficher les collections */}
-              {collections.map((collection) => (
+              {sortedCollections.map((collection) => (
                 <FilterCollectionItem
                   key={collection._id}
                   collection={collection}
@@ -277,13 +317,31 @@ const Sidebar = () => {
                 <button
                   onClick={() => {
                     setSearchInput('');
-                    setSelectedCollection(null);
-                    setSelectedSource(null);
-                    setFilters({
-                      searchTerm: '',
-                      sources: userSources.map((s) => s._id),
-                      collection: null,
-                    });
+                    // Si une collection par défaut existe, la sélectionner
+                    if (defaultCollection) {
+                      setSelectedCollection(defaultCollection._id);
+                      setSelectedSource(null);
+                      setFilters({
+                        searchTerm: '',
+                        sources:
+                          defaultCollection.sources?.map((s) =>
+                            typeof s === 'string' ? s : s._id
+                          ) || [],
+                        collection: defaultCollection._id,
+                      });
+                      // Mettre à jour l'URL
+                      navigate(`/app?collection=${defaultCollection._id}`);
+                    } else {
+                      // Sinon, réinitialiser complètement
+                      setSelectedCollection(null);
+                      setSelectedSource(null);
+                      setFilters({
+                        searchTerm: '',
+                        sources: userSources.map((s) => s._id),
+                        collection: null,
+                      });
+                      navigate('/app');
+                    }
                   }}
                   className="text-xs text-blue-600 hover:text-blue-800"
                 >
@@ -321,7 +379,7 @@ const Sidebar = () => {
               <Accordion title="Collections" defaultOpen={true}>
                 <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
                   {/* Afficher les collections */}
-                  {collections.map((collection) => (
+                  {sortedCollections.map((collection) => (
                     <FilterCollectionItem
                       key={collection._id}
                       collection={collection}
@@ -350,13 +408,31 @@ const Sidebar = () => {
                     <button
                       onClick={() => {
                         setSearchInput('');
-                        setSelectedCollection(null);
-                        setSelectedSource(null);
-                        setFilters({
-                          searchTerm: '',
-                          sources: userSources.map((s) => s._id),
-                          collection: null,
-                        });
+                        // Si une collection par défaut existe, la sélectionner
+                        if (defaultCollection) {
+                          setSelectedCollection(defaultCollection._id);
+                          setSelectedSource(null);
+                          setFilters({
+                            searchTerm: '',
+                            sources:
+                              defaultCollection.sources?.map((s) =>
+                                typeof s === 'string' ? s : s._id
+                              ) || [],
+                            collection: defaultCollection._id,
+                          });
+                          // Mettre à jour l'URL
+                          navigate(`/app?collection=${defaultCollection._id}`);
+                        } else {
+                          // Sinon, réinitialiser complètement
+                          setSelectedCollection(null);
+                          setSelectedSource(null);
+                          setFilters({
+                            searchTerm: '',
+                            sources: userSources.map((s) => s._id),
+                            collection: null,
+                          });
+                          navigate('/app');
+                        }
                       }}
                       className="text-xs text-blue-600 hover:text-blue-800"
                     >

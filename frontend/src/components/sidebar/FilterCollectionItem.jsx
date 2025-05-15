@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
-import { GlobeIcon, LockIcon } from '../common/icons';
+import { GlobeIcon, LockIcon, StarIcon } from '../common/icons';
 import { AppContext } from '../../context/AppContext';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 
 /**
  * Composant pour une collection dépliable avec ses sources dans le filtre
@@ -18,8 +19,10 @@ const FilterCollectionItem = ({
   user,
 }) => {
   const { toggleSidebar } = useContext(AppContext);
+  const { isDefaultCollection } = useDefaultCollection();
   const isExpanded = expandedCollections.includes(collection._id);
   const isMobile = window.innerWidth < 768;
+  const isDefault = isDefaultCollection(collection._id);
 
   // S'assurer que collection.sources est un tableau
   const sources = collection.sources || [];
@@ -52,7 +55,11 @@ const FilterCollectionItem = ({
     <div className="mb-1">
       <div
         className={`flex items-center py-1.5 px-1 rounded cursor-pointer ${
-          isSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
+          isSelected
+            ? 'bg-blue-100 hover:bg-blue-50'
+            : isDefault
+            ? 'bg-yellow-50 hover:bg-yellow-100'
+            : 'hover:bg-gray-50'
         }`}
         onClick={() => toggleCollection(collection._id)}
       >
@@ -89,6 +96,11 @@ const FilterCollectionItem = ({
               ) : (
                 <span className="inline-flex ml-1.5 items-center">
                   <LockIcon />
+                </span>
+              )}
+              {isDefault && (
+                <span className="inline-flex ml-1.5 items-center">
+                  <StarIcon className="h-3.5 w-3.5 text-yellow-500" />
                 </span>
               )}
             </span>

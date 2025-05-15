@@ -40,6 +40,8 @@ const CollectionsList = ({
 
   // Utiliser les collections externes si fournies, sinon celles du hook
   const [collections, setCollections] = useState([]);
+  // Nouvel état pour suivre les IDs des collections supprimées
+  const [deletedCollectionIds, setDeletedCollectionIds] = useState([]);
 
   useEffect(() => {
     setCollections(externalCollections || hookCollections);
@@ -52,8 +54,13 @@ const CollectionsList = ({
   const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   // Séparer les collections personnelles et les collections suivies
-  const personalCollections = collections.filter((collection) => !collection.isFollowed);
-  const followedCollections = collections.filter((collection) => collection.isFollowed);
+  // en filtrant également les collections supprimées
+  const personalCollections = collections.filter(
+    (collection) => !collection.isFollowed && !deletedCollectionIds.includes(collection._id)
+  );
+  const followedCollections = collections.filter(
+    (collection) => collection.isFollowed && !deletedCollectionIds.includes(collection._id)
+  );
 
   // Rafraîchir les collections au montage et périodiquement
   useEffect(() => {
@@ -109,10 +116,16 @@ const CollectionsList = ({
     try {
       await deleteCollection(collectionToDelete._id);
 
+      // Ajouter l'ID de la collection à la liste des collections supprimées
+      setDeletedCollectionIds((prev) => [...prev, collectionToDelete._id]);
+
       // Mettre à jour l'état local après suppression réussie
       setCollections((prevCollections) =>
         prevCollections.filter((collection) => collection._id !== collectionToDelete._id)
       );
+
+      // Forcer un rafraîchissement des collections depuis la source
+      loadCollections();
 
       setShowDeleteModal(false);
       setCollectionToDelete(null);
