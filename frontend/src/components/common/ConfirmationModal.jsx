@@ -34,7 +34,6 @@ const ConfirmationModal = ({
         <h3 className="text-xl font-bold mb-4">{title}</h3>
         <p className="mb-6">
           {message} {itemName && <span className="font-semibold">{itemName}</span>}
-          {message.endsWith('?') ? '' : '?'} Cette action est irréversible.
         </p>
         <div className="flex justify-end space-x-3">
           <button

@@ -357,8 +357,7 @@ const CollectionDetailComponent = ({
         onClose={() => setShowShareModal(false)}
         onConfirm={() => setShowShareModal(false)}
         title="Partager la collection"
-        message="Le système de partage de collections sera bientôt disponible ! Vous pourrez partager"
-        itemName={collection?.name}
+        message="Le système de partage de collections sera bientôt disponible !"
         confirmButtonText="D'accord"
         cancelButtonText="Fermer"
         confirmButtonClass="bg-blue-600 text-white hover:bg-blue-700"
