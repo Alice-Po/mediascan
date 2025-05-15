@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ContributionModal from '../components/common/ContributionModal';
 import Footer from '../components/common/Footer';
 import FeatureList from '../components/features/FeatureList';
+import FAQ from '../components/common/FAQ';
 
 const Funding = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -14,6 +15,20 @@ const Funding = () => {
     setSelectedAmount(amount);
     setModalOpen(true);
   };
+
+  // Define FAQ items for the funding page
+  const faqItems = [
+    {
+      question: 'Est-ce que je peux annuler ma promesse de don ?',
+      answer:
+        'Oui, à tout moment avant que la fonctionnalité soit complètement développée et que le paiement soit demandé.',
+    },
+    {
+      question: "Comment fonctionnera concrètement le paiement à l'article ?",
+      answer:
+        'Nous aimerions utiliser GNU Taler, solution libre de micro-paiement soutenu par NGI mais le sujet est toujours en cours de discussion.',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
@@ -192,19 +207,6 @@ const Funding = () => {
                   <span>Soutien régulier au projet avec avantages exclusifs</span>
                 </li>
               </ul>
-              {/* <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm text-yellow-800">
-                <p className="flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Disponible lors du lancement officiel, prévu pour le dernier trimestre 2025.
-                </p>
-              </div> */}
             </div>
           </div>
         </section>
@@ -216,112 +218,14 @@ const Funding = () => {
           <FeatureList openContributionModal={openModal} />
         </section>
 
-        {/* Call to Action */}
-        {/* <section className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 md:p-8 text-white shadow-lg mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            Comment soutenir Médiascan aujourd'hui ?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <button
-                onClick={() => openModal('Médiascan', 10)}
-                className="text-lg font-medium hover:underline mb-2 flex flex-col items-center justify-center w-full h-full"
-              >
-                <span className="text-3xl mb-2">🤝</span>
-                <span>Faire une promesse de don</span>
-              </button>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <Link
-                to="/register"
-                className="text-lg font-medium hover:underline mb-2 flex flex-col items-center justify-center w-full h-full"
-              >
-                <span className="text-3xl mb-2">🚀</span>
-                <span>Créer un compte et tester</span>
-              </Link>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
-              <a
-                href="#"
-                className="text-lg font-medium hover:underline mb-2 flex flex-col items-center justify-center w-full h-full"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigator
-                    .share({
-                      title: "Médiascan - Redécouvrez le plaisir de l'information",
-                      text: "Découvrez Médiascan, un agrégateur d'actualités qui vous permet d'explorer l'information sous toutes ses perspectives.",
-                      url: window.location.origin,
-                    })
-                    .catch(() => {
-                      alert('Copiez ce lien et partagez-le : ' + window.location.origin);
-                    });
-                }}
-              >
-                <span className="text-3xl mb-2">📣</span>
-                <span>Partager le projet</span>
-              </a>
-            </div>
-          </div>
-        </section> */}
-
-        {/* FAQ */}
+        {/* FAQ - Utilisation du composant réutilisable */}
         <div className="border-t border-gray-200 my-8"></div>
-        <section className="bg-white p-4 md:p-8 ">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Questions fréquentes sur notre modèle économique
-          </h2>
-          <div className="space-y-6">
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Que se passe-t-il si l'objectif de financement n'est pas atteint pour une
-                fonctionnalité ?
-              </h3>
-              <p className="text-gray-700">
-                Les promesses ne sont pas prélevées. Nous continuons à collecter des promesses
-                jusqu'à atteindre l'objectif ou redéfinissons nos priorités.
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Comment garantissez-vous que les fonctionnalités seront développées comme promis ?
-              </h3>
-              <p className="text-gray-700">
-                Nous communiquons régulièrement sur l'avancement des développements et ne prélevons
-                les fonds que lorsque la fonctionnalité est livrée et testée.
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Comment sont déterminés les objectifs de financement ?
-              </h3>
-              <p className="text-gray-700">
-                Ils correspondent aux coûts réels de développement, incluant le temps de travail des
-                développeurs, les tests, et la maintenance.
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Est-ce que je peux annuler ma promesse de don ?
-              </h3>
-              <p className="text-gray-700">
-                Oui, à tout moment avant que la fonctionnalité soit complètement développée et que
-                le paiement soit demandé.
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 ">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Comment fonctionnera concrètement le paiement à l'article ?
-              </h3>
-              <p className="text-gray-700">
-                Vous chargez des crédits dans votre porte-monnaie virtuel et décidez quand les
-                utiliser. Un système de micropaiement simple et transparent, sans engagement.
-              </p>
-            </div>
-          </div>
+        <section className="bg-white p-4 md:p-8">
+          <FAQ
+            items={faqItems}
+            title="Questions fréquentes sur notre modèle économique"
+            itemClassName="border-b border-gray-200 pb-4 mb-6"
+          />
         </section>
       </div>
 

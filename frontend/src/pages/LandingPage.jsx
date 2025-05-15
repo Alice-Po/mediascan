@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ContactForm from '../components/common/ContactForm';
 import Footer from '../components/common/Footer';
 import Accordion from '../components/common/Accordion';
+import FAQ from '../components/common/FAQ';
 // Feature Item Component
 const FeatureItem = ({ icon, title, description }) => (
   <div className="flex gap-4 items-start">
@@ -132,7 +133,7 @@ const LandingPage = () => {
 
         {/* Section: FAQ */}
         <section ref={faqRef} className="bg-white rounded-xl  p-6 md:p-8">
-          <FAQ />
+          <FAQSection />
         </section>
       </div>
 
@@ -691,41 +692,24 @@ const ContactFormSection = () => (
   </div>
 );
 
-const FAQ = () => (
+// Place this outside of components, near other constants
+const FAQ_ITEMS = [
+  {
+    question: 'Est-ce que Médiascan va mettre en place de la publicité sur sa version gratuite ?',
+    answer:
+      "Trés certainement. Ceci dit, vous ne trouverez jamais de publicité frauduleuse pour des panneaux solaires ou des appareils auditifs révolutionnaires sur notre plateforme, la régie publicitaire étant gouvernée par la communauté d'abonnés premium.",
+  },
+  {
+    question: "Est ce que MédiaScan intégre des outils d'IA ?",
+    answer:
+      "Absolument. Nous ne pouvons pas se défendre d'un monde complexe avec des outils simples. Nous refusons un dilemme entre un refus dogmatique qui nous condamnerait à la marginalité, ou une fascination aveugle qui sacrifierait vos intérêts sur l'autel de l'innovation. Notre communauté d'abonné premium sera arbitre des choix que nous ferons en la matière. Notre ambition n'est pas de créer un outil de niche pour quelques initiés, mais une solution accessible ce qui necessite d'être à la hauteur des standards et attentes élevés du grand public.",
+  },
+];
+
+// Remove the old FAQ component and replace with:
+const FAQSection = () => (
   <div className="">
-    <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Foire aux questions</h2>
-    </div>
-
-    <div className="space-y-2">
-      <Accordion
-        title="Est-ce que Médiascan va mettre en place de la publicité sur sa version gratuite ?"
-        titleClassName="text-lg font-semibold text-gray-900"
-        className="border-b-0 bg-white rounded-lg shadow-sm p-4 hover:bg-gray-50 transition"
-      >
-        <p className="text-gray-700 px-2">
-          Trés certainement. Ceci dit, vous ne trouverez jamais de publicité frauduleuse pour des
-          panneaux solaires ou des appareils auditifs révolutionnaires sur notre plateforme, la
-          régie publicitaire étant gouvernée par la communauté d'abonnés premium.
-        </p>
-      </Accordion>
-
-      <Accordion
-        title="Est ce que MédiaScan intégre des outils d'IA ?"
-        titleClassName="text-lg font-semibold text-gray-900"
-        className="border-b-0 bg-white rounded-lg shadow-sm p-4 hover:bg-gray-50 transition"
-      >
-        <p className="text-gray-700 px-2">
-          Absolument. Nous ne pouvons pas se défendre d'un monde complexe avec des outils simples.
-          Nous refusons un dilemme entre un refus dogmatique qui nous condamnerait à la marginalité,
-          ou une fascination aveugle qui sacrifierait vos intérêts sur l'autel de l'innovation.
-          Notre communauté d'abonné premium sera arbitre des choix que nous ferons en la matière.
-          Notre ambition n'est pas de créer un outil de niche pour quelques initiés, mais une
-          solution accessible ce qui necessite d'être à la hauteur des standards et attentes élevés
-          du grand public.
-        </p>
-      </Accordion>
-    </div>
+    <FAQ items={FAQ_ITEMS} />
   </div>
 );
 
