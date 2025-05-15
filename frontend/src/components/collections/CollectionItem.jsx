@@ -154,10 +154,10 @@ const CollectionItem = ({
         }`}
         onClick={handleItemClick}
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex">
           {/* Avatar de la collection */}
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
+            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden mr-3"
             style={{
               backgroundColor: !collection.imageUrl
                 ? collection.colorHex || generateColorFromId(collection._id)
@@ -174,20 +174,20 @@ const CollectionItem = ({
             )}
           </div>
 
-          {/* Informations sur la collection */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center">
-              <p className="font-medium text-gray-900 truncate mr-2">{collection.name}</p>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            {/* Première ligne: titre et badges */}
+            <div className="flex items-center flex-wrap">
+              <h3 className="font-medium text-gray-900 truncate mr-2">{collection.name}</h3>
               {collection.isPublic ? (
-                <span className="inline-flex ml-1.5 items-center">
+                <span className="inline-flex items-center">
                   <GlobeIcon />
                 </span>
               ) : (
-                <span className="inline-flex ml-1.5 items-center">
+                <span className="inline-flex items-center">
                   <LockIcon />
                 </span>
               )}
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1 ml-1">
                 {isFollowed && (
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
                     Suivie
@@ -201,72 +201,87 @@ const CollectionItem = ({
               </div>
             </div>
 
-            {/* Créateur et statistiques */}
-            <p className="text-xs text-gray-500">
-              {/* Afficher "Par vous" ou le nom du créateur */}
-              Par{' '}
-              {collection.userId === currentUserId
-                ? 'vous'
-                : collection.creator?.username || 'Utilisateur anonyme'}
-              {/* Nombre de sources */}
-              <span className="mx-1">•</span>
-              {collection.sources?.length || 0} source
-              {collection.sources?.length !== 1 ? 's' : ''}
+            {/* Seconde ligne: Créateur et métadonnées */}
+            <div className="flex flex-wrap text-xs text-gray-500 w-full">
+              <span className="truncate">
+                Par{' '}
+                {collection.userId === currentUserId
+                  ? 'vous'
+                  : collection.creator?.username || 'Utilisateur anonyme'}
+              </span>
+              <span className="mx-1 flex-shrink-0">•</span>
+              <span className="flex-shrink-0">
+                {collection.sources?.length || 0} source
+                {collection.sources?.length !== 1 ? 's' : ''}
+              </span>
               {/* Nombre de suiveurs pour les collections publiques */}
               {collection.isPublic && (
                 <>
-                  <span className="mx-1">•</span>
-                  {generateFollowersFromId(collection._id)} suiveurs
+                  <span className="mx-1 flex-shrink-0">•</span>
+                  <span className="truncate flex-shrink-0">
+                    {generateFollowersFromId(collection._id)} suiveurs
+                  </span>
                 </>
               )}
-            </p>
+            </div>
 
-            {/* Description (si elle existe) */}
+            {/* Description sur une ligne distincte avec plus d'espace */}
             {collection.description && (
-              <p className="text-xs text-gray-700 mt-1 truncate">{collection.description}</p>
+              <p className="text-xs text-gray-700 mt-2 sm:max-w-none overflow-hidden">
+                {/* Sur mobile: afficher plus de texte, sur desktop: garder compact */}
+                <span className="sm:hidden">
+                  {collection.description.length > 100
+                    ? `${collection.description.substring(0, 100)}...`
+                    : collection.description}
+                </span>
+                <span className="hidden sm:inline truncate">{collection.description}</span>
+              </p>
             )}
           </div>
 
           {/* Boutons d'action */}
           {showActionButtons && (
-            <div className="flex space-x-1">
-              {/* Bouton Partager (uniquement pour les collections publiques) */}
-              {collection.isPublic && (
-                <button
-                  className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100"
-                  onClick={handleShareClick}
-                  title="Partager cette collection"
-                >
-                  <CollectionShareIcon />
-                </button>
-              )}
-
+            <div className="flex flex-shrink-0 space-x-1 ml-2">
               {/* Bouton Voir (pour toutes les collections) */}
               <button
-                className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
                 onClick={handleViewClick}
                 title="Voir les détails de la collection"
               >
-                <ViewIcon />
+                <ViewIcon className="h-5 w-5" />
               </button>
+
+              {/* Bouton Partager (uniquement pour les collections publiques) */}
+              {collection.isPublic && onShare && (
+                <button
+                  className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                  onClick={handleShareClick}
+                  title="Partager cette collection"
+                >
+                  <CollectionShareIcon className="h-5 w-5" />
+                </button>
+              )}
 
               {/* Boutons Modifier et Supprimer (uniquement pour les collections de l'utilisateur) */}
               {canModify && (
                 <>
                   <Link
                     to={`/collections/edit/${collection._id}`}
-                    className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
+                    className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
                     onClick={(e) => e.stopPropagation()}
+                    title="Modifier cette collection"
                   >
-                    <EditIcon />
+                    <EditIcon className="h-5 w-5" />
                   </Link>
-                  <button
-                    className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100"
-                    onClick={handleDeleteClick}
-                    title="Supprimer cette collection"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
+                  {onDelete && (
+                    <button
+                      className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                      onClick={handleDeleteClick}
+                      title="Supprimer cette collection"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  )}
                 </>
               )}
             </div>

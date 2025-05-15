@@ -188,6 +188,7 @@ const CollectionsList = ({ collections: externalCollections }) => {
                 isSelected={filters.collection === collection._id}
                 onClick={handleCollectionClick}
                 onShare={handleShareClick}
+                onDelete={null}
                 onSourceRemove={handleSourceRemoved}
                 currentUserId={user?._id}
                 showActionButtons={true}

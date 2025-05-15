@@ -93,7 +93,7 @@ const Navbar = () => {
 
       {/* Navigation mobile */}
       <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-50">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {/* Bouton Toggle Sidebar */}
           <button
             onClick={toggleSidebar}
@@ -106,21 +106,52 @@ const Navbar = () => {
             <span className="text-xs mt-1">Menu</span>
           </button>
 
-          {/* Items de navigation */}
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-2 transition-colors ${
-                  isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
-                }`
-              }
-            >
-              <div className="h-6 w-6">{item.icon}</div>
-              <span className="text-xs mt-1">{item.label}</span>
-            </NavLink>
-          ))}
+          {/* Bouton Collections */}
+          <NavLink
+            to="/collections"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center py-2 transition-colors ${
+                isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
+              }`
+            }
+          >
+            <div className="h-6 w-6">
+              <CollectionsIcon />
+            </div>
+            <span className="text-xs mt-1">Collections</span>
+          </NavLink>
+
+          {/* Bouton Feed principal/Dashboard au centre */}
+          <NavLink
+            to="/app"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center py-2 transition-colors ${
+                isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
+              }`
+            }
+          >
+            <div className="h-7 w-7 -mt-1">
+              <HomeIcon />
+            </div>
+            <span className="text-xs mt-1">Actualités</span>
+          </NavLink>
+
+          {/* Bouton Profil */}
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center py-2 transition-colors ${
+                isActive ? 'text-primary' : 'text-gray-500 hover:text-primary'
+              }`
+            }
+          >
+            <div className="h-6 w-6">
+              <ProfileIcon />
+            </div>
+            <span className="text-xs mt-1">Profil</span>
+          </NavLink>
+
+          {/* Bouton Financement */}
           <NavLink
             to="/funding"
             className={({ isActive }) =>
