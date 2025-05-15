@@ -109,62 +109,84 @@ const FeatureItem = ({ feature, onDetailClick, onContributionComplete, index }) 
   };
 
   return (
-    <div className={`${colors.bg} rounded-lg p-6`}>
-      {/* En-tête avec icône, titre et objectif */}
-      <div className="flex justify-between items-start mb-4">
+    <div className={`${colors.bg} rounded-lg p-4 sm:p-6`}>
+      {/* En-tête avec icône, titre et objectif - Restructuré pour le responsive */}
+      <div className="sm:flex sm:justify-between items-start mb-3 sm:mb-4">
         <div className="flex items-start">
-          <div className={`${colors.text} mr-4`}>{getIconComponent(feature.icon)}</div>
+          {/* Icône masquée sur mobile */}
+          <div className={`${colors.text} mr-3 hidden sm:block`}>
+            {getIconComponent(feature.icon)}
+          </div>
           <div>
-            <h3 className={`text-xl font-semibold mb-2 ${colors.text}`}>{feature.title}</h3>
-            <p className="text-gray-600">{feature.description}</p>
+            <h3 className={`text-lg sm:text-xl font-semibold mb-1 sm:mb-2 ${colors.text}`}>
+              {feature.title}
+              {feature.funded >= feature.goal && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                  Objectif atteint! 🎉
+                </span>
+              )}
+            </h3>
+            <p className="text-sm sm:text-base text-gray-600">{feature.description}</p>
+
+            {/* Objectif financier visible uniquement sur mobile, sous le titre */}
+            <div className="flex items-center mt-2 sm:hidden">
+              <span className="text-xl font-bold">{feature.goal}€</span>
+              <span className="text-sm text-gray-600 ml-2">Objectif</span>
+            </div>
           </div>
         </div>
-        <div className="text-right">
+
+        {/* Objectif financier - seulement visible sur desktop */}
+        <div className="text-right hidden sm:block">
           <span className="text-2xl font-bold">{feature.goal}€</span>
           <p className="text-sm text-gray-600">Objectif</p>
         </div>
       </div>
 
       {/* Lien GitHub discret */}
-      <div className="mb-4">
+      <div className="mb-3 sm:mb-4">
         <Link
           to={feature.issue}
           target="_blank"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center text-xs sm:text-sm text-gray-500 hover:text-gray-700"
         >
-          <GitHubIcon className="mr-1" />
+          <GitHubIcon className="w-4 h-4 mr-1" />
           Suivre sur GitHub
         </Link>
       </div>
 
       {/* Montant collecté et barre de progression */}
-      <div className="mb-4">
-        <div className="flex justify-between text-sm mb-1">
+      <div className="mb-3 sm:mb-4">
+        <div className="flex justify-between text-xs sm:text-sm mb-1">
           <span className="font-medium">{feature.funded}€ collectés</span>
           <span className="text-gray-600">{progressPercentage}%</span>
         </div>
-        <div className="w-full bg-white rounded-full h-2.5">
+        <div className="w-full bg-white rounded-full h-2 sm:h-2.5">
           <div
-            className={`${colors.progress} h-2.5 rounded-full`}
+            className={`${
+              feature.funded >= feature.goal ? 'bg-green-500' : colors.progress
+            } h-2 sm:h-2.5 rounded-full`}
             style={{ width: `${Math.min(progressPercentage, 100)}%` }}
           ></div>
         </div>
       </div>
 
       {/* Boutons d'action */}
-      <div className="flex space-x-2">
+      <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
         <button
           onClick={handleFundingClick}
-          className={`flex-1 ${colors.button} text-white py-2 rounded-md transition-colors`}
+          className={`${colors.button} text-white py-2 rounded-md transition-colors text-sm sm:text-base flex-1`}
         >
           Contribuer à cette fonctionnalité
         </button>
         {feature.modal && (
           <button
             onClick={() => onDetailClick(feature)}
-            className={`bg-white border px-4 py-2 rounded-md hover:bg-${
+            className={`bg-white border py-2 px-4 rounded-md hover:bg-${
               colors.text.split('-')[1]
-            }-50 transition-colors border-${colors.text.split('-')[1]}-200 ${colors.text}`}
+            }-50 transition-colors border-${colors.text.split('-')[1]}-200 ${
+              colors.text
+            } text-sm sm:text-base sm:flex-none`}
           >
             En savoir plus
           </button>

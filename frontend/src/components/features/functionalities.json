@@ -65,7 +65,7 @@
         "description": "Créez et partagez des collections de sources thématiques, comme des playlists Spotify. Idéal pour la veille collaborative et le partage de centres d'intérêt spécifiques.",
         "status": "investigation",
         "goal": 5000,
-        "funded": 0,
+        "funded": 5000,
         "issue": "https://github.com/Alice-Po/mediascan/issues/40",
         "modal": "PublicCollections"
     }

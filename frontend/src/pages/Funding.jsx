@@ -201,9 +201,9 @@ const Funding = () => {
         </section>
 
         {/* Fonctionnalités à financer */}
-        <div className="border-t border-gray-200 my-8"></div>
+        <div className="border-t border-gray-200 my-6 sm:my-8"></div>
 
-        <section className="bg-white px-4 py-0 md:p-8 mb-12">
+        <section className="bg-white px-2 py-0 sm:px-4 md:p-8 mb-8 sm:mb-12">
           <FeatureList />
         </section>
 
