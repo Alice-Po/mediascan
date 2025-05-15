@@ -671,6 +671,7 @@ const WhoWeAre = () => (
             </p>
             <p>
               <strong>Alice Poggioli</strong>
+              <span className="text-gray-500 text-sm">, fondatrice</span>
             </p>
           </div>
         </div>

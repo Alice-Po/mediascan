@@ -102,8 +102,8 @@ const SourceCatalog = ({
   // Afficher un indicateur de chargement
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex justify-center items-center p-4 sm:p-8">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -111,10 +111,10 @@ const SourceCatalog = ({
   // Afficher un message d'erreur
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">{error}</p>
+      <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-600 text-sm sm:text-base">{error}</p>
         <button
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          className="mt-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
           onClick={() => window.location.reload()}
         >
           Réessayer
@@ -126,8 +126,10 @@ const SourceCatalog = ({
   // Afficher un message si aucune source n'est disponible
   if (sources.length === 0) {
     return (
-      <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
-        <p className="text-gray-600">Aucune source disponible dans le catalogue.</p>
+      <div className="p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
+        <p className="text-gray-600 text-sm sm:text-base">
+          Aucune source disponible dans le catalogue.
+        </p>
       </div>
     );
   }
@@ -135,19 +137,20 @@ const SourceCatalog = ({
   return (
     <div className="source-catalog">
       {/* Barre de recherche */}
-      <div className="sticky top-0 bg-gray-50 pt-2 pb-4 mb-8 z-10">
-        <div className="mb-4">
+      <div className="sticky top-0 bg-gray-50 pt-2 pb-3 sm:pb-4 mb-4 sm:mb-8 z-10 px-2 sm:px-0">
+        <div className="mb-3 sm:mb-4">
           <div className="relative">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Rechercher une source..."
-              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 text-sm shadow-sm"
+              className="w-full pl-9 pr-4 py-2.5 sm:py-3 border rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 text-sm shadow-sm"
+              aria-label="Rechercher une source"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5 text-gray-400"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -180,17 +183,22 @@ const SourceCatalog = ({
         </div>
 
         {/* Compteur de résultats et bouton d'ajout de source */}
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-0">
             {filteredSources.length}{' '}
             {filteredSources.length > 1 ? 'sources trouvées' : 'source trouvée'}
             {searchTerm && ` pour "${searchTerm}"`}
           </p>
           <button
             onClick={() => setShowAddSourceModal(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md flex items-center shadow-sm transition-colors"
+            className="w-full sm:w-auto px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-md flex items-center justify-center sm:justify-start shadow-sm transition-colors"
           >
-            <svg className="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -204,7 +212,7 @@ const SourceCatalog = ({
       </div>
 
       {/* Liste des sources */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-2 sm:px-0">
         {filteredSources.map((source) => {
           const isInCollection = isSourceInCollection(source._id);
           return (
@@ -224,11 +232,13 @@ const SourceCatalog = ({
 
       {/* Message si aucun résultat */}
       {filteredSources.length === 0 && searchTerm && (
-        <div className="p-8 bg-gray-50 border border-gray-200 rounded-lg text-center my-8">
-          <p className="text-gray-600 mb-2">Aucune source ne correspond à votre recherche.</p>
+        <div className="p-4 sm:p-8 bg-gray-50 border border-gray-200 rounded-lg text-center my-4 sm:my-8 mx-2 sm:mx-0">
+          <p className="text-gray-600 mb-2 text-sm sm:text-base">
+            Aucune source ne correspond à votre recherche.
+          </p>
           <button
             onClick={() => setSearchTerm('')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
           >
             Effacer la recherche
           </button>
@@ -238,12 +248,13 @@ const SourceCatalog = ({
       {/* Modale pour le formulaire d'ajout de source */}
       {showAddSourceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-white/30 animate-fadeIn">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
-            <div className="flex justify-between items-center p-4 border-b bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-              <h3 className="text-lg font-medium">Ajouter une nouvelle source</h3>
+          <div className="bg-white rounded-lg w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-auto m-2 sm:m-0">
+            <div className="flex justify-between items-center p-4 sm:p-6 border-b bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+              <h3 className="text-base sm:text-lg font-medium">Ajouter une nouvelle source</h3>
               <button
                 onClick={() => setShowAddSourceModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-white/80 hover:text-white"
+                aria-label="Fermer"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

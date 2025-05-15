@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useImperativeHandle, forwardRef
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import SourceCatalog from '../sources/SourceCatalog';
+import Modal from '../common/Modal';
 import {
   createCollection,
   updateCollection,
@@ -40,7 +41,7 @@ const CollectionForm = forwardRef(
     });
 
     const [selectedSources, setSelectedSources] = useState([]);
-    const [showSourceCatalog, setShowSourceCatalog] = useState(false);
+    const [showSourceCatalogModal, setShowSourceCatalogModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -215,6 +216,16 @@ const CollectionForm = forwardRef(
       }
     };
 
+    // Ouvrir la modale du catalogue de sources
+    const openSourceCatalog = () => {
+      setShowSourceCatalogModal(true);
+    };
+
+    // Fermer la modale du catalogue de sources
+    const closeSourceCatalog = () => {
+      setShowSourceCatalogModal(false);
+    };
+
     if (loading || loadingCollections) {
       return (
         <div className="p-6 flex justify-center">
@@ -318,10 +329,10 @@ const CollectionForm = forwardRef(
                 <h2 className="text-lg font-medium text-gray-900">Sources sélectionnées</h2>
                 <button
                   type="button"
-                  onClick={() => setShowSourceCatalog(!showSourceCatalog)}
+                  onClick={openSourceCatalog}
                   className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 text-sm w-full sm:w-auto"
                 >
-                  {showSourceCatalog ? 'Masquer le catalogue' : 'Parcourir le catalogue de sources'}
+                  Parcourir le catalogue de sources
                 </button>
               </div>
 
@@ -384,18 +395,7 @@ const CollectionForm = forwardRef(
               )}
             </div>
 
-            {/* Catalogue de sources (conditionnel) */}
-            {showSourceCatalog && (
-              <div className="mb-6 p-3 sm:p-4 border border-gray-200 rounded-lg">
-                <h3 className="text-lg font-medium mb-3 sm:mb-4">Catalogue de sources</h3>
-                <SourceCatalog
-                  onAddToCollection={handleAddSource}
-                  collectionSources={selectedSources}
-                  userCollections={collections}
-                />
-              </div>
-            )}
-
+            {/* Boutons de navigation */}
             {!hideNavigation && (
               <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4">
                 <button
@@ -428,6 +428,22 @@ const CollectionForm = forwardRef(
             )}
           </form>
         </div>
+
+        {/* Modale pour le catalogue de sources */}
+        <Modal
+          isOpen={showSourceCatalogModal}
+          onClose={closeSourceCatalog}
+          title="Catalogue de sources"
+          size="2xl"
+        >
+          <div className="p-2">
+            <SourceCatalog
+              onAddToCollection={handleAddSource}
+              collectionSources={selectedSources}
+              userCollections={collections}
+            />
+          </div>
+        </Modal>
       </div>
     );
   }

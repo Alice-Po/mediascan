@@ -26,9 +26,8 @@ const Onboarding = () => {
     1: true, // Introduction est toujours valide
     2: false, // PublicCollections requiert au moins une collection suivie
     3: false, // CreateCollection requiert la création d'une collection
-    4: false, // AddSourcesToCollection requiert au moins 3 sources
-    5: true, // UpcomingFeatures est toujours valide
-    6: true, // Conclusion est toujours valide
+    4: true, // UpcomingFeatures est toujours valide
+    5: true, // Conclusion est toujours valide
   });
 
   // Vérifier si l'étape actuelle est valide
@@ -107,7 +106,7 @@ const Onboarding = () => {
       return;
     }
 
-    if (step === 6) {
+    if (step === 5) {
       await completeOnboardingProcess();
     } else {
       setStep((prev) => prev + 1);
@@ -127,7 +126,7 @@ const Onboarding = () => {
 
   const renderStep = () => {
     // No need for special loading handling for Conclusion component
-    if (loading && step < 6) {
+    if (loading && step < 5) {
       return (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -151,17 +150,17 @@ const Onboarding = () => {
             onValidationChange={(isValid) => handleStepValidation(3, isValid)}
           />
         );
+      // case 4:
+      //   return (
+      //     <AddSourcesToCollection
+      //       onValidationChange={(isValid) => handleStepValidation(4, isValid)}
+      //     />
+      //   );
       case 4:
-        return (
-          <AddSourcesToCollection
-            onValidationChange={(isValid) => handleStepValidation(4, isValid)}
-          />
-        );
-      case 5:
         return (
           <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(5, isValid)} />
         );
-      case 6:
+      case 5:
         return <Conclusion onValidationChange={(isValid) => handleStepValidation(6, isValid)} />;
       default:
         return null;
@@ -186,7 +185,7 @@ const Onboarding = () => {
 
           {/* Indicateur d'étapes */}
           <div className="flex justify-center mt-4 space-x-2">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
@@ -225,7 +224,7 @@ const Onboarding = () => {
               } ${step === 1 ? 'ml-auto' : ''}`}
               disabled={loading || !isCurrentStepValid()}
             >
-              {step === 6 ? 'Terminer' : step === 1 ? "C'est parti !" : 'Suivant'}
+              {step === 5 ? 'Terminer' : step === 1 ? "C'est parti !" : 'Suivant'}
             </button>
           </div>
         </div>
