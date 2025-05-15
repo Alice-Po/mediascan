@@ -117,7 +117,7 @@ const Dashboard = () => {
     });
   };
 
-  if (loadingArticles) {
+  if (loadingArticles && articles.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -152,16 +152,6 @@ const Dashboard = () => {
         >
           <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
             <ArticleList />
-            {!loadingArticles && !hasMoreArticles && (
-              <div className="flex justify-center py-4">
-                <button
-                  onClick={refreshArticles}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
-                >
-                  Charger de nouveaux articles
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

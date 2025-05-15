@@ -343,11 +343,37 @@ export const AppProvider = ({ children }) => {
       setLoadingArticles(true);
       const nextPage = articlesPage + 1;
 
-      const data = await fetchArticles({
+      // Construire les paramètres en tenant compte des filtres actuels
+      const params = {
         page: nextPage,
         limit: 20,
-        // Ne pas filtrer par sources ici pour obtenir tous les articles supplémentaires
-      });
+      };
+
+      // Ajouter les filtres de sources si spécifiés
+      if (filters.sources && filters.sources.length > 0) {
+        params.sources = filters.sources.join(',');
+      }
+
+      // Ajouter le filtre de collection si spécifié
+      if (filters.collection) {
+        params.collection = filters.collection;
+      }
+
+      // Ajouter le terme de recherche si spécifié
+      if (filters.searchTerm) {
+        params.searchTerm = filters.searchTerm;
+      }
+
+      // Ajouter les filtres d'orientation si spécifiés
+      if (filters.orientation && Object.values(filters.orientation).some((arr) => arr.length > 0)) {
+        Object.entries(filters.orientation).forEach(([key, values]) => {
+          if (values.length > 0) {
+            params[`orientation[${key}]`] = values.join(',');
+          }
+        });
+      }
+
+      const data = await fetchArticles(params);
 
       // Extraire les IDs des articles existants
       const existingIds = articles.map((article) => article._id);
@@ -361,13 +387,9 @@ export const AppProvider = ({ children }) => {
       setArticles((prev) => [...prev, ...uniqueNewArticles]);
       setHasMoreArticles(data.hasMore);
       setArticlesPage(nextPage);
-
-      // Log pour debug
-      console.log(
-        `Chargé ${data.articles.length} articles, ${uniqueNewArticles.length} uniques ajoutés`
-      );
     } catch (err) {
       console.error("Erreur lors du chargement de plus d'articles:", err);
+      throw err; // Propager l'erreur pour la gestion dans le composant
     } finally {
       setLoadingArticles(false);
     }

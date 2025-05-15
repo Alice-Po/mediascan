@@ -5,27 +5,18 @@ import { useSavedArticles } from '../../context/SavedArticlesContext';
 import { useDebounce } from '../../hooks/useDebounce';
 
 /**
- * Composant d'affichage de la liste des articles
+ * Composant d'affichage de la liste des articles avec scroll infini
  */
 const ArticleList = () => {
   const { articles, loadingArticles, hasMoreArticles, loadMoreArticles, updateArticle } =
     useContext(AppContext);
-  const { saveArticle, unsaveArticle, isArticleSaved } = useSavedArticles();
+  const { saveArticle, unsaveArticle } = useSavedArticles();
 
-  // État pour déclencher le chargement d'articles supplémentaires
-  const [intersectionTrigger, setIntersectionTrigger] = useState(0);
-  // Utilisation du hook de debounce sur le déclencheur d'intersection
-  const debouncedTrigger = useDebounce(intersectionTrigger, 300);
-
-  // Référence pour l'élément observé pour l'infinite scroll
+  // Référence pour l'observateur d'intersection
   const observer = useRef();
 
-  // Effet pour charger plus d'articles lorsque le déclencheur debounced change
-  useEffect(() => {
-    if (debouncedTrigger > 0 && hasMoreArticles && !loadingArticles) {
-      loadMoreArticles();
-    }
-  }, [debouncedTrigger, hasMoreArticles, loadingArticles, loadMoreArticles]);
+  // État pour gérer les erreurs de chargement
+  const [loadError, setLoadError] = useState(null);
 
   // Fonction pour gérer le partage d'un article
   const handleShare = (url) => {
@@ -48,7 +39,6 @@ const ArticleList = () => {
   // Fonction pour gérer la sauvegarde/désauvegarde d'un article
   const handleSave = async (articleId) => {
     try {
-      console.log('Trying to save article:', articleId);
       const article = articles.find((a) => a._id === articleId);
       if (!article) return;
 
@@ -68,21 +58,47 @@ const ArticleList = () => {
   // Callback pour l'observateur d'intersection (infinite scroll)
   const lastArticleRef = useCallback(
     (node) => {
+      // Ne pas observer si en cours de chargement ou s'il n'y a plus d'articles
       if (loadingArticles) return;
 
+      // Nettoyer l'observateur précédent
       if (observer.current) observer.current.disconnect();
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMoreArticles) {
-          // Incrémenter le déclencheur au lieu d'appeler directement loadMoreArticles
-          setIntersectionTrigger((prev) => prev + 1);
+      // Créer un nouvel observateur
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          // Si l'élément devient visible et qu'il y a plus d'articles à charger
+          if (entries[0].isIntersecting && hasMoreArticles) {
+            // Appeler la fonction de chargement d'articles supplémentaires
+            try {
+              loadMoreArticles();
+            } catch (error) {
+              setLoadError("Impossible de charger plus d'articles. Veuillez réessayer.");
+              console.error('Erreur lors du chargement des articles:', error);
+            }
+          }
+        },
+        {
+          root: null, // Viewport utilisé comme conteneur d'observation
+          rootMargin: '100px', // Déclencher un peu avant d'atteindre la fin
+          threshold: 0.1, // Déclencher quand 10% de l'élément est visible
         }
-      });
+      );
 
+      // Observer le nouvel élément
       if (node) observer.current.observe(node);
     },
-    [loadingArticles, hasMoreArticles]
+    [loadingArticles, hasMoreArticles, loadMoreArticles]
   );
+
+  // Nettoyer l'observateur au démontage du composant
+  useEffect(() => {
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
 
   // Fonction pour afficher un message si aucun article
   const renderNoArticles = () => {
@@ -105,31 +121,44 @@ const ArticleList = () => {
     );
   };
 
+  // Affichage du message d'erreur
+  const renderError = () => {
+    return (
+      <div className="flex justify-center py-4">
+        <div className="text-red-500">{loadError}</div>
+      </div>
+    );
+  };
+
+  // Affichage du message de fin de liste
+  const renderEndOfList = () => {
+    if (!hasMoreArticles && articles.length > 0) {
+      return (
+        <div className="text-center py-6 text-gray-500">Vous avez atteint la fin de la liste</div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="article-list -mx-3 sm:mx-0">
       {/* Liste des articles */}
       {articles.length > 0
-        ? articles.map((article, index) => {
-            if (articles.length === index + 1) {
-              return (
-                <div ref={lastArticleRef} key={article._id} className="mb-3 last:mb-0">
-                  <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
-                </div>
-              );
-            } else {
-              return (
-                <div key={article._id} className="mb-3 last:mb-0">
-                  <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
-                </div>
-              );
-            }
-          })
-        : !loadingArticles
-        ? renderNoArticles()
-        : null}
+        ? articles.map((article, index) => (
+            <div
+              ref={index === articles.length - 1 ? lastArticleRef : null}
+              key={article._id}
+              className="mb-3 last:mb-0"
+            >
+              <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
+            </div>
+          ))
+        : !loadingArticles && renderNoArticles()}
 
-      {/* Indicateur de chargement */}
+      {/* Affichage des états */}
+      {loadError && renderError()}
       {loadingArticles && renderLoading()}
+      {!loadingArticles && renderEndOfList()}
     </div>
   );
 };
