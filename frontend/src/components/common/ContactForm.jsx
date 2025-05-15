@@ -7,10 +7,8 @@ const ContactForm = () => {
   if (state.succeeded) {
     return (
       <div className="text-center py-8">
-        <div className="text-green-600 text-xl mb-2">✨ Merci pour votre retour !</div>
-        <p className="text-gray-600">
-          Nous l'examinerons avec attention pour améliorer votre expérience.
-        </p>
+        <div className="text-green-600 text-xl mb-2">✨ Merci !</div>
+        <p className="text-gray-600">Nous revenons vers vous trés vite !</p>
       </div>
     );
   }
@@ -45,7 +43,7 @@ const ContactForm = () => {
           name="message"
           rows="4"
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-          placeholder="Décrivez votre retour d'expérience, bug rencontré ou suggestion d'amélioration..."
+          placeholder="Votre message..."
         />
         <ValidationError
           prefix="Message"
@@ -60,7 +58,7 @@ const ContactForm = () => {
         disabled={state.submitting}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 font-medium"
       >
-        {state.submitting ? 'Envoi en cours...' : 'Envoyer mon retour'}
+        {state.submitting ? 'Envoi en cours...' : 'Envoyer'}
       </button>
     </form>
   );
