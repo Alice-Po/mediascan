@@ -347,25 +347,35 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    // Mise à jour de l'utilisateur
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpires = undefined;
-    await user.save();
+    // Si l'utilisateur n'est pas encore vérifié, le marquer comme vérifié
+    if (!user.isVerified) {
+      user.isVerified = true;
 
-    console.log('Utilisateur vérifié avec succès:', {
-      id: user._id,
-      email: user.email,
-    });
+      // Au lieu de supprimer le token, prolonger sa validité de 30 minutes
+      user.verificationTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    // Enregistrer l'événement analytics
-    await Analytics.create({
-      userId: user._id,
-      eventType: 'emailVerification',
-      metadata: {
-        timestamp: new Date(),
-      },
-    });
+      await user.save();
+
+      console.log('Utilisateur vérifié avec succès:', {
+        id: user._id,
+        email: user.email,
+        tokenValidePour: '30 minutes supplémentaires',
+      });
+
+      // Enregistrer l'événement analytics
+      await Analytics.create({
+        userId: user._id,
+        eventType: 'emailVerification',
+        metadata: {
+          timestamp: new Date(),
+        },
+      });
+    } else {
+      console.log('Utilisateur déjà vérifié:', {
+        id: user._id,
+        email: user.email,
+      });
+    }
 
     res.json({ message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' });
   } catch (error) {

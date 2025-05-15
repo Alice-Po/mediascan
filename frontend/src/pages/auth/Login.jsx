@@ -185,8 +185,7 @@ const Login = () => {
         {/* Note en bas de page */}
         <div className="mt-6">
           <p className="text-xs text-gray-500 text-center">
-            Médiascan est un projet open source financé par sa communauté, sans investisseurs
-            externes ni publicité. Votre soutien est notre seul moteur.
+            Médiascan est un projet d'agrégateur social d'actualité français et open source .
           </p>
         </div>
       </div>

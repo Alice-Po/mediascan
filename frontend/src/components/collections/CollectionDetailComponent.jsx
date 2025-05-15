@@ -24,6 +24,7 @@ const CollectionDetailComponent = ({
   onBrowseArticles,
   withSourcesList = true,
   layoutType = 'full', // 'full' ou 'compact'
+  isOnboarding = false, // Nouvelle prop pour indiquer le contexte d'onboarding
 }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -148,8 +149,8 @@ const CollectionDetailComponent = ({
         </div>
 
         <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-          {/* Bouton Voir les articles */}
-          {onBrowseArticles && (
+          {/* Bouton Voir les articles - n'apparaît pas pendant l'onboarding */}
+          {onBrowseArticles && !isOnboarding && (
             <button
               onClick={handleBrowseArticles}
               className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"

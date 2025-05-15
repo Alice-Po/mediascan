@@ -274,6 +274,7 @@ const PublicCollections = ({ onValidationChange }) => {
           onFollow={handleFollowFromModal}
           followStatus={followStatus[selectedCollection._id]}
           isFollowLoading={followLoading[selectedCollection._id]}
+          isOnboarding={true}
         />
       )}
     </div>

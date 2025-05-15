@@ -28,6 +28,7 @@ const CollectionDetailsModal = ({
   onEditSuccess,
   onSourceRemove, // Fonction de callback quand une source est supprimée
   standalone = false, // Mode autonome (hors page dédiée)
+  isOnboarding = false, // Nouvelle prop pour indiquer le contexte d'onboarding
 }) => {
   // Context et navigation
   const { user } = useContext(AuthContext);
@@ -264,6 +265,7 @@ const CollectionDetailsModal = ({
                 onDelete={handleDelete}
                 onBrowseArticles={handleBrowseArticles}
                 withSourcesList={true}
+                isOnboarding={isOnboarding}
               />
 
               <div className="mt-6 flex justify-end space-x-2 pt-4 border-t">
