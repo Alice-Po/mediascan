@@ -1,21 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import ContributionModal from '../components/common/ContributionModal';
 import Footer from '../components/common/Footer';
 import FeatureList from '../components/features/FeatureList';
 import FAQ from '../components/common/FAQ';
 
 const Funding = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState('');
-  const [selectedAmount, setSelectedAmount] = useState(0);
-
-  const openModal = (feature, amount) => {
-    setSelectedFeature(feature);
-    setSelectedAmount(amount);
-    setModalOpen(true);
-  };
-
   // Define FAQ items for the funding page
   const faqItems = [
     {
@@ -215,7 +204,7 @@ const Funding = () => {
         <div className="border-t border-gray-200 my-8"></div>
 
         <section className="bg-white px-4 py-0 md:p-8 mb-12">
-          <FeatureList openContributionModal={openModal} />
+          <FeatureList />
         </section>
 
         {/* FAQ - Utilisation du composant réutilisable */}
@@ -230,85 +219,6 @@ const Funding = () => {
       </div>
 
       <Footer />
-
-      {/* Modal de contribution */}
-      <ContributionModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        feature={selectedFeature}
-        amount={selectedAmount}
-      />
-    </div>
-  );
-};
-
-// Composant pour les cartes de fonctionnalités
-const FeatureCard = ({ title, goal, current, description, icon, color, openModal }) => {
-  const progress = (current / goal) * 100;
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-800 border-blue-200',
-    green: 'bg-green-100 text-green-800 border-green-200',
-    indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-    amber: 'bg-amber-100 text-amber-800 border-amber-200',
-    purple: 'bg-purple-100 text-purple-800 border-purple-200',
-  };
-
-  const progressBarClasses = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    indigo: 'bg-indigo-500',
-    amber: 'bg-amber-500',
-    purple: 'bg-purple-500',
-  };
-
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className="p-6">
-        <div className="flex items-start gap-4 mb-4">
-          <div
-            className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${colorClasses[color]}`}
-          >
-            {icon}
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500">Objectif : {goal.toLocaleString()}€</p>
-          </div>
-        </div>
-
-        <p className="text-gray-700 mb-6">{description}</p>
-
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="font-medium">{current.toLocaleString()}€ collectés</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className={`h-2.5 rounded-full ${progressBarClasses[color]}`}
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {[5, 10, 20, 50, 100].map((amount) => (
-            <button
-              key={amount}
-              onClick={() => openModal(title, amount)}
-              className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50`}
-            >
-              {amount}€
-            </button>
-          ))}
-          <button
-            onClick={() => openModal(title, 0)}
-            className={`px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50`}
-          >
-            Autre
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
