@@ -7,8 +7,25 @@ import CollectionItem from './CollectionItem';
 import { useCollections } from '../../hooks/useCollections';
 /**
  * Composant pour afficher la liste des collections de l'utilisateur
+ *
+ * @param {Object} props - Propriétés du composant
+ * @param {Array} props.collections - Collections externes à afficher (optionnel)
+ * @param {boolean} props.showViewAction - Afficher le bouton de visualisation (par défaut: true)
+ * @param {boolean} props.showEditAction - Afficher le bouton d'édition (par défaut: true)
+ * @param {boolean} props.showDeleteAction - Afficher le bouton de suppression (par défaut: true)
+ * @param {boolean} props.showShareAction - Afficher le bouton de partage (par défaut: true)
+ * @param {boolean} props.isOnboarding - Indique si le composant est utilisé dans l'onboarding (par défaut: false)
+ * @param {Function} props.onCollectionDeleted - Callback appelé après la suppression réussie d'une collection
  */
-const CollectionsList = ({ collections: externalCollections }) => {
+const CollectionsList = ({
+  collections: externalCollections,
+  showViewAction = true,
+  showEditAction = true,
+  showDeleteAction = true,
+  showShareAction = true,
+  isOnboarding = false,
+  onCollectionDeleted = null,
+}) => {
   const { filterByCollection, filters } = useContext(AppContext);
   const { user } = useContext(AuthContext);
   const {
@@ -89,8 +106,18 @@ const CollectionsList = ({ collections: externalCollections }) => {
 
     try {
       await deleteCollection(collectionToDelete._id);
+
+      // Mettre à jour l'état local après suppression réussie
+      setCollections((prevCollections) =>
+        prevCollections.filter((collection) => collection._id !== collectionToDelete._id)
+      );
+
       setShowDeleteModal(false);
       setCollectionToDelete(null);
+
+      if (onCollectionDeleted) {
+        onCollectionDeleted(collectionToDelete);
+      }
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
     }
@@ -142,15 +169,25 @@ const CollectionsList = ({ collections: externalCollections }) => {
     return (
       <div className="p-4 text-center">
         <p className="text-gray-500 mb-3">Vous n'avez pas encore de collections</p>
-        <Link
-          to="/collections/new"
-          className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-        >
-          Créer une collection
-        </Link>
+        {!isOnboarding && (
+          <Link
+            to="/collections/new"
+            className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          >
+            Créer une collection
+          </Link>
+        )}
       </div>
     );
   }
+
+  // Configuration des actions disponibles
+  const actionConfig = {
+    view: showViewAction,
+    edit: showEditAction,
+    delete: showDeleteAction,
+    share: showShareAction,
+  };
 
   return (
     <div className="collections-list">
@@ -163,11 +200,13 @@ const CollectionsList = ({ collections: externalCollections }) => {
               collection={collection}
               isSelected={filters.collection === collection._id}
               onClick={handleCollectionClick}
-              onDelete={handleDeleteClick}
-              onShare={handleShareClick}
+              onDelete={showDeleteAction ? handleDeleteClick : null}
+              onShare={showShareAction ? handleShareClick : null}
               onSourceRemove={handleSourceRemoved}
               currentUserId={user?._id}
               showActionButtons={true}
+              actionConfig={actionConfig}
+              isOnboarding={isOnboarding}
             />
           ))}
         </div>
@@ -187,11 +226,13 @@ const CollectionsList = ({ collections: externalCollections }) => {
                 collection={collection}
                 isSelected={filters.collection === collection._id}
                 onClick={handleCollectionClick}
-                onShare={handleShareClick}
+                onShare={showShareAction ? handleShareClick : null}
                 onDelete={null}
                 onSourceRemove={handleSourceRemoved}
                 currentUserId={user?._id}
                 showActionButtons={true}
+                actionConfig={actionConfig}
+                isOnboarding={isOnboarding}
               />
             ))}
           </div>
@@ -199,7 +240,7 @@ const CollectionsList = ({ collections: externalCollections }) => {
       )}
 
       {/* Bouton pour réinitialiser les filtres si une collection est sélectionnée */}
-      {filters.collection && (
+      {filters.collection && !isOnboarding && (
         <div className="mt-6 px-4">
           <button
             onClick={() => filterByCollection(null)}

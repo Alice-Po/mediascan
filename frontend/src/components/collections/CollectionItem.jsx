@@ -16,6 +16,19 @@ import CollectionAvatar from './CollectionAvatar';
 /**
  * Composant réutilisable pour afficher un élément de collection
  * Adapté pour les collections personnelles, publiques et suivies
+ *
+ * @param {Object} props - Les propriétés du composant
+ * @param {string} props.collectionId - ID de la collection à afficher
+ * @param {Object} props.collection - Objet collection à afficher directement
+ * @param {boolean} props.isSelected - Indique si cette collection est sélectionnée
+ * @param {Function} props.onClick - Fonction appelée quand l'élément est cliqué
+ * @param {Function} props.onDelete - Fonction appelée quand le bouton supprimer est cliqué
+ * @param {Function} props.onShare - Fonction appelée quand le bouton partager est cliqué
+ * @param {Function} props.onSourceRemove - Fonction appelée quand une source est supprimée
+ * @param {string} props.currentUserId - ID de l'utilisateur actuel
+ * @param {boolean} props.showActionButtons - Afficher ou non les boutons d'action
+ * @param {Object} props.actionConfig - Configuration des boutons d'action à afficher
+ * @param {boolean} props.isOnboarding - Indique si le composant est utilisé dans l'onboarding
  */
 const CollectionItem = ({
   collectionId,
@@ -27,6 +40,8 @@ const CollectionItem = ({
   onSourceRemove,
   currentUserId,
   showActionButtons = true,
+  actionConfig = { view: true, edit: true, delete: true, share: true },
+  isOnboarding = false,
 }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -114,7 +129,13 @@ const CollectionItem = ({
       return; // Ne pas traiter le clic si ça vient d'un bouton d'action
     }
 
-    // 1. Toujours naviguer vers la page de détail de la collection
+    // Si en mode onboarding, juste afficher les détails sans naviguer
+    if (isOnboarding) {
+      setShowDetailsModal(true);
+      return;
+    }
+
+    // 1. Naviguer vers la page de détail de la collection
     navigate(`/collections/${collection._id}`);
 
     // 2. Si la fonction onClick est fournie, l'appeler après la navigation
@@ -228,16 +249,18 @@ const CollectionItem = ({
           {showActionButtons && (
             <div className="flex flex-shrink-0 space-x-1 ml-2">
               {/* Bouton Voir (pour toutes les collections) */}
-              <button
-                className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
-                onClick={handleViewClick}
-                title="Voir les détails de la collection"
-              >
-                <ViewIcon className="h-5 w-5" />
-              </button>
+              {actionConfig.view && (
+                <button
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                  onClick={handleViewClick}
+                  title="Voir les détails de la collection"
+                >
+                  <ViewIcon className="h-5 w-5" />
+                </button>
+              )}
 
               {/* Bouton Partager (uniquement pour les collections publiques) */}
-              {collection.isPublic && onShare && (
+              {actionConfig.share && collection.isPublic && onShare && (
                 <button
                   className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
                   onClick={handleShareClick}
@@ -250,15 +273,17 @@ const CollectionItem = ({
               {/* Boutons Modifier et Supprimer (uniquement pour les collections de l'utilisateur) */}
               {canModify && (
                 <>
-                  <Link
-                    to={`/collections/edit/${collection._id}`}
-                    className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
-                    onClick={(e) => e.stopPropagation()}
-                    title="Modifier cette collection"
-                  >
-                    <EditIcon className="h-5 w-5" />
-                  </Link>
-                  {onDelete && (
+                  {actionConfig.edit && !isOnboarding && (
+                    <Link
+                      to={`/collections/edit/${collection._id}`}
+                      className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Modifier cette collection"
+                    >
+                      <EditIcon className="h-5 w-5" />
+                    </Link>
+                  )}
+                  {actionConfig.delete && onDelete && (
                     <button
                       className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
                       onClick={handleDeleteClick}
@@ -283,6 +308,7 @@ const CollectionItem = ({
           externalCollection={collection}
           onSourceRemove={handleSourceRemove}
           standalone={true}
+          isOnboarding={isOnboarding}
         />
       )}
     </>

@@ -4,6 +4,7 @@ import CollectionItem from '../../../../components/collections/CollectionItem';
 import { AuthContext } from '../../../../context/AuthContext';
 import WarningBanner from '../../../../components/common/WarningBanner';
 import CollectionForm from '../../../../components/collections/CollectionForm';
+import CollectionsList from '../../../../components/collections/CollectionsList';
 
 const CreateCollection = ({ onValidationChange }) => {
   const { user } = useContext(AuthContext);
@@ -77,6 +78,15 @@ const CreateCollection = ({ onValidationChange }) => {
     if (formRef.current && typeof formRef.current.applySuggestion === 'function') {
       formRef.current.applySuggestion(suggestion);
     }
+  };
+
+  // Gestionnaire pour la suppression d'une collection
+  const handleCollectionDeleted = (deletedCollection) => {
+    console.log('Collection supprimée:', deletedCollection._id);
+    // Mettre à jour l'état local en retirant la collection supprimée
+    setUserCollections((prev) =>
+      prev.filter((collection) => collection._id !== deletedCollection._id)
+    );
   };
 
   return (
@@ -174,16 +184,15 @@ const CreateCollection = ({ onValidationChange }) => {
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
             </div>
           ) : (
-            <div className="space-y-2">
-              {userCollections.map((collection) => (
-                <CollectionItem
-                  key={collection._id}
-                  collection={collection}
-                  currentUserId={user?._id}
-                  showActionButtons={true}
-                />
-              ))}
-            </div>
+            <CollectionsList
+              collections={userCollections}
+              showEditAction={false}
+              showViewAction={true}
+              showDeleteAction={true}
+              showShareAction={false}
+              isOnboarding={true}
+              onCollectionDeleted={handleCollectionDeleted}
+            />
           )}
         </div>
       )}
