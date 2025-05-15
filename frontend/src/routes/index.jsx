@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // Layouts
@@ -14,7 +14,6 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import Onboarding from '../pages/auth/onboarding/Onboarding';
 import VerifyEmail from '../pages/auth/VerifyEmail';
-import Premium from '../pages/Premium';
 import Feedback from '../pages/Feedback';
 import TermsOfService from '../pages/TermsOfService';
 import Funding from '../pages/Funding';
@@ -25,12 +24,14 @@ import CollectionDetail from '../pages/CollectionDetail';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
 const AppRoutes = () => {
+  const { user } = useAuth();
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       {/* Routes publiques */}
       <Route element={<PublicAuthLayout />}>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={user ? <Navigate to="/app" replace /> : <Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
@@ -51,7 +52,6 @@ const AppRoutes = () => {
           <Route path="/collections/edit/:id" element={<CollectionForm />} />
           <Route path="/collections/:id" element={<CollectionDetail />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/premium" element={<Premium />} />
         </Route>
       </Route>
     </Routes>
