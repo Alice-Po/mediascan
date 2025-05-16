@@ -19,6 +19,7 @@ const FeatureItem = ({ icon, title, description }) => (
 const LandingPage = () => {
   const { isAuthenticated } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   // Définir contactRef ici, au niveau du composant principal
   const contactRef = useRef(null);
@@ -34,6 +35,18 @@ const LandingPage = () => {
   // Animation d'entrée
   useEffect(() => {
     setIsVisible(true);
+
+    // Masquer l'indicateur de défilement après un certain défilement
+    const handleScroll = () => {
+      if (window.scrollY > 200) {
+        setShowScrollHint(false);
+      } else {
+        setShowScrollHint(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Fonction pour scroller vers une section
@@ -42,6 +55,13 @@ const LandingPage = () => {
       ref.current.scrollIntoView({ behavior: 'smooth' });
     } else {
       console.warn("La référence n'existe pas ou n'est pas encore attachée à un élément DOM");
+    }
+  };
+
+  // Fonction pour scroller vers la section "Qu'est-ce que Médiascan"
+  const scrollToContent = () => {
+    if (whatRef && whatRef.current) {
+      whatRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -80,26 +100,36 @@ const LandingPage = () => {
               </Link>
             </div>
           </div>
-
-          {/* Images */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-12">
-            <div className="hidden md:block w-full max-w-2xl">
-              <img
-                src="/illu-mediascan-desktop.png"
-                alt="Médiascan sur ordinateur"
-                className="w-full h-auto rounded-lg "
-              />
-            </div>
-            <div className="md:hidden w-full max-w-xs">
-              <img
-                src="/illu-mediascan-smartphone.png"
-                alt="Médiascan sur smartphone"
-                className="w-full h-auto rounded-lg mx-auto"
-              />
-            </div>
-          </div>
         </div>
       </section>
+
+      {/* Indicateur de défilement */}
+      <div
+        className={`flex flex-col items-center justify-center py-4 transition-opacity duration-500 ${
+          showScrollHint ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <p className="text-blue-600 font-medium mb-2">Découvrez-en plus sur Médiascan</p>
+        <button
+          onClick={scrollToContent}
+          className="flex flex-col items-center text-blue-500 hover:text-blue-700 transition-colors focus:outline-none"
+          aria-label="Défiler vers le bas"
+        >
+          <svg
+            className="w-8 h-8 animate-bounce"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            ></path>
+          </svg>
+        </button>
+      </div>
 
       {/* Divider */}
       <div className="w-full max-w-6xl mx-auto border-t border-gray-200 my-8"></div>
@@ -114,11 +144,6 @@ const LandingPage = () => {
         {/* Section: Pourquoi Médiascan */}
         <section ref={whyRef} className="bg-white rounded-xl  p-6 md:p-8">
           <WhyMediascan />
-        </section>
-
-        {/* Section: Nous soutenir */}
-        <section ref={supportRef} className="bg-white rounded-xl  p-6 md:p-8">
-          <SupportUs contactRef={contactRef} scrollToSection={scrollToSection} />
         </section>
 
         {/* Section: Contact */}
@@ -166,7 +191,7 @@ const WhatIsMediascan = () => (
         </li>
         <li className="flex items-center gap-2">
           <span className="text-blue-500">✓</span>
-          <span>Les dernières vidéos de vos chaines YouTube</span>
+          <span>Les dernières vidéos de vos chaines préférées</span>
         </li>
         <li className="flex items-center gap-2">
           <span className="text-blue-500">✓</span>
@@ -174,7 +199,11 @@ const WhatIsMediascan = () => (
         </li>
         <li className="flex items-center gap-2">
           <span className="text-blue-500">✓</span>
-          <span>Et peut-être encore d'autres choses</span>
+          <span>Les derniers posts de vos forums </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="text-blue-500">✓</span>
+          <span>Et tellement encore </span>
         </li>
       </ul>
 
@@ -200,11 +229,11 @@ const WhatIsMediascan = () => (
               </svg>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900">Recommandation humaine</h4>
+              <h4 className="font-bold text-gray-900">Flux éditorialisés par des pairs</h4>
               <p className="text-gray-700">
-                Notre approche est centrée sur la recommandation humaine. Les sources sont
-                regroupées dans des collections éditorialisées par des pairs plutôt que sur des
-                tendances algorithmiques induites par des clics.
+                Les sources sont regroupées dans des collections éditorialisées par des pairs plutôt
+                que des régies publicitaires. Switcher de collections selon votre mood. Faites
+                confiance à vos connaissances pour faire les compilations les plus pertinentes
               </p>
             </div>
           </div>
@@ -226,11 +255,10 @@ const WhatIsMediascan = () => (
               </svg>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900">Qualité plutôt que quantité</h4>
+              <h4 className="font-bold text-gray-900">Transparence algorithmique</h4>
               <p className="text-gray-700">
-                Nous privilégions la qualité plutôt que la quantité. Dans un feed avec différentes
-                sources, nous donnons plus de visibilité à celles qui publient moins souvent, car
-                celui qui parle peu a tendance à dire des choses plus intéressantes.
+                Nos algorithmes seront toujours explicables, justifiés et au service de la
+                lisibilité de l'information.
               </p>
             </div>
           </div>
@@ -254,11 +282,9 @@ const WhatIsMediascan = () => (
             <div>
               <h4 className="font-bold text-gray-900">Intelligence collective</h4>
               <p className="text-gray-700">
-                Nous cherchons prudemment la sagesse de la foule : le catalogue de sources est
-                piloté par la communauté et enrichi de métadonnées (financement, parti pris,
-                contexte éditorial) pour permettre une modération éclairée. Même si la foule peut se
-                tromper, la légitimité naît du dialogue et de la contestation, et non de la voix de
-                l'autorité.
+                Les utilisateurs guident les évolutions de la plateforme mais aussi son contenu. Par
+                exemple, le catalogue de sources et leur métadonnées (orientation, partis pris,
+                contexte éditorial) est agrémenté par notre communauté et non par des bots.
               </p>
             </div>
           </div>
@@ -291,11 +317,6 @@ const WhatIsMediascan = () => (
             title="Des crédits pour lire des articles payants"
             description="À l'unité sans abonnement"
           />
-          <FeatureItem
-            icon="🔍"
-            title="Une fonction 'radar'"
-            description="Pour créer des alertes comme le Bon Coin sur les sujets qui vous intéressent"
-          />
 
           <FeatureItem
             icon="🌐"
@@ -304,7 +325,7 @@ const WhatIsMediascan = () => (
           />
           <FeatureItem
             icon="🇫🇷"
-            title="Traduction automatique de contenu"
+            title="Traduction automatique de contenus"
             description="Lire des articles dans votre langue maternelle"
           />
           <FeatureItem
@@ -315,7 +336,7 @@ const WhatIsMediascan = () => (
         </div>
 
         <p className="text-gray-600 italic">
-          Disponible sur le web, avec des versions Android et iOS en développement.
+          Disponible sur le web. Les versions Android et iOS arrivent prochainement.
         </p>
       </div>
     </div>
@@ -328,33 +349,36 @@ const WhyMediascan = () => (
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Pourquoi Médiascan ?</h2>
       <p className="text-gray-700 mb-6">
         <strong>
-          Parce que nous ne sommes pas condamnés à choisir entre rester ignorants ou être manipulés.
+          Parce que l'accès à une information diversifiée et de qualité est un défi qui existe
+          depuis longtemps.
         </strong>
       </p>
       <p className="text-gray-700 mb-6">
-        Le web d'aujourd'hui nous pousse vers l'information qui nous met en colère plutôt que celle
-        qui nous éclaire. Les algorithmes nous enferment dans des bulles où tous pensent comme nous,
-        pendant que l'IA génère du contenu calibré pour capter notre attention, pas pour nourrir
-        notre réflexion.
+        Le paysage médiatique actuel présente des défis structurels bien documentés : concentration
+        des médias, modèles économiques basés sur l'engagement émotionnel, et algorithmes optimisés
+        pour la publicité plutôt que pour la qualité informationnelle.
       </p>
       <p className="text-gray-700 mb-6">
-        Médiascan est né d'un constat simple : pour naviguer dans un monde façonné par des
-        intelligences artificielles,{' '}
+        Selon une étude Reuters de 2023, plus de 65% des Français expriment leur méfiance envers les
+        médias traditionnels, tandis que les plateformes numériques continuent de promouvoir le
+        contenu qui génère le plus d'engagement, généralement le plus clivant.
+      </p>
+      <p className="text-gray-700 mb-6">
+        Médiascan propose une approche différente : remettre le contrôle entre vos mains, en vous
+        permettant de découvrir et partager des collections de sources sélectionnées par des humains
+        en qui vous avez confiance.
+      </p>
+      <p className="text-gray-700 mb-6">
+        Plutôt que des algorithmes opaques qui décident pour vous, nous privilégions les{' '}
+        <strong>recommandations humaines complétées par des outils transparents.</strong>
+      </p>
+      <p className="text-gray-700 mb-6">
+        Si vous cherchez à élargir vos horizons informationnels tout en gardant un regard critique,
+        Médiascan peut vous y aider.{' '}
         <strong>
-          nous avons besoin d'outils qui fasse la place à notre intelligence humaine, pas qui la
-          remplacent.
+          La diversité des perspectives n'est pas un luxe, c'est une nécessité pour comprendre notre
+          monde complexe.
         </strong>
-      </p>
-      <p className="text-gray-700 mb-6">
-        Nous redonnons le pouvoir aux relations humaines dans votre parcours d'information.{' '}
-        <strong>
-          Car la confiance ne se calcule pas avec des algorithmes, elle se bâtit entre personnes.
-        </strong>
-      </p>
-      <p className="text-gray-700 mb-6">
-        Si vous êtes fatigué de vous sentir manipulé par votre fil d'actualités ou dépassé par la
-        polarisation des débats, Médiascan est fait pour vous.{' '}
-        <strong>Reprenez le contrôle sur ce qui mérite votre attention.</strong>
       </p>
     </div>
 
@@ -405,7 +429,7 @@ const WhyMediascan = () => (
           <div>
             <h4 className="font-medium text-gray-900">L'indépendance</h4>
             <p className="text-gray-600">
-              Résistance aux pressions commerciales, développement guidé par les besoins réels
+              Notre graal est un modèle économique basé sur les abonnements des utilisateurs.
             </p>
           </div>
         </div>
@@ -449,174 +473,14 @@ const WhyMediascan = () => (
             </svg>
           </div>
           <div>
-            <h4 className="font-medium text-gray-900">L'humanisme informationnel</h4>
-            <p className="text-gray-600">
-              L'information comme plaisir, respect de votre intelligence
-            </p>
+            <h4 className="font-medium text-gray-900">Le plaisir d'apprendre</h4>
+            <p className="text-gray-600">Fluidité et et stimulation de la curiosité</p>
           </div>
         </div>
       </div>
-
-      <p className="mt-6 text-center font-medium text-gray-900">
-        Notre objectif est de vous aider à comprendre le monde dans sa complexité, pas à le
-        simplifier.
-      </p>
     </div>
   </div>
 );
-
-const SupportUs = ({ contactRef, scrollToSection }) => {
-  return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Comment nous soutenir ?</h2>
-        <p className="text-gray-700 mb-6">
-          Médiascan se développe grâce à votre soutien. Voici comment vous pouvez nous aider :
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-blue-50 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Financement participatif</h3>
-          <ul className="space-y-2">
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>
-                <strong>Faites des promesses de dons</strong> pour les fonctionnalités qui vous
-                semblent prioritaires
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>
-                <strong>Payez uniquement</strong> une fois la fonctionnalité développée et
-                opérationnelle
-              </span>
-            </li>
-          </ul>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4">
-            <a href="/funding" target="_blank">
-              Explorer les fonctionalités
-            </a>
-          </button>
-        </div>
-
-        <div className="bg-green-50 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Vous êtes un média ou un blogueur ?
-          </h3>
-          <ul className="space-y-2">
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-1">•</span>
-              <span>
-                <strong>Contactez-nous</strong> pour participer aux premières expériementations
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-1">•</span>
-              <span>
-                <strong>80% reviennent aux créateurs</strong> de contenus et{' '}
-                <strong>20% financent Médiascan</strong>
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-1">•</span>
-              <span>
-                <strong>L'équipe technique de Médiascan cherche des partenaires</strong> pour tester
-                une implémentation de{' '}
-                <a
-                  href="https://www.taler.net/fr/index.html"
-                  target="_blank"
-                  className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  GNU Taler
-                </a>
-                , solution libre de micro-paiement soutenu par NGI.
-              </span>
-            </li>
-          </ul>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
-            onClick={() => scrollToSection(contactRef)}
-          >
-            Contactez-nous
-          </button>
-        </div>
-
-        <div className="bg-purple-50 rounded-lg p-6 relative">
-          {/* Badge "Bientôt disponible" */}
-          <div className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold shadow-md transform rotate-3">
-            Bientôt disponible
-          </div>
-
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Optez pour un abonnement premium
-          </h3>
-          <p>
-            Devenez membre premium soutenir le developpement du projet et participer aux grandes
-            décisions du projet.
-          </p>
-          <br />
-
-          <ul className="space-y-2 opacity-75">
-            <li className="flex items-start gap-2">
-              <span className="text-purple-500 mt-1">•</span>
-              <span>
-                <strong>4,99€/mois</strong> pour l'accès aux fonctionnalités avancées
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-purple-500 mt-1">•</span>
-              <span>
-                <strong>9,99€/mois</strong> dont 5€ de crédits cumulables pour lire des articles
-                payants
-              </span>
-            </li>
-          </ul>
-
-          {/* Message explicatif */}
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm text-yellow-800">
-            <p className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              Les abonnements premium seront disponibles lors du lancement officiel de Médiascan,
-              prévu pour le dernier trimestre 2025.
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-orange-50 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Faites-nous des retours</h3>
-          <ul className="space-y-2">
-            <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-1">•</span>
-              <span>
-                Faites découvrir notre projet à votre entourage, enquêter sur ses besoins et
-                faites-nous des retours
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-1">•</span>
-              <span>Faites remonter des bugs ou des suggestions</span>
-            </li>
-          </ul>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
-            onClick={() => scrollToSection(contactRef)}
-          >
-            Envoie-nous un message
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const WhoWeAre = () => (
   <div className="">
@@ -649,17 +513,14 @@ const WhoWeAre = () => (
               carreau.
             </p>
             <p>
-              Chaque soir, je scroll l'actualité numérique noyée dans un flux mainstream qui
-              m'ennuie ou m'énerve. L'information de qualité se raréfie et ça m'angoisse.
+              Chaque soir, je scroll l'actualité noyée dans un flux mainstream qui m'ennuie ou
+              m'agace. L'information de qualité se raréfie et cela m'angoisse.
             </p>
+            <p>Qu'est ce que je pourrais faire de bien dans le monde avec mes compétences ?</p>
             <p>
-              J'ai failli échanger mon clavier contre une bêche, déconnecter pour de bon, choisir la
-              simplicité.
-            </p>
-            <p>
-              Mais j'ai choisi de rester dans la partie. Je développe Médiascan de A à Z - design,
-              code, stratégie - portée par une conviction : nous méritons mieux que ce qu'on nous
-              sert.
+              Je développe Médiascan de A à Z - design, code, stratégie - portée par la conviction
+              qu'il y a une place dans le marché francais pour un outil de veille à la fois sérieux,
+              souverain et grand public .
             </p>
             <p>
               Médiascan est mon invitation à ne pas abandonner la compréhension du monde. À choisir
@@ -667,12 +528,12 @@ const WhoWeAre = () => (
               simplifications toxiques.
             </p>
             <p>
-              Ce ne sera pas une révolution. Juste un moyen d'offrir une petite bouée à ceux qui,
-              comme moi, refusent de se noyer dans le bruit ou de s'isoler sur la rive.
+              Cela ne va pas changer le monde mais j'espère juste qu'il pourra offrir une petite
+              bouée à ceux qui, comme moi, refusent de se noyer dans le bruit ou de s'isoler sur la
+              rive.
             </p>
             <p>
               <strong>Alice Poggioli</strong>
-              <span className="text-gray-500 text-sm">, fondatrice</span>
             </p>
           </div>
         </div>
