@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { BookmarkIcon } from '../common/icons';
 
 /**
@@ -11,6 +10,7 @@ import { BookmarkIcon } from '../common/icons';
  * @param {Object} props.article - Données de l'article
  * @param {string} props.article._id - ID de l'article
  * @param {string} props.article.title - Titre de l'article
+ * @param {string} [props.article.link] - Lien externe de l'article
  * @param {string} [props.article.imageUrl] - URL de l'image de l'article (optionnel)
  * @param {string} [props.article.publishedAt] - Date de publication (optionnel)
  * @param {string} [props.article.sourceName] - Nom de la source de l'article (optionnel)
@@ -36,9 +36,24 @@ const ArticleItem = ({ article, onUnsave }) => {
     ? new Date(article.publishedAt).toLocaleDateString()
     : '';
 
+  // Utiliser le lien externe de l'article, ou fallback sur la page détaillée interne
+  const articleUrl = article.link || `/article/${article._id}`;
+
+  // Ouvrir le lien dans un nouvel onglet si c'est un lien externe
+  const isExternalLink = article.link && !article.link.startsWith('/');
+  const linkProps = isExternalLink
+    ? {
+        href: articleUrl,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    : {
+        href: articleUrl,
+      };
+
   return (
     <div className="p-2 hover:bg-gray-50 rounded-md border border-gray-100">
-      <Link to={`/article/${article._id}`} className="block">
+      <a {...linkProps} className="block">
         <div className="flex items-start gap-2">
           {/* Image de l'article si disponible */}
           {article.imageUrl && (
@@ -74,7 +89,7 @@ const ArticleItem = ({ article, onUnsave }) => {
             </div>
           </div>
         </div>
-      </Link>
+      </a>
     </div>
   );
 };

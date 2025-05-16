@@ -278,11 +278,11 @@ const Sidebar = () => {
 
         <div className="p-4">
           {/* Barre de recherche avec contexte */}
-          <SearchBar
+          {/* <SearchBar
             searchInput={searchInput}
             handleSearch={handleSearch}
             clearSearch={clearSearch}
-          />
+          /> */}
 
           {/* Collections */}
           <Accordion title="Collections" defaultOpen={true}>
@@ -369,11 +369,11 @@ const Sidebar = () => {
           {!isSidebarCollapsed && (
             <>
               {/* Barre de recherche avec contexte */}
-              <SearchBar
+              {/* <SearchBar
                 searchInput={searchInput}
                 handleSearch={handleSearch}
                 clearSearch={clearSearch}
-              />
+              /> */}
 
               {/* Collections */}
               <Accordion title="Collections" defaultOpen={true}>
