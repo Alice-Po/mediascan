@@ -516,7 +516,7 @@ const WhoWeAre = () => (
               Chaque soir, je scroll l'actualité noyée dans un flux mainstream qui m'ennuie ou
               m'agace. L'information de qualité se raréfie et cela m'angoisse.
             </p>
-            <p>Qu'est ce que je pourrais faire de bien dans le monde avec mes compétences ?</p>
+            <p>Qu'est ce que je pourrais faire de bien dans ce monde avec mes compétences ?</p>
             <p>
               Je développe Médiascan de A à Z - design, code, stratégie - portée par la conviction
               qu'il y a une place dans le marché francais pour un outil de veille à la fois sérieux,
