@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
-import { fetchUserSources, fetchAllSources } from '../api/sourcesApi';
+import { fetchSourcesFromUserCollections, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
 import { useCollections } from '../hooks/useCollections';
 
@@ -183,7 +183,7 @@ export const AppProvider = ({ children }) => {
       try {
         setLoadingSources(true);
         const [userSourcesData, allSourcesData] = await Promise.all([
-          fetchUserSources(),
+          fetchSourcesFromUserCollections(),
           fetchAllSources(),
         ]);
 
@@ -319,7 +319,7 @@ export const AppProvider = ({ children }) => {
   const loadUserSources = async () => {
     try {
       setLoadingSources(true);
-      const sources = await fetchUserSources();
+      const sources = await fetchSourcesFromUserCollections();
       console.log('Sources actives chargées:', sources);
       setUserSources(sources);
     } catch (error) {

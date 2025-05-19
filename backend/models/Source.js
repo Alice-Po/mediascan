@@ -28,6 +28,8 @@ const SourceSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ['independent', 'public', 'private', 'cooperative', 'association', 'other'],
+        default: undefined,
+        required: false,
       },
       details: {
         type: String,

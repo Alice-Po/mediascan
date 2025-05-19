@@ -108,7 +108,7 @@ export const getAllSources = async (req, res) => {
 // @desc    Récupérer les sources de l'utilisateur qu'elles soient dans ses collections ou les collections qu'il suit. L'objectif est d'optimiser le chargement des sources nécéssaires au parcours utilisateurs.
 // @route   GET /api/sources/user
 // @access  Private
-export const getUserSources = async (req, res) => {
+export const getSourcesFromUserCollections = async (req, res) => {
   try {
     const userId = req.user._id;
 
@@ -171,15 +171,15 @@ export const getUserSources = async (req, res) => {
   }
 };
 
-// @desc    Ajouter une source aux sources de l'utilisateur
-// @route   POST /api/sources/user
+// @desc    Créer une nouvelle source dans le catalogue (l'utilisateur en est le créateur)
+// @route   POST /api/sources
 // @access  Private
-export const addUserSource = async (req, res) => {
+export const createSource = async (req, res) => {
   try {
-    const { rssUrl, orientation } = req.body;
+    const { name, url, rssUrl, description, funding, orientation, collectionId } = req.body;
     const userId = req.user._id;
 
-    // 1. Vérifier si la source existe déjà
+    // 1. Vérifier si la source existe déjà (par RSS)
     let source = await Source.findOne({ rssUrl });
     let sourceCreated = false;
 
@@ -203,22 +203,26 @@ export const addUserSource = async (req, res) => {
           error: validation.error,
         });
       }
-
       try {
-        // 4. Créer la source si valide
+        // 4. Créer la source avec tous les champs transmis (priorité au formulaire, fallback sur RSS)
         source = await Source.create({
-          name: validation.feed.title || 'Source sans nom',
+          name: name || validation.feed.title || 'Source sans nom',
           rssUrl,
-          url: validation.feed.link || rssUrl,
-          description: validation.feed.description || '',
-          faviconUrl: `https://www.google.com/s2/favicons?domain=${validation.feed.link}`,
+          url: url || validation.feed.link || rssUrl,
+          description: description || validation.feed.description || '',
+          faviconUrl: `https://www.google.com/s2/favicons?domain=${(
+            url ||
+            validation.feed.link ||
+            ''
+          ).replace(/^https?:\/\//, '')}`,
           lastValidated: new Date(),
           status: 'active',
-          orientation: orientation,
+          funding: funding || {},
+          orientation: orientation || [],
+          isUserAdded: true,
+          addedBy: userId,
         });
         sourceCreated = true;
-
-        // Vérifier que la source a bien été créée
         if (!source || !source._id) {
           throw new Error('Échec de la création de la source dans la base de données');
         }
@@ -232,116 +236,56 @@ export const addUserSource = async (req, res) => {
       }
     }
 
-    // Log pour débugger
-    console.log('Source créée/trouvée:', {
-      id: source._id,
-      name: source.name,
-      orientation: source.orientation,
-    });
-
-    try {
-      // 5. Rechercher la collection par défaut "Mes sources" de l'utilisateur
-      const Collection = mongoose.model('Collection');
-      let defaultCollection = await Collection.findOne({
-        userId,
-        name: 'Mes sources',
+    // 5. Vérifier la collection cible
+    const Collection = mongoose.model('Collection');
+    const targetCollection = await Collection.findOne({ _id: collectionId, userId });
+    if (!targetCollection) {
+      // Si la collection n'existe pas ou n'appartient pas à l'utilisateur
+      if (sourceCreated) await Source.findByIdAndDelete(source._id);
+      return res.status(400).json({
+        success: false,
+        message: "La collection spécifiée n'existe pas ou ne vous appartient pas.",
       });
-
-      // Créer la collection par défaut si elle n'existe pas
-      if (!defaultCollection) {
-        console.log(
-          'Création de la collection par défaut "Mes sources" pour l\'utilisateur:',
-          userId
-        );
-        defaultCollection = await Collection.create({
-          name: 'Mes sources',
-          description: 'Collection par défaut pour vos sources',
-          userId,
-          sources: [source._id],
-          colorHex: '#3B82F6', // Bleu par défaut
-        });
-
-        // Ajouter la collection à l'utilisateur
-        await User.findByIdAndUpdate(userId, {
-          $addToSet: { collections: defaultCollection._id },
-        });
-
-        console.log('Collection par défaut créée avec succès:', {
-          id: defaultCollection._id,
-          name: defaultCollection.name,
-        });
-      } else {
-        // Ajouter la source à la collection existante si elle n'y est pas déjà
-        if (!defaultCollection.sources.some((s) => s.toString() === source._id.toString())) {
-          console.log('Ajout de la source à la collection par défaut existante');
-          await Collection.findByIdAndUpdate(defaultCollection._id, {
-            $addToSet: { sources: source._id },
-          });
-        } else {
-          console.log('La source est déjà dans la collection par défaut');
-        }
-      }
-
-      // 6. Enregistrer l'événement analytics
-      if (sourceCreated) {
-        await Analytics.create({
-          userId,
-          eventType: 'sourceAdd',
-          metadata: {
-            sourceName: source.name,
-            sourceUrl: source.url,
-            sourceId: source._id,
-            orientation: source.orientation,
-          },
-        });
-      }
-
-      res.status(201).json({
-        success: true,
-        data: source,
-      });
-    } catch (error) {
-      // Si l'ajout à l'utilisateur échoue et que c'était une nouvelle source,
-      // on supprime la source créée pour maintenir la cohérence
-      if (sourceCreated) {
-        await Source.findByIdAndDelete(source._id);
-      }
-      throw error;
     }
+
+    // 6. Ajouter la source à la collection si pas déjà présente
+    if (!targetCollection.sources.some((s) => s.toString() === source._id.toString())) {
+      targetCollection.sources.push(source._id);
+      await targetCollection.save();
+    }
+
+    // 7. Enregistrer l'événement analytics si besoin
+    if (sourceCreated) {
+      await Analytics.create({
+        userId,
+        eventType: 'sourceAdd',
+        metadata: {
+          sourceName: source.name,
+          sourceUrl: source.url,
+          sourceId: source._id,
+          orientation: source.orientation,
+        },
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: source,
+    });
   } catch (error) {
-    console.error('Error in addUserSource:', error);
+    console.error('Error in createSource:', error);
     res.status(400).json({
       success: false,
-      message: "Impossible d'ajouter la source",
+      message: 'Impossible de créer la source',
       error: error.message,
     });
   }
 };
 
-/**
- * @desc    Supprimer définitivement une source personnalisée ajoutée par l'utilisateur
- * @route   DELETE /api/sources/user/:id
- * @access  Private
- *
- * @example
- * // Utilisation côté frontend:
- * await axios.delete(`/api/sources/user/${sourceId}`);
- *
- * @description
- * Cette fonction supprime DÉFINITIVEMENT une source de la base de données.
- * Elle ne doit être utilisée que pour les sources personnalisées créées par l'utilisateur.
- *
- * ATTENTION:
- * - Cette fonction supprime la source de toutes les collections de l'utilisateur
- * - La source est complètement effacée de la base de données
- * - Ne pas utiliser pour les sources système/prédéfinies (utiliser removeSourceFromAllCollections)
- * - Vérifier la propriété isUserAdded=true avant suppression
- *
- * Cas d'usage:
- * - Lorsqu'un utilisateur souhaite supprimer une source RSS personnalisée qu'il a lui-même créée
- * - Lorsqu'une source personnalisée n'est plus fonctionnelle et doit être retirée
- */
-export const deleteUserSource = async (req, res) => {
+// @desc    Supprimer une source personnalisée du catalogue (seul le créateur peut supprimer)
+// @route   DELETE /api/sources/:id
+// @access  Private
+export const deleteSource = async (req, res) => {
   try {
     const sourceId = req.params.id;
     const userId = req.user._id;
@@ -493,7 +437,7 @@ export const getSourceById = async (req, res) => {
  * ATTENTION:
  * - La source reste dans la base de données et reste disponible pour d'autres utilisateurs
  * - À utiliser pour les sources système/prédéfinies que l'utilisateur ne veut plus suivre
- * - Pour supprimer complètement une source personnalisée, utiliser deleteUserSource
+ * - Pour supprimer complètement une source personnalisée, utiliser deleteSource
  *
  * Cas d'usage:
  * - Lorsqu'un utilisateur ne souhaite plus suivre une source dans ses collections

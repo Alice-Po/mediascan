@@ -1,26 +1,6 @@
 import api from './index';
 
 /**
- * Récupérer les sources activées par l'utilisateur
- * @returns {Promise} Liste des sources activées par l'utilisateur
- */
-export const fetchUserSources = async () => {
-  try {
-    const response = await api.get('/sources/user');
-
-    // S'assurer que les sources sont marquées comme enabled
-    const sources = Array.isArray(response.data)
-      ? response.data.map((source) => ({ ...source, enabled: true }))
-      : [];
-
-    return sources;
-  } catch (error) {
-    console.error('Error fetching user sources:', error);
-    throw error;
-  }
-};
-
-/**
  * Récupérer toutes les sources disponibles
  * @returns {Promise} Liste de toutes les sources disponibles
  */
@@ -35,48 +15,19 @@ export const fetchAllSources = async () => {
 };
 
 /**
- * Ajouter une source à l'utilisateur
- * @param {Object} sourceData - Données de la source
- * @returns {Promise} Source ajoutée
+ * Créer une source personnalisée et l'ajouter à une collection
+ * @param {Object} sourceData - Données de la source à ajouter
+ * @returns {Promise} Statut de la création
  */
-export const addUserSource = async (sourceData) => {
+export const createSource = async (sourceData) => {
   try {
-    console.log('Adding source with data:', sourceData); // Debug log
-    const response = await api.post('/sources/user', {
-      ...sourceData,
-      isUserAdded: true, // Ajouter ce flag
-    });
+    const response = await api.post('/sources', sourceData);
     return response.data;
   } catch (error) {
-    console.error('Error details:', error.response?.data); // Debug log
-    throw error;
-  }
-};
-
-/**
- * Activer une source pour l'utilisateur
- * @param {string} sourceId - ID de la source à activer
- */
-export const enableUserSource = async (sourceId) => {
-  try {
-    const response = await api.post(`/sources/user/${sourceId}/enable`);
-    return response.data;
-  } catch (error) {
-    console.error('Error enabling source:', error);
-    throw error;
-  }
-};
-
-/**
- * Désactiver une source pour l'utilisateur
- * @param {string} sourceId - ID de la source à désactiver
- */
-export const disableUserSource = async (sourceId) => {
-  try {
-    const response = await api.post(`/sources/user/${sourceId}/disable`);
-    return response.data;
-  } catch (error) {
-    console.error('Error disabling source:', error);
+    console.error(
+      'Erreur lors de la création de la source:',
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -86,9 +37,9 @@ export const disableUserSource = async (sourceId) => {
  * @param {string} sourceId - ID de la source
  * @returns {Promise} Statut de la suppression
  */
-export const deleteUserSource = async (sourceId) => {
+export const deleteSource = async (sourceId) => {
   try {
-    const response = await api.delete(`/sources/user/${sourceId}`);
+    const response = await api.delete(`/sources/${sourceId}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -101,6 +52,16 @@ export const fetchSourceById = async (sourceId) => {
     return response.data.data;
   } catch (error) {
     console.error('Erreur dans fetchSourceById:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const fetchSourcesFromUserCollections = async () => {
+  try {
+    const response = await api.get('/sources/user-collections');
+    return response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des sources des collections utilisateur:', error);
     throw error;
   }
 };

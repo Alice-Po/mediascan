@@ -1,9 +1,8 @@
 import express from 'express';
 import {
   getAllSources,
-  getUserSources,
-  addUserSource,
-  deleteUserSource,
+  getSourcesFromUserCollections,
+  deleteSource,
   validateRssUrl,
   getSourceById,
   removeSourceFromAllCollections,
@@ -17,12 +16,10 @@ const router = express.Router();
 router.get('/', getAllSources);
 
 // Routes protégées (nécessitant une authentification)
-router.get('/user', protect, getUserSources);
-router.post('/user', protect, addUserSource);
-router.delete('/user/:id', protect, deleteUserSource);
 router.post('/validate-rss', protect, validateRssUrl);
 router.post('/user/:sourceId/remove-from-collections', protect, removeSourceFromAllCollections);
 router.get('/:id', protect, getSourceById);
+router.get('/user-collections', protect, getSourcesFromUserCollections);
 
 // Route pour vérifier un flux RSS
 router.post('/check-rss', async (req, res) => {
