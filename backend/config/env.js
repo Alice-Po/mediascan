@@ -8,9 +8,32 @@ const __dirname = path.dirname(__filename);
 // Déterminer le mode d'exécution
 const mode = process.env.NODE_ENV || 'development';
 
-// Charger le fichier d'environnement approprié
-const envFile = `.env.${mode}`;
-dotenv.config({ path: path.resolve(__dirname, '..', envFile) });
+// Configuration par défaut pour les tests
+const testConfig = {
+  MONGODB_URI: 'mongodb://localhost:27017/test',
+  JWT_SECRET: 'test-secret-key',
+  CORS_ORIGIN: 'http://localhost:5173',
+  PORT: 5000,
+  MAX_USER_SOURCES: 10,
+  ARTICLE_RETENTION_DAYS: 7,
+  MAX_ARTICLES_PER_PAGE: 50,
+  FRONTEND_URL: 'http://localhost:5173',
+  ALLOWED_HOSTS: 'localhost',
+  LISTEN_INTERFACE: 'localhost',
+  TRUSTED_PROXIES: '127.0.0.1',
+  ALLOWED_ORIGINS: 'http://localhost:5173',
+};
+
+// En mode test, utiliser la configuration de test
+if (mode === 'test') {
+  Object.entries(testConfig).forEach(([key, value]) => {
+    process.env[key] = value;
+  });
+} else {
+  // Charger le fichier d'environnement approprié pour les autres modes
+  const envFile = `.env.${mode}`;
+  dotenv.config({ path: path.resolve(__dirname, '..', envFile) });
+}
 
 // Vérifier les variables requises
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'CORS_ORIGIN'];

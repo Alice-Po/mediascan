@@ -23,6 +23,10 @@ import articleRoutes from './routes/articleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import collectionRoutes from './routes/collectionRoutes.js';
 
+// Variable pour stocker la connexion MongoDB
+let mongoConnection;
+let server;
+
 // Fonction pour logger les infos de l'application selon le mode
 const logAppInfo = (mode) => {
   console.log('\n=== MediaScan Server ===');
@@ -155,35 +159,54 @@ fetchAllSources().catch((error) => {
   console.error('Erreur lors de la récupération initiale des flux RSS:', error);
 });
 
-// Connexion MongoDB et démarrage du serveur
-mongoose
-  .connect(config.mongoUri)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    // En production, on écoute sur toutes les interfaces
-    const listenInterface =
-      config.mode === 'production' ? '0.0.0.0' : config.security.listenInterface;
+// Fonction pour arrêter proprement le serveur
+const gracefulShutdown = async () => {
+  console.log('\nArrêt du serveur...');
 
-    app.listen(config.port, listenInterface, async () => {
-      logAppInfo(config.mode);
-
-      // Lancer la vérification des sources uniquement en développement
-      if (process.env.NODE_ENV === 'development') {
-        await checkAllSources();
-      }
+  // Arrêter le serveur HTTP
+  if (server) {
+    await new Promise((resolve) => {
+      server.close(resolve);
     });
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err);
-  });
+    console.log('Serveur HTTP arrêté');
+  }
+
+  // Fermer la connexion MongoDB
+  if (mongoConnection) {
+    await mongoose.disconnect();
+    console.log('Connexion MongoDB fermée');
+  }
+
+  process.exit(0);
+};
 
 // Gestion de l'arrêt propre du serveur
-process.on('SIGTERM', () => {
-  console.log('SIGTERM reçu. Arrêt du serveur...');
-  process.exit(0);
-});
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
 
-process.on('SIGINT', () => {
-  console.log('SIGINT reçu. Arrêt du serveur...');
-  process.exit(0);
-});
+// Connexion MongoDB et démarrage du serveur
+if (config.mode !== 'test') {
+  mongoose
+    .connect(config.mongoUri)
+    .then((conn) => {
+      mongoConnection = conn;
+      console.log('Connected to MongoDB');
+      // En production, on écoute sur toutes les interfaces
+      const listenInterface =
+        config.mode === 'production' ? '0.0.0.0' : config.security.listenInterface;
+
+      server = app.listen(config.port, listenInterface, async () => {
+        logAppInfo(config.mode);
+
+        // Lancer la vérification des sources uniquement en développement
+        if (process.env.NODE_ENV === 'development') {
+          await checkAllSources();
+        }
+      });
+    })
+    .catch((err) => {
+      console.error('MongoDB connection error:', err);
+    });
+}
+
+export default app;
