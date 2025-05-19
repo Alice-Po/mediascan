@@ -20,9 +20,20 @@ import {
  * @param {Function} props.onError - Callback appelé en cas d'erreur
  * @param {Function} props.setFormRef - Fonction pour exposer l'API du formulaire au parent
  * @param {boolean} props.hideNavigation - Masque les boutons de navigation
+ * @param {Function} props.onCollectionCreated - Callback appelé après la création d'une collection dans le processus d'onboarding
  */
 const CollectionForm = forwardRef(
-  ({ isOnboarding = false, onSuccess, onError, setFormRef, hideNavigation = false }, ref) => {
+  (
+    {
+      isOnboarding = false,
+      onSuccess,
+      onError,
+      setFormRef,
+      hideNavigation = false,
+      onCollectionCreated,
+    },
+    ref
+  ) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
@@ -207,6 +218,8 @@ const CollectionForm = forwardRef(
 
           if (onSuccess) {
             onSuccess(savedCollection);
+          } else if (isOnboarding && onCollectionCreated) {
+            onCollectionCreated(savedCollection);
           } else {
             navigate(`/collections/${savedCollection._id}`);
           }

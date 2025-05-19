@@ -5,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import CollectionItem from './CollectionItem';
+import DefaultCollectionGuide from './DefaultCollectionGuide';
 import { useCollections } from '../../hooks/useCollections';
 /**
  * Composant pour afficher la liste des collections de l'utilisateur
@@ -17,6 +18,8 @@ import { useCollections } from '../../hooks/useCollections';
  * @param {boolean} props.showShareAction - Afficher le bouton de partage (par défaut: true)
  * @param {boolean} props.isOnboarding - Indique si le composant est utilisé dans l'onboarding (par défaut: false)
  * @param {Function} props.onCollectionDeleted - Callback appelé après la suppression réussie d'une collection
+ * @param {boolean} props.showDefaultGuide - Afficher le guide de collection par défaut (par défaut: false)
+ * @param {Function} props.onCloseDefaultGuide - Callback appelé lors de la fermeture du guide de collection par défaut
  */
 const CollectionsList = ({
   collections: externalCollections,
@@ -26,6 +29,8 @@ const CollectionsList = ({
   showShareAction = true,
   isOnboarding = false,
   onCollectionDeleted = null,
+  showDefaultGuide = false,
+  onCloseDefaultGuide = null,
 }) => {
   const { filterByCollection, filters } = useContext(AppContext);
   const { user } = useContext(AuthContext);
@@ -232,6 +237,14 @@ const CollectionsList = ({
           ))}
         </div>
       </div>
+
+      {/* Guide de collection par défaut */}
+      {showDefaultGuide && personalCollections.length > 0 && (
+        <DefaultCollectionGuide
+          collectionId={personalCollections[0]._id}
+          onClose={onCloseDefaultGuide}
+        />
+      )}
 
       {/* Collections suivies */}
       {followedCollections.length > 0 && (
