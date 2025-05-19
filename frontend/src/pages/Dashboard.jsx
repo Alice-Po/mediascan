@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import ArticleList from '../components/articles/ArticleList';
+import EmptyState from '../components/articles/EmptyState';
 
 /**
  * Page principale du Dashboard
@@ -20,6 +21,7 @@ const Dashboard = () => {
     isSidebarCollapsed,
     filterByCollection,
     setFilters,
+    collections,
   } = useContext(AppContext);
   const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
@@ -117,6 +119,9 @@ const Dashboard = () => {
     });
   };
 
+  // Trouver la collection actuellement sélectionnée
+  const selectedCollection = collections?.find((c) => c._id === filters.collection);
+
   if (loadingArticles && articles.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -151,7 +156,14 @@ const Dashboard = () => {
           } md:max-w-[800px] lg:max-w-[900px] xl:max-w-[1000px] mx-auto transition-all duration-300 ease-in-out`}
         >
           <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
-            <ArticleList />
+            {articles.length === 0 ? (
+              <EmptyState
+                collectionName={selectedCollection?.name}
+                collectionId={selectedCollection?._id}
+              />
+            ) : (
+              <ArticleList />
+            )}
           </div>
         </div>
       </div>
