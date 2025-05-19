@@ -5,6 +5,7 @@ import PremiumBanner from '../premium/PremiumBanner';
 import { SimpleSourceItem } from './SourceItem';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import TagInputForm from '../common/TagInputForm';
+import ArticlePreview from '../articles/ArticlePreview';
 
 const AddSourceForm = ({
   onSubmit,
@@ -33,6 +34,7 @@ const AddSourceForm = ({
     orientation: [],
     collectionId: '',
   });
+  const [previewArticles, setPreviewArticles] = useState([]);
 
   // Fonction pour vérifier le flux RSS
   const checkRssFeed = async (url) => {
@@ -66,6 +68,12 @@ const AddSourceForm = ({
           status: 'success',
           message: 'Flux RSS valide !',
         });
+        // Transformer les articles pour s'assurer que nous avons la date de publication
+        const transformedArticles = data.items.map((item) => ({
+          ...item,
+          pubDate: item.pubDate || item.isoDate || item.date || new Date().toISOString(),
+        }));
+        setPreviewArticles(transformedArticles);
       }
 
       return data;
@@ -75,6 +83,7 @@ const AddSourceForm = ({
         status: 'error',
         message: 'Flux RSS invalide ou inaccessible',
       });
+      setPreviewArticles([]);
       return null;
     }
   };
@@ -331,6 +340,18 @@ const AddSourceForm = ({
                     </svg>
                     {formErrors.rssUrl}
                   </p>
+                )}
+
+                {/* Aperçu des articles */}
+                {rssValidationState.status === 'success' && previewArticles.length > 0 && (
+                  <div className="mt-4 border-t border-gray-200 pt-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Derniers articles</h4>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {previewArticles.map((article, index) => (
+                        <ArticlePreview key={index} article={article} />
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
