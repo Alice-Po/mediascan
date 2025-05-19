@@ -5,6 +5,17 @@ import ContactForm from '../components/common/ContactForm';
 import Footer from '../components/common/Footer';
 import Accordion from '../components/common/Accordion';
 import FAQ from '../components/common/FAQ';
+import {
+  ChevronDownIcon,
+  UserGroupIcon,
+  LightBulbIcon,
+  UsersIcon,
+  LightningIcon,
+  ScaleIcon,
+  ShieldLockIcon,
+  ArrowRightIcon,
+} from '../components/common/icons';
+
 // Feature Item Component
 const FeatureItem = ({ icon, title, description }) => (
   <div className="flex gap-4 items-start">
@@ -115,19 +126,7 @@ const LandingPage = () => {
           className="flex flex-col items-center text-blue-500 hover:text-blue-700 transition-colors focus:outline-none"
           aria-label="Défiler vers le bas"
         >
-          <svg
-            className="w-8 h-8 animate-bounce"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            ></path>
-          </svg>
+          <ChevronDownIcon />
         </button>
       </div>
 
@@ -145,6 +144,36 @@ const LandingPage = () => {
         <section ref={whyRef} className="bg-white rounded-xl  p-6 md:p-8">
           <WhyMediascan />
         </section>
+
+        <div className="mt-16 mb-8 relative">
+          {/* Fond décoratif */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl transform -rotate-1"></div>
+
+          {/* Contenu du CTA */}
+          <div className="relative bg-white rounded-2xl p-8 shadow-xl border border-blue-100">
+            <div className="text-center space-y-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Découvrez Médiascan maintenant
+              </h2>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                <Link
+                  to="/register"
+                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2 group"
+                >
+                  <span>Créer un compte gratuit</span>
+                  <ArrowRightIcon className="transform group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl border-2 border-blue-600 hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  Se connecter
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Section: Contact */}
         <section ref={contactRef} id="contact" className="bg-white rounded-xl  p-6 md:p-8">
@@ -214,19 +243,7 @@ const WhatIsMediascan = () => (
         <div className="space-y-4">
           <div className="flex gap-4 items-start">
             <div className="hidden sm:block bg-blue-100 p-2 rounded-full flex-shrink-0">
-              <svg
-                className="w-6 h-6 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
+              <UserGroupIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
               <h4 className="font-bold text-gray-900">Flux éditorialisés par des pairs</h4>
@@ -240,19 +257,7 @@ const WhatIsMediascan = () => (
 
           <div className="flex gap-4 items-start">
             <div className="hidden sm:block bg-blue-100 p-2 rounded-full flex-shrink-0">
-              <svg
-                className="w-6 h-6 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
+              <LightBulbIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
               <h4 className="font-bold text-gray-900">Transparence algorithmique</h4>
@@ -265,19 +270,7 @@ const WhatIsMediascan = () => (
 
           <div className="flex gap-4 items-start">
             <div className="hidden sm:block bg-blue-100 p-2 rounded-full flex-shrink-0">
-              <svg
-                className="w-6 h-6 text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
+              <UsersIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
               <h4 className="font-bold text-gray-900">Intelligence collective</h4>
@@ -364,21 +357,28 @@ const WhyMediascan = () => (
         contenu qui génère le plus d'engagement, généralement le plus clivant.
       </p>
       <p className="text-gray-700 mb-6">
-        Médiascan propose une approche différente : remettre le contrôle entre vos mains, en vous
-        permettant de découvrir et partager des collections de sources sélectionnées par des humains
-        en qui vous avez confiance.
+        Un nouveau défi émerge : de plus en plus de personnes se tournent vers les agents
+        conversationnels pour s'informer sur des sujets précis. Cette pratique, bien que pratique,
+        met en péril le modèle économique des créateurs de contenu dont le travail est aspiré par
+        ces systèmes, tout en nous privant de la richesse des perspectives multiples.
       </p>
       <p className="text-gray-700 mb-6">
-        Plutôt que des algorithmes opaques qui décident pour vous, nous privilégions les{' '}
-        <strong>recommandations humaines complétées par des outils transparents.</strong>
+        <strong>
+          Médiascan est un réflexion continue pour garder du controle et de l'étonnement dans notre
+          parcours informationnel.
+        </strong>
+      </p>
+      <p className="text-gray-700 mb-6">
+        Notre service fonctionne comme une{' '}
+        <strong>bibliothèque de revues éditorialisée par des personnes</strong> dont vous respectez
+        le sérieux. C'est plus qu'une façon de s'informer : c'est une invitation à s'étonner, à
+        élargir ses horizons, un divertissement qui augmente votre champ de perspectives. Nous
+        rendons accessible au plus grand nombre la configuration de ses flux d'information et la
+        découverte de sources pépites, habituellement réservées aux initiés ou aux professionnels.
       </p>
       <p className="text-gray-700 mb-6">
         Si vous cherchez à élargir vos horizons informationnels tout en gardant un regard critique,
         Médiascan peut vous y aider.{' '}
-        <strong>
-          La diversité des perspectives n'est pas un luxe, c'est une nécessité pour comprendre notre
-          monde complexe.
-        </strong>
       </p>
     </div>
 
@@ -390,19 +390,7 @@ const WhyMediascan = () => (
       <div className="space-y-6">
         <div className="flex gap-4 items-start">
           <div className="bg-green-100 p-2 rounded-full">
-            <svg
-              className="w-6 h-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
+            <LightningIcon className="w-6 h-6 text-green-600" />
           </div>
           <div>
             <h4 className="font-medium text-gray-900">La transparence technique</h4>
@@ -412,19 +400,7 @@ const WhyMediascan = () => (
 
         <div className="flex gap-4 items-start">
           <div className="bg-green-100 p-2 rounded-full">
-            <svg
-              className="w-6 h-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-              />
-            </svg>
+            <ScaleIcon className="w-6 h-6 text-green-600" />
           </div>
           <div>
             <h4 className="font-medium text-gray-900">L'indépendance</h4>
@@ -436,19 +412,7 @@ const WhyMediascan = () => (
 
         <div className="flex gap-4 items-start">
           <div className="bg-green-100 p-2 rounded-full">
-            <svg
-              className="w-6 h-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
-              />
-            </svg>
+            <ShieldLockIcon className="w-6 h-6 text-green-600" />
           </div>
           <div>
             <h4 className="font-medium text-gray-900">Le pluralisme intellectuel</h4>
@@ -458,19 +422,7 @@ const WhyMediascan = () => (
 
         <div className="flex gap-4 items-start">
           <div className="bg-green-100 p-2 rounded-full">
-            <svg
-              className="w-6 h-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
+            <UsersIcon className="w-6 h-6 text-green-600" />
           </div>
           <div>
             <h4 className="font-medium text-gray-900">Le plaisir d'apprendre</h4>
