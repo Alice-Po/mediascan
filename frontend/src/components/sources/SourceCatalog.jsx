@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchAllSources } from '../../api/sourcesApi';
+import { fetchAllSources, createSource } from '../../api/sourcesApi';
 import AddSourceForm from './AddSourceForm';
 import SourceCard from './SourceCard';
 
@@ -9,7 +9,6 @@ import SourceCard from './SourceCard';
  */
 const SourceCatalog = ({
   onAddToCollection,
-  onAddSource,
   collectionSources = [], // Sources déjà dans la collection
   userCollections = [], // Collections de l'utilisateur
 }) => {
@@ -84,15 +83,11 @@ const SourceCatalog = ({
   // Gérer la soumission du formulaire d'ajout de source
   const handleSubmitSource = async (sourceData) => {
     try {
-      if (onAddSource) {
-        await onAddSource(sourceData);
-        setShowAddSourceModal(false);
-        setFormErrors({});
-        // Recharger les sources pour mettre à jour la liste
-        await reloadSources();
-      } else {
-        console.log("Fonctionnalité d'ajout de source non implémentée", sourceData);
-      }
+      await createSource(sourceData);
+      setShowAddSourceModal(false);
+      setFormErrors({});
+      // Recharger les sources pour mettre à jour la liste
+      await reloadSources();
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source:", error);
       setFormErrors(error.response?.data?.errors || {});

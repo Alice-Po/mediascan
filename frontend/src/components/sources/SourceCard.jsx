@@ -155,11 +155,10 @@ const SourceCard = ({ source, onAddToCollection, isActive }) => {
                   e.stopPropagation();
                   onAddToCollection(source);
                 }}
-                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 transition-colors px-2 py-1 rounded-md hover:bg-indigo-50 font-medium text-sm"
+                className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded hover:bg-indigo-50"
                 title="Ajouter à une collection"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span>Ajouter</span>
               </button>
             )}
 

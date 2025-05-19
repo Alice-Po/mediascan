@@ -12,10 +12,8 @@ const CreateCollection = ({ onValidationChange }) => {
   const [error, setError] = useState(null);
   const [userCollections, setUserCollections] = useState([]);
   const [collectionsLoading, setCollectionsLoading] = useState(false);
-  const [showDefaultGuide, setShowDefaultGuide] = useState(false);
   const lastValidationValue = useRef(false);
   const formRef = useRef(null);
-  const collectionsSectionRef = useRef(null);
 
   // Vérifier si au moins une collection existe
   const isCurrentlyValid = userCollections.length > 0;
@@ -70,26 +68,12 @@ const CreateCollection = ({ onValidationChange }) => {
     setSuccess(true);
     setError(null);
     await loadUserCollections();
-    setShowDefaultGuide(true);
 
     // Réinitialiser le formulaire après création réussie
     if (formRef.current && typeof formRef.current.resetForm === 'function') {
       formRef.current.resetForm();
     }
   };
-
-  // Effet pour gérer le défilement quand le guide est affiché
-  useEffect(() => {
-    if (showDefaultGuide && collectionsSectionRef.current) {
-      const timer = setTimeout(() => {
-        collectionsSectionRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [showDefaultGuide]);
 
   // Gestionnaire pour les erreurs de CollectionForm
   const handleFormError = (errorMessage) => {
@@ -111,11 +95,6 @@ const CreateCollection = ({ onValidationChange }) => {
     setUserCollections((prev) =>
       prev.filter((collection) => collection._id !== deletedCollection._id)
     );
-  };
-
-  // Gestionnaire pour la fermeture du guide
-  const handleCloseDefaultGuide = () => {
-    setShowDefaultGuide(false);
   };
 
   return (
@@ -199,7 +178,7 @@ const CreateCollection = ({ onValidationChange }) => {
 
       {/* Affichage des collections de l'utilisateur */}
       {userCollections.length > 0 && (
-        <div ref={collectionsSectionRef} className="bg-white p-5 rounded-lg shadow-sm">
+        <div className="bg-white p-5 rounded-lg shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-4 text-lg">Mes collections</h3>
 
           {collectionsLoading ? (
@@ -215,8 +194,6 @@ const CreateCollection = ({ onValidationChange }) => {
               showShareAction={false}
               isOnboarding={true}
               onCollectionDeleted={handleCollectionDeleted}
-              showDefaultGuide={showDefaultGuide}
-              onCloseDefaultGuide={handleCloseDefaultGuide}
             />
           )}
         </div>

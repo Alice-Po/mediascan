@@ -1,6 +1,7 @@
 import Source from '../models/Source.js';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
+import Collection from '../models/Collection.js';
 import Parser from 'rss-parser';
 import config from '../config/env.js';
 import mongoose from 'mongoose';
@@ -203,6 +204,7 @@ export const createSource = async (req, res) => {
           error: validation.error,
         });
       }
+
       try {
         // 4. Créer la source avec tous les champs transmis (priorité au formulaire, fallback sur RSS)
         source = await Source.create({
@@ -237,7 +239,6 @@ export const createSource = async (req, res) => {
     }
 
     // 5. Vérifier la collection cible
-    const Collection = mongoose.model('Collection');
     const targetCollection = await Collection.findOne({ _id: collectionId, userId });
     if (!targetCollection) {
       // Si la collection n'existe pas ou n'appartient pas à l'utilisateur

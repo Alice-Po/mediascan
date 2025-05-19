@@ -151,8 +151,20 @@ const AddSourceForm = ({
       formElements: e.target.elements,
     });
 
+    // Nettoyer le champ funding.type si vide
+    const cleanedSource = {
+      ...customSource,
+      funding: {
+        ...customSource.funding,
+        type: customSource.funding?.type ? customSource.funding.type : undefined,
+      },
+    };
+    if (!cleanedSource.funding.type) delete cleanedSource.funding.type;
+    if (!cleanedSource.funding.details) delete cleanedSource.funding.details;
+    if (Object.keys(cleanedSource.funding).length === 0) delete cleanedSource.funding;
+
     try {
-      await onSubmit(customSource);
+      await onSubmit(cleanedSource);
 
       // Afficher une notification de succès
       showSnackbar(
@@ -562,13 +574,31 @@ const AddSourceForm = ({
             </div>
 
             {/* Section 4: Orientation */}
-            <div className="space-y-4 mt-4 md:mt-0">
-              <div>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200 flex items-center">
+                <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
+                  <svg
+                    className="w-5 h-5 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <h3 className="font-medium text-gray-900">Orientation</h3>
+              </div>
+              <div className="p-3 sm:p-4">
                 <label
                   htmlFor="orientation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Orientation
+                  Tags (0/3)
                 </label>
                 <TagInputForm
                   tags={customSource.orientation}

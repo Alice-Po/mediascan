@@ -36,7 +36,7 @@ const SourceSchema = new mongoose.Schema(
         trim: true,
       },
     },
-    orientations: {
+    orientation: {
       type: [String],
     },
     defaultEnabled: {
