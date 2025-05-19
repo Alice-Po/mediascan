@@ -344,19 +344,62 @@ const CollectionForm = forwardRef(
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
                 <h2 className="text-lg font-medium text-gray-900">Sources sélectionnées</h2>
-                <button
-                  type="button"
-                  onClick={openSourceCatalog}
-                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 text-sm w-full sm:w-auto"
-                >
-                  Parcourir le catalogue de sources
-                </button>
+                {selectedSources.length === 0 ? (
+                  ''
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openSourceCatalog}
+                    className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 text-sm w-full sm:w-auto"
+                  >
+                    Parcourir le catalogue de sources
+                  </button>
+                )}
               </div>
 
               {selectedSources.length === 0 ? (
-                <div className="p-4 bg-gray-50 rounded-md text-center text-gray-500">
-                  Aucune source n'a été sélectionnée. Parcourez le catalogue pour ajouter des
-                  sources.
+                <div className="p-6 bg-gray-50 rounded-md text-center">
+                  <div className="mb-4">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">
+                    Aucune source sélectionnée
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Commencez à enrichir votre collection en ajoutant des sources pertinentes.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={openSourceCatalog}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <svg
+                      className="-ml-1 mr-2 h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Parcourir le catalogue
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto p-2">
