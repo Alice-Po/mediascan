@@ -265,9 +265,37 @@ export const checkAllSources = async () => {
   }
 };
 
+/**
+ * Vérifie un flux RSS spécifique
+ */
+export const checkRssFeed = async (rssUrl) => {
+  try {
+    console.log('Vérification du flux RSS:', rssUrl);
+    const feed = await parser.parseURL(rssUrl);
+
+    // Retourner les informations essentielles du flux
+    return {
+      title: feed.title,
+      description: feed.description,
+      link: feed.link,
+      items: feed.items.slice(0, 5).map((item) => ({
+        title: item.title,
+        link: item.link,
+        pubDate: item.pubDate,
+        contentSnippet: item.contentSnippet,
+      })),
+      totalItems: feed.items.length,
+    };
+  } catch (error) {
+    console.error('Erreur lors de la vérification du flux RSS:', error);
+    throw error;
+  }
+};
+
 // Export par défaut
 export default {
   fetchSourceArticles,
   fetchAllSources,
   checkAllSources,
+  checkRssFeed,
 };

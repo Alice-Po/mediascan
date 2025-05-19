@@ -5,6 +5,7 @@ import PremiumBanner from '../premium/PremiumBanner';
 import { SimpleSourceItem } from './SourceItem';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import TagInputForm from '../common/TagInputForm';
+
 const AddSourceForm = ({
   onSubmit,
   onCancel,
@@ -16,6 +17,10 @@ const AddSourceForm = ({
 }) => {
   const { showSnackbar } = useSnackbar();
   const [showRssHelp, setShowRssHelp] = useState(false);
+  const [rssValidationState, setRssValidationState] = useState({
+    status: 'idle', // 'idle' | 'loading' | 'success' | 'error'
+    message: '',
+  });
   const [customSource, setCustomSource] = useState({
     name: '',
     url: '',
@@ -29,10 +34,62 @@ const AddSourceForm = ({
     collectionId: '',
   });
 
-  // Log initial collections for debugging
+  // Fonction pour vérifier le flux RSS
+  const checkRssFeed = async (url) => {
+    try {
+      setRssValidationState({ status: 'loading', message: 'Vérification du flux RSS...' });
+      console.log('Vérification du flux RSS:', url);
+      const response = await fetch('/api/sources/check-rss', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rssUrl: url }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la vérification du flux RSS');
+      }
+
+      const data = await response.json();
+      console.log('Contenu du flux RSS:', data);
+
+      // Pré-remplir les champs avec les données du flux
+      if (data) {
+        setCustomSource((prev) => ({
+          ...prev,
+          name: data.title || prev.name,
+          description: data.description || prev.description,
+          url: data.link || prev.url,
+        }));
+        setRssValidationState({
+          status: 'success',
+          message: 'Flux RSS valide !',
+        });
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du flux RSS:', error);
+      setRssValidationState({
+        status: 'error',
+        message: 'Flux RSS invalide ou inaccessible',
+      });
+      return null;
+    }
+  };
+
+  // Debounce pour éviter trop d'appels API
+  const [debouncedRssUrl, setDebouncedRssUrl] = useState('');
   useEffect(() => {
-    console.log('Initial collections:', collections);
-  }, []);
+    const timer = setTimeout(() => {
+      if (debouncedRssUrl) {
+        checkRssFeed(debouncedRssUrl);
+      }
+    }, 1000); // Attendre 1 seconde après la dernière modification
+
+    return () => clearTimeout(timer);
+  }, [debouncedRssUrl]);
 
   const handleCustomSourceChange = (e) => {
     const { name, value, type } = e.target;
@@ -43,6 +100,10 @@ const AddSourceForm = ({
       element: e.target,
       validity: e.target.validity,
     });
+
+    if (name === 'rssUrl') {
+      setDebouncedRssUrl(value);
+    }
 
     if (name.includes('.')) {
       // Gestion des champs imbriqués
@@ -176,7 +237,57 @@ const AddSourceForm = ({
                         : 'border-gray-300 focus:ring-blue-200'
                     } shadow-sm focus:border-blue-500 focus:ring focus:ring-opacity-50`}
                   />
+                  {/* Indicateur de validation RSS */}
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    {rssValidationState.status === 'loading' && (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                    )}
+                    {rssValidationState.status === 'success' && (
+                      <svg
+                        className="h-5 w-5 text-green-500 animate-bounce"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                    {rssValidationState.status === 'error' && (
+                      <svg
+                        className="h-5 w-5 text-red-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    )}
+                  </div>
                 </div>
+                {/* Message de validation */}
+                {rssValidationState.status !== 'idle' && (
+                  <p
+                    className={`mt-1.5 text-sm ${
+                      rssValidationState.status === 'success'
+                        ? 'text-green-600'
+                        : rssValidationState.status === 'error'
+                        ? 'text-red-600'
+                        : 'text-blue-600'
+                    }`}
+                  >
+                    {rssValidationState.message}
+                  </p>
+                )}
                 <div className="mt-1.5 flex items-start text-xs">
                   <svg
                     className="h-4 w-4 text-blue-500 mt-0.5 mr-1.5 flex-shrink-0"
@@ -225,84 +336,20 @@ const AddSourceForm = ({
             </div>
           </div>
 
-          {/* Section 2: Description */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
-              <div className="flex items-center">
-                <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
-                  <svg
-                    className="w-5 h-5 text-blue-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Description éditoriale</h3>
-                </div>
-              </div>
-            </div>
-            <div className="p-3 sm:p-4">
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Description de la source <span className="text-red-500">*</span>
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Aidez les utilisateurs à comprendre l'approche éditoriale de cette source
-                </p>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={customSource.description}
-                  onChange={handleCustomSourceChange}
-                  rows="3"
-                  placeholder="Ex: Journal indépendant spécialisé dans le journalisme d'investigation..."
-                  className={`block w-full rounded-md border ${
-                    formErrors.description
-                      ? 'border-red-300 ring-red-200'
-                      : 'border-gray-300 focus:ring-blue-200'
-                  } shadow-sm focus:border-blue-500 focus:ring focus:ring-opacity-50`}
-                />
-                {formErrors.description && (
-                  <p className="mt-1.5 text-sm text-red-600 flex items-center">
-                    <svg
-                      className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                    {formErrors.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Collections */}
-          {collections.length > 0 && (
+          <div
+            className={`transition-all duration-500 ease-in-out ${
+              rssValidationState.status === 'success'
+                ? 'opacity-100 max-h-[2000px]'
+                : 'opacity-0 max-h-0 overflow-hidden'
+            }`}
+          >
+            {/* Section 2: Informations de la source */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+              <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
                 <div className="flex items-center">
-                  <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
+                  <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
                     <svg
-                      className="w-5 h-5 text-indigo-600"
+                      className="w-5 h-5 text-blue-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -311,30 +358,77 @@ const AddSourceForm = ({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Collection</h3>
+                    <h3 className="font-medium text-gray-900">Informations de la source</h3>
                   </div>
                 </div>
               </div>
-              <div className="p-3 sm:p-4">
+              <div className="p-3 sm:p-4 space-y-4">
+                {/* Nom de la source */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nom de la source <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={customSource.name}
+                    onChange={handleCustomSourceChange}
+                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    placeholder="Nom de la source"
+                  />
+                </div>
+
+                {/* Lien du site web */}
+                <div>
+                  <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+                    Lien du site web <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    value={customSource.url}
+                    onChange={handleCustomSourceChange}
+                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    placeholder="https://www.example.com"
+                  />
+                </div>
+
+                {/* Description */}
                 <div>
                   <label
-                    htmlFor="collectionId"
+                    htmlFor="description"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Ajouter à une collection
+                    Description <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Ajoutez directement cette source à l'une de vos collections existantes
-                  </p>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={customSource.description}
+                    onChange={handleCustomSourceChange}
+                    rows="3"
+                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    placeholder="Description de la source"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Collections */}
+            {collections.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
                       <svg
-                        className="h-5 w-5 text-gray-400"
+                        className="w-5 h-5 text-indigo-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -347,27 +441,26 @@ const AddSourceForm = ({
                         />
                       </svg>
                     </div>
-                    <select
-                      id="collectionId"
-                      name="collectionId"
-                      value={customSource.collectionId}
-                      onChange={handleCustomSourceChange}
-                      className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
-                    >
-                      <option value="">Ne pas ajouter à une collection</option>
-                      {collections.map((collection) => (
-                        <option key={collection._id} value={collection._id}>
-                          {collection.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Collection</h3>
+                    </div>
                   </div>
-
-                  {customSource.collectionId && (
-                    <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
-                      <p className="text-xs text-indigo-700 flex items-center">
+                </div>
+                <div className="p-3 sm:p-4">
+                  <div>
+                    <label
+                      htmlFor="collectionId"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Ajouter à une collection
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Ajoutez directement cette source à l'une de vos collections existantes
+                    </p>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg
-                          className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
+                          className="h-5 w-5 text-gray-400"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -375,168 +468,208 @@ const AddSourceForm = ({
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            strokeWidth={2}
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                           />
                         </svg>
-                        La source sera immédiatement ajoutée à cette collection dès sa création
-                      </p>
+                      </div>
+                      <select
+                        id="collectionId"
+                        name="collectionId"
+                        value={customSource.collectionId}
+                        onChange={handleCustomSourceChange}
+                        className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
+                      >
+                        <option value="">Ne pas ajouter à une collection</option>
+                        {collections.map((collection) => (
+                          <option key={collection._id} value={collection._id}>
+                            {collection.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+
+                    {customSource.collectionId && (
+                      <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
+                        <p className="text-xs text-indigo-700 flex items-center">
+                          <svg
+                            className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          La source sera immédiatement ajoutée à cette collection dès sa création
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Section 4: Orientation */}
+            <div className="space-y-4 mt-4 md:mt-0">
+              <div>
+                <label
+                  htmlFor="orientation"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Orientation
+                </label>
+                <TagInputForm
+                  tags={customSource.orientation}
+                  setTags={setCustomSource}
+                  error={formErrors.orientation}
+                />
+              </div>
+            </div>
+
+            {/* Section 5: Paramètres */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+                <div className="flex items-center">
+                  <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Paramètres additionnels</h3>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 sm:p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="funding.type"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Type de financement
+                      </label>
+                      <select
+                        id="funding.type"
+                        name="funding.type"
+                        value={customSource.funding?.type}
+                        onChange={handleCustomSourceChange}
+                        className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white"
+                      >
+                        <option value="">Sélectionner un type</option>
+                        <option value="independent">Média indépendant</option>
+                        <option value="public">Service public</option>
+                        <option value="private">Groupe privé / Industriel</option>
+                        <option value="cooperative">Coopérative de journalistes</option>
+                        <option value="association">Association / ONG</option>
+                        <option value="other">Autre</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="funding.details"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Précisions (optionnel)
+                      </label>
+                      <input
+                        type="text"
+                        id="funding.details"
+                        name="funding.details"
+                        value={customSource.funding?.details || ''}
+                        onChange={handleCustomSourceChange}
+                        placeholder="Ex: Appartient au groupe Bouygues..."
+                        className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                    </div>
+                  </div>
+
+                  {formErrors.funding && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center">
+                      <svg
+                        className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      {formErrors.funding}
+                    </p>
                   )}
                 </div>
               </div>
             </div>
-          )}
-          {/* Section 4: Orientation */}
-          <div className="space-y-4 mt-4 md:mt-0">
-            <div>
-              <label htmlFor="orientation" className="block text-sm font-medium text-gray-700 mb-1">
-                Orientation
-              </label>
-              <TagInputForm
-                tags={customSource.orientation}
-                setTags={setCustomSource}
-                error={formErrors.orientation}
-              />
-            </div>
           </div>
-        </div>
 
-        {/* Section 5: Paramètres */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="bg-blue-50 px-3 sm:px-4 py-3 border-b border-gray-200">
-            <div className="flex items-center">
-              <div className="bg-blue-100 rounded-full p-2 mr-2 sm:mr-3">
-                <svg
-                  className="w-5 h-5 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Paramètres additionnels</h3>
-              </div>
-            </div>
-          </div>
-          <div className="p-3 sm:p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="funding.type"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Type de financement
-                  </label>
-                  <select
-                    id="funding.type"
-                    name="funding.type"
-                    value={customSource.funding?.type}
-                    onChange={handleCustomSourceChange}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 bg-white"
-                  >
-                    <option value="">Sélectionner un type</option>
-                    <option value="independent">Média indépendant</option>
-                    <option value="public">Service public</option>
-                    <option value="private">Groupe privé / Industriel</option>
-                    <option value="cooperative">Coopérative de journalistes</option>
-                    <option value="association">Association / ONG</option>
-                    <option value="other">Autre</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="funding.details"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Précisions (optionnel)
-                  </label>
-                  <input
-                    type="text"
-                    id="funding.details"
-                    name="funding.details"
-                    value={customSource.funding?.details || ''}
-                    onChange={handleCustomSourceChange}
-                    placeholder="Ex: Appartient au groupe Bouygues..."
-                    className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  />
-                </div>
-              </div>
-
-              {formErrors.funding && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <svg
-                    className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                  {formErrors.funding}
-                </p>
+          {/* Actions */}
+          <div className="mt-6 sm:mt-8 flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={loading || rssValidationState.status !== 'success'}
+              className={`px-4 sm:px-6 py-2 rounded-md shadow-sm text-white ${
+                loading || rssValidationState.status !== 'success'
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              }`}
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Vérification...
+                </span>
+              ) : rssValidationState.status !== 'success' ? (
+                'Flux RSS requis'
+              ) : (
+                'Ajouter cette source'
               )}
-            </div>
+            </button>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-6 sm:mt-8 flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Annuler
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`px-4 sm:px-6 py-2 rounded-md shadow-sm text-white ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-            }`}
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Vérification...
-              </span>
-            ) : (
-              'Ajouter cette source'
-            )}
-          </button>
         </div>
       </form>
 
-      <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200">
+      {/* <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200">
         <PremiumBanner
           title="Vous trouvez cette gestion de sources un peu légère ?"
           description="Nous réfléchissons à une approche intelligente de modération communautaire pour enrichir et valider collectivement les descriptions des sources."
           linkText="Contribuer à la réflexion"
         />
-      </div>
+      </div> */}
 
       <RssHelpModal isOpen={showRssHelp} onClose={() => setShowRssHelp(false)} />
 
