@@ -584,12 +584,17 @@ export const getFollowedCollections = async (req, res) => {
     // Récupérer les collections avec population
     const collections = await Collection.find({
       _id: { $in: user.followedCollections },
-    }).populate('sources', 'name url faviconUrl');
+    })
+      .populate('sources', 'name url faviconUrl')
+      .populate('userId', 'username'); // Ajout du populate pour le créateur
 
     res.status(200).json({
       success: true,
       count: collections.length,
-      data: collections,
+      data: collections.map((collection) => ({
+        ...collection.toObject(),
+        createdBy: collection.userId, // Renommer userId en createdBy pour le frontend
+      })),
     });
   } catch (error) {
     console.error('Erreur lors de la récupération des collections suivies:', error);

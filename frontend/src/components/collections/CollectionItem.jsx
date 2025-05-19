@@ -300,7 +300,7 @@ const CollectionItem = ({
                 Par{' '}
                 {collection.userId === currentUserId
                   ? 'vous'
-                  : collection.creator?.username || 'Utilisateur anonyme'}
+                  : collection.createdBy?.username || 'Utilisateur anonyme'}
               </span>
               <span className="mx-1 flex-shrink-0">•</span>
               <span className="flex-shrink-0">

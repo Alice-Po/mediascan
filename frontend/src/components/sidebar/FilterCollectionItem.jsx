@@ -51,6 +51,11 @@ const FilterCollectionItem = ({
     }
   };
 
+  // Fonction robuste pour afficher le nom du créateur
+  const getCreatorNameRobust = (collection) => {
+    return collection.creator || collection.createdBy?.username || 'Utilisateur anonyme';
+  };
+
   return (
     <div className="mb-1">
       <div
@@ -109,7 +114,7 @@ const FilterCollectionItem = ({
           {/* Information sur le créateur et indicateur pour les collections publiques */}
           <div className="flex flex-wrap items-center ml-5 mt-0.5 gap-1.5 overflow-hidden">
             <span className="text-xs text-gray-500 whitespace-nowrap text-ellipsis overflow-hidden max-w-full">
-              Par {getCreatorName(collection)}
+              Par {getCreatorNameRobust(collection)}
             </span>
             <div className="flex gap-1.5 flex-shrink-0 ml-auto">
               {isPublicFollowed && (

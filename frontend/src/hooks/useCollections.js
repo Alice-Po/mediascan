@@ -50,9 +50,11 @@ export function useCollections(user, setGlobalError) {
     try {
       setLoading(true);
       const collectionsData = await fetchCollections();
+      console.log('[useCollections] collectionsData (personnelles):', collectionsData);
 
       // Récupérer les collections suivies
       const followedCollectionsData = await fetchFollowedCollections();
+      console.log('[useCollections] followedCollectionsData (suivies):', followedCollectionsData);
 
       // Ajouter le nom du créateur et propriété isFollowed=false aux collections personnelles
       const enhancedPersonalCollections = collectionsData.map((collection) => {
