@@ -22,6 +22,11 @@ const AddSourceForm = ({
     status: 'idle', // 'idle' | 'loading' | 'success' | 'error'
     message: '',
   });
+
+  // Trouver la collection par défaut
+  const defaultCollection =
+    collections.find((collection) => collection.isDefault) || collections[0];
+
   const [customSource, setCustomSource] = useState({
     name: '',
     url: '',
@@ -32,7 +37,7 @@ const AddSourceForm = ({
       details: '',
     },
     orientation: [],
-    collectionId: '',
+    collectionId: defaultCollection?._id || '',
   });
   const [previewArticles, setPreviewArticles] = useState([]);
 
@@ -166,7 +171,7 @@ const AddSourceForm = ({
           details: '',
         },
         orientation: [],
-        collectionId: '',
+        collectionId: defaultCollection?._id || '',
       });
     } catch (error) {
       // Afficher une notification d'erreur en cas d'échec
@@ -442,14 +447,47 @@ const AddSourceForm = ({
               </div>
             </div>
 
-            {/* Section 3: Collections */}
-            {collections.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
-                  <div className="flex items-center">
-                    <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
+            {/* Section Collections */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+                <div className="flex items-center">
+                  <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
+                    <svg
+                      className="w-5 h-5 text-indigo-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      Collection <span className="text-red-500">*</span>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 sm:p-4">
+                <div>
+                  <label
+                    htmlFor="collectionId"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Ajouter à une collection <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Cette source doit être ajoutée à une collection
+                  </p>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <svg
-                        className="w-5 h-5 text-indigo-600"
+                        className="h-5 w-5 text-gray-400"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -462,26 +500,48 @@ const AddSourceForm = ({
                         />
                       </svg>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">Collection</h3>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3 sm:p-4">
-                  <div>
-                    <label
-                      htmlFor="collectionId"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                    <select
+                      id="collectionId"
+                      name="collectionId"
+                      value={customSource.collectionId}
+                      onChange={handleCustomSourceChange}
+                      required
+                      className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
                     >
-                      Ajouter à une collection
-                    </label>
-                    <p className="text-xs text-gray-500 mb-2">
-                      Ajoutez directement cette source à l'une de vos collections existantes
+                      <option value="">Sélectionner une collection</option>
+                      {collections.map((collection) => (
+                        <option key={collection._id} value={collection._id}>
+                          {collection.name}
+                          {collection.isDefault ? ' (Collection par défaut)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {formErrors.collectionId && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center">
+                      <svg
+                        className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      {formErrors.collectionId}
                     </p>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  )}
+
+                  {customSource.collectionId && (
+                    <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
+                      <p className="text-xs text-indigo-700 flex items-center">
                         <svg
-                          className="h-5 w-5 text-gray-400"
+                          className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -489,51 +549,17 @@ const AddSourceForm = ({
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                            strokeWidth="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                      </div>
-                      <select
-                        id="collectionId"
-                        name="collectionId"
-                        value={customSource.collectionId}
-                        onChange={handleCustomSourceChange}
-                        className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
-                      >
-                        <option value="">Ne pas ajouter à une collection</option>
-                        {collections.map((collection) => (
-                          <option key={collection._id} value={collection._id}>
-                            {collection.name}
-                          </option>
-                        ))}
-                      </select>
+                        La source sera immédiatement ajoutée à cette collection dès sa création
+                      </p>
                     </div>
-
-                    {customSource.collectionId && (
-                      <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
-                        <p className="text-xs text-indigo-700 flex items-center">
-                          <svg
-                            className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          La source sera immédiatement ajoutée à cette collection dès sa création
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Section 4: Orientation */}
             <div className="space-y-4 mt-4 md:mt-0">
@@ -662,9 +688,11 @@ const AddSourceForm = ({
             </button>
             <button
               type="submit"
-              disabled={loading || rssValidationState.status !== 'success'}
+              disabled={
+                loading || rssValidationState.status !== 'success' || !customSource.collectionId
+              }
               className={`px-4 sm:px-6 py-2 rounded-md shadow-sm text-white ${
-                loading || rssValidationState.status !== 'success'
+                loading || rssValidationState.status !== 'success' || !customSource.collectionId
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               }`}
@@ -676,6 +704,8 @@ const AddSourceForm = ({
                 </span>
               ) : rssValidationState.status !== 'success' ? (
                 'Flux RSS requis'
+              ) : !customSource.collectionId ? (
+                'Collection requise'
               ) : (
                 'Ajouter cette source'
               )}
