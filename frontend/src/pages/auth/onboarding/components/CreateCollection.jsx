@@ -20,11 +20,19 @@ const CreateCollection = ({ onValidationChange }) => {
 
   // Suggestions pour l'autocomplétion
   const suggestions = [
-    { name: 'Au potager', description: 'Inspiration et apprentissage pour le jardinage' },
-    { name: 'Municipalisme', description: 'Innovation démocratique et citoyenne' },
     {
-      name: 'Sciences et découvertes',
-      description: 'Articles scientifiques et découvertes récentes',
+      name: 'Au potager',
+      description:
+        'Inspiration et apprentissage pour le jardinage à destiation des particuliers. Orientation vivrière et permaculture.',
+    },
+    {
+      name: 'Innovation démocratique',
+      description: "Blog et sources qui font de l'innavation démocratique et citoyenne",
+    },
+    {
+      name: "Biologie et science de l'ADN",
+      description:
+        "Articles scientifiques et découvertes récentes sur la biologie et la science de l'ADN",
     },
     { name: 'Info Bretagne', description: 'Presse locale bretonne' },
   ];
@@ -140,12 +148,6 @@ const CreateCollection = ({ onValidationChange }) => {
 
       {/* Suggestions de collections */}
       <div className="bg-white p-5 rounded-lg shadow-sm mb-4">
-        <h3 className="font-semibold text-gray-900 mb-4 text-lg text-center">
-          {userCollections.length > 0
-            ? 'Créer une autre collection'
-            : 'Créer votre première collection'}
-        </h3>
-
         <div className="mb-6">
           <p className="text-sm text-gray-600 mb-3">Suggestions de collections :</p>
           <div className="flex flex-wrap gap-2">

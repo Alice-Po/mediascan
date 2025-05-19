@@ -224,7 +224,7 @@ const Onboarding = () => {
               } ${step === 1 ? 'ml-auto' : ''}`}
               disabled={loading || !isCurrentStepValid()}
             >
-              {step === 5 ? 'Terminer' : step === 1 ? "C'est parti !" : 'Suivant'}
+              {step === 5 ? 'Terminer' : step === 1 ? 'Commencer' : 'Suivant'}
             </button>
           </div>
         </div>

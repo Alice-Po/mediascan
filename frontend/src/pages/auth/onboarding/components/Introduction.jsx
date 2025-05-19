@@ -29,7 +29,7 @@ const Step1Introduction = ({ onValidationChange }) => {
         </h3>
         <p className="text-gray-700 mb-4">
           Médiascan est un projet en développement actif. Nous sommes actuellement dans une phase
-          d'aller retours avec de nombreux tests à la fois technique et fonctionnel. Le projet et
+          d'allers retours avec de nombreux tests à la fois techniques et fonctionnels. Le projet et
           son interface évoluent trés rapidement. Nous vous remercions par avance pour votre
           indulgence face aux éventuels bugs ou fonctionnalités manquantes.
         </p>

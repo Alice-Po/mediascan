@@ -270,7 +270,12 @@ const CollectionForm = forwardRef(
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 required
+                placeholder="Ex: Actualités Tech, Cuisine Méditerranéenne, etc."
               />
+              <p className="mt-1 text-sm text-gray-500">
+                Un titre clair aide les autres utilisateurs à comprendre le contenu de votre
+                collection.
+              </p>
             </div>
 
             <div className="mb-3 sm:mb-4">
@@ -284,35 +289,37 @@ const CollectionForm = forwardRef(
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                placeholder="Décrivez le thème, les sujets ou les types de contenu que vous souhaitez rassembler dans cette collection..."
               ></textarea>
+              <p className="mt-1 text-sm text-gray-500">
+                Une description détaillée aide les autres utilisateurs à comprendre l'objet de votre
+                collection.
+              </p>
             </div>
-            {/* 
-            <div className="mb-4">
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                URL de l'image
-              </label>
-              <input
-                type="url"
-                id="imageUrl"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com/image.jpg"
-              />
-              {formData.imageUrl && (
-                <div className="mt-2">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Aperçu"
-                    className="w-16 h-16 object-cover rounded-md"
-                    onError={(e) => {
-                      e.target.src = '';
-                    }}
-                  />
+
+            {/* Encadré dédié aux fonctionnalités IA */}
+            <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div className="flex items-start space-x-3">
+                <img src="/bot.svg" alt="IA" className="w-8 h-8 mt-1" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-blue-900 mb-2">
+                    Suggestions IA (Bientôt disponible)
+                  </h3>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Une description précise de votre collection permettra à notre IA de vous
+                    suggérer des sources et articles pertinents. Ces suggestions seront basées sur
+                    le titre et la description de votre collection.
+                  </p>
+                  <div className="bg-white p-3 rounded-md border border-blue-100">
+                    <p className="text-sm text-blue-800">
+                      <span className="font-medium">💡 Important :</span> Les suggestions IA seront
+                      toujours activables ou désactivables selon vos préférences. Vous garderez le
+                      contrôle sur l'utilisation de l'IA dans votre expérience.
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div> */}
+              </div>
+            </div>
 
             <div className="mb-3 sm:mb-6">
               <div className="flex items-center">
@@ -329,7 +336,7 @@ const CollectionForm = forwardRef(
                 </label>
               </div>
               <p className="text-xs text-gray-500 mt-1 ml-6">
-                Les collections publiques peuvent être visibles par d'autres utilisateurs
+                Les collections publiques peuvent être visibles et suivies par d'autres utilisateurs
               </p>
             </div>
 
