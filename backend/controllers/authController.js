@@ -19,16 +19,15 @@ const generateToken = (id) => {
 export const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    console.log('=== Inscription ===');
-    console.log('Données reçues:', { email, name });
 
-    // Vérifier si l'utilisateur existe déjà
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
+      return res.status(400).json({
+        success: false,
+        message: 'Cet email est déjà utilisé',
+      });
     }
 
-    // Créer l'utilisateur sans sauvegarder immédiatement
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = new User({
       email,
@@ -38,7 +37,6 @@ export const register = async (req, res) => {
       verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    // Créer une collection par défaut "Mes sources" pour le nouvel utilisateur
     let defaultCollection;
     try {
       const Collection = mongoose.model('Collection');
@@ -47,49 +45,32 @@ export const register = async (req, res) => {
         description: 'Collection par défaut pour vos sources',
         userId: user._id,
         sources: [],
-        colorHex: '#3B82F6', // Bleu par défaut
-      });
-
-      console.log('Collection par défaut créée:', {
-        id: defaultCollection._id,
-        name: defaultCollection.name,
+        colorHex: '#3B82F6',
       });
     } catch (collectionError) {
-      console.error('Erreur lors de la création de la collection par défaut:', collectionError);
+      console.error('Erreur création collection par défaut:', collectionError.message);
       return res.status(500).json({
+        success: false,
         message: "Erreur lors de la création de la collection par défaut. L'inscription a échoué.",
         error: collectionError.message,
       });
     }
 
-    // Associer la collection par défaut à l'utilisateur
     user.defaultCollection = defaultCollection._id;
     user.collections = [defaultCollection._id];
 
-    // Sauvegarder l'utilisateur avec sa collection par défaut
     await user.save();
-    console.log('Utilisateur créé:', {
-      id: user._id,
-      token: verificationToken,
-      expiration: user.verificationTokenExpires,
-      defaultCollection: user.defaultCollection,
-    });
 
     try {
-      // Envoyer l'email de vérification
       await sendVerificationEmail(email, verificationToken);
-      console.log('Email de vérification envoyé');
-
-      // Enregistrer l'événement analytics
       await Analytics.create({
         userId: user._id,
         eventType: 'userRegister',
-        metadata: {
-          timestamp: new Date(),
-        },
+        metadata: { timestamp: new Date() },
       });
 
       return res.status(201).json({
+        success: true,
         message: 'Inscription réussie. Veuillez vérifier votre email pour activer votre compte.',
         user: {
           id: user._id,
@@ -99,10 +80,10 @@ export const register = async (req, res) => {
         },
       });
     } catch (emailError) {
-      console.error('Erreur envoi email:', emailError);
+      console.error('Erreur envoi email:', emailError.message);
       return res.status(201).json({
-        message:
-          "Inscription réussie mais erreur lors de l'envoi de l'email de vérification. Un nouvel email sera envoyé ultérieurement.",
+        success: true,
+        message: "Inscription réussie mais erreur lors de l'envoi de l'email de vérification.",
         user: {
           id: user._id,
           email: user.email,
@@ -112,8 +93,9 @@ export const register = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Erreur inscription:', error);
+    console.error('Erreur inscription:', error.message);
     res.status(500).json({
+      success: false,
       message: "Erreur lors de l'inscription",
       error: error.message,
     });
@@ -124,71 +106,42 @@ export const register = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 export const login = async (req, res) => {
-  console.log('Login attempt:', {
-    headers: req.headers,
-    origin: req.headers.origin,
-    method: req.method,
-  });
-
   try {
-    console.log('=== Tentative de connexion ===');
-    console.log('Email reçu:', req.body.email);
-
     const { email, password } = req.body;
-
-    // Trouver l'utilisateur
-    console.log("Recherche de l'utilisateur...");
     const user = await User.findOne({ email }).select('+password');
-    console.log('Résultat recherche:', {
-      utilisateurTrouvé: !!user,
-      email: user?.email,
-      isVerified: user?.isVerified,
-    });
 
     if (!user) {
-      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      return res.status(401).json({
+        success: false,
+        message: 'Email ou mot de passe incorrect',
+      });
     }
 
-    // Vérifier le mot de passe
-    console.log('Vérification du mot de passe...');
     const isMatch = await user.comparePassword(password);
-    console.log('Résultat vérification mot de passe:', { isMatch });
-
     if (!isMatch) {
-      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      return res.status(401).json({
+        success: false,
+        message: 'Email ou mot de passe incorrect',
+      });
     }
 
-    // Vérifier si l'email est vérifié
     if (!user.isVerified) {
       return res.status(403).json({
+        success: false,
         message: 'Veuillez vérifier votre email avant de vous connecter',
         isVerified: false,
       });
     }
 
-    // Générer le token
-    console.log('Génération du token...');
     const token = generateToken(user._id);
-    console.log('Token généré avec succès');
-
-    // Log avant l'envoi de la réponse
-    console.log('Envoi de la réponse...', {
-      userId: user._id,
-      email: user.email,
-      isVerified: user.isVerified,
-      onboardingCompleted: user.onboardingCompleted,
-    });
-
-    // Enregistrer l'événement de connexion
     await Analytics.create({
       userId: user._id,
       eventType: 'userLogin',
-      metadata: {
-        timestamp: new Date(),
-      },
+      metadata: { timestamp: new Date() },
     });
 
     res.json({
+      success: true,
       token,
       user: {
         id: user._id,
@@ -199,13 +152,12 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    // Log détaillé de l'erreur
-    console.error('Erreur dans login:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
+    console.error('Erreur connexion:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la connexion',
+      error: error.message,
     });
-    res.status(500).json({ message: 'Erreur lors de la connexion' });
   }
 };
 
@@ -437,66 +389,32 @@ export const completeOnboarding = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
-    console.log('=== Vérification Email ===');
-    console.log('Token reçu:', token);
-
-    // Rechercher l'utilisateur
     const user = await User.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() },
     });
 
-    console.log('Recherche utilisateur:', {
-      utilisateurTrouvé: !!user,
-      email: user?.email,
-      tokenStocké: user?.verificationToken,
-      dateExpiration: user?.verificationTokenExpires,
-      maintenant: new Date(),
-    });
-
     if (!user) {
-      console.log('Utilisateur non trouvé ou token expiré');
       return res.status(400).json({
         message: 'Le lien de vérification est invalide ou a expiré',
       });
     }
 
-    // Si l'utilisateur n'est pas encore vérifié, le marquer comme vérifié
     if (!user.isVerified) {
       user.isVerified = true;
-
-      // Au lieu de supprimer le token, prolonger sa validité de 30 minutes
-      user.verificationTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-
+      user.verificationTokenExpires = new Date(Date.now() + 30 * 60 * 1000);
       await user.save();
 
-      console.log('Utilisateur vérifié avec succès:', {
-        id: user._id,
-        email: user.email,
-        tokenValidePour: '30 minutes supplémentaires',
-      });
-
-      // Enregistrer l'événement analytics
       await Analytics.create({
         userId: user._id,
         eventType: 'emailVerification',
-        metadata: {
-          timestamp: new Date(),
-        },
-      });
-    } else {
-      console.log('Utilisateur déjà vérifié:', {
-        id: user._id,
-        email: user.email,
+        metadata: { timestamp: new Date() },
       });
     }
 
     res.json({ message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' });
   } catch (error) {
-    console.error('Erreur lors de la vérification:', {
-      message: error.message,
-      stack: error.stack,
-    });
+    console.error('Erreur vérification email:', error.message);
     res.status(500).json({ message: "Erreur lors de la vérification de l'email" });
   }
 };

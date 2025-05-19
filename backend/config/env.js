@@ -66,6 +66,8 @@ const config = {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400, // 24 heures
   },
   limits: {
     maxUserSources: parseInt(process.env.MAX_USER_SOURCES, 10) || 10,

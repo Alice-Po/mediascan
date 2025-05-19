@@ -8,13 +8,10 @@ import User from '../models/User.js';
 export const protect = async (req, res, next) => {
   let token;
 
-  // Vérification de la présence du token dans les headers
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    // Récupération du token
     token = req.headers.authorization.split(' ')[1];
   }
 
-  // Si aucun token n'est trouvé
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -23,10 +20,7 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    // Vérification du token
     const decoded = jwt.verify(token, config.jwt.secret);
-
-    // Recherche de l'utilisateur
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
@@ -36,10 +30,11 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // Ajout des informations de l'utilisateur à la requête
     req.user = user;
     next();
   } catch (error) {
+    console.error('Erreur authentification:', error.message);
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
@@ -55,9 +50,9 @@ export const protect = async (req, res, next) => {
 };
 
 /**
- * Middleware pour logger les événements d'authentification (facultatif)
+ * Middleware pour logger les événements d'authentification
  */
 export const logAuthEvent = (req, res, next) => {
-  console.log(`Tentative d'authentification: ${req.originalUrl} - ${new Date().toISOString()}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 };
