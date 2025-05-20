@@ -8,7 +8,7 @@ const RssHelpModal = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-semibold text-gray-900">Comprendre les flux RSS</h3>
+            <h3 className="text-xl font-semibold text-gray-900">Nous utilisons les flux RSS</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-500 p-1 rounded-full hover:bg-gray-100"
@@ -26,11 +26,11 @@ const RssHelpModal = ({ isOpen, onClose }) => {
 
           <div className="space-y-4 text-gray-600">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Qu'est-ce qu'un flux RSS ?</h4>
+              <h4 className="font-medium text-gray-900 mb-2">Qu'est ce qu'un flux RSS ?</h4>
               <p>
                 Un flux RSS est un format standardisé qui permet de suivre automatiquement les mises
                 à jour d'un site web. C'est comme un fil d'actualité brut qui contient les derniers
-                articles publiés.
+                actualités publiées.
               </p>
             </div>
 
@@ -94,13 +94,13 @@ const RssHelpModal = ({ isOpen, onClose }) => {
 
           <br></br>
           {/* Bannière Premium - Détection RSS */}
-          <PremiumBanner
+          {/* <PremiumBanner
             className="mb-6"
             variant="coming"
             title="Fini la recherche manuelle des flux RSS !"
             description="Bientôt, vous n'aurez plus qu'à entrer l'URL du site web et nous détecterons automatiquement le flux RSS correspondant."
             linkText="En savoir plus sur la détection intelligente de flux RSS"
-          />
+          /> */}
         </div>
       </div>
     </div>

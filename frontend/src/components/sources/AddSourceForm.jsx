@@ -224,14 +224,14 @@ const AddSourceForm = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Adresse du flux RSS</h3>
+                  <h3 className="font-medium text-gray-900">Ajouter une source</h3>
                 </div>
               </div>
             </div>
             <div className="p-3 sm:p-4">
               <div>
                 <label htmlFor="rssUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                  URL du flux RSS <span className="text-red-500">*</span>
+                  Entrez l'URL du flux de la source <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -314,32 +314,7 @@ const AddSourceForm = ({
                     {rssValidationState.message}
                   </p>
                 )}
-                <div className="mt-1.5 flex items-start text-xs">
-                  <svg
-                    className="h-4 w-4 text-blue-500 mt-0.5 mr-1.5 flex-shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-gray-500">
-                    L'URL du flux RSS se trouve généralement dans le code source de la page ou est
-                    indiquée par une icône RSS.
-                    <button
-                      type="button"
-                      onClick={() => setShowRssHelp(true)}
-                      className="ml-1 text-blue-600 hover:text-blue-700 hover:underline"
-                    >
-                      En savoir plus
-                    </button>
-                  </span>
-                </div>
+
                 {formErrors.rssUrl && (
                   <p className="mt-1.5 text-sm text-red-600 flex items-center">
                     <svg
@@ -370,6 +345,91 @@ const AddSourceForm = ({
                     </div>
                   </div>
                 )}
+
+                {/* Guide d'aide RSS */}
+                <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 hidden sm:block">
+                      <div className="bg-blue-100 rounded-full p-2">
+                        <svg
+                          className="h-5 w-5 text-blue-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-blue-900 mb-3">
+                        Comment trouver l'URL d'un flux ?
+                      </h4>
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-700">
+                          Rendez-vous sur le site web auquel vous souhaitez vous abonner.
+                        </p>
+
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <p className="text-sm font-medium text-gray-900 mb-2">
+                            Cherchez ces icônes :
+                          </p>
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium">
+                                RSS
+                              </span>
+                              <span className="text-sm text-gray-600">ou</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <svg
+                                className="h-5 w-5 text-gray-600"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 13.1v-3z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <p className="text-sm text-blue-700">
+                            <span className="font-medium">Astuce :</span> Le plus simple est
+                            d'utiliser des extensions de votre navigateur pour récupérer facilement
+                            l'URL du flux.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setShowRssHelp(true)}
+                          className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          <svg
+                            className="h-4 w-4 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          J'ai besoin de plus d'aide
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
