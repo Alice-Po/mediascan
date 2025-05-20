@@ -708,19 +708,12 @@ const AddSourceForm = ({
                 </div>
                 <h3 className="font-medium text-gray-900">Orientation</h3>
               </div>
-              <div className="p-3 sm:p-4">
-                <label
-                  htmlFor="orientation"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Tags (0/3)
-                </label>
-                <TagInputForm
-                  tags={customSource.orientation}
-                  setTags={setCustomSource}
-                  error={formErrors.orientation}
-                />
-              </div>
+
+              <TagInputForm
+                tags={customSource.orientation}
+                setTags={setCustomSource}
+                error={formErrors.orientation}
+              />
             </div>
 
             {/* Section 5: Paramètres */}
