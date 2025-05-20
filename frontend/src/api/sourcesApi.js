@@ -65,3 +65,20 @@ export const fetchSourcesFromUserCollections = async () => {
     throw error;
   }
 };
+
+/**
+ * Vérifier si une source existe déjà en base par son URL
+ * @param {string} url - L'URL du flux à vérifier
+ * @returns {Promise<{exists: boolean, source?: object, error?: string}>}
+ */
+export const checkSourceExists = async (url) => {
+  try {
+    const response = await api.get(`/sources/exists?url=${encodeURIComponent(url)}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'existence de la source:", error);
+    return { exists: false, error: error.response?.data?.error || error.message };
+  }
+};

@@ -6,6 +6,7 @@ import { SimpleSourceItem } from './SourceItem';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import TagInputForm from '../common/TagInputForm';
 import ArticlePreview from '../articles/ArticlePreview';
+import { checkSourceExists } from '../../api/sourcesApi';
 
 const AddSourceForm = ({
   onSubmit,
@@ -25,6 +26,7 @@ const AddSourceForm = ({
     message: '',
     details: '',
   });
+  const [existingSource, setExistingSource] = useState(null);
 
   // Trouver la collection par défaut
   const defaultCollection =
@@ -57,11 +59,59 @@ const AddSourceForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hideCollectionSection, defaultCollectionId]);
 
+  // Vérification de l'existence de la source en base (debounce)
+  useEffect(() => {
+    if (!customSource.rssUrl) {
+      setExistingSource(null);
+      return;
+    }
+    console.log('[EXISTING CHECK] Checking existence for URL:', customSource.rssUrl);
+    const timer = setTimeout(async () => {
+      try {
+        const data = await checkSourceExists(customSource.rssUrl);
+        console.log('[EXISTING CHECK] API response:', data);
+        if (data.exists) {
+          setExistingSource(data.source || true);
+          setRssValidationState({ status: 'idle', message: '', details: '' });
+          setPreviewArticles([]);
+          console.log('[EXISTING CHECK] Source exists, blocking further validation.');
+          return;
+        } else {
+          setExistingSource(null);
+          console.log('[EXISTING CHECK] Source does not exist.');
+        }
+      } catch (e) {
+        setExistingSource(null);
+        console.log('[EXISTING CHECK] Exception:', e);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customSource.rssUrl]);
+
+  // Debounce pour éviter trop d'appels API (pour RSS)
+  const [debouncedRssUrl, setDebouncedRssUrl] = useState('');
+  useEffect(() => {
+    if (existingSource) return; // Ne pas vérifier le RSS si la source existe déjà
+    const timer = setTimeout(() => {
+      if (debouncedRssUrl) {
+        checkRssFeed(debouncedRssUrl);
+      }
+    }, 1000); // Attendre 1 seconde après la dernière modification
+
+    return () => clearTimeout(timer);
+  }, [debouncedRssUrl, existingSource]);
+
   // Fonction pour vérifier le flux RSS
   const checkRssFeed = async (url) => {
+    console.log('[RSS CHECK] Called for URL:', url, 'existingSource:', existingSource);
+    if (existingSource) {
+      console.log('[RSS CHECK] Aborted: existingSource is set.');
+      return; // Ne rien faire si la source existe déjà
+    }
     try {
       setRssValidationState({ status: 'loading', message: 'Vérification du flux RSS...' });
-      console.log('Vérification du flux RSS:', url);
+      console.log('[RSS CHECK] Starting RSS validation...');
       const response = await fetch('/api/sources/check-rss', {
         method: 'POST',
         headers: {
@@ -94,6 +144,7 @@ const AddSourceForm = ({
           status: 'success',
           message: 'Flux RSS valide !',
         });
+        console.log('[RSS CHECK] RSS is valid, state set to success.');
         // Transformer les articles pour s'assurer que nous avons la date de publication
         const transformedArticles = data.items.map((item) => ({
           ...item,
@@ -104,7 +155,7 @@ const AddSourceForm = ({
 
       return data;
     } catch (error) {
-      console.error('Erreur lors de la vérification du flux RSS:', error);
+      console.error('[RSS CHECK] Erreur lors de la vérification du flux RSS:', error);
       if (error.message === 'FORBIDDEN') {
         setRssValidationState({
           status: 'error',
@@ -112,29 +163,19 @@ const AddSourceForm = ({
           details:
             "Le site que vous essayez d'ajouter ne nous autorise pas à récupérer son contenu (erreur 403).",
         });
+        console.log('[RSS CHECK] RSS forbidden (403), state set to error.');
       } else {
         setRssValidationState({
           status: 'error',
           message: 'Flux RSS invalide ou inaccessible',
           details: error.message || 'Une erreur est survenue lors de la vérification du flux.',
         });
+        console.log('[RSS CHECK] RSS invalid or inaccessible, state set to error.');
       }
       setPreviewArticles([]);
       return null;
     }
   };
-
-  // Debounce pour éviter trop d'appels API
-  const [debouncedRssUrl, setDebouncedRssUrl] = useState('');
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (debouncedRssUrl) {
-        checkRssFeed(debouncedRssUrl);
-      }
-    }, 1000); // Attendre 1 seconde après la dernière modification
-
-    return () => clearTimeout(timer);
-  }, [debouncedRssUrl]);
 
   const handleCustomSourceChange = (e) => {
     const { name, value, type } = e.target;
@@ -298,6 +339,7 @@ const AddSourceForm = ({
                         ? 'border-red-300 ring-red-200'
                         : 'border-gray-300 focus:ring-blue-200'
                     } shadow-sm focus:border-blue-500 focus:ring focus:ring-opacity-50`}
+                    disabled={existingSource !== null}
                   />
                   {/* Indicateur de validation RSS (masqué sur mobile) */}
                   <div className="absolute inset-y-0 right-0 pr-3 items-center hidden sm:flex">
@@ -350,23 +392,66 @@ const AddSourceForm = ({
                     Essayer une autre URL de flux
                   </button>
                 )}
-                {/* Message de validation */}
-                {rssValidationState.status !== 'idle' && (
-                  <div
-                    className={`mt-1.5 ${
-                      rssValidationState.status === 'success'
-                        ? 'text-green-600'
-                        : rssValidationState.status === 'error'
-                        ? 'text-red-600'
-                        : 'text-blue-600'
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{rssValidationState.message}</p>
-                    {rssValidationState.details && (
-                      <p className="text-sm mt-1">{rssValidationState.details}</p>
-                    )}
+
+                {/* Message source existante */}
+                {existingSource && (
+                  <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5 text-yellow-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>
+                      Cette source existe déjà dans notre base de données !
+                      {existingSource.name && (
+                        <span>
+                          {' '}
+                          (<strong>{existingSource.name}</strong>)
+                        </span>
+                      )}
+                      <br />
+                      <span className="text-xs text-yellow-700">
+                        Vous pouvez la retrouver dans votre catalogue ou vos collections.
+                      </span>
+                    </span>
                   </div>
                 )}
+                {(() => {
+                  if (existingSource) {
+                    console.log(
+                      '[RENDER] Existing source detected, not rendering RSS validation message.'
+                    );
+                    return null;
+                  }
+                  if (rssValidationState.status !== 'idle') {
+                    console.log('[RENDER] Rendering RSS validation message:', rssValidationState);
+                    return (
+                      <div
+                        className={`mt-1.5 ${
+                          rssValidationState.status === 'success'
+                            ? 'text-green-600'
+                            : rssValidationState.status === 'error'
+                            ? 'text-red-600'
+                            : 'text-blue-600'
+                        }`}
+                      >
+                        <p className="text-sm font-medium">{rssValidationState.message}</p>
+                        {rssValidationState.details && (
+                          <p className="text-sm mt-1">{rssValidationState.details}</p>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
                 {formErrors.rssUrl && (
                   <p className="mt-1.5 text-sm text-red-600 flex items-center">

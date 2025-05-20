@@ -7,6 +7,7 @@ import {
   getSourceById,
   removeSourceFromAllCollections,
   createSource,
+  getSourceExists,
 } from '../controllers/sourceController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { checkRssFeed } from '../services/rssFetcher.js';
@@ -18,6 +19,8 @@ router.get('/', getAllSources);
 
 // Routes protégées (nécessitant une authentification)
 router.post('/', protect, createSource);
+router.get('/exists', protect, getSourceExists);
+
 router.post('/validate-rss', protect, validateRssUrl);
 router.post('/user/:sourceId/remove-from-collections', protect, removeSourceFromAllCollections);
 router.get('/:id', protect, getSourceById);

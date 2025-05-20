@@ -515,3 +515,22 @@ export const removeSourceFromAllCollections = async (req, res) => {
     });
   }
 };
+
+export const getSourceExists = async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) {
+      return res.status(400).json({ exists: false, error: 'URL requise' });
+    }
+    const source = await Source.findOne({ $or: [{ rssUrl: url }, { url }] });
+    if (source) {
+      return res.json({
+        exists: true,
+        source: { name: source.name, _id: source._id, rssUrl: source.rssUrl },
+      });
+    }
+    return res.json({ exists: false });
+  } catch (error) {
+    res.status(500).json({ exists: false, error: error.message });
+  }
+};
