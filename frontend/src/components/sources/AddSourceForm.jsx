@@ -21,6 +21,7 @@ const AddSourceForm = ({
   const [rssValidationState, setRssValidationState] = useState({
     status: 'idle', // 'idle' | 'loading' | 'success' | 'error'
     message: '',
+    details: '',
   });
 
   // Trouver la collection par défaut
@@ -54,11 +55,16 @@ const AddSourceForm = ({
         body: JSON.stringify({ rssUrl: url }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Erreur lors de la vérification du flux RSS');
+        // Vérifier si le message d'erreur contient "Status code 403"
+        if (data.error && data.error.includes('Status code 403')) {
+          throw new Error('FORBIDDEN');
+        }
+        throw new Error(data.error || 'Erreur lors de la vérification du flux RSS');
       }
 
-      const data = await response.json();
       console.log('Contenu du flux RSS:', data);
 
       // Pré-remplir les champs avec les données du flux
@@ -84,10 +90,20 @@ const AddSourceForm = ({
       return data;
     } catch (error) {
       console.error('Erreur lors de la vérification du flux RSS:', error);
-      setRssValidationState({
-        status: 'error',
-        message: 'Flux RSS invalide ou inaccessible',
-      });
+      if (error.message === 'FORBIDDEN') {
+        setRssValidationState({
+          status: 'error',
+          message: '😕 Oups ! Ce flux RSS semble verrouillé',
+          details:
+            "Le site que vous essayez d'ajouter ne nous autorise pas à récupérer son contenu (erreur 403).",
+        });
+      } else {
+        setRssValidationState({
+          status: 'error',
+          message: 'Flux RSS invalide ou inaccessible',
+          details: error.message || 'Une erreur est survenue lors de la vérification du flux.',
+        });
+      }
       setPreviewArticles([]);
       return null;
     }
@@ -263,8 +279,8 @@ const AddSourceForm = ({
                         : 'border-gray-300 focus:ring-blue-200'
                     } shadow-sm focus:border-blue-500 focus:ring focus:ring-opacity-50`}
                   />
-                  {/* Indicateur de validation RSS */}
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  {/* Indicateur de validation RSS (masqué sur mobile) */}
+                  <div className="absolute inset-y-0 right-0 pr-3 items-center hidden sm:flex">
                     {rssValidationState.status === 'loading' && (
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
                     )}
@@ -300,10 +316,24 @@ const AddSourceForm = ({
                     )}
                   </div>
                 </div>
+                {/* Bouton de réinitialisation de l'URL du flux */}
+                {customSource.rssUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomSource((prev) => ({ ...prev, rssUrl: '' }));
+                      setRssValidationState({ status: 'idle', message: '', details: '' });
+                      setPreviewArticles([]);
+                    }}
+                    className="mt-2 text-xs text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                  >
+                    Essayer une autre URL de flux
+                  </button>
+                )}
                 {/* Message de validation */}
                 {rssValidationState.status !== 'idle' && (
-                  <p
-                    className={`mt-1.5 text-sm ${
+                  <div
+                    className={`mt-1.5 ${
                       rssValidationState.status === 'success'
                         ? 'text-green-600'
                         : rssValidationState.status === 'error'
@@ -311,8 +341,11 @@ const AddSourceForm = ({
                         : 'text-blue-600'
                     }`}
                   >
-                    {rssValidationState.message}
-                  </p>
+                    <p className="text-sm font-medium">{rssValidationState.message}</p>
+                    {rssValidationState.details && (
+                      <p className="text-sm mt-1">{rssValidationState.details}</p>
+                    )}
+                  </div>
                 )}
 
                 {formErrors.rssUrl && (
