@@ -8,6 +8,7 @@ import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
 import { networkInterfaces } from 'os';
+import net from 'net';
 
 // Configuration ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -159,6 +160,23 @@ fetchAllSources().catch((error) => {
   console.error('Erreur lors de la récupération initiale des flux RSS:', error);
 });
 
+// Fonction pour vérifier la disponibilité du port
+const isPortAvailable = (port) => {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(false);
+      }
+    });
+    server.once('listening', () => {
+      server.close();
+      resolve(true);
+    });
+    server.listen(port);
+  });
+};
+
 // Fonction pour arrêter proprement le serveur
 const gracefulShutdown = async () => {
   console.log('\nArrêt du serveur...');
@@ -188,9 +206,19 @@ process.on('SIGINT', gracefulShutdown);
 if (config.mode !== 'test') {
   mongoose
     .connect(config.mongoUri)
-    .then((conn) => {
+    .then(async (conn) => {
       mongoConnection = conn;
       console.log('Connected to MongoDB');
+
+      // Vérifier la disponibilité du port
+      const portAvailable = await isPortAvailable(config.port);
+      if (!portAvailable) {
+        console.error(
+          `Le port ${config.port} est déjà utilisé. Veuillez choisir un autre port ou libérer ce port.`
+        );
+        process.exit(1);
+      }
+
       // En production, on écoute sur toutes les interfaces
       const listenInterface =
         config.mode === 'production' ? '0.0.0.0' : config.security.listenInterface;
