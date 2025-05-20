@@ -154,6 +154,12 @@ const ArticleCard = ({ article, onSave, onShare }) => {
 
             {/* Source, auteur et date - Regroupés en ligne */}
             <div className="flex items-center gap-2 mb-2 flex-wrap text-xs text-gray-600">
+              {article.creator && (
+                <>
+                  <span>Par {article.creator}</span>
+                  <span className="text-gray-400">•</span>
+                </>
+              )}
               <button
                 onClick={handleSourceClick}
                 className="flex items-center space-x-1 hover:text-blue-600 transition-colors"
@@ -163,12 +169,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
                 )}
                 <span className="font-medium">{article.sourceName}</span>
               </button>
-              {article.creator && (
-                <>
-                  <span className="text-gray-400">•</span>
-                  <span>Par {article.creator}</span>
-                </>
-              )}
               <span className="text-gray-400">•</span>
               <span>{formatRelativeTime(article.publishedAt)}</span>
             </div>
