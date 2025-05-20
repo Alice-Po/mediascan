@@ -155,6 +155,8 @@ const OnboardingSource = ({ onValidationChange }) => {
               loading={loading}
               formErrors={formErrors}
               collections={[{ _id: 'default', name: 'Collection par défaut', isDefault: true }]}
+              hideCollectionSection={true}
+              defaultCollectionId="default"
             />
           </div>
         </div>

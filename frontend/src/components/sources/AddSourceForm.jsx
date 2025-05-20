@@ -15,6 +15,8 @@ const AddSourceForm = ({
   suggestions = [],
   handleSelectSource = () => {},
   collections = [],
+  hideCollectionSection = false,
+  defaultCollectionId = '',
 }) => {
   const { showSnackbar } = useSnackbar();
   const [showRssHelp, setShowRssHelp] = useState(false);
@@ -38,9 +40,22 @@ const AddSourceForm = ({
       details: '',
     },
     orientation: [],
-    collectionId: defaultCollection?._id || '',
+    collectionId: hideCollectionSection
+      ? defaultCollectionId || defaultCollection?._id || ''
+      : defaultCollection?._id || '',
   });
   const [previewArticles, setPreviewArticles] = useState([]);
+
+  // Si hideCollectionSection est actif, forcer collectionId à la valeur par défaut à chaque changement d'URL RSS
+  useEffect(() => {
+    if (hideCollectionSection) {
+      setCustomSource((prev) => ({
+        ...prev,
+        collectionId: defaultCollectionId || defaultCollection?._id || '',
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hideCollectionSection, defaultCollectionId]);
 
   // Fonction pour vérifier le flux RSS
   const checkRssFeed = async (url) => {
@@ -174,6 +189,9 @@ const AddSourceForm = ({
         ...customSource.funding,
         type: customSource.funding?.type ? customSource.funding.type : undefined,
       },
+      collectionId: hideCollectionSection
+        ? defaultCollectionId || defaultCollection?._id || ''
+        : customSource.collectionId,
     };
     if (!cleanedSource.funding.type) delete cleanedSource.funding.type;
     if (!cleanedSource.funding.details) delete cleanedSource.funding.details;
@@ -199,7 +217,9 @@ const AddSourceForm = ({
           details: '',
         },
         orientation: [],
-        collectionId: defaultCollection?._id || '',
+        collectionId: hideCollectionSection
+          ? defaultCollectionId || defaultCollection?._id || ''
+          : defaultCollection?._id || '',
       });
     } catch (error) {
       // Afficher une notification d'erreur en cas d'échec
@@ -379,73 +399,15 @@ const AddSourceForm = ({
                   </div>
                 )}
 
-                {/* Guide d'aide RSS */}
-                <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-100">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 hidden sm:block">
-                      <div className="bg-blue-100 rounded-full p-2">
-                        <svg
-                          className="h-5 w-5 text-blue-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium text-blue-900 mb-3">
-                        Comment trouver l'URL d'un flux ?
-                      </h4>
-                      <div className="space-y-4">
-                        <p className="text-sm text-gray-700">
-                          Rendez-vous sur le site web auquel vous souhaitez vous abonner.
-                        </p>
-
-                        <div className="bg-white rounded-lg p-3 border border-gray-200">
-                          <p className="text-sm font-medium text-gray-900 mb-2">
-                            Cherchez ces icônes :
-                          </p>
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium">
-                                RSS
-                              </span>
-                              <span className="text-sm text-gray-600">ou</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <svg
-                                className="h-5 w-5 text-gray-600"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 13.1v-3z" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                          <p className="text-sm text-blue-700">
-                            <span className="font-medium">Astuce :</span> Le plus simple est
-                            d'utiliser des extensions de votre navigateur pour récupérer facilement
-                            l'URL du flux.
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setShowRssHelp(true)}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
+                {/* Section d'aide pour trouver l'URL du flux */}
+                {rssValidationState.status !== 'success' && (
+                  <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                    <div className="flex items-start space-x-3">
+                      {' '}
+                      <div className="flex-shrink-0 hidden sm:block">
+                        <div className="bg-blue-100 rounded-full p-2">
                           <svg
-                            className="h-4 w-4 mr-2"
+                            className="h-5 w-5 text-blue-600"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -457,12 +419,70 @@ const AddSourceForm = ({
                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                           </svg>
-                          J'ai besoin de plus d'aide
-                        </button>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-blue-900 mb-3">
+                          Comment trouver l'URL d'un flux ?
+                        </h4>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-700">
+                            Rendez-vous sur le site web auquel vous souhaitez vous abonner.
+                          </p>
+                          <div className="bg-white rounded-lg p-3 border border-gray-200">
+                            <p className="text-sm font-medium text-gray-900 mb-2">
+                              Cherchez ces icônes :
+                            </p>
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-sm font-medium">
+                                  RSS
+                                </span>
+                                <span className="text-sm text-gray-600">ou</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <svg
+                                  className="h-5 w-5 text-gray-600"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 13.1v-3z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                            <p className="text-sm text-blue-700">
+                              <span className="font-medium">Astuce :</span> Le plus simple est
+                              d'utiliser des extensions de votre navigateur pour récupérer
+                              facilement l'URL du flux.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowRssHelp(true)}
+                            className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            <svg
+                              className="h-4 w-4 mr-2"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            J'ai besoin de plus d'aide
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -553,46 +573,13 @@ const AddSourceForm = ({
             </div>
 
             {/* Section Collections */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
-                <div className="flex items-center">
-                  <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
-                    <svg
-                      className="w-5 h-5 text-indigo-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      Collection <span className="text-red-500">*</span>
-                    </h3>
-                  </div>
-                </div>
-              </div>
-              <div className="p-3 sm:p-4">
-                <div>
-                  <label
-                    htmlFor="collectionId"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Ajouter à une collection <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Cette source doit être ajoutée à une collection
-                  </p>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {!hideCollectionSection && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-indigo-50 px-3 sm:px-4 py-3 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <div className="bg-indigo-100 rounded-full p-2 mr-2 sm:mr-3">
                       <svg
-                        className="h-5 w-5 text-gray-400"
+                        className="w-5 h-5 text-indigo-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -605,48 +592,62 @@ const AddSourceForm = ({
                         />
                       </svg>
                     </div>
-                    <select
-                      id="collectionId"
-                      name="collectionId"
-                      value={customSource.collectionId}
-                      onChange={handleCustomSourceChange}
-                      required
-                      className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
-                    >
-                      <option value="">Sélectionner une collection</option>
-                      {collections.map((collection) => (
-                        <option key={collection._id} value={collection._id}>
-                          {collection.name}
-                          {collection.isDefault ? ' (Collection par défaut)' : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        Collection <span className="text-red-500">*</span>
+                      </h3>
+                    </div>
                   </div>
-
-                  {formErrors.collectionId && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center">
-                      <svg
-                        className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                      {formErrors.collectionId}
+                </div>
+                <div className="p-3 sm:p-4">
+                  <div>
+                    <label
+                      htmlFor="collectionId"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Ajouter à une collection <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Cette source doit être ajoutée à une collection
                     </p>
-                  )}
-
-                  {customSource.collectionId && (
-                    <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
-                      <p className="text-xs text-indigo-700 flex items-center">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg
-                          className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
+                          className="h-5 w-5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                          />
+                        </svg>
+                      </div>
+                      <select
+                        id="collectionId"
+                        name="collectionId"
+                        value={customSource.collectionId}
+                        onChange={handleCustomSourceChange}
+                        required
+                        className="block w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-white"
+                      >
+                        <option value="">Sélectionner une collection</option>
+                        {collections.map((collection) => (
+                          <option key={collection._id} value={collection._id}>
+                            {collection.name}
+                            {collection.isDefault ? ' (Collection par défaut)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {formErrors.collectionId && (
+                      <p className="mt-2 text-sm text-red-600 flex items-center">
+                        <svg
+                          className="h-4 w-4 text-red-500 mr-1.5 flex-shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -655,16 +656,37 @@ const AddSourceForm = ({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                           />
                         </svg>
-                        La source sera immédiatement ajoutée à cette collection dès sa création
+                        {formErrors.collectionId}
                       </p>
-                    </div>
-                  )}
+                    )}
+
+                    {customSource.collectionId && (
+                      <div className="mt-3 bg-indigo-50 p-2 sm:p-3 rounded-md">
+                        <p className="text-xs text-indigo-700 flex items-center">
+                          <svg
+                            className="h-4 w-4 text-indigo-500 mr-1.5 flex-shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          La source sera immédiatement ajoutée à cette collection dès sa création
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Section 4: Orientation */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -886,12 +908,16 @@ AddSourceForm.propTypes = {
       name: PropTypes.string.isRequired,
     })
   ),
+  hideCollectionSection: PropTypes.bool,
+  defaultCollectionId: PropTypes.string,
 };
 
 AddSourceForm.defaultProps = {
   collections: [],
   suggestions: [],
   handleSelectSource: () => {},
+  hideCollectionSection: false,
+  defaultCollectionId: '',
 };
 
 export default AddSourceForm;
