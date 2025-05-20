@@ -756,6 +756,11 @@ const AddSourceForm = ({
                       >
                         Type de financement
                       </label>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Indiquer le mode de financement permet de mieux comprendre l'indépendance,
+                        les éventuels biais ou la mission de la source. Cette information aide à la
+                        transparence et à la confiance pour tous les utilisateurs.
+                      </p>
                       <select
                         id="funding.type"
                         name="funding.type"
