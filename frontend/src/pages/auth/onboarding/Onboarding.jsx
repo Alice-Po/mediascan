@@ -200,7 +200,7 @@ const Onboarding = () => {
         {error && <div className="bg-red-100 text-red-700 p-3 rounded-md mb-4">{error}</div>}
 
         {/* Contenu principal */}
-        <div className="bg-white rounded-xl shadow-sm md:p-6">
+        <div className=" md:p-6">
           {renderStep()}
 
           {/* Boutons de navigation */}

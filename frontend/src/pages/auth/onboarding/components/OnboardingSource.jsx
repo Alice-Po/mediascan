@@ -80,8 +80,8 @@ const OnboardingSource = ({ onValidationChange }) => {
           Médiascan est un aggrégateur de flux d'information.
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Nous allons beaucoup vous parler de sources. Une source, c'est pour nous un flux
-          d'informations qui correspond aux mise à jours d'un service web (comme de nouveaux
+          Nous allons beaucoup vous parler de <strong>sources</strong>. Une source, c'est pour nous
+          un flux d'informations qui correspond aux mise à jours d'un service web (comme de nouveaux
           articles, vidéos ou podcasts).
         </p>
         <br />
