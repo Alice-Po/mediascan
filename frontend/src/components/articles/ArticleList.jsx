@@ -1,22 +1,47 @@
-import React, { useContext, useEffect, useRef, useCallback, useState } from 'react';
-import { AppContext } from '../../context/AppContext';
+import React, { useEffect, useRef, useCallback, useState, useContext } from 'react';
 import ArticleCard from './ArticleCard';
 import { useSavedArticles } from '../../context/SavedArticlesContext';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useCollections } from '../../hooks/useCollections';
+import { useArticles } from '../../hooks/useArticles';
+import { fetchArticles } from '../../api/articlesApi';
+import { AuthContext } from '../../context/AuthContext';
+import EmptyState from './EmptyState';
 
 /**
  * Composant d'affichage de la liste des articles avec scroll infini
+ * @param {Object} props
+ * @param {Object} props.filters - Filtres à appliquer au feed (optionnel, fourni par le parent)
  */
-const ArticleList = () => {
-  const { articles, loadingArticles, hasMoreArticles, loadMoreArticles, updateArticle } =
-    useContext(AppContext);
+const ArticleList = ({ filters: parentFilters }) => {
+  // Récupérer les collections de l'utilisateur
+  const { user } = useContext(AuthContext);
+  const { ownedCollections } = useCollections(user);
   const { saveArticle, unsaveArticle } = useSavedArticles();
+
+  // Utiliser le hook généraliste pour les articles, en injectant les filtres du parent
+  const [filters, setFilters] = useState(parentFilters);
+  const {
+    articles,
+    loading,
+    error,
+    hasMore,
+    loadMore,
+    updateArticle,
+    setFilters: setHookFilters,
+  } = useArticles({
+    fetchArticlesFn: fetchArticles,
+    collections: ownedCollections,
+    options: { pageSize: 20, initialFilters: filters },
+  });
+
+  // Synchroniser les filtres du parent avec le hook si la prop change
+  useEffect(() => {
+    setFilters(parentFilters);
+    setHookFilters(parentFilters);
+  }, [parentFilters, setHookFilters]);
 
   // Référence pour l'observateur d'intersection
   const observer = useRef();
-
-  // État pour gérer les erreurs de chargement
-  const [loadError, setLoadError] = useState(null);
 
   // Fonction pour gérer le partage d'un article
   const handleShare = (url) => {
@@ -28,7 +53,6 @@ const ArticleList = () => {
         })
         .catch(console.error);
     } else {
-      // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
       navigator.clipboard
         .writeText(url)
         .then(() => alert('Lien copié dans le presse-papier'))
@@ -48,7 +72,7 @@ const ArticleList = () => {
         await saveArticle(articleId);
       }
 
-      // Mettre à jour l'état de l'article dans le contexte
+      // Mettre à jour l'état de l'article dans le hook
       updateArticle(articleId, { isSaved: !article.isSaved });
     } catch (error) {
       console.error("Erreur lors de la sauvegarde de l'article:", error);
@@ -58,40 +82,29 @@ const ArticleList = () => {
   // Callback pour l'observateur d'intersection (infinite scroll)
   const lastArticleRef = useCallback(
     (node) => {
-      // Ne pas observer si en cours de chargement ou s'il n'y a plus d'articles
-      if (loadingArticles) return;
-
-      // Nettoyer l'observateur précédent
+      if (loading) return;
       if (observer.current) observer.current.disconnect();
-
-      // Créer un nouvel observateur
       observer.current = new IntersectionObserver(
         (entries) => {
-          // Si l'élément devient visible et qu'il y a plus d'articles à charger
-          if (entries[0].isIntersecting && hasMoreArticles) {
-            // Appeler la fonction de chargement d'articles supplémentaires
+          if (entries[0].isIntersecting && hasMore) {
             try {
-              loadMoreArticles();
+              loadMore();
             } catch (error) {
-              setLoadError("Impossible de charger plus d'articles. Veuillez réessayer.");
-              console.error('Erreur lors du chargement des articles:', error);
+              // L'erreur est déjà gérée dans le hook
             }
           }
         },
         {
-          root: null, // Viewport utilisé comme conteneur d'observation
-          rootMargin: '100px', // Déclencher un peu avant d'atteindre la fin
-          threshold: 0.1, // Déclencher quand 10% de l'élément est visible
+          root: null,
+          rootMargin: '100px',
+          threshold: 0.1,
         }
       );
-
-      // Observer le nouvel élément
       if (node) observer.current.observe(node);
     },
-    [loadingArticles, hasMoreArticles, loadMoreArticles]
+    [loading, hasMore, loadMore]
   );
 
-  // Nettoyer l'observateur au démontage du composant
   useEffect(() => {
     return () => {
       if (observer.current) {
@@ -100,39 +113,18 @@ const ArticleList = () => {
     };
   }, []);
 
-  // Fonction pour afficher un message si aucun article
-  const renderNoArticles = () => {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-gray-500 text-lg mb-4">Aucun article ne correspond à vos critères.</p>
-        <p className="text-gray-400">
-          Essayez de modifier vos filtres ou d'ajouter d'autres sources.
-        </p>
-      </div>
-    );
-  };
-
-  // Fonction pour afficher l'indicateur de chargement
-  const renderLoading = () => {
-    return (
-      <div className="flex justify-center py-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  };
-
   // Affichage du message d'erreur
   const renderError = () => {
     return (
       <div className="flex justify-center py-4">
-        <div className="text-red-500">{loadError}</div>
+        <div className="text-red-500">{error}</div>
       </div>
     );
   };
 
   // Affichage du message de fin de liste
   const renderEndOfList = () => {
-    if (!hasMoreArticles && articles.length > 0) {
+    if (!hasMore && articles.length > 0) {
       return (
         <div className="text-center py-6 text-gray-500">Vous avez atteint la fin de la liste</div>
       );
@@ -142,7 +134,7 @@ const ArticleList = () => {
 
   return (
     <div className="article-list -mx-3 sm:mx-0">
-      {/* Liste des articles */}
+      {/* Liste des articles ou état vide */}
       {articles.length > 0
         ? articles.map((article, index) => (
             <div
@@ -153,12 +145,16 @@ const ArticleList = () => {
               <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
             </div>
           ))
-        : !loadingArticles && renderNoArticles()}
+        : !loading && <EmptyState />}
 
       {/* Affichage des états */}
-      {loadError && renderError()}
-      {loadingArticles && renderLoading()}
-      {!loadingArticles && renderEndOfList()}
+      {error && renderError()}
+      {loading && (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      )}
+      {!loading && renderEndOfList()}
     </div>
   );
 };

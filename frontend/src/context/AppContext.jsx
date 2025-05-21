@@ -3,7 +3,7 @@ import { AuthContext } from './AuthContext';
 import { fetchSourcesFromUserCollections } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
 import { useCollections } from '../hooks/useCollections';
-import { useArticleFilters } from '../hooks/useArticleFilters';
+import { useArticles } from '../hooks/useArticles';
 
 // Création du contexte
 export const AppContext = createContext(null);
@@ -58,7 +58,7 @@ export const AppProvider = ({ children }) => {
     filterByCollection,
     filterBySource,
     filterBySearch,
-  } = useArticleFilters(articles, ownedCollections);
+  } = useArticles(articles, ownedCollections);
 
   // Toggle sidebar
   const toggleSidebar = useCallback(() => {
@@ -79,23 +79,10 @@ export const AppProvider = ({ children }) => {
 
       try {
         setLoadingSources(true);
-        const [userSourcesData, allSourcesData] = await Promise.all([
-          fetchSourcesFromUserCollections(),
-          fetchAllSources(),
-        ]);
+        const [userSourcesData] = await Promise.all([fetchSourcesFromUserCollections()]);
 
         if (mounted) {
           setUserSources(userSourcesData);
-
-          // Initialiser les filtres avec les sources actives
-          const activeSourceIds = userSourcesData
-            .filter((source) => source.enabled)
-            .map((source) => source._id);
-
-          setFilters((prev) => ({
-            ...prev,
-            sources: prev.sources.length === 0 ? activeSourceIds : prev.sources,
-          }));
         }
       } catch (err) {
         console.error('Error loading sources:', err);
