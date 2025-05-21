@@ -4,12 +4,7 @@ import { AppContext } from '../../context/AppContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import SourceCatalogModal from '../sources/SourceCatalogModal';
 import Modal from '../common/Modal';
-import {
-  createCollection,
-  updateCollection,
-  fetchCollectionById,
-  addSourceToCollection,
-} from '../../api/collectionsApi';
+import { useCollections } from '../../hooks/useCollections';
 
 /**
  * Composant pour créer ou modifier une collection
@@ -34,6 +29,9 @@ const CollectionForm = forwardRef(
       sources: userSources,
     } = useContext(AppContext) || { collections: [], loadingCollections: false, sources: [] };
 
+    const { loading, error, createCollection, updateCollection, addSourceToCollection } =
+      useCollections();
+
     // État local pour le formulaire
     const [formData, setFormData] = useState({
       name: '',
@@ -44,8 +42,6 @@ const CollectionForm = forwardRef(
 
     const [selectedSources, setSelectedSources] = useState([]);
     const [showSourceCatalogModal, setShowSourceCatalogModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     // Exposer des méthodes pour le parent via useImperativeHandle et ref
     useImperativeHandle(ref, () => ({

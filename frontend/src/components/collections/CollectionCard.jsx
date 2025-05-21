@@ -96,7 +96,7 @@ const CollectionCard = ({
             className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 rounded-lg text-sm font-medium transition-colors"
             onClick={handleViewDetails}
           >
-            Voir les détails
+            Avoir un aperçu
           </button>
           <button
             className={`flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg text-sm font-medium transition-colors ${

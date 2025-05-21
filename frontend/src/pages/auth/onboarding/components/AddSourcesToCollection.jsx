@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { fetchCollections, addSourceToCollection } from '../../../../api/collectionsApi';
+import { useCollections } from '../../../../hooks/useCollections';
 import SourceCatalogModal from '../../../../components/sources/SourceCatalogModal';
 
 const AddSourcesToCollection = ({ onValidationChange }) => {
-  const [collections, setCollections] = useState([]);
+  const { user } = useCollect(UserContext);
+  const {
+    collections,
+    loading,
+    error: collectionsError,
+    loadFollowedAndOwnedCollections,
+    addSourceToCollection: addSourceToCollectionHook,
+  } = useCollections(user);
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [addedSources, setAddedSources] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Vérifier si l'étape est valide (au moins 3 sources ajoutées)
@@ -24,13 +30,11 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
   useEffect(() => {
     const loadUserCollections = async () => {
       try {
-        setLoading(true);
-        const fetchedCollections = await fetchCollections();
-        setCollections(fetchedCollections);
+        await loadFollowedAndOwnedCollections();
 
         // Si des collections existent, sélectionner la première par défaut
-        if (fetchedCollections && fetchedCollections.length > 0) {
-          const recentCollection = fetchedCollections[fetchedCollections.length - 1];
+        if (collections && collections.length > 0) {
+          const recentCollection = collections[collections.length - 1];
           setSelectedCollection(recentCollection);
 
           // Initialiser les sources déjà présentes dans la collection
@@ -44,13 +48,11 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
       } catch (err) {
         console.error('Erreur lors du chargement des collections:', err);
         setError('Impossible de charger vos collections');
-      } finally {
-        setLoading(false);
       }
     };
 
     loadUserCollections();
-  }, []);
+  }, [loadFollowedAndOwnedCollections, collections]);
 
   // Gérer l'ajout d'une source à la collection sélectionnée
   const handleAddToCollection = async (source) => {
@@ -60,7 +62,7 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
     }
 
     try {
-      await addSourceToCollection(selectedCollection._id, source._id);
+      await addSourceToCollectionHook(selectedCollection._id, source._id);
 
       // Mettre à jour la liste des sources ajoutées
       setAddedSources((prev) => {
@@ -71,19 +73,10 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
       });
 
       // Mettre à jour la collection sélectionnée
-      const updatedCollections = collections.map((collection) => {
-        if (collection._id === selectedCollection._id) {
-          const updatedSources = collection.sources ? [...collection.sources] : [];
-          if (!updatedSources.includes(source._id)) {
-            updatedSources.push(source._id);
-          }
-          return { ...collection, sources: updatedSources };
-        }
-        return collection;
-      });
-
-      setCollections(updatedCollections);
-      setSelectedCollection(updatedCollections.find((c) => c._id === selectedCollection._id));
+      const updatedCollection = collections.find((c) => c._id === selectedCollection._id);
+      if (updatedCollection) {
+        setSelectedCollection(updatedCollection);
+      }
     } catch (err) {
       console.error("Erreur lors de l'ajout de la source à la collection:", err);
       setError("Impossible d'ajouter cette source à la collection");
@@ -191,8 +184,10 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
         <div className="flex justify-center items-center p-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
-      ) : error ? (
-        <div className="bg-red-50 p-4 rounded-md text-red-700 text-center">{error}</div>
+      ) : error || collectionsError ? (
+        <div className="bg-red-50 p-4 rounded-md text-red-700 text-center">
+          {error || collectionsError}
+        </div>
       ) : collections.length === 0 ? (
         <div className="bg-gray-50 p-6 rounded-md text-center">
           <p className="text-gray-700">Vous n'avez pas encore créé de collection.</p>

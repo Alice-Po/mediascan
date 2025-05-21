@@ -50,7 +50,6 @@ const Profile = () => {
       try {
         setLoading(true);
         const response = await getUserProfile();
-        console.log('Profile data loaded:', response);
 
         // Extraire l'objet user de la réponse
         const userData = response.user;

@@ -1,16 +1,16 @@
 import api from './index';
 
 /**
- * Récupérer toutes les collections de l'utilisateur
- * @returns {Promise} Liste des collections de l'utilisateur
+ * Récupérer toutes les collections personnelles de l'utilisateur
+ * @returns {Promise} Liste des collections personnelles de l'utilisateur
  */
-export const fetchCollections = async () => {
+export const fetchOwnedCollections = async () => {
   try {
     const response = await api.get('/collections');
     return response.data.data;
   } catch (error) {
     console.error(
-      'API: Error fetching collections:',
+      'API: Error fetching owned collections:',
       error.response?.status,
       error.response?.data?.message || error.message
     );
@@ -61,7 +61,7 @@ export const fetchCollectionById = async (collectionId) => {
  * @param {boolean} collectionData.isPublic - Indique si la collection est publique
  * @returns {Promise} Collection créée
  */
-export const createCollection = async (collectionData) => {
+export const apiCreateCollection = async (collectionData) => {
   try {
     const response = await api.post('/collections', collectionData);
     return response.data.data;
@@ -77,7 +77,7 @@ export const createCollection = async (collectionData) => {
  * @param {Object} collectionData - Données à mettre à jour
  * @returns {Promise} Collection mise à jour
  */
-export const updateCollection = async (collectionId, collectionData) => {
+export const apiUpdateCollection = async (collectionId, collectionData) => {
   try {
     const response = await api.put(`/collections/${collectionId}`, collectionData);
     return response.data.data;
@@ -92,7 +92,7 @@ export const updateCollection = async (collectionId, collectionData) => {
  * @param {string} collectionId - ID de la collection
  * @returns {Promise} Résultat de la suppression
  */
-export const deleteCollection = async (collectionId) => {
+export const apiDeleteCollection = async (collectionId) => {
   try {
     const response = await api.delete(`/collections/${collectionId}`);
     return response.data;
@@ -108,7 +108,7 @@ export const deleteCollection = async (collectionId) => {
  * @param {string} sourceId - ID de la source à ajouter
  * @returns {Promise} Collection mise à jour
  */
-export const addSourceToCollection = async (collectionId, sourceId) => {
+export const apiAddSourceToCollection = async (collectionId, sourceId) => {
   try {
     const response = await api.post(`/collections/${collectionId}/sources`, { sourceId });
     return response.data.data;
@@ -124,7 +124,7 @@ export const addSourceToCollection = async (collectionId, sourceId) => {
  * @param {string} sourceId - ID de la source à retirer
  * @returns {Promise} Collection mise à jour
  */
-export const removeSourceFromCollection = async (collectionId, sourceId) => {
+export const apiRemoveSourceFromCollection = async (collectionId, sourceId) => {
   try {
     const response = await api.delete(`/collections/${collectionId}/sources/${sourceId}`);
     return response.data.data;
@@ -139,7 +139,7 @@ export const removeSourceFromCollection = async (collectionId, sourceId) => {
  * @param {string} collectionId - ID de la collection à suivre
  * @returns {Promise} Résultat de l'opération
  */
-export const followCollection = async (collectionId) => {
+export const apiFollowCollection = async (collectionId) => {
   try {
     const response = await api.post(`/collections/${collectionId}/follow`);
     return response.data.data;
@@ -154,7 +154,7 @@ export const followCollection = async (collectionId) => {
  * @param {string} collectionId - ID de la collection à ne plus suivre
  * @returns {Promise} Résultat de l'opération
  */
-export const unfollowCollection = async (collectionId) => {
+export const apiUnfollowCollection = async (collectionId) => {
   try {
     const response = await api.delete(`/collections/${collectionId}/follow`);
     return response.data.data;
@@ -169,7 +169,7 @@ export const unfollowCollection = async (collectionId) => {
  * @param {string} collectionId - ID de la collection à vérifier
  * @returns {Promise} Résultat de la vérification
  */
-export const checkIfFollowing = async (collectionId) => {
+export const apiCheckIfFollowing = async (collectionId) => {
   try {
     const response = await api.get(`/collections/${collectionId}/following`);
     return response.data.following;

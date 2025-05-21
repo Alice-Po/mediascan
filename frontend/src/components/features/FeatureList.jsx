@@ -3,8 +3,7 @@ import functionalities from './functionalities.json';
 import FeatureDetailModal from './FeatureDetailModal';
 import FeatureItem from './FeatureItem';
 // Importation dynamique des composants de détail
-import PublicCollections from '../../pages/auth/onboarding/components/PublicCollections';
-import CreateCollection from '../../pages/auth/onboarding/components/CreateCollection';
+import OnboardingPublicCollections from '../../pages/auth/onboarding/components/OnboardingPublicCollections';
 import Step3Radar from '../../pages/auth/onboarding/components/Radar';
 import Step4Coverage from '../../pages/auth/onboarding/components/Coverage';
 import Step5Credits from '../../pages/auth/onboarding/components/Credits';
@@ -29,9 +28,8 @@ const FeatureList = () => {
   const getDetailComponent = (modalName) => {
     switch (modalName) {
       case 'PublicCollections':
-        return <PublicCollections />;
-      case 'CreateCollection':
-        return <CreateCollection />;
+        return <OnboardingPublicCollections />;
+
       case 'Radar':
         return <Step3Radar />;
       case 'Coverage':

@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { fetchCollections } from '../../../../api/collectionsApi';
+import { useCollections } from '../../../../hooks/useCollections';
 import CollectionItem from '../../../../components/collections/CollectionItem';
 import { AuthContext } from '../../../../context/AuthContext';
 import WarningBanner from '../../../../components/common/WarningBanner';
 import CollectionForm from '../../../../components/collections/CollectionForm';
 import CollectionsList from '../../../../components/collections/CollectionsList';
 
-const CreateCollection = ({ onValidationChange }) => {
+const OnboardingCreateCollection = ({ onValidationChange }) => {
   const { user } = useContext(AuthContext);
+  const {
+    collections: userCollections,
+    loading: collectionsLoading,
+    error: hookError,
+    loadOwnedCollections,
+    deleteCollection,
+    createCollection,
+  } = useCollections();
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
-  const [userCollections, setUserCollections] = useState([]);
-  const [collectionsLoading, setCollectionsLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
   const lastValidationValue = useRef(false);
   const formRef = useRef(null);
 
@@ -37,19 +43,6 @@ const CreateCollection = ({ onValidationChange }) => {
     { name: 'Info Bretagne', description: 'Presse locale bretonne' },
   ];
 
-  // Charger les collections de l'utilisateur au montage ou après une création réussie
-  const loadUserCollections = async () => {
-    try {
-      setCollectionsLoading(true);
-      const collections = await fetchCollections();
-      setUserCollections(collections);
-    } catch (err) {
-      console.error('Erreur lors du chargement des collections:', err);
-    } finally {
-      setCollectionsLoading(false);
-    }
-  };
-
   // Informer le composant parent du changement de validation
   useEffect(() => {
     if (onValidationChange && isCurrentlyValid !== lastValidationValue.current) {
@@ -60,14 +53,14 @@ const CreateCollection = ({ onValidationChange }) => {
 
   useEffect(() => {
     // Charger les collections au montage du composant
-    loadUserCollections();
-  }, []);
+    loadOwnedCollections();
+  }, [loadOwnedCollections]);
 
   // Gestionnaire pour la création de collection via CollectionForm
   const handleCollectionCreated = async (collection) => {
     setSuccess(true);
-    setError(null);
-    await loadUserCollections();
+    setFormError(null);
+    await loadOwnedCollections();
 
     // Réinitialiser le formulaire après création réussie
     if (formRef.current && typeof formRef.current.resetForm === 'function') {
@@ -77,7 +70,7 @@ const CreateCollection = ({ onValidationChange }) => {
 
   // Gestionnaire pour les erreurs de CollectionForm
   const handleFormError = (errorMessage) => {
-    setError(errorMessage);
+    setFormError(errorMessage);
     setSuccess(false);
   };
 
@@ -89,12 +82,14 @@ const CreateCollection = ({ onValidationChange }) => {
   };
 
   // Gestionnaire pour la suppression d'une collection
-  const handleCollectionDeleted = (deletedCollection) => {
-    console.log('Collection supprimée:', deletedCollection._id);
-    // Mettre à jour l'état local en retirant la collection supprimée
-    setUserCollections((prev) =>
-      prev.filter((collection) => collection._id !== deletedCollection._id)
-    );
+  const handleCollectionDeleted = async (deletedCollection) => {
+    try {
+      await deleteCollection(deletedCollection._id);
+      await loadOwnedCollections();
+    } catch (err) {
+      console.error('Erreur lors de la suppression de la collection:', err);
+      setFormError('Impossible de supprimer la collection');
+    }
   };
 
   return (
@@ -182,8 +177,12 @@ const CreateCollection = ({ onValidationChange }) => {
           <h3 className="font-semibold text-gray-900 mb-4 text-lg">Mes collections</h3>
 
           {collectionsLoading ? (
-            <div className="flex justify-center items-center py-8">
+            <div className="flex justify-center p-4">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+          ) : formError || hookError ? (
+            <div className="bg-red-50 p-4 rounded-md text-red-700 text-center">
+              {formError || hookError}
             </div>
           ) : (
             <CollectionsList
@@ -202,4 +201,4 @@ const CreateCollection = ({ onValidationChange }) => {
   );
 };
 
-export default CreateCollection;
+export default OnboardingCreateCollection;

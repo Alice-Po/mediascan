@@ -1,12 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  fetchCollections,
+  fetchOwnedCollections,
+  fetchPublicCollections,
   fetchCollectionById,
-  createCollection as apiCreateCollection,
-  updateCollection as apiUpdateCollection,
-  deleteCollection as apiDeleteCollection,
-  addSourceToCollection as apiAddSourceToCollection,
-  removeSourceFromCollection as apiRemoveSourceFromCollection,
+  apiCreateCollection,
+  apiUpdateCollection,
+  apiDeleteCollection,
+  apiAddSourceToCollection,
+  apiRemoveSourceFromCollection,
+  apiFollowCollection,
+  apiUnfollowCollection,
+  apiCheckIfFollowing,
   fetchFollowedCollections,
 } from '../api/collectionsApi';
 
@@ -18,8 +22,12 @@ import {
  * @returns {Object} État et fonctions pour gérer les collections
  */
 export function useCollections(user, setGlobalError) {
-  // États
-  const [collections, setCollections] = useState([]);
+  // États pour les différentes catégories de collections
+  const [ownedCollections, setOwnedCollections] = useState([]);
+  const [followedCollections, setFollowedCollections] = useState([]);
+  const [allFollowedAndOwnedCollections, setAllFollowedAndOwnedCollections] = useState([]);
+  const [publicCollections, setPublicCollections] = useState([]);
+  const [defaultCollection, setDefaultCollection] = useState(null);
   const [currentCollection, setCurrentCollection] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,7 +38,6 @@ export function useCollections(user, setGlobalError) {
       console.error(errorMessage, errorObj);
       setError(errorMessage);
 
-      // Propager l'erreur au contexte parent si la fonction est fournie
       if (setGlobalError) {
         setGlobalError(errorMessage);
       }
@@ -39,9 +46,9 @@ export function useCollections(user, setGlobalError) {
   );
 
   /**
-   * Charger toutes les collections de l'utilisateur
+   * Charger toutes les collections de l'utilisateur (personnelles + suivies)
    */
-  const loadCollections = useCallback(async () => {
+  const loadAllCollections = useCallback(async () => {
     if (!user) {
       console.warn('Tentative de chargement des collections sans utilisateur connecté');
       return;
@@ -49,36 +56,41 @@ export function useCollections(user, setGlobalError) {
 
     try {
       setLoading(true);
-      const collectionsData = await fetchCollections();
+      const [ownedData, followedData] = await Promise.all([
+        fetchOwnedCollections(),
+        fetchFollowedCollections(),
+      ]);
 
-      // Récupérer les collections suivies
-      const followedCollectionsData = await fetchFollowedCollections();
+      // Enrichir les collections avec des informations supplémentaires
+      const enhancedOwnedCollections = ownedData.map((collection) => ({
+        ...collection,
+        creator:
+          collection.userId === user._id ? user.name || 'Vous' : collection.createdBy?.username,
+        isFollowed: false,
+      }));
 
-      // Ajouter le nom du créateur et propriété isFollowed=false aux collections personnelles
-      const enhancedPersonalCollections = collectionsData.map((collection) => {
-        return {
-          ...collection,
-          creator:
-            collection.userId === user._id ? user.name || 'Vous' : collection.createdBy?.username,
-          isFollowed: false,
-        };
-      });
+      const enhancedFollowedCollections = followedData.map((collection) => ({
+        ...collection,
+        creator: collection.createdBy?.username,
+        isFollowed: true,
+      }));
 
-      // Marquer les collections suivies avec isFollowed=true
-      const enhancedFollowedCollections = followedCollectionsData.map((collection) => {
-        return {
-          ...collection,
-          creator: collection.createdBy?.username,
-          isFollowed: true,
-        };
-      });
+      // Mettre à jour les états
+      setOwnedCollections(enhancedOwnedCollections);
+      setFollowedCollections(enhancedFollowedCollections);
+      setAllFollowedAndOwnedCollections([
+        ...enhancedOwnedCollections,
+        ...enhancedFollowedCollections,
+      ]);
 
-      // Combiner les collections personnelles et suivies
-      const allCollections = [...enhancedPersonalCollections, ...enhancedFollowedCollections];
+      // Définir la collection par défaut (la plus récente des collections personnelles)
+      if (enhancedOwnedCollections.length > 0) {
+        const mostRecent = enhancedOwnedCollections[enhancedOwnedCollections.length - 1];
+        setDefaultCollection(mostRecent);
+      }
 
-      setCollections(allCollections);
       setError(null);
-      return allCollections;
+      return [...enhancedOwnedCollections, ...enhancedFollowedCollections];
     } catch (err) {
       console.error('Erreur détaillée lors du chargement des collections:', err);
       handleError('Impossible de charger les collections', err);
@@ -89,10 +101,62 @@ export function useCollections(user, setGlobalError) {
   }, [user, handleError]);
 
   /**
+   * Charger les collections publiques
+   */
+  const loadPublicCollections = useCallback(async () => {
+    try {
+      setLoading(true);
+      const publicData = await fetchPublicCollections();
+      const enhancedPublicCollections = publicData.map((collection) => ({
+        ...collection,
+        creator: collection.createdBy?.username,
+        isPublic: true,
+      }));
+      setPublicCollections(enhancedPublicCollections);
+      setError(null);
+      return enhancedPublicCollections;
+    } catch (err) {
+      console.error('Erreur lors du chargement des collections publiques:', err);
+      handleError('Impossible de charger les collections publiques', err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [handleError]);
+
+  /**
+   * Charger uniquement les collections personnelles de l'utilisateur
+   */
+  const loadOwnedCollections = useCallback(async () => {
+    if (!user) {
+      console.warn('Tentative de chargement des collections sans utilisateur connecté');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const collectionsData = await fetchOwnedCollections();
+      const enhancedCollections = collectionsData.map((collection) => ({
+        ...collection,
+        creator:
+          collection.userId === user._id ? user.name || 'Vous' : collection.createdBy?.username,
+        isFollowed: false,
+      }));
+
+      setOwnedCollections(enhancedCollections);
+      setError(null);
+      return enhancedCollections;
+    } catch (err) {
+      console.error('Erreur lors du chargement des collections personnelles:', err);
+      handleError('Impossible de charger les collections personnelles', err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [user, handleError]);
+
+  /**
    * Charger une collection spécifique par son ID
-   *
-   * @param {string} collectionId - L'ID de la collection à charger
-   * @returns {Object} La collection chargée
    */
   const loadCollectionById = useCallback(
     async (collectionId) => {
@@ -114,23 +178,18 @@ export function useCollections(user, setGlobalError) {
 
   /**
    * Créer une nouvelle collection
-   *
-   * @param {Object} collectionData - Données de la collection à créer
-   * @returns {Object} La nouvelle collection créée
    */
   const createCollection = useCallback(
     async (collectionData) => {
       try {
-        setLoading(true);
         const newCollection = await apiCreateCollection(collectionData);
-        setCollections((prev) => [...prev, newCollection]);
+        setOwnedCollections((prev) => [...prev, newCollection]);
         setError(null);
         return newCollection;
-      } catch (err) {
-        handleError('Impossible de créer la collection', err);
-        throw err;
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error creating collection:', error);
+        handleError('Impossible de créer la collection', error);
+        throw error;
       }
     },
     [handleError]
@@ -138,179 +197,153 @@ export function useCollections(user, setGlobalError) {
 
   /**
    * Mettre à jour une collection existante
-   *
-   * @param {string} collectionId - L'ID de la collection à mettre à jour
-   * @param {Object} collectionData - Nouvelles données de la collection
-   * @returns {Object} La collection mise à jour
    */
   const updateCollection = useCallback(
     async (collectionId, collectionData) => {
       try {
-        setLoading(true);
         const updatedCollection = await apiUpdateCollection(collectionId, collectionData);
-
-        // Mettre à jour la liste des collections
-        setCollections((prev) =>
-          prev.map((collection) =>
-            collection._id === collectionId ? updatedCollection : collection
-          )
+        setOwnedCollections((prev) =>
+          prev.map((c) => (c.id === collectionId ? updatedCollection : c))
         );
-
-        // Mettre à jour la collection courante si nécessaire
-        if (currentCollection && currentCollection._id === collectionId) {
-          setCurrentCollection(updatedCollection);
-        }
-
         setError(null);
         return updatedCollection;
-      } catch (err) {
-        handleError('Impossible de mettre à jour la collection', err);
-        throw err;
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error updating collection:', error);
+        handleError('Impossible de mettre à jour la collection', error);
+        throw error;
       }
     },
-    [currentCollection, handleError]
+    [handleError]
   );
 
   /**
    * Supprimer une collection
-   *
-   * @param {string} collectionId - L'ID de la collection à supprimer
-   * @returns {boolean} Succès de l'opération
    */
   const deleteCollection = useCallback(
     async (collectionId) => {
       try {
-        setLoading(true);
         await apiDeleteCollection(collectionId);
-
-        // Supprimer de la liste des collections
-        setCollections((prev) => prev.filter((collection) => collection._id !== collectionId));
-
-        // Réinitialiser la collection courante si nécessaire
-        if (currentCollection && currentCollection._id === collectionId) {
-          setCurrentCollection(null);
-        }
-
+        setOwnedCollections((prev) => prev.filter((c) => c.id !== collectionId));
         setError(null);
         return true;
-      } catch (err) {
-        handleError('Impossible de supprimer la collection', err);
-        throw err;
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error deleting collection:', error);
+        handleError('Impossible de supprimer la collection', error);
+        throw error;
       }
     },
-    [currentCollection, handleError]
+    [handleError]
   );
 
   /**
    * Ajouter une source à une collection
-   *
-   * @param {string} collectionId - L'ID de la collection
-   * @param {string} sourceId - L'ID de la source à ajouter
-   * @returns {Object} La collection mise à jour
    */
   const addSourceToCollection = useCallback(
     async (collectionId, sourceId) => {
       try {
-        setLoading(true);
         const updatedCollection = await apiAddSourceToCollection(collectionId, sourceId);
-
-        // Mettre à jour la liste des collections
-        setCollections((prev) =>
-          prev.map((collection) =>
-            collection._id === collectionId ? updatedCollection : collection
-          )
+        setOwnedCollections((prev) =>
+          prev.map((c) => (c.id === collectionId ? updatedCollection : c))
         );
-
-        // Mettre à jour la collection courante si nécessaire
-        if (currentCollection && currentCollection._id === collectionId) {
-          setCurrentCollection(updatedCollection);
-        }
-
         setError(null);
         return updatedCollection;
-      } catch (err) {
-        handleError("Impossible d'ajouter la source à la collection", err);
-        throw err;
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error adding source to collection:', error);
+        handleError("Impossible d'ajouter la source à la collection", error);
+        throw error;
       }
     },
-    [currentCollection, handleError]
+    [handleError]
   );
 
   /**
    * Retirer une source d'une collection
-   *
-   * @param {string} collectionId - L'ID de la collection
-   * @param {string} sourceId - L'ID de la source à retirer
-   * @returns {Object} La collection mise à jour
    */
   const removeSourceFromCollection = useCallback(
     async (collectionId, sourceId) => {
       try {
-        setLoading(true);
         const updatedCollection = await apiRemoveSourceFromCollection(collectionId, sourceId);
-
-        // Mettre à jour la liste des collections
-        setCollections((prev) =>
-          prev.map((collection) =>
-            collection._id === collectionId ? updatedCollection : collection
-          )
+        setOwnedCollections((prev) =>
+          prev.map((c) => (c.id === collectionId ? updatedCollection : c))
         );
-
-        // Mettre à jour la collection courante si nécessaire
-        if (currentCollection && currentCollection._id === collectionId) {
-          setCurrentCollection(updatedCollection);
-        }
-
         setError(null);
         return updatedCollection;
-      } catch (err) {
-        handleError('Impossible de retirer la source de la collection', err);
-        throw err;
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error removing source from collection:', error);
+        handleError('Impossible de retirer la source de la collection', error);
+        throw error;
       }
     },
-    [currentCollection, handleError]
+    [handleError]
   );
 
-  /**
-   * Créer une fonction de filtrage par collection pour l'intégration avec AppContext
-   *
-   * @param {Function} setFilters - Fonction de mise à jour des filtres du contexte
-   * @returns {Function} Fonction pour filtrer les articles par collection
-   */
-  const createFilterByCollection = useCallback((setFilters) => {
-    return (collectionId) => {
-      setFilters((prev) => ({
-        ...prev,
-        collection: collectionId,
-        // Réinitialiser les sources individuelles si on filtre par collection
-        sources: [],
-      }));
-    };
-  }, []);
+  const followCollection = useCallback(
+    async (collectionId) => {
+      try {
+        const result = await apiFollowCollection(collectionId);
+        setOwnedCollections((prev) => [...prev, result]);
+        setError(null);
+        return result;
+      } catch (error) {
+        console.error('Error following collection:', error);
+        handleError('Impossible de suivre la collection', error);
+        throw error;
+      }
+    },
+    [handleError]
+  );
+
+  const unfollowCollection = useCallback(
+    async (collectionId) => {
+      try {
+        await apiUnfollowCollection(collectionId);
+        setOwnedCollections((prev) => prev.filter((c) => c.id !== collectionId));
+        setError(null);
+      } catch (error) {
+        console.error('Error unfollowing collection:', error);
+        handleError('Impossible de ne plus suivre la collection', error);
+        throw error;
+      }
+    },
+    [handleError]
+  );
+
+  const checkIfFollowing = useCallback(
+    async (collectionId) => {
+      try {
+        return await apiCheckIfFollowing(collectionId);
+      } catch (error) {
+        console.error('Error checking if following collection:', error);
+        handleError('Impossible de vérifier si on suit la collection', error);
+        throw error;
+      }
+    },
+    [handleError]
+  );
 
   // Charger les collections au montage ou quand l'utilisateur change
   useEffect(() => {
     if (user) {
-      loadCollections();
+      loadAllCollections();
     } else {
       // Réinitialiser l'état si l'utilisateur n'est pas connecté
-      setCollections([]);
+      setOwnedCollections([]);
+      setFollowedCollections([]);
+      setAllFollowedAndOwnedCollections([]);
+      setPublicCollections([]);
+      setDefaultCollection(null);
       setCurrentCollection(null);
     }
-  }, [user, loadCollections]);
+  }, [user, loadAllCollections]);
 
   // Exposer toutes les fonctionnalités et états
   return {
     // États
-    collections,
+    ownedCollections,
+    followedCollections,
+    allFollowedAndOwnedCollections,
+    publicCollections,
+    defaultCollection,
     currentCollection,
     loading,
     error,
@@ -319,15 +352,17 @@ export function useCollections(user, setGlobalError) {
     setCurrentCollection,
 
     // Actions
-    loadCollections,
+    loadAllCollections,
+    loadOwnedCollections,
+    loadPublicCollections,
     loadCollectionById,
     createCollection,
     updateCollection,
     deleteCollection,
     addSourceToCollection,
     removeSourceFromCollection,
-
-    // Utilitaires
-    createFilterByCollection,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
   };
 }

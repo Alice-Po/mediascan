@@ -2,13 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { AuthContext } from '../../context/AuthContext';
-import {
-  followCollection,
-  unfollowCollection,
-  checkIfFollowing,
-  fetchCollectionById,
-} from '../../api/collectionsApi';
+import { fetchCollectionById } from '../../api/collectionsApi';
 import CollectionDetailComponent from './CollectionDetailComponent';
+import { useCollections } from '../../hooks/useCollections';
 
 /**
  * Composant modal pour afficher le détail d'une collection (publique ou privée)
@@ -43,10 +39,18 @@ const CollectionDetailsModal = ({
 
   const navigate = useNavigate();
 
+  const {
+    loading,
+    error,
+    deleteCollection,
+    removeSourceFromCollection,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
+  } = useCollections();
+
   // États pour les données et l'UI
   const [collection, setCollection] = useState(externalCollection || null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(followStatus || false);
   const [followLoading, setFollowLoading] = useState(isFollowLoading || false);
 
@@ -62,26 +66,6 @@ const CollectionDetailsModal = ({
     }
   };
 
-  // Fonction pour supprimer une collection - utilise le contexte ou l'API directement
-  const deleteCollection = async (id) => {
-    if (contextDeleteCollection && !standalone) {
-      return await contextDeleteCollection(id);
-    } else {
-      // Implémentation à ajouter pour le cas standalone
-      throw new Error('Suppression standalone non implémentée');
-    }
-  };
-
-  // Fonction pour retirer une source - utilise le contexte ou l'API directement
-  const removeSourceFromCollection = async (collectionId, sourceId) => {
-    if (contextRemoveSourceFromCollection && !standalone) {
-      return await contextRemoveSourceFromCollection(collectionId, sourceId);
-    } else {
-      // Implémentation à ajouter pour le cas standalone
-      throw new Error('Retrait de source standalone non implémenté');
-    }
-  };
-
   // Charger les détails de la collection
   useEffect(() => {
     const fetchCollectionDetails = async () => {
@@ -90,7 +74,6 @@ const CollectionDetailsModal = ({
       // Si une collection externe est fournie, l'utiliser directement
       if (externalCollection) {
         setCollection(externalCollection);
-        setLoading(false);
         return;
       }
 

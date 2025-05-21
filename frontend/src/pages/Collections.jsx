@@ -7,15 +7,11 @@ import PublicCollectionsCatalog from '../components/collections/PublicCollection
 
 const Collections = () => {
   const { user } = useContext(AuthContext);
-  const { collections, loading, loadCollections } = useCollections(user);
+  const { ownedCollections, loading } = useCollections(user);
   const [showPublicCollectionsModal, setShowPublicCollectionsModal] = useState(false);
 
   // Nombre minimum de sources requises pour afficher une collection
   const MIN_SOURCES_REQUIRED = 5;
-
-  useEffect(() => {
-    loadCollections();
-  }, [loadCollections]);
 
   // Ouvrir la modal des collections publiques
   const handleOpenPublicCollections = () => {
@@ -29,8 +25,8 @@ const Collections = () => {
 
   // Gérer les changements de statut de suivi
   const handleFollowStatusChange = async (collectionId, isFollowing) => {
-    // Rafraîchir les collections de l'utilisateur pour inclure/exclure la collection suivie/non suivie
-    await loadCollections();
+    // Ici, tu pourrais éventuellement rafraîchir les collections si besoin
+    // Mais le hook useCollections gère déjà la synchronisation
   };
 
   return (
@@ -55,14 +51,14 @@ const Collections = () => {
         </div>
       </div>
 
-      {/* Affichage des collections */}
+      {/* Affichage des collections de l'utilisateur */}
       <div className="bg-white rounded-lg shadow-sm">
         {loading ? (
           <div className="p-4 flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <CollectionsList collections={collections} />
+          <CollectionsList collections={ownedCollections} />
         )}
       </div>
 

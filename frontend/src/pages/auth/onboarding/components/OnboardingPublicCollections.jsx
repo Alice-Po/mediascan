@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  fetchPublicCollections,
-  followCollection,
-  unfollowCollection,
-  checkIfFollowing,
-} from '../../../../api/collectionsApi';
+import { useCollections } from '../../../../hooks/useCollections';
 import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
 import { generateFollowersFromId } from '../../../../utils/colorUtils';
 import CollectionCard from '../../../../components/collections/CollectionCard';
 import WarningBanner from '../../../../components/common/WarningBanner';
 
-const PublicCollections = ({ onValidationChange }) => {
-  const [publicCollections, setPublicCollections] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+const OnboardingPublicCollections = ({ onValidationChange, user }) => {
+  const {
+    publicCollections,
+    loading: isLoading,
+    error,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
+  } = useCollections(user);
+
   const [followStatus, setFollowStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
   const [selectedCollection, setSelectedCollection] = useState(null);
@@ -42,44 +43,28 @@ const PublicCollections = ({ onValidationChange }) => {
   }, [onValidationChange, hasFollowedCollections]);
 
   useEffect(() => {
-    const loadPublicCollections = async () => {
-      try {
-        setIsLoading(true);
-        const collections = await fetchPublicCollections();
-        console.log('Collections publiques chargées:', collections);
+    const loadFollowStatus = async () => {
+      if (!publicCollections.length) return;
 
-        // Filtrer pour ne garder que les collections avec au moins 5 sources
-        const filteredCollections = collections.filter(
-          (collection) => (collection.sources?.length || 0) >= MIN_SOURCES_REQUIRED
-        );
-
-        setPublicCollections(filteredCollections);
-
-        // Vérifier le statut de suivi pour chaque collection filtrée
-        const statusObj = {};
-        for (const collection of filteredCollections) {
-          try {
-            const isFollowing = await checkIfFollowing(collection._id);
-            statusObj[collection._id] = isFollowing;
-          } catch (err) {
-            console.error(
-              `Erreur lors de la vérification du statut de suivi pour ${collection._id}:`,
-              err
-            );
-            statusObj[collection._id] = false;
-          }
+      // Vérifier le statut de suivi pour chaque collection filtrée
+      const statusObj = {};
+      for (const collection of publicCollections) {
+        try {
+          const isFollowing = await checkIfFollowing(collection._id);
+          statusObj[collection._id] = isFollowing;
+        } catch (err) {
+          console.error(
+            `Erreur lors de la vérification du statut de suivi pour ${collection._id}:`,
+            err
+          );
+          statusObj[collection._id] = false;
         }
-        setFollowStatus(statusObj);
-      } catch (err) {
-        console.error('Erreur lors du chargement des collections publiques:', err);
-        setError('Impossible de charger les collections publiques.');
-      } finally {
-        setIsLoading(false);
       }
+      setFollowStatus(statusObj);
     };
 
-    loadPublicCollections();
-  }, []);
+    loadFollowStatus();
+  }, [publicCollections, checkIfFollowing]);
 
   // Gérer le suivi d'une collection
   const handleFollowToggle = async (collectionId) => {
@@ -118,6 +103,11 @@ const PublicCollections = ({ onValidationChange }) => {
   const handleFollowFromModal = (collectionId, isFollowing) => {
     setFollowStatus((prev) => ({ ...prev, [collectionId]: isFollowing }));
   };
+
+  // Filtrer les collections avec au moins 5 sources
+  const filteredCollections = publicCollections.filter(
+    (collection) => (collection.sources?.length || 0) >= MIN_SOURCES_REQUIRED
+  );
 
   return (
     <div className="space-y-6 sm:space-y-8" id="public-collections-container">
@@ -159,7 +149,7 @@ const PublicCollections = ({ onValidationChange }) => {
 
         {error && <div className="bg-red-50 p-4 rounded-md text-red-700 text-center">{error}</div>}
 
-        {!isLoading && !error && publicCollections.length === 0 && (
+        {!isLoading && !error && filteredCollections.length === 0 && (
           <div className="bg-gray-50 p-6 rounded-md text-center">
             <p className="text-gray-700">
               Aucune collection publique avec au moins {MIN_SOURCES_REQUIRED} sources n'est
@@ -171,9 +161,9 @@ const PublicCollections = ({ onValidationChange }) => {
           </div>
         )}
 
-        {!isLoading && !error && publicCollections.length > 0 && (
+        {!isLoading && !error && filteredCollections.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {publicCollections.map((collection) => (
+            {filteredCollections.map((collection) => (
               <CollectionCard
                 key={collection._id}
                 collection={collection}
@@ -204,4 +194,4 @@ const PublicCollections = ({ onValidationChange }) => {
   );
 };
 
-export default PublicCollections;
+export default OnboardingPublicCollections;

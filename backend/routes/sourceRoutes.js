@@ -20,11 +20,11 @@ router.get('/', getAllSources);
 // Routes protégées (nécessitant une authentification)
 router.post('/', protect, createSource);
 router.get('/exists', protect, getSourceExists);
+router.get('/user-collections', protect, getSourcesFromUserCollections);
 
 router.post('/validate-rss', protect, validateRssUrl);
 router.post('/user/:sourceId/remove-from-collections', protect, removeSourceFromAllCollections);
 router.get('/:id', protect, getSourceById);
-router.get('/user-collections', protect, getSourcesFromUserCollections);
 
 // Route pour vérifier un flux RSS
 router.post('/check-rss', async (req, res) => {

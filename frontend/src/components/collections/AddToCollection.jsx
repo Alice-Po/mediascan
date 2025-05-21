@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Link } from 'react-router-dom';
+import { useCollections } from '../../hooks/useCollections';
 
 /**
  * Composant pour ajouter une source à une ou plusieurs collections
@@ -10,17 +11,9 @@ import { Link } from 'react-router-dom';
  * @param {React.ReactNode} props.trigger - Élément déclencheur du menu
  */
 const AddToCollection = ({ sourceId, onClose, trigger }) => {
-  const {
-    collections,
-    loadCollections,
-    loadingCollections,
-    addSourceToCollection,
-    createCollection,
-  } = useContext(AppContext);
+  const { collections, loading, error, addSourceToCollection, createCollection } = useCollections();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
   const menuRef = useRef(null);
@@ -28,9 +21,9 @@ const AddToCollection = ({ sourceId, onClose, trigger }) => {
   // Charger les collections au montage
   useEffect(() => {
     if (isOpen) {
-      loadCollections();
+      // loadCollections();
     }
-  }, [isOpen, loadCollections]);
+  }, [isOpen]);
 
   // Fermer le menu si on clique en dehors
   useEffect(() => {
@@ -61,15 +54,12 @@ const AddToCollection = ({ sourceId, onClose, trigger }) => {
   // Ajouter la source à une collection
   const handleAddToCollection = async (collectionId) => {
     try {
-      setLoading(true);
       setError(null);
       await addSourceToCollection(collectionId, sourceId);
       handleClose();
     } catch (err) {
       setError("Impossible d'ajouter la source à cette collection");
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -83,7 +73,6 @@ const AddToCollection = ({ sourceId, onClose, trigger }) => {
     }
 
     try {
-      setLoading(true);
       setError(null);
 
       // Créer la collection
@@ -97,8 +86,6 @@ const AddToCollection = ({ sourceId, onClose, trigger }) => {
     } catch (err) {
       setError('Impossible de créer la collection');
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -170,7 +157,7 @@ const AddToCollection = ({ sourceId, onClose, trigger }) => {
 
           {/* Liste des collections existantes */}
           <div className="max-h-60 overflow-y-auto p-1">
-            {loadingCollections || loading ? (
+            {loading ? (
               <div className="p-3 flex justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
               </div>

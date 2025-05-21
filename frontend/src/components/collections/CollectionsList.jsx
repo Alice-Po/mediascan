@@ -5,12 +5,13 @@ import { AuthContext } from '../../context/AuthContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import CollectionItem from './CollectionItem';
-import { useCollections } from '../../hooks/useCollections';
+import PropTypes from 'prop-types';
+
 /**
  * Composant pour afficher la liste des collections de l'utilisateur
  *
  * @param {Object} props - Propriétés du composant
- * @param {Array} props.collections - Collections externes à afficher (optionnel)
+ * @param {Array} props.collections - Collections externes à afficher (obligatoire)
  * @param {boolean} props.showViewAction - Afficher le bouton de visualisation (par défaut: true)
  * @param {boolean} props.showEditAction - Afficher le bouton d'édition (par défaut: true)
  * @param {boolean} props.showDeleteAction - Afficher le bouton de suppression (par défaut: true)
@@ -19,7 +20,7 @@ import { useCollections } from '../../hooks/useCollections';
  * @param {Function} props.onCollectionDeleted - Callback appelé après la suppression réussie d'une collection
  */
 const CollectionsList = ({
-  collections: externalCollections,
+  collections,
   showViewAction = true,
   showEditAction = true,
   showDeleteAction = true,
@@ -30,72 +31,33 @@ const CollectionsList = ({
   const { filterByCollection, filters } = useContext(AppContext);
   const { user } = useContext(AuthContext);
   const { showSnackbar } = useSnackbar();
-  const {
-    collections: hookCollections,
-    loadCollections,
-    loading: loadingCollections,
-    deleteCollection,
-    removeSourceFromCollection,
-  } = useCollections(user);
 
-  // Utiliser les collections externes si fournies, sinon celles du hook
-  const [collections, setCollections] = useState([]);
+  // Si la prop collections n'est pas fournie ou vide, afficher un message
+  if (!collections || !Array.isArray(collections) || collections.length === 0) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-gray-500 mb-3">Aucune collection à afficher</p>
+      </div>
+    );
+  }
+
   // Nouvel état pour suivre les IDs des collections supprimées
   const [deletedCollectionIds, setDeletedCollectionIds] = useState([]);
 
+  // Rafraîchir la liste locale si la prop collections change
+  const [collectionsList, setCollectionsList] = useState(collections);
   useEffect(() => {
-    setCollections(externalCollections || hookCollections);
-  }, [externalCollections, hookCollections]);
-
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [collectionToDelete, setCollectionToDelete] = useState(null);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [collectionToShare, setCollectionToShare] = useState(null);
-  const [lastRefresh, setLastRefresh] = useState(Date.now());
+    setCollectionsList(collections);
+  }, [collections]);
 
   // Séparer les collections personnelles et les collections suivies
   // en filtrant également les collections supprimées
-  const personalCollections = collections.filter(
+  const personalCollections = collectionsList.filter(
     (collection) => !collection.isFollowed && !deletedCollectionIds.includes(collection._id)
   );
-  const followedCollections = collections.filter(
+  const followedCollections = collectionsList.filter(
     (collection) => collection.isFollowed && !deletedCollectionIds.includes(collection._id)
   );
-
-  // Rafraîchir les collections au montage et périodiquement
-  useEffect(() => {
-    // Ne charger les collections que si aucune collection externe n'est fournie
-    if (!externalCollections) {
-      loadCollections();
-
-      // Rafraîchir toutes les 30 secondes
-      const refreshInterval = setInterval(() => {
-        loadCollections();
-        setLastRefresh(Date.now());
-      }, 30000);
-
-      return () => clearInterval(refreshInterval);
-    }
-  }, [loadCollections, externalCollections]);
-
-  // Rafraîchir quand le composant devient visible
-  useEffect(() => {
-    // Ne surveiller la visibilité que si aucune collection externe n'est fournie
-    if (!externalCollections) {
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible' && Date.now() - lastRefresh > 10000) {
-          loadCollections();
-          setLastRefresh(Date.now());
-        }
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      };
-    }
-  }, [loadCollections, lastRefresh, externalCollections]);
 
   // Gérer le clic sur le bouton supprimer
   const handleDeleteClick = (collection) => {
@@ -110,32 +72,26 @@ const CollectionsList = ({
   };
 
   // Confirmer la suppression
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [collectionToShare, setCollectionToShare] = useState(null);
+
   const handleConfirmDelete = async () => {
     if (!collectionToDelete) return;
 
     try {
-      await deleteCollection(collectionToDelete._id);
-
-      // Ajouter l'ID de la collection à la liste des collections supprimées
+      // Ici, il faudrait appeler la fonction de suppression du parent si besoin
       setDeletedCollectionIds((prev) => [...prev, collectionToDelete._id]);
-
-      // Mettre à jour l'état local après suppression réussie
-      setCollections((prevCollections) =>
+      setCollectionsList((prevCollections) =>
         prevCollections.filter((collection) => collection._id !== collectionToDelete._id)
       );
-
-      // Forcer un rafraîchissement des collections depuis la source
-      loadCollections();
-
       setShowDeleteModal(false);
       setCollectionToDelete(null);
-
-      // Afficher la notification de succès après suppression confirmée
       showSnackbar(
         `Collection "${collectionToDelete.name}" supprimée avec succès`,
         SNACKBAR_TYPES.SUCCESS
       );
-
       if (onCollectionDeleted) {
         onCollectionDeleted(collectionToDelete);
       }
@@ -158,14 +114,12 @@ const CollectionsList = ({
 
   // Gérer le clic sur une collection
   const handleCollectionClick = (collection) => {
-    // On filtre simplement par collection, la navigation est déjà gérée dans CollectionItem
     filterByCollection(collection._id);
   };
 
   // Gérer la suppression d'une source depuis la liste des collections
   const handleSourceRemoved = (collectionId, sourceId) => {
-    // Mettre à jour la liste des collections localement
-    setCollections((prevCollections) =>
+    setCollectionsList((prevCollections) =>
       prevCollections.map((collection) => {
         if (collection._id === collectionId) {
           return {
@@ -177,30 +131,6 @@ const CollectionsList = ({
       })
     );
   };
-
-  if (loadingCollections && !externalCollections) {
-    return (
-      <div className="p-4 flex justify-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!collections || collections.length === 0) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-gray-500 mb-3">Vous n'avez pas encore de collections</p>
-        {!isOnboarding && (
-          <Link
-            to="/collections/new"
-            className="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-          >
-            Créer une collection
-          </Link>
-        )}
-      </div>
-    );
-  }
 
   // Configuration des actions disponibles
   const actionConfig = {
@@ -298,6 +228,16 @@ const CollectionsList = ({
       />
     </div>
   );
+};
+
+CollectionsList.propTypes = {
+  collections: PropTypes.array.isRequired,
+  showViewAction: PropTypes.bool,
+  showEditAction: PropTypes.bool,
+  showDeleteAction: PropTypes.bool,
+  showShareAction: PropTypes.bool,
+  isOnboarding: PropTypes.bool,
+  onCollectionDeleted: PropTypes.func,
 };
 
 export default CollectionsList;

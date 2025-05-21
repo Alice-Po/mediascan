@@ -5,8 +5,7 @@ import { fetchAllSources } from '../../../api/sourcesApi';
 import { completeOnboarding } from '../../../api/authApi';
 
 import Step1Introduction from './components/Introduction';
-import PublicCollections from './components/PublicCollections';
-import CreateCollection from './components/CreateCollection';
+import OnboardingCreateCollection from './components/OnboardingCreateCollection';
 import AddSourcesToCollection from './components/AddSourcesToCollection';
 import UpcomingFeatures from './components/UpcomingFeatures';
 import Conclusion from './components/Conclusion';
@@ -147,11 +146,13 @@ const Onboarding = () => {
         );
       case 3:
         return (
-          <PublicCollections onValidationChange={(isValid) => handleStepValidation(3, isValid)} />
+          <OnboardingPublicCollections
+            onValidationChange={(isValid) => handleStepValidation(3, isValid)}
+          />
         );
       case 4:
         return (
-          <CreateCollection
+          <OnboardingCreateCollection
             allSources={allSources}
             onValidationChange={(isValid) => handleStepValidation(4, isValid)}
           />

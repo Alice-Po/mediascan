@@ -3,11 +3,12 @@ import { AuthContext } from './AuthContext';
 import { fetchSourcesFromUserCollections, fetchAllSources } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
 import { useCollections } from '../hooks/useCollections';
+import { useArticleFilters } from '../hooks/useArticleFilters';
 
-// Création du contexte et du hook dans des constantes nommées
+// Création du contexte
 export const AppContext = createContext(null);
 
-// Hook personnalisé dans une fonction nommée
+// Hook personnalisé
 function useApp() {
   const context = useContext(AppContext);
   if (!context) {
@@ -16,161 +17,58 @@ function useApp() {
   return context;
 }
 
-// Provider dans une fonction nommée
+// Provider
 export const AppProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
 
-  // State pour les sources
+  // States
   const [userSources, setUserSources] = useState([]);
   const [allSources, setAllSources] = useState([]);
   const [loadingSources, setLoadingSources] = useState(true);
   const [error, setError] = useState(null);
-
-  // State pour les articles avec un tableau vide par défaut
   const [articles, setArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [articlesPage, setArticlesPage] = useState(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
-
-  // State pour la sidebar
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
     localStorage.getItem('sidebarCollapsed') === 'true'
   );
 
-  // Toggle sidebar collapse
+  // Utilisation du hook collections
+  const collectionsHookResult = useCollections(user);
+  const {
+    ownedCollections,
+    loading: collectionsLoading,
+    error: collectionsError,
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    addSourceToCollection,
+    removeSourceFromCollection,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
+  } = collectionsHookResult;
+
+  // Utilisation du hook de filtrage
+  const {
+    filters,
+    setFilters,
+    resetFilters,
+    filteredArticles,
+    filterByCollection,
+    filterBySource,
+    filterBySearch,
+  } = useArticleFilters(articles, ownedCollections);
+
+  // Toggle sidebar
   const toggleSidebar = useCallback(() => {
     const newState = !isSidebarCollapsed;
     setIsSidebarCollapsed(newState);
     localStorage.setItem('sidebarCollapsed', newState.toString());
   }, [isSidebarCollapsed]);
 
-  // State pour les filtres
-  const [filters, setFilters] = useState({
-    searchTerm: '',
-    sources: [],
-    orientation: {
-      political: [],
-    },
-    collection: null,
-  });
-
-  // Utilisation du hook personnalisé pour les collections
-  const {
-    collections,
-    currentCollection,
-    loading: loadingCollections,
-    loadCollections: fetchCollectionsData,
-    createCollection,
-    updateCollection,
-    deleteCollection,
-    loadCollectionById,
-    setCurrentCollection,
-    addSourceToCollection: addSourceToCollectionApi,
-    removeSourceFromCollection,
-    createFilterByCollection,
-  } = useCollections(user, setError);
-
-  // Fonction améliorée pour charger les collections et mettre à jour l'état global
-  const loadCollections = useCallback(async () => {
-    try {
-      const data = await fetchCollectionsData();
-      return data;
-    } catch (error) {
-      console.error('AppContext: Erreur lors du rechargement des collections', error);
-      return null;
-    }
-  }, [fetchCollectionsData]);
-
-  // Fonction améliorée pour ajouter une source à une collection
-  const addSourceToCollection = useCallback(
-    async (collectionId, sourceId) => {
-      try {
-        const result = await addSourceToCollectionApi(collectionId, sourceId);
-        // Recharger les collections pour mettre à jour les compteurs partout
-        await loadCollections();
-        return result;
-      } catch (error) {
-        throw error;
-      }
-    },
-    [addSourceToCollectionApi, loadCollections]
-  );
-
-  // Création de la fonction de filtrage par collection
-  const filterByCollection = createFilterByCollection(setFilters);
-
-  // Memoize les articles filtrés
-  const filteredArticles = React.useMemo(() => {
-    const filtered = articles.filter((article) => {
-      // Filtre par collection (prioritaire sur les sources individuelles)
-      if (filters.collection) {
-        const collection = collections.find((c) => c._id === filters.collection);
-
-        // Vérifie si la collection existe et si les sources sont disponibles
-        if (!collection) {
-          return false;
-        }
-
-        // Si filters.sources contient un seul ID, on filtre spécifiquement par cette source
-        if (filters.sources.length === 1) {
-          const sourceId = filters.sources[0];
-          const matches = article.sourceId._id === sourceId;
-
-          return matches;
-        }
-
-        // Sinon, on utilise toutes les sources de la collection
-        const collectionSources = Array.isArray(collection.sources)
-          ? collection.sources.map((s) => (typeof s === 'string' ? s : s._id))
-          : [];
-
-        const sourceInCollection = collectionSources.some((s) => s === article.sourceId._id);
-
-        if (!sourceInCollection) {
-          // console.log(`Article rejeté: source ${article.sourceId._id} pas dans la collection`, article.title);
-          return false;
-        }
-      }
-      // Si aucune source n'est sélectionnée, ne pas filtrer par source
-      else if (filters.sources.length > 0 && !filters.sources.includes(article.sourceId._id)) {
-        return false;
-      }
-
-      // Filtre par recherche textuelle
-      if (filters.searchTerm) {
-        const searchTermLower = filters.searchTerm.toLowerCase();
-        const matchesSearch =
-          article.title?.toLowerCase().includes(searchTermLower) ||
-          article.contentSnippet?.toLowerCase().includes(searchTermLower);
-
-        if (!matchesSearch) {
-          return false;
-        }
-      }
-
-      // Filtre par orientation
-      if (
-        filters.orientation.political?.length > 0 &&
-        !filters.orientation.political.includes(article.orientation?.political)
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    return filtered;
-  }, [articles, filters, collections]);
-
-  // Sauvegarder les filtres dans localStorage à chaque changement
-  useEffect(() => {
-    localStorage.setItem('articleFilters', JSON.stringify(filters));
-  }, [filters]);
-
-  // Ajout du state pour les thématiques
-  const [userInterests, setUserInterests] = useState([]);
-
-  // Charger les sources initiales
+  // Charger les sources
   useEffect(() => {
     let mounted = true;
 
@@ -187,23 +85,18 @@ export const AppProvider = ({ children }) => {
           fetchAllSources(),
         ]);
 
-        const formattedUserSources = Array.isArray(userSourcesData)
-          ? userSourcesData.map((source) => ({ ...source, enabled: true }))
-          : [];
-
         if (mounted) {
-          setUserSources(formattedUserSources);
+          setUserSources(userSourcesData);
           setAllSources(allSourcesData.data);
 
-          // Initialiser les filtres avec TOUTES les sources actives
-          const activeSourceIds = formattedUserSources
+          // Initialiser les filtres avec les sources actives
+          const activeSourceIds = userSourcesData
             .filter((source) => source.enabled)
             .map((source) => source._id);
 
-          // Mettre à jour les filtres en préservant les autres filtres existants
           setFilters((prev) => ({
             ...prev,
-            sources: prev.sources.length === 0 ? activeSourceIds : prev.sources, // Ne pas écraser si déjà défini
+            sources: prev.sources.length === 0 ? activeSourceIds : prev.sources,
           }));
         }
       } catch (err) {
@@ -217,45 +110,30 @@ export const AppProvider = ({ children }) => {
     };
 
     initializeSources();
-
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, setFilters]);
 
-  // Charger les articles une seule fois au montage ou quand l'utilisateur change
+  // Charger les articles
   useEffect(() => {
     if (user) {
-      console.log('Utilisateur connecté, chargement initial des articles');
-      loadAllArticles(); // Charger tous les articles une seule fois
+      loadAllArticles();
     }
   }, [user]);
 
-  // Recharger les articles quand les filtres changent
-  // useEffect(() => {
-  //   if (user && (filters.sources.length > 0 || filters.collection)) {
-  //     loadArticles();
-  //   }
-  // }, [filters.sources, filters.collection, user]);
-
-  // Fonction pour charger les articles
+  // Fonctions de chargement
   const loadAllArticles = async () => {
     try {
       setLoadingArticles(true);
-      console.log('Chargement de tous les articles pertinents...');
-
-      // Ici, nous ne spécifions pas de sources spécifiques pour obtenir tous les articles
-      // de toutes les sources de l'utilisateur
       const response = await fetchArticles({
-        // Ne pas filtrer par sources spécifiques
         page: 1,
-        limit: 50, // Augmenter la limite pour obtenir plus d'articles en une fois
+        limit: 50,
       });
 
-      console.log(`${response.articles.length} articles chargés`);
       setArticles(response.articles);
       setHasMoreArticles(response.hasMore);
-      setArticlesPage(1); // Réinitialiser la page
+      setArticlesPage(1);
     } catch (error) {
       console.error('Erreur lors du chargement des articles:', error);
       setError(error.message);
@@ -264,49 +142,39 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // Fonction pour charger plus d'articles
-  const loadArticles = async () => {
+  const loadMoreArticles = async () => {
+    if (loadingArticles || !hasMoreArticles) return;
+
     try {
       setLoadingArticles(true);
+      const nextPage = articlesPage + 1;
 
-      const response = await fetchArticles({
-        sources: filters.sources.join(','),
-        page: articlesPage,
-      });
+      const params = {
+        page: nextPage,
+        limit: 20,
+        ...(filters.sources.length > 0 && { sources: filters.sources.join(',') }),
+        ...(filters.collection && { collection: filters.collection }),
+        ...(filters.searchTerm && { searchTerm: filters.searchTerm }),
+      };
 
-      setArticles(response.articles);
-      setHasMoreArticles(response.hasMore);
-    } catch (error) {
-      console.error('AppContext - Erreur loadArticles:', error);
-      setError(error.message);
+      const data = await fetchArticles(params);
+      const existingIds = articles.map((article) => article._id);
+      const uniqueNewArticles = data.articles.filter(
+        (article) => !existingIds.includes(article._id)
+      );
+
+      setArticles((prev) => [...prev, ...uniqueNewArticles]);
+      setHasMoreArticles(data.hasMore);
+      setArticlesPage(nextPage);
+    } catch (err) {
+      console.error("Erreur lors du chargement de plus d'articles:", err);
+      throw err;
     } finally {
       setLoadingArticles(false);
     }
   };
 
-  // Fonction pour réinitialiser les filtres
-  const resetFilters = () => {
-    setFilters((prev) => {
-      if (
-        prev.sources.length === 0 &&
-        !prev.searchTerm &&
-        !prev.collection &&
-        (!prev.orientation || Object.values(prev.orientation).every((arr) => arr.length === 0))
-      ) {
-        return prev;
-      }
-      return {
-        sources: [],
-        orientation: {
-          political: [],
-        },
-        searchTerm: '',
-        collection: null,
-      };
-    });
-  };
-
-  // Fonction pour mettre à jour l'état d'un article
+  // Fonctions utilitaires
   const updateArticle = useCallback((articleId, updates) => {
     setArticles((prevArticles) =>
       prevArticles.map((article) =>
@@ -315,87 +183,11 @@ export const AppProvider = ({ children }) => {
     );
   }, []);
 
-  // Vérifier les logs des sources actives
-  const loadUserSources = async () => {
-    try {
-      setLoadingSources(true);
-      const sources = await fetchSourcesFromUserCollections();
-      console.log('Sources actives chargées:', sources);
-      setUserSources(sources);
-    } catch (error) {
-      console.error('Erreur chargement sources:', error);
-      setError(error.message);
-    } finally {
-      setLoadingSources(false);
-    }
-  };
-
-  // Ajouter une fonction pour rafraîchir manuellement les articles
-  const refreshArticles = () => {
+  const refreshArticles = useCallback(() => {
     loadAllArticles();
-  };
+  }, []);
 
-  // Modifier loadMoreArticles pour charger plus d'articles avec les mêmes filtres
-  const loadMoreArticles = async () => {
-    if (loadingArticles || !hasMoreArticles) return;
-
-    try {
-      setLoadingArticles(true);
-      const nextPage = articlesPage + 1;
-
-      // Construire les paramètres en tenant compte des filtres actuels
-      const params = {
-        page: nextPage,
-        limit: 20,
-      };
-
-      // Ajouter les filtres de sources si spécifiés
-      if (filters.sources && filters.sources.length > 0) {
-        params.sources = filters.sources.join(',');
-      }
-
-      // Ajouter le filtre de collection si spécifié
-      if (filters.collection) {
-        params.collection = filters.collection;
-      }
-
-      // Ajouter le terme de recherche si spécifié
-      if (filters.searchTerm) {
-        params.searchTerm = filters.searchTerm;
-      }
-
-      // Ajouter les filtres d'orientation si spécifiés
-      if (filters.orientation && Object.values(filters.orientation).some((arr) => arr.length > 0)) {
-        Object.entries(filters.orientation).forEach(([key, values]) => {
-          if (values.length > 0) {
-            params[`orientation[${key}]`] = values.join(',');
-          }
-        });
-      }
-
-      const data = await fetchArticles(params);
-
-      // Extraire les IDs des articles existants
-      const existingIds = articles.map((article) => article._id);
-
-      // Filtrer les nouveaux articles pour éviter les doublons
-      const uniqueNewArticles = data.articles.filter(
-        (article) => !existingIds.includes(article._id)
-      );
-
-      // N'ajouter que les articles uniques
-      setArticles((prev) => [...prev, ...uniqueNewArticles]);
-      setHasMoreArticles(data.hasMore);
-      setArticlesPage(nextPage);
-    } catch (err) {
-      console.error("Erreur lors du chargement de plus d'articles:", err);
-      throw err; // Propager l'erreur pour la gestion dans le composant
-    } finally {
-      setLoadingArticles(false);
-    }
-  };
-
-  // Retourner les valeurs dans le contexte
+  // Valeur du contexte
   const value = {
     userSources,
     allSources,
@@ -410,28 +202,26 @@ export const AppProvider = ({ children }) => {
     error,
     setArticles,
     updateArticle,
-    loadUserSources,
-    // Fonctionnalités de collections fournies par le hook
-    collections,
-    currentCollection,
-    loadingCollections,
-    loadCollections,
+    collections: ownedCollections,
+    loadingCollections: collectionsLoading,
+    collectionsError,
     createCollection,
     updateCollection,
     deleteCollection,
-    loadCollectionById,
-    setCurrentCollection,
     addSourceToCollection,
     removeSourceFromCollection,
-    filterByCollection,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
     refreshArticles,
-    // Ajouter les fonctionnalités pour la sidebar
     isSidebarCollapsed,
     toggleSidebar,
+    filterByCollection,
+    filterBySource,
+    filterBySearch,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-// Export des constantes et fonctions nommées
 export { useApp };

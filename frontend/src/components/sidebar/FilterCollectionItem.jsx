@@ -1,59 +1,124 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { GlobeIcon, LockIcon, StarIcon } from '../common/icons';
 import { AppContext } from '../../context/AppContext';
+import { AuthContext } from '../../context/AuthContext';
 import { useDefaultCollection } from '../../context/DefaultCollectionContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Composant pour une collection dépliable avec ses sources dans le filtre
+ * @param {Object} props
+ * @param {Object} props.collection - La collection à afficher
  */
-const FilterCollectionItem = ({
-  collection,
-  selectedCollection,
-  selectedSource,
-  onSelectCollection,
-  expandedCollections,
-  toggleCollection,
-  getCreatorName,
-  onSelectSource,
-  userSources,
-  user,
-}) => {
-  const { toggleSidebar } = useContext(AppContext);
-  const { isDefaultCollection } = useDefaultCollection();
-  const isExpanded = expandedCollections.includes(collection._id);
-  const isMobile = window.innerWidth < 768;
-  const isDefault = isDefaultCollection(collection._id);
+const FilterCollectionItem = ({ collection }) => {
+  const { filters, setFilters, toggleSidebar, allSources, userSources } = useContext(AppContext);
+  const { defaultCollection, isDefaultCollection } = useDefaultCollection();
+
+  const navigate = useNavigate();
+
+  // Expansion locale
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Sélection locale
+  const isSelected = filters.collection === collection._id;
+  const [selectedSource, setSelectedSource] = useState(null);
+
+  // Gérer l'expansion/repli
+  const handleToggleExpand = () => setIsExpanded((prev) => !prev);
+
+  // Fonction utilitaire pour collapse la sidebar en mobile
+  const collapseSidebarIfMobile = () => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && typeof toggleSidebar === 'function') {
+      toggleSidebar();
+    }
+  };
+
+  // Handler pour sélectionner une collection
+  const handleCollectionClick = (e) => {
+    e.stopPropagation();
+    if (isSelected) {
+      // Si c'est la collection par défaut, ne pas la désélectionner
+      if (defaultCollection && collection._id === defaultCollection._id) return;
+      setFilters((prev) => ({
+        ...prev,
+        collection: null,
+        sources: userSources.map((s) => s._id),
+      }));
+      setSelectedSource(null);
+      navigate('/app');
+    } else {
+      // Sélectionner la collection
+      const collectionSources = (collection.sources || []).map((s) => s._id || s);
+      setFilters((prev) => ({
+        ...prev,
+        collection: collection._id,
+        sources: collectionSources,
+      }));
+      setSelectedSource(null);
+      navigate(`/app?collection=${collection._id}`);
+    }
+    collapseSidebarIfMobile();
+  };
+
+  // Handler pour sélectionner une source spécifique dans la collection
+  const handleSourceClick = (e, sourceId) => {
+    e.stopPropagation();
+    const sourceIdString = String(sourceId);
+    if (selectedSource === sourceIdString) {
+      setSelectedSource(null);
+      const collectionSources = (collection.sources || []).map((s) =>
+        typeof s === 'string' ? s : s._id
+      );
+      setFilters((prev) => ({
+        ...prev,
+        sources: collectionSources,
+      }));
+      navigate(`/app?collection=${collection._id}`);
+    } else {
+      setSelectedSource(sourceIdString);
+      setFilters((prev) => ({
+        ...prev,
+        sources: [sourceIdString],
+      }));
+      navigate(`/app?collection=${collection._id}&source=${sourceIdString}`);
+    }
+    collapseSidebarIfMobile();
+  };
+
+  // Sélectionner la collection par défaut si aucune n'est sélectionnée (sans écraser la sélection utilisateur)
+  useEffect(() => {
+    if (!filters.collection && defaultCollection) {
+      setFilters((prev) => ({
+        ...prev,
+        collection: defaultCollection._id,
+        sources: (defaultCollection.sources || []).map((s) => (typeof s === 'string' ? s : s._id)),
+      }));
+      setSelectedSource(null);
+      navigate(`/app?collection=${defaultCollection._id}`);
+    }
+    // eslint-disable-next-line
+  }, [defaultCollection, filters.collection]);
 
   // S'assurer que collection.sources est un tableau
   const sources = collection.sources || [];
-
-  // Déterminer si cette collection est la collection sélectionnée
-  const isSelected = selectedCollection === collection._id;
-
-  // Déterminer si c'est une collection publique que l'utilisateur suit
-  const isPublicFollowed = collection.isPublic && user && collection.userId !== user._id;
-
-  // Handler pour sélectionner une collection et fermer la sidebar sur mobile
-  const handleCollectionClick = (e) => {
-    e.stopPropagation();
-    onSelectCollection(collection._id);
-    if (isMobile) {
-      toggleSidebar();
-    }
-  };
-
-  // Handler pour sélectionner une source et fermer la sidebar sur mobile
-  const handleSourceClick = (e, sourceId) => {
-    e.stopPropagation();
-    onSelectSource(sourceId);
-    if (isMobile) {
-      toggleSidebar();
-    }
-  };
+  const isDefault = isDefaultCollection(collection._id);
+  const isMobile = window.innerWidth < 768;
 
   // Fonction robuste pour afficher le nom du créateur
   const getCreatorNameRobust = (collection) => {
     return collection.creator || collection.createdBy?.username || 'Utilisateur anonyme';
+  };
+
+  // Trouver le nom de la source dans userSources ou allSources
+  const getSourceName = (sourceId) => {
+    const foundUserSource = userSources.find((s) => s._id === sourceId);
+    if (foundUserSource) return foundUserSource.name;
+    if (allSources) {
+      const foundAllSource = allSources.find((s) => s._id === sourceId);
+      if (foundAllSource) return foundAllSource.name;
+    }
+    return 'Source inconnue';
   };
 
   return (
@@ -66,7 +131,7 @@ const FilterCollectionItem = ({
             ? 'bg-yellow-50 hover:bg-yellow-100'
             : 'hover:bg-gray-50'
         }`}
-        onClick={() => toggleCollection(collection._id)}
+        onClick={handleToggleExpand}
       >
         {/* Icône pour déplier/replier */}
         <span
@@ -117,7 +182,7 @@ const FilterCollectionItem = ({
               Par {getCreatorNameRobust(collection)}
             </span>
             <div className="flex gap-1.5 flex-shrink-0 ml-auto">
-              {isPublicFollowed && (
+              {collection.isPublic && user && collection.userId !== user._id && (
                 <span className="px-1.5 py-0.5 text-xs rounded-full bg-green-100 text-green-800 font-medium whitespace-nowrap">
                   Suivi
                 </span>
@@ -142,14 +207,18 @@ const FilterCollectionItem = ({
             (sourceId) => {
               const isSourceSelected = selectedSource === sourceId;
 
-              // Trouver l'objet source complet
-              const sourceObj = userSources.find((s) => s._id === sourceId) || {
-                name: 'Source inconnue',
-              };
+              // Trouver le nom de la source dans userSources ou allSources
+              const sourceName = getSourceName(sourceId);
+
+              // Trouver l'objet source complet pour l'icône
+              const sourceObj =
+                userSources.find((s) => s._id === sourceId) ||
+                (allSources ? allSources.find((s) => s._id === sourceId) : null) ||
+                {};
 
               return (
                 <div
-                  key={`${sourceId}-${collection._id}`} // Utiliser une clé composée
+                  key={`${sourceId}-${collection._id}`}
                   className={`flex items-center py-1 px-1 rounded cursor-pointer ${
                     isSourceSelected ? 'bg-blue-100 hover:bg-blue-50' : 'hover:bg-gray-50'
                   }`}
@@ -170,7 +239,7 @@ const FilterCollectionItem = ({
                         isSourceSelected ? 'font-medium text-blue-700' : ''
                       }`}
                     >
-                      {sourceObj.name}
+                      {sourceName}
                     </span>
                   </div>
                 </div>

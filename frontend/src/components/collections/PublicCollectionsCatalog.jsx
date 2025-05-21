@@ -2,12 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import CollectionDetailsModal from './CollectionDetailsModal';
 import CollectionCard from './CollectionCard';
-import {
-  fetchPublicCollections,
-  followCollection,
-  unfollowCollection,
-  checkIfFollowing,
-} from '../../api/collectionsApi';
+import { useCollections } from '../../hooks/useCollections';
 
 /**
  * Composant pour afficher un catalogue de collections publiques
@@ -20,6 +15,8 @@ const PublicCollectionsCatalog = ({
   onFollowStatusChange,
 }) => {
   const { user } = useContext(AuthContext);
+  const { collections, loading, error, followCollection, unfollowCollection, checkIfFollowing } =
+    useCollections();
   const [publicCollections, setPublicCollections] = useState([]);
   const [publicCollectionsLoading, setPublicCollectionsLoading] = useState(false);
   const [publicCollectionsError, setPublicCollectionsError] = useState(null);
