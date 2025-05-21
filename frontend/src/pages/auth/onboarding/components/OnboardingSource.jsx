@@ -18,13 +18,14 @@ const OnboardingSource = ({ onValidationChange }) => {
   const [showCatalog, setShowCatalog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [hasAddedSource, setHasAddedSource] = useState(false);
 
-  // Cette étape est toujours valide
+  // Mettre à jour la validation de l'étape
   useEffect(() => {
     if (onValidationChange) {
-      onValidationChange(true);
+      onValidationChange(hasAddedSource);
     }
-  }, []);
+  }, [hasAddedSource, onValidationChange]);
 
   const sources = [
     {
@@ -32,11 +33,7 @@ const OnboardingSource = ({ onValidationChange }) => {
       title: 'Vos articles de presse',
       description: "Suivez l'actualité de vos journaux et magazines préférés en temps réel",
     },
-    {
-      icon: MailIcon,
-      title: 'Vos infolettres',
-      description: 'Centralisez toutes vos newsletters dans un seul endroit',
-    },
+
     {
       icon: GlobeIcon,
       title: 'Réseaux sociaux',
@@ -65,6 +62,7 @@ const OnboardingSource = ({ onValidationChange }) => {
       const response = await createSource(sourceData);
       console.log('Source ajoutée:', response);
       setShowAddSource(false);
+      setHasAddedSource(true);
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source:", error);
       setFormErrors({
@@ -79,69 +77,114 @@ const OnboardingSource = ({ onValidationChange }) => {
     <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-          Qu'est-ce qu'une source d'actualité ?
+          Médiascan est un aggrégateur de flux d'information.
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Une source, c'est un flux d'informations qui correspond aux mise à jours d'un service web
-          (comme de nouveaux articles, vidéos ou podcasts).
+          Nous allons beaucoup vous parler de sources. Une source, c'est pour nous un flux
+          d'informations qui correspond aux mise à jours d'un service web (comme de nouveaux
+          articles, vidéos ou podcasts).
         </p>
+        <br />
         <p className="text-sm sm:text-base text-gray-600">
-          Nous nous appuyons sur une technologie trés vieille : les flux RSS, qui signifie signifie
-          "Really Simple Syndication" (Syndication Vraiment Simple) (entre autre).
+          {' '}
+          Pour l'instant nous utilisons une technologie vieille et efficace : les flux RSS (Really
+          Simple Syndication) mais d'autres technologies existent et seront prochainement
+          implémentées.
         </p>
       </div>
 
       {/* Explication principale */}
       <div className="bg-blue-50 rounded-xl p-4 sm:p-6 shadow-sm">
         <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
-          Médiascan est un aggrégateur de flux.
+          Où puis-je trouver des flux qui m'intéressent ?
         </h3>
         <p className="text-gray-700 mb-4">
-          Médiascan vous permet de centraliser toutes vos sources d'information préférées en un seul
-          endroit. Plus besoin de naviguer entre différents sites ou applications.
+          Le moyen le plus simple est d'installer une extension pour dxétecter les flux rss, vous
+          rendre sur la page web d'un flux qui vous intéresse et récupérer l'adresse du flux qui
+          vous intéresse.
         </p>
+
+        <p className="text-gray-700 mb-4">Voici deux extensions que nous vous recommandons :</p>
+
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+            <img src="https://www.mozilla.org/favicon.ico" alt="Firefox" className="w-5 h-5" />
+            <a
+              href="https://addons.mozilla.org/fr/firefox/addon/get-rss-feed-url/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Get RSS Feed URL pour Firefox
+            </a>
+          </div>
+          <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+            <img
+              src="https://www.google.com/chrome/static/images/chrome-logo.svg"
+              alt="Chrome"
+              className="w-5 h-5"
+            />
+            <a
+              href="https://chromewebstore.google.com/detail/rss-feed-finder/gneplfjjnfmbgimbgonejfoaiphdfkcp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              RSS Feed Finder pour Chrome
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Liste des types de sources */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
+        Voici les types de flux que nous supportons pour l'instant :
+      </h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {sources.map((source, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-200 transition-colors"
+            className="flex items-center gap-2 p-2 rounded-lg bg-white border border-gray-100 hover:border-blue-200 transition-colors"
           >
-            <div className="flex items-start gap-3">
-              <div className="text-blue-600 shrink-0 mt-1">
-                <source.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900 mb-1">{source.title}</h4>
-                <p className="text-sm text-gray-600">{source.description}</p>
-              </div>
-            </div>
+            <source.icon className="w-4 h-4 text-blue-600 shrink-0" />
+            <span className="text-sm font-medium text-gray-700">{source.title}</span>
           </div>
         ))}
       </div>
+      <p className="text-gray-700 mb-4">L'intégration des newsletters arrivent prochainement ! </p>
 
-      {/* Note de conclusion */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 sm:p-6 shadow-sm">
-        <p className="text-gray-700 text-sm sm:text-base">
-          <strong>Le saviez-vous ?</strong> Vous pouvez ajouter autant de sources que vous le
-          souhaitez et les organiser selon vos préférences. Médiascan s'occupe de tout mettre à jour
-          automatiquement !
-        </p>
-        <div className="mt-4 flex justify-center space-x-4">
-          <button
-            onClick={() => setShowCatalog(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Explorer le catalogue
-          </button>
-          <button
-            onClick={() => setShowAddSource(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Ajouter une source
-          </button>
+      {/* Call to Action */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm">
+        <div className="text-center">
+          {!hasAddedSource ? (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Prêt à commencer ?</h3>
+              <p className="text-gray-700 mb-6">
+                Ajoutez votre première source d'information pour passer à l'étape suivante
+              </p>
+              <button
+                onClick={() => setShowAddSource(true)}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Ajouter une source
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Parfait ! Votre première source est ajoutée
+              </h3>
+              <p className="text-gray-700 mb-6">
+                Découvrez d'autres sources intéressantes dans notre catalogue.
+              </p>
+              <button
+                onClick={() => setShowCatalog(true)}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Explorer le catalogue
+              </button>
+            </>
+          )}
         </div>
       </div>
 
