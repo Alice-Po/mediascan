@@ -10,6 +10,7 @@ import {
 import RssHelpModal from '../../../../components/sources/RssHelpModal';
 import AddSourceForm from '../../../../components/sources/AddSourceForm';
 import SourceCatalog from '../../../../components/sources/SourceCatalog';
+import { createSource } from '../../../../api/sourcesApi';
 
 const OnboardingSource = ({ onValidationChange }) => {
   const [showRssHelp, setShowRssHelp] = useState(false);
@@ -61,13 +62,14 @@ const OnboardingSource = ({ onValidationChange }) => {
   const handleSubmitSource = async (sourceData) => {
     setLoading(true);
     try {
-      // Simuler un délai de traitement
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Source ajoutée:', sourceData);
+      const response = await createSource(sourceData);
+      console.log('Source ajoutée:', response);
       setShowAddSource(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source:", error);
-      setFormErrors({ submit: "Une erreur est survenue lors de l'ajout de la source" });
+      setFormErrors({
+        submit: error.message || "Une erreur est survenue lors de l'ajout de la source",
+      });
     } finally {
       setLoading(false);
     }

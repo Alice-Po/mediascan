@@ -11,25 +11,35 @@ const parser = new Parser();
 // Fonction de validation d'une source RSS
 const validateRssSource = async (rssUrl) => {
   try {
+    console.log('Début validation RSS:', { rssUrl });
+
     // 1. Valider le format de l'URL
     const urlRegex = /^(http|https):\/\/[^ "]+$/;
     if (!urlRegex.test(rssUrl)) {
+      console.log('Format URL invalide:', rssUrl);
       throw new Error(
         "L'URL n'est pas dans un format valide. Elle doit commencer par http:// ou https://"
       );
     }
 
     try {
+      console.log('Tentative de parsing du flux RSS...');
       // 2. Essayer de parser l'URL comme un flux RSS
       const feed = await parser.parseURL(rssUrl);
+      console.log('Flux RSS parsé avec succès:', {
+        title: feed.title,
+        itemCount: feed.items?.length,
+      });
 
       // 3. Vérifier que c'est bien un flux RSS valide
       if (!feed || typeof feed !== 'object') {
+        console.log('Contenu invalide: pas un objet feed');
         throw new Error('Le contenu ne correspond pas à un flux RSS valide');
       }
 
       // 4. Vérifier les champs minimums requis
       if (!feed.items || !Array.isArray(feed.items) || feed.items.length === 0) {
+        console.log('Flux RSS invalide: aucun article trouvé');
         throw new Error('Le flux RSS ne contient aucun article');
       }
 
@@ -38,16 +48,19 @@ const validateRssSource = async (rssUrl) => {
       const requiredFields = ['title', 'link'];
       for (const field of requiredFields) {
         if (!sampleItem[field]) {
+          console.log('Format article invalide:', { missingField: field });
           throw new Error(`Le format du flux RSS est invalide : champ ${field} manquant`);
         }
       }
 
+      console.log('Validation RSS réussie');
       return {
         isValid: true,
         feed,
         error: null,
       };
     } catch (error) {
+      console.log('Erreur lors du parsing RSS:', error.message);
       // Analyser l'erreur pour donner un message approprié
       const errorMessage = error.message.toLowerCase();
 
@@ -76,6 +89,7 @@ const validateRssSource = async (rssUrl) => {
       throw new Error('Impossible de lire le contenu de cette URL comme un flux RSS');
     }
   } catch (error) {
+    console.log('Validation RSS échouée:', error.message);
     return {
       isValid: false,
       feed: null,
@@ -180,33 +194,52 @@ export const createSource = async (req, res) => {
     const { name, url, rssUrl, description, funding, orientation, collectionId } = req.body;
     const userId = req.user._id;
 
+    console.log('Début création source:', {
+      name,
+      url,
+      rssUrl,
+      collectionId,
+      userId: userId.toString(),
+    });
+
     // 1. Vérifier si la source existe déjà (par RSS)
     let source = await Source.findOne({ rssUrl });
     let sourceCreated = false;
 
+    console.log('Vérification existence source:', {
+      exists: !!source,
+      rssUrl,
+    });
+
     if (source) {
       // 2. Si elle existe, vérifier si elle est toujours valide
+      console.log('Source existante trouvée, validation du flux...');
       const validation = await validateRssSource(rssUrl);
       if (!validation.isValid) {
+        console.log('Source existante invalide:', validation.error);
         return res.status(400).json({
           success: false,
           message: "La source existe mais n'est plus accessible",
           error: validation.error,
         });
       }
+      console.log('Source existante validée avec succès');
     } else {
       // 3. Si nouvelle source, valider avant création
+      console.log('Nouvelle source, validation du flux...');
       const validation = await validateRssSource(rssUrl);
       if (!validation.isValid) {
+        console.log('Validation du flux échouée:', validation.error);
         return res.status(400).json({
           success: false,
           message: 'Impossible de valider la source RSS',
           error: validation.error,
         });
       }
+      console.log('Validation du flux réussie, création de la source...');
 
       try {
-        // 4. Créer la source avec tous les champs transmis (priorité au formulaire, fallback sur RSS)
+        // 4. Créer la source avec tous les champs transmis
         source = await Source.create({
           name: name || validation.feed.title || 'Source sans nom',
           rssUrl,
@@ -225,6 +258,11 @@ export const createSource = async (req, res) => {
           addedBy: userId,
         });
         sourceCreated = true;
+        console.log('Source créée avec succès:', {
+          sourceId: source._id.toString(),
+          name: source.name,
+        });
+
         if (!source || !source._id) {
           throw new Error('Échec de la création de la source dans la base de données');
         }
@@ -239,24 +277,44 @@ export const createSource = async (req, res) => {
     }
 
     // 5. Vérifier la collection cible
+    console.log('Vérification de la collection cible:', {
+      collectionId,
+      userId: userId.toString(),
+    });
     const targetCollection = await Collection.findOne({ _id: collectionId, userId });
     if (!targetCollection) {
+      console.log('Collection non trouvée ou non autorisée:', {
+        collectionId,
+        userId: userId.toString(),
+      });
       // Si la collection n'existe pas ou n'appartient pas à l'utilisateur
-      if (sourceCreated) await Source.findByIdAndDelete(source._id);
+      if (sourceCreated) {
+        console.log('Suppression de la source créée car collection invalide');
+        await Source.findByIdAndDelete(source._id);
+      }
       return res.status(400).json({
         success: false,
         message: "La collection spécifiée n'existe pas ou ne vous appartient pas.",
       });
     }
+    console.log('Collection cible trouvée:', {
+      collectionId: targetCollection._id.toString(),
+      name: targetCollection.name,
+    });
 
     // 6. Ajouter la source à la collection si pas déjà présente
     if (!targetCollection.sources.some((s) => s.toString() === source._id.toString())) {
+      console.log('Ajout de la source à la collection...');
       targetCollection.sources.push(source._id);
       await targetCollection.save();
+      console.log('Source ajoutée à la collection avec succès');
+    } else {
+      console.log('Source déjà présente dans la collection');
     }
 
     // 7. Enregistrer l'événement analytics si besoin
     if (sourceCreated) {
+      console.log("Enregistrement de l'événement analytics...");
       await Analytics.create({
         userId,
         eventType: 'sourceAdd',
@@ -267,14 +325,16 @@ export const createSource = async (req, res) => {
           orientation: source.orientation,
         },
       });
+      console.log('Événement analytics enregistré');
     }
 
+    console.log('Création de source terminée avec succès');
     res.status(201).json({
       success: true,
       data: source,
     });
   } catch (error) {
-    console.error('Error in createSource:', error);
+    console.error('Erreur globale dans createSource:', error);
     res.status(400).json({
       success: false,
       message: 'Impossible de créer la source',

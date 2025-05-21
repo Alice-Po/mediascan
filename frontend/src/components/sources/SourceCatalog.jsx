@@ -29,7 +29,13 @@ const SourceCatalog = ({
 
         // Vérifier la structure de la réponse
         const sourceData = response.data || response;
-        setSources(Array.isArray(sourceData) ? sourceData : []);
+        if (!Array.isArray(sourceData)) {
+          console.error('Format de réponse invalide:', sourceData);
+          setError('Format de données invalide reçu du serveur');
+          return;
+        }
+
+        setSources(sourceData);
       } catch (err) {
         console.error('Erreur lors du chargement des sources:', err);
         setError('Impossible de charger le catalogue des sources. Veuillez réessayer plus tard.');
@@ -44,11 +50,19 @@ const SourceCatalog = ({
   // Recharger les sources quand le formulaire est fermé
   const reloadSources = async () => {
     try {
+      setLoading(true);
       const response = await fetchAllSources();
       const sourceData = response.data || response;
-      setSources(Array.isArray(sourceData) ? sourceData : []);
+      if (!Array.isArray(sourceData)) {
+        console.error('Format de réponse invalide lors du rechargement:', sourceData);
+        return;
+      }
+      setSources(sourceData);
     } catch (err) {
       console.error('Erreur lors du rechargement des sources:', err);
+      showSnackbar('Erreur lors du rechargement des sources', SNACKBAR_TYPES.ERROR);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,7 +97,10 @@ const SourceCatalog = ({
   // Gérer la soumission du formulaire d'ajout de source
   const handleSubmitSource = async (sourceData) => {
     try {
-      await createSource(sourceData);
+      const response = await createSource(sourceData);
+      if (!response.success) {
+        throw new Error(response.message || 'Erreur lors de la création de la source');
+      }
       setShowAddSourceModal(false);
       setFormErrors({});
       // Recharger les sources pour mettre à jour la liste
@@ -91,6 +108,10 @@ const SourceCatalog = ({
     } catch (error) {
       console.error("Erreur lors de l'ajout de la source:", error);
       setFormErrors(error.response?.data?.errors || {});
+      showSnackbar(
+        `Erreur lors de l'ajout de la source: ${error.message || 'Veuillez réessayer'}`,
+        SNACKBAR_TYPES.ERROR
+      );
     }
   };
 

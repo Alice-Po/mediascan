@@ -22,13 +22,16 @@ export const fetchAllSources = async () => {
 export const createSource = async (sourceData) => {
   try {
     const response = await api.post('/sources', sourceData);
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Erreur lors de la création de la source');
+    }
     return response.data;
   } catch (error) {
     console.error(
       'Erreur lors de la création de la source:',
       error.response?.data || error.message
     );
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -80,5 +83,26 @@ export const checkSourceExists = async (url) => {
   } catch (error) {
     console.error("Erreur lors de la vérification de l'existence de la source:", error);
     return { exists: false, error: error.response?.data?.error || error.message };
+  }
+};
+
+/**
+ * Vérifie la validité d'un flux RSS via l'API backend
+ * @param {string} url - L'URL du flux RSS à vérifier
+ * @returns {Promise<{valid: boolean, data?: object, error?: string}>}
+ */
+export const checkRssFluxIsValid = async (url) => {
+  try {
+    const response = await api.post(
+      '/sources/check-rss',
+      { rssUrl: url },
+      { withCredentials: true }
+    );
+    return { valid: true, data: response.data };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error.response?.data?.error || error.message,
+    };
   }
 };
