@@ -4,6 +4,7 @@ import SourceDetailsModal from '../sources/SourceDetailsModal';
 import { fetchSourceById } from '../../api/sourcesApi';
 import Badge from '../common/Badge';
 import { BookmarkIcon, ShareIcon } from '../common/icons';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 // Remplacer l'import de date-fns par une fonction utilitaire native
 const formatRelativeTime = (date) => {
@@ -39,6 +40,7 @@ const formatRelativeTime = (date) => {
 const ArticleCard = ({ article, onSave, onShare }) => {
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
   const [sourceDetails, setSourceDetails] = useState(null);
+  const { showSnackbar } = useSnackbar();
 
   // Gérer le clic sur le bouton de sauvegarde
   const handleSaveClick = (e) => {
@@ -50,9 +52,26 @@ const ArticleCard = ({ article, onSave, onShare }) => {
   };
 
   // Gérer le clic sur le bouton de partage
-  const handleShareClick = (e) => {
+  const handleShareClick = async (e) => {
     e.stopPropagation(); // Empêcher la navigation vers l'article
-    onShare(article.link);
+
+    const shareText = `Regarde ce que j'ai trouvé sur Médiascan !\n\n📰 ${article.title}\n\n${article.contentSnippet}\n\nDécouvrez cet article et bien d'autres sur MediaScan, votre agrégateur social d'actualités.\n\n${article.link}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: article.title,
+          text: shareText,
+          url: article.link,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        showSnackbar('Article et message copiés dans le presse-papier !', SNACKBAR_TYPES.SUCCESS);
+      }
+    } catch (error) {
+      console.error('Error sharing article:', error);
+      showSnackbar("Erreur lors du partage de l'article", SNACKBAR_TYPES.ERROR);
+    }
   };
 
   const handleClick = async (e) => {
