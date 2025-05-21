@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
-import { fetchSourcesFromUserCollections, fetchAllSources } from '../api/sourcesApi';
+import { fetchSourcesFromUserCollections } from '../api/sourcesApi';
 import { fetchArticles } from '../api/articlesApi';
 import { useCollections } from '../hooks/useCollections';
 import { useArticleFilters } from '../hooks/useArticleFilters';
@@ -23,7 +23,6 @@ export const AppProvider = ({ children }) => {
 
   // States
   const [userSources, setUserSources] = useState([]);
-  const [allSources, setAllSources] = useState([]);
   const [loadingSources, setLoadingSources] = useState(true);
   const [error, setError] = useState(null);
   const [articles, setArticles] = useState([]);
@@ -87,7 +86,6 @@ export const AppProvider = ({ children }) => {
 
         if (mounted) {
           setUserSources(userSourcesData);
-          setAllSources(allSourcesData.data);
 
           // Initialiser les filtres avec les sources actives
           const activeSourceIds = userSourcesData
@@ -190,7 +188,6 @@ export const AppProvider = ({ children }) => {
   // Valeur du contexte
   const value = {
     userSources,
-    allSources,
     loadingSources,
     articles: filteredArticles,
     loadingArticles,
