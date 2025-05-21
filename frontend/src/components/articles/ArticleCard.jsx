@@ -2,34 +2,9 @@ import React, { useState } from 'react';
 import { trackEvent } from '../../api/analyticsApi';
 import SourceDetailsModal from '../sources/SourceDetailsModal';
 import { fetchSourceById } from '../../api/sourcesApi';
-import Badge from '../common/Badge';
 import { BookmarkIcon, ShareIcon } from '../common/icons';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
-
-// Remplacer l'import de date-fns par une fonction utilitaire native
-const formatRelativeTime = (date) => {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
-
-  if (diffInSeconds < 60) return "à l'instant";
-
-  const minutes = Math.floor(diffInSeconds / 60);
-  if (diffInSeconds < 3600) {
-    return `il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
-  }
-
-  const hours = Math.floor(diffInSeconds / 3600);
-  if (diffInSeconds < 86400) {
-    return `il y a ${hours} heure${hours > 1 ? 's' : ''}`;
-  }
-
-  const days = Math.floor(diffInSeconds / 86400);
-  if (diffInSeconds < 604800) {
-    return `il y a ${days} jour${days > 1 ? 's' : ''}`;
-  }
-
-  return new Date(date).toLocaleDateString('fr-FR');
-};
+import { formatRelativeTime } from '../../utils/timeUtils';
 
 /**
  * Composant d'affichage d'un article
