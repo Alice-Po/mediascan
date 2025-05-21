@@ -16,7 +16,12 @@ const getFundingTypeLabel = (type) => {
   return types[type] || type;
 };
 
-const SourceCard = ({ source, onAddToCollection, isActive }) => {
+const SourceCard = ({
+  source,
+  onAddToCollection,
+  isActive,
+  enableAddSourceToCollectionAction = true,
+}) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [faviconLoaded, setFaviconLoaded] = React.useState(true);
 
@@ -149,7 +154,7 @@ const SourceCard = ({ source, onAddToCollection, isActive }) => {
           {/* Actions - rangées en ligne */}
           <div className="flex justify-between items-center mt-auto pt-1.5 border-t border-gray-100">
             {/* Ajouter à une collection */}
-            {onAddToCollection && !isActive && (
+            {onAddToCollection && !isActive && enableAddSourceToCollectionAction && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -206,10 +211,12 @@ SourceCard.propTypes = {
   }).isRequired,
   onAddToCollection: PropTypes.func,
   isActive: PropTypes.bool,
+  enableAddSourceToCollectionAction: PropTypes.bool,
 };
 
 SourceCard.defaultProps = {
   isActive: false,
+  enableAddSourceToCollectionAction: true,
 };
 
 export default SourceCard;

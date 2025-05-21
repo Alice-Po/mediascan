@@ -9,7 +9,7 @@ import {
 } from '../../../../components/common/icons';
 import RssHelpModal from '../../../../components/sources/RssHelpModal';
 import AddSourceForm from '../../../../components/sources/AddSourceForm';
-import SourceCatalog from '../../../../components/sources/SourceCatalog';
+import SourceCatalogModal from '../../../../components/sources/SourceCatalogModal';
 import { createSource } from '../../../../api/sourcesApi';
 
 const OnboardingSource = ({ onValidationChange }) => {
@@ -175,7 +175,8 @@ const OnboardingSource = ({ onValidationChange }) => {
                 Parfait ! Votre première source est ajoutée
               </h3>
               <p className="text-gray-700 mb-6">
-                Découvrez d'autres sources intéressantes dans notre catalogue.
+                Vous pouvez vous baladez à travers le catalogue des sources déjà renseignées par les
+                utilisateurs
               </p>
               <button
                 onClick={() => setShowCatalog(true)}
@@ -199,45 +200,18 @@ const OnboardingSource = ({ onValidationChange }) => {
               onCancel={() => setShowAddSource(false)}
               loading={loading}
               formErrors={formErrors}
-              collections={[{ _id: 'default', name: 'Collection par défaut', isDefault: true }]}
               hideCollectionSection={true}
-              defaultCollectionId="default"
             />
           </div>
         </div>
       )}
 
       {showCatalog && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-4 sm:p-6 border-b bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-              <h3 className="text-lg sm:text-xl font-medium">Catalogue des sources</h3>
-              <button
-                onClick={() => setShowCatalog(false)}
-                className="text-white/80 hover:text-white"
-                aria-label="Fermer"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4">
-              <SourceCatalog
-                onAddToCollection={() => {}}
-                collectionSources={[]}
-                userCollections={[
-                  { _id: 'default', name: 'Collection par défaut', isDefault: true },
-                ]}
-              />
-            </div>
-          </div>
-        </div>
+        <SourceCatalogModal
+          isOpen={showCatalog}
+          onClose={() => setShowCatalog(false)}
+          isOnboarding={true}
+        />
       )}
     </div>
   );

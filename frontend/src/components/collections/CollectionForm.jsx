@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useImperativeHandle, forwardRef
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
-import SourceCatalog from '../sources/SourceCatalog';
+import SourceCatalogModal from '../sources/SourceCatalogModal';
 import Modal from '../common/Modal';
 import {
   createCollection,
@@ -497,7 +497,7 @@ const CollectionForm = forwardRef(
           size="2xl"
         >
           <div className="p-2">
-            <SourceCatalog
+            <SourceCatalogModal
               onAddToCollection={handleAddSource}
               collectionSources={selectedSources}
               userCollections={collections}
