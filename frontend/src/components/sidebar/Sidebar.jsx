@@ -41,9 +41,6 @@ const Sidebar = () => {
   const [searchInput, setSearchInput] = useState(filters.searchTerm);
   const debouncedSearch = useDebounce(searchInput, 300);
 
-  // Ajout du log pour diagnostiquer le contenu des collections
-  console.log('Sidebar.jsx - collections:', collections);
-
   // Trier les collections
   const sortedCollections = useMemo(() => {
     if (!collections) return [];
@@ -122,18 +119,9 @@ const Sidebar = () => {
           <Accordion title="Collections" defaultOpen={true}>
             <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
               {/* Afficher les collections */}
-              {sortedCollections.map(
-                (collection) => (
-                  console.log(collection),
-                  (
-                    <FilterCollectionItem
-                      key={collection._id}
-                      collection={collection}
-                      user={user}
-                    />
-                  )
-                )
-              )}
+              {sortedCollections.map((collection) => (
+                <FilterCollectionItem key={collection._id} collection={collection} user={user} />
+              ))}
             </div>
           </Accordion>
 

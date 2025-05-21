@@ -6,6 +6,7 @@ import { useArticles } from '../../hooks/useArticles';
 import { fetchArticles } from '../../api/articlesApi';
 import { AuthContext } from '../../context/AuthContext';
 import EmptyState from './EmptyState';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 /**
  * Composant d'affichage de la liste des articles avec scroll infini
@@ -17,6 +18,7 @@ const ArticleList = ({ filters: parentFilters }) => {
   const { user } = useContext(AuthContext);
   const { ownedCollections } = useCollections(user);
   const { saveArticle, unsaveArticle } = useSavedArticles();
+  const { showSnackbar } = useSnackbar();
 
   // Utiliser le hook généraliste pour les articles, en injectant les filtres du parent
   const [filters, setFilters] = useState(parentFilters);
@@ -68,8 +70,10 @@ const ArticleList = ({ filters: parentFilters }) => {
 
       if (article.isSaved) {
         await unsaveArticle(articleId);
+        showSnackbar('Article retiré des favoris', SNACKBAR_TYPES.SUCCESS);
       } else {
         await saveArticle(articleId);
+        showSnackbar('Article sauvegardé avec succès', SNACKBAR_TYPES.SUCCESS);
       }
 
       // Mettre à jour l'état de l'article dans le hook

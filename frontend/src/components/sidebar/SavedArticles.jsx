@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSavedArticles } from '../../context/SavedArticlesContext';
 import ArticleItem from '../articles/ArticleItem';
+import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 /**
  * Composant pour afficher les articles sauvegardés dans la sidebar
@@ -9,11 +10,13 @@ import ArticleItem from '../articles/ArticleItem';
 const SavedArticles = () => {
   const { savedArticles, loading, error, unsaveArticle } = useSavedArticles();
   const [expanded, setExpanded] = useState(true);
+  const { showSnackbar } = useSnackbar();
 
   // Gérer la désauvegarde d'un article
   const handleUnsave = async (articleId, e) => {
     e.stopPropagation();
     await unsaveArticle(articleId);
+    showSnackbar('Article retiré des favoris', SNACKBAR_TYPES.SUCCESS);
   };
 
   // Fonction pour basculer l'affichage
