@@ -9,6 +9,9 @@ import SourceDetailsModal from '../sources/SourceDetailsModal';
 import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '../common/icons';
 import SourceCatalogModal from '../sources/SourceCatalogModal';
 import CollectionAvatar from './CollectionAvatar';
+import ArticleList from '../articles/ArticleList';
+import { useArticles } from '../../hooks/useArticles';
+import Accordion from '../common/Accordion';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -41,6 +44,27 @@ const CollectionDetailComponent = ({
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSourceCatalog, setShowSourceCatalog] = useState(false);
   const [defaultSettingLoading] = useState(false);
+
+  // Configurer les filtres pour le feed d'articles
+  const collectionFilters = {
+    collection: collection?._id,
+    sources: collection?.sources?.map((source) => source._id) || [],
+  };
+
+  // Utiliser le hook useArticles pour le feed
+  const {
+    articles,
+    loading: articlesLoading,
+    error: articlesError,
+    hasMore,
+    loadMore,
+  } = useArticles({
+    collections: [collection],
+    options: {
+      initialFilters: collectionFilters,
+      pageSize: 10, // Limiter à 10 articles pour l'aperçu
+    },
+  });
 
   const isUserOwner = collection.createdBy && user._id && collection.createdBy._id === user._id;
   const isDefault = isDefaultCollection(collection._id);
@@ -271,9 +295,7 @@ const CollectionDetailComponent = ({
 
       {/* Liste des sources - conditionnelle */}
       {withSourcesList && collection.sources && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Sources ({collection.sources.length || 0})</h2>
-
+        <Accordion title={`Sources (${collection.sources.length || 0})`} defaultOpen={true}>
           {collection.sources.length === 0 ? (
             <div className="text-center p-6 bg-gray-50 rounded-md">
               <p className="text-gray-500">Cette collection ne contient aucune source</p>
@@ -322,6 +344,16 @@ const CollectionDetailComponent = ({
               ))}
             </div>
           )}
+        </Accordion>
+      )}
+
+      {/* Section du feed d'articles */}
+      {withSourcesList && collection.sources && collection.sources.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Aperçu du flux</h2>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <ArticleList filters={collectionFilters} />
+          </div>
         </div>
       )}
 

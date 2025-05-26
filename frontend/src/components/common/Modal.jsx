@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * Composant de modale générique réutilisable avec gestion d'accessibilité
+ * Composant Modal générique pour afficher des modales
  * @param {Object} props - Propriétés du composant
  * @param {boolean} props.isOpen - Indique si la modale est ouverte
  * @param {function} props.onClose - Fonction appelée lors de la fermeture
@@ -10,51 +10,11 @@ import PropTypes from 'prop-types';
  * @param {React.ReactNode} props.children - Contenu de la modale
  * @param {string} props.size - Taille de la modale ('sm', 'md', 'lg', 'xl')
  * @param {boolean} props.showCloseButton - Si true, affiche le bouton de fermeture (par défaut: true)
- * @returns {JSX.Element} Composant de modale
+ * @returns {JSX.Element} Composant Modal
  */
 const Modal = ({ isOpen, onClose, title = '', children, size = 'md', showCloseButton = true }) => {
-  const modalRef = useRef(null);
-  const closeButtonRef = useRef(null);
-
-  // Gérer la fermeture avec la touche Escape
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  // Gérer le focus quand la modale s'ouvre
-  useEffect(() => {
-    if (isOpen) {
-      // Mettre le focus sur le bouton de fermeture ou la modale elle-même
-      if (closeButtonRef.current) {
-        closeButtonRef.current.focus();
-      } else if (modalRef.current) {
-        modalRef.current.focus();
-      }
-
-      // Empêcher le scroll sur le body
-      document.body.style.overflow = 'hidden';
-    } else {
-      // Restaurer le scroll
-      document.body.style.overflow = 'auto';
-    }
-
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
-  // Définir la largeur de la modale en fonction de la taille
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -68,48 +28,31 @@ const Modal = ({ isOpen, onClose, title = '', children, size = 'md', showCloseBu
 
   const modalClass = sizeClasses[size] || sizeClasses.md;
 
-  // Empêcher la propagation des clics depuis la modale vers le backdrop
-  const handleModalClick = (e) => {
-    e.stopPropagation();
-  };
-
   return (
-    <div
-      className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-2 sm:p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
-    >
-      <div
-        ref={modalRef}
-        className={`bg-white rounded-lg ${modalClass} w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-xl animate-fadeIn`}
-        onClick={handleModalClick}
-        tabIndex={-1}
-      >
-        <div className="flex justify-between items-center border-b p-3 sm:p-4">
-          <h3 id="modal-title" className="text-base sm:text-lg font-semibold truncate">
-            {title}
-          </h3>
+    <div className="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm bg-white/30 flex items-center justify-center p-4">
+      <div className={`bg-white rounded-lg ${modalClass} w-full max-h-[90vh] overflow-y-auto`}>
+        <div className="sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center">
+          <h2 className="text-xl font-bold">{title}</h2>
           {showCloseButton && (
-            <button
-              ref={closeButtonRef}
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Fermer"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="text-gray-500 hover:text-gray-700" onClick={onClose}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
+                  strokeWidth={2}
                   d="M6 18L18 6M6 6l12 12"
-                ></path>
+                />
               </svg>
             </button>
           )}
         </div>
-        <div className="overflow-y-auto p-3 sm:p-4 flex-grow">{children}</div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );

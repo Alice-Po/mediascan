@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useCollections } from '../../../../hooks/useCollections';
-import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
 import CollectionCard from '../../../../components/collections/CollectionCard';
 import WarningBanner from '../../../../components/common/WarningBanner';
+import Modal from '../../../../components/common/Modal';
+import CollectionDetails from '../../../../components/collections/CollectionDetails';
 
 const OnboardingPublicCollections = ({ onValidationChange, user }) => {
   const {
@@ -189,15 +190,23 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
 
       {/* Modale de détail de collection */}
       {selectedCollection && (
-        <PublicCollectionModal
-          collectionId={selectedCollection._id}
+        <Modal
           isOpen={showModal}
           onClose={handleCloseModal}
-          onFollow={handleFollowFromModal}
-          followStatus={followStatus[selectedCollection._id]}
-          isFollowLoading={followLoading[selectedCollection._id]}
-          isOnboarding={true}
-        />
+          title="Détails de la collection"
+          size="3xl"
+        >
+          <CollectionDetails
+            collection={selectedCollection}
+            isOwner={false}
+            isFollowing={followStatus[selectedCollection._id]}
+            followLoading={followLoading[selectedCollection._id]}
+            onFollowToggle={handleFollowToggle}
+            onBrowseArticles={handleCloseModal}
+            withSourcesList={true}
+            isOnboarding={true}
+          />
+        </Modal>
       )}
     </div>
   );
