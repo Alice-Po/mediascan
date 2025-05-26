@@ -345,7 +345,7 @@ const CollectionDetailComponent = ({
             title={selectedSource.name}
             size="md"
           >
-            <SourceDetailsModal source={selectedSource} />
+            <SourceDetails source={selectedSource} />
           </Modal>
         </>
       )}
