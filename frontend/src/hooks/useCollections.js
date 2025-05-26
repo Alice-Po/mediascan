@@ -107,14 +107,10 @@ export function useCollections(user, setGlobalError) {
     try {
       setLoading(true);
       const publicData = await fetchPublicCollections();
-      const enhancedPublicCollections = publicData.map((collection) => ({
-        ...collection,
-        creator: collection.createdBy?.username,
-        isPublic: true,
-      }));
-      setPublicCollections(enhancedPublicCollections);
+      setPublicCollections(publicData);
+      console.log('publicData', publicData);
       setError(null);
-      return enhancedPublicCollections;
+      return publicData;
     } catch (err) {
       console.error('Erreur lors du chargement des collections publiques:', err);
       handleError('Impossible de charger les collections publiques', err);

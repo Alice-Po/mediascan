@@ -155,6 +155,7 @@ const Onboarding = () => {
         return (
           <OnboardingPublicCollections
             onValidationChange={(isValid) => handleStepValidation(4, isValid)}
+            user={user}
           />
         );
       case 5:

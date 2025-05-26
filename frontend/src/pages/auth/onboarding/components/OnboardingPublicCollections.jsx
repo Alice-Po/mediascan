@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useCollections } from '../../../../hooks/useCollections';
 import PublicCollectionModal from '../../../../components/collections/CollectionDetailsModal';
-import { generateFollowersFromId } from '../../../../utils/colorUtils';
 import CollectionCard from '../../../../components/collections/CollectionCard';
 import WarningBanner from '../../../../components/common/WarningBanner';
 
@@ -13,7 +12,12 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
     followCollection,
     unfollowCollection,
     checkIfFollowing,
+    loadPublicCollections,
   } = useCollections(user);
+
+  useEffect(() => {
+    loadPublicCollections();
+  }, [loadPublicCollections]);
 
   const [followStatus, setFollowStatus] = useState({});
   const [followLoading, setFollowLoading] = useState({});
@@ -26,7 +30,9 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
 
   // Vérifier si l'étape est valide (au moins une collection suivie)
   const hasFollowedCollections = useCallback(() => {
-    return Object.values(followStatus).some((status) => status === true);
+    const hasFollowed = Object.values(followStatus).some((status) => status === true);
+
+    return hasFollowed;
   }, [followStatus]);
 
   // Informer le composant parent quand le statut de validation change
@@ -44,7 +50,10 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
 
   useEffect(() => {
     const loadFollowStatus = async () => {
-      if (!publicCollections.length) return;
+      if (!publicCollections.length) {
+        console.log('[OnboardingPublicCollections] Aucune collection publique disponible');
+        return;
+      }
 
       // Vérifier le statut de suivi pour chaque collection filtrée
       const statusObj = {};

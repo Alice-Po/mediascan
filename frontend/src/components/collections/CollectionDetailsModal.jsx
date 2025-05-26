@@ -39,9 +39,10 @@ const CollectionDetailsModal = ({
 
   const navigate = useNavigate();
 
+  // Utiliser le hook useCollections pour les opérations de base
   const {
-    loading,
-    error,
+    loading: collectionsLoading, // Renommé pour éviter le conflit
+    error: collectionsError,
     deleteCollection,
     removeSourceFromCollection,
     followCollection,
@@ -53,11 +54,13 @@ const CollectionDetailsModal = ({
   const [collection, setCollection] = useState(externalCollection || null);
   const [isFollowing, setIsFollowing] = useState(followStatus || false);
   const [followLoading, setFollowLoading] = useState(isFollowLoading || false);
+  const [modalLoading, setModalLoading] = useState(false); // Renommé pour plus de clarté
+  const [error, setError] = useState(null);
 
   // Détermine si l'utilisateur est le propriétaire de la collection
   const isOwner = user && collection?.userId === user._id;
 
-  // Fonction pour charger une collection - utilise le contexte ou l'API directement
+  // Fonction pour charger une collection
   const loadCollectionById = async (id) => {
     if (contextLoadCollectionById && !standalone) {
       return await contextLoadCollectionById(id);
@@ -71,16 +74,14 @@ const CollectionDetailsModal = ({
     const fetchCollectionDetails = async () => {
       if (!collectionId || !isOpen) return;
 
-      // Si une collection externe est fournie, l'utiliser directement
       if (externalCollection) {
         setCollection(externalCollection);
         return;
       }
 
       try {
-        setLoading(true);
+        setModalLoading(true);
 
-        // Utiliser currentCollection du contexte si disponible et correspond à l'ID demandé
         if (
           contextCurrentCollection &&
           contextCurrentCollection._id === collectionId &&
@@ -92,7 +93,6 @@ const CollectionDetailsModal = ({
           setCollection(data);
         }
 
-        // Vérifier si l'utilisateur suit déjà cette collection si status non fourni
         if (followStatus === undefined && collection?.isPublic && !isOwner) {
           try {
             const isFollowingStatus = await checkIfFollowing(collectionId);
@@ -105,7 +105,7 @@ const CollectionDetailsModal = ({
         setError('Impossible de charger les détails de la collection');
         console.error(err);
       } finally {
-        setLoading(false);
+        setModalLoading(false);
       }
     };
 
@@ -145,7 +145,7 @@ const CollectionDetailsModal = ({
     if (!isOwner) return;
 
     try {
-      setLoading(true);
+      setModalLoading(true);
       await deleteCollection(collectionId);
 
       if (onDeleteSuccess) {
@@ -159,7 +159,7 @@ const CollectionDetailsModal = ({
       setError('Erreur lors de la suppression de la collection');
       console.error(err);
     } finally {
-      setLoading(false);
+      setModalLoading(false);
     }
   };
 
@@ -223,43 +223,48 @@ const CollectionDetailsModal = ({
         </div>
 
         <div className="p-4">
-          {(loading || contextLoadingCollections) && (
+          {(modalLoading || collectionsLoading || contextLoadingCollections) && (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
             </div>
           )}
 
-          {error && (
+          {(error || collectionsError) && (
             <div className="bg-red-50 text-red-700 p-4 rounded-md">
-              <p>{error}</p>
+              <p>{error || collectionsError}</p>
             </div>
           )}
 
-          {!loading && !contextLoadingCollections && !error && collection && (
-            <>
-              <CollectionDetailComponent
-                collection={collection}
-                isOwner={isOwner}
-                isFollowing={isFollowing}
-                followLoading={followLoading}
-                onFollowToggle={handleFollowToggle}
-                onRemoveSource={handleRemoveSource}
-                onDelete={handleDelete}
-                onBrowseArticles={handleFilterAndClose}
-                withSourcesList={true}
-                isOnboarding={isOnboarding}
-              />
+          {!modalLoading &&
+            !collectionsLoading &&
+            !contextLoadingCollections &&
+            !error &&
+            !collectionsError &&
+            collection && (
+              <>
+                <CollectionDetailComponent
+                  collection={collection}
+                  isOwner={isOwner}
+                  isFollowing={isFollowing}
+                  followLoading={followLoading}
+                  onFollowToggle={handleFollowToggle}
+                  onRemoveSource={handleRemoveSource}
+                  onDelete={handleDelete}
+                  onBrowseArticles={handleFilterAndClose}
+                  withSourcesList={true}
+                  isOnboarding={isOnboarding}
+                />
 
-              <div className="mt-6 flex justify-end space-x-2 pt-4 border-t">
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-                >
-                  Fermer
-                </button>
-              </div>
-            </>
-          )}
+                <div className="mt-6 flex justify-end space-x-2 pt-4 border-t">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </>
+            )}
         </div>
       </div>
     </div>
