@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import CollectionDetails from './CollectionDetails';
 import CollectionCard from './CollectionCard';
 import { useCollections } from '../../hooks/useCollections';
+import Modal from '../common/Modal';
 
 /**
  * Composant pour afficher un catalogue de collections publiques
@@ -15,9 +16,15 @@ const PublicCollectionsCatalog = ({
   onFollowStatusChange,
 }) => {
   const { user } = useContext(AuthContext);
-  const { collections, loading, error, followCollection, unfollowCollection, checkIfFollowing } =
-    useCollections();
-  const [publicCollections, setPublicCollections] = useState([]);
+  const {
+    publicCollections,
+    loading,
+    error,
+    followCollection,
+    unfollowCollection,
+    checkIfFollowing,
+    loadPublicCollections,
+  } = useCollections();
   const [publicCollectionsLoading, setPublicCollectionsLoading] = useState(false);
   const [publicCollectionsError, setPublicCollectionsError] = useState(null);
   const [followStatus, setFollowStatus] = useState({});
@@ -28,25 +35,24 @@ const PublicCollectionsCatalog = ({
   // Charger les collections publiques quand la modal est ouverte
   useEffect(() => {
     if (isOpen) {
-      loadPublicCollections();
+      fetchAndSetPublicCollections();
     }
   }, [isOpen]);
 
-  // Fonction pour charger les collections publiques
-  const loadPublicCollections = async () => {
+  // Fonction pour charger les collections publiques via le hook
+  const fetchAndSetPublicCollections = async () => {
     try {
       setPublicCollectionsLoading(true);
       setPublicCollectionsError(null);
 
-      // Récupérer les collections publiques
-      const collections = await fetchPublicCollections(minSourcesRequired);
-      setPublicCollections(collections);
+      // Charger les collections publiques via le hook
+      await loadPublicCollections(minSourcesRequired);
 
       // Vérifier le statut de suivi pour chaque collection
       const statusObj = {};
       const loadingObj = {};
 
-      for (const collection of collections) {
+      for (const collection of publicCollections) {
         try {
           statusObj[collection._id] = await checkIfFollowing(collection._id);
         } catch (error) {
@@ -79,20 +85,16 @@ const PublicCollectionsCatalog = ({
     if (!user) return;
 
     try {
-      // Mettre à jour le state de chargement
       setFollowLoading((prev) => ({ ...prev, [collectionId]: true }));
 
       if (followStatus[collectionId]) {
-        // Si déjà suivi, désabonner
         await unfollowCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: false }));
       } else {
-        // Sinon, suivre
         await followCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: true }));
       }
 
-      // Informer le composant parent du changement
       if (onFollowStatusChange) {
         onFollowStatusChange(collectionId, !followStatus[collectionId]);
       }
@@ -112,7 +114,6 @@ const PublicCollectionsCatalog = ({
   // Gérer le suivi depuis la modale de détails
   const handleFollowFromDetails = (collectionId, isFollowing) => {
     setFollowStatus((prev) => ({ ...prev, [collectionId]: isFollowing }));
-
     if (onFollowStatusChange) {
       onFollowStatusChange(collectionId, isFollowing);
     }
@@ -190,6 +191,7 @@ const PublicCollectionsCatalog = ({
               {publicCollections.map((collection) => (
                 <CollectionCard
                   key={collection._id}
+                  collectionId={collection._id}
                   collection={collection}
                   isFollowed={followStatus[collection._id]}
                   isLoading={followLoading[collection._id]}
@@ -203,18 +205,22 @@ const PublicCollectionsCatalog = ({
       </div>
 
       {/* Modal de détails d'une collection */}
-      {selectedCollection && (
-        <CollectionDetails
-          collectionId={selectedCollection._id}
-          externalCollection={selectedCollection}
-          isOpen={showDetailModal}
-          onClose={handleCloseDetailModal}
-          onFollow={handleFollowFromDetails}
-          followStatus={followStatus[selectedCollection._id]}
-          isFollowLoading={followLoading[selectedCollection._id]}
-          standalone={true}
-        />
-      )}
+      <Modal
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        title={selectedCollection?.name || 'Détail de la collection'}
+        size="lg"
+      >
+        {selectedCollection && (
+          <CollectionDetails
+            collection={selectedCollection}
+            onFollow={handleFollowFromDetails}
+            followStatus={followStatus[selectedCollection?._id]}
+            isFollowLoading={followLoading[selectedCollection?._id]}
+            standalone={true}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
