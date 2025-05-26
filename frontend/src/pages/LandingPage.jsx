@@ -212,7 +212,7 @@ const WhatIsMediascan = () => (
         </li>
         <li className="flex items-center gap-2">
           <span className="text-blue-500">✓</span>
-          <span>Vos infolettres</span>
+          <span>Vos newsletters</span>
         </li>
         <li className="flex items-center gap-2">
           <span className="text-blue-500">✓</span>
@@ -348,8 +348,8 @@ const WhyMediascan = () => (
       </p>
       <p className="text-gray-700 mb-6">
         Le paysage médiatique actuel présente des défis structurels bien documentés : concentration
-        des médias, modèles économiques basés sur l'engagement émotionnel, et algorithmes optimisés
-        pour la publicité plutôt que pour la qualité informationnelle.
+        des médias, modèles économiques basés sur l'engagement émotionnel, bulles informationnelles
+        et algorithmes optimisés pour la publicité plutôt que pour la qualité informationnelle.
       </p>
       <p className="text-gray-700 mb-6">
         Selon une étude Reuters de 2023, plus de 65% des Français expriment leur méfiance envers les
@@ -370,8 +370,8 @@ const WhyMediascan = () => (
       </p>
       <p className="text-gray-700 mb-6">
         Notre service fonctionne comme une{' '}
-        <strong>bibliothèque de revues éditorialisée par des personnes</strong> dont vous respectez
-        le sérieux. C'est plus qu'une façon de s'informer : c'est une invitation à s'étonner, à
+        <strong>bibliothèque de revues éditorialisée par des personnes</strong> en qui vous avez
+        confiance. C'est plus qu'une façon de s'informer : c'est une invitation à s'étonner, à
         élargir ses horizons, un divertissement qui augmente votre champ de perspectives. Nous
         rendons accessible au plus grand nombre la configuration de ses flux d'information et la
         découverte de sources pépites, habituellement réservées aux initiés ou aux professionnels.
