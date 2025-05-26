@@ -10,6 +10,7 @@ import {
   EditIcon,
   TrashIcon,
   StarIcon,
+  ProfileIcon,
 } from './../common/icons';
 import CollectionAvatar from './CollectionAvatar';
 
@@ -115,12 +116,23 @@ const CollectionItem = ({
           </div>
 
           {/* Seconde ligne: Créateur et métadonnées */}
-          <div className="flex flex-wrap text-xs text-gray-500 w-full">
-            <span className="truncate">
-              Par{' '}
-              {collection.userId === currentUserId
-                ? 'vous'
-                : collection.createdBy?.username || 'Utilisateur anonyme'}
+          <div className="flex flex-wrap text-xs text-gray-500 w-full items-center mt-1">
+            {/* Avatar du créateur */}
+            <span className="flex items-center mr-2">
+              {collection.createdBy?.avatarUrl ? (
+                <img
+                  src={collection.createdBy.avatarUrl}
+                  alt={collection.createdBy.username || 'Créateur'}
+                  className="w-6 h-6 rounded-full object-cover border border-gray-200 mr-1"
+                />
+              ) : (
+                <ProfileIcon className="w-6 h-6 text-gray-400 mr-1" />
+              )}
+              <span className="font-semibold text-gray-800 text-sm">
+                {collection.userId === currentUserId
+                  ? 'vous'
+                  : collection.createdBy?.username || 'Utilisateur anonyme'}
+              </span>
             </span>
             <span className="mx-1 flex-shrink-0">•</span>
             <span className="flex-shrink-0">
