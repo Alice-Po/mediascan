@@ -200,16 +200,6 @@ const CollectionDetails = ({
       )}
 
       <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 mb-2">
-        {/* Bouton Voir les articles - n'apparaît pas pendant l'onboarding */}
-        {onBrowseArticles && !isOnboarding && (
-          <button
-            onClick={handleBrowseArticles}
-            className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
-          >
-            Voir les articles
-          </button>
-        )}
-
         {/* Bouton Suivre/Arrêter de suivre (si collection publique et non propriétaire) */}
         {collection.isPublic && !isUserOwner && onFollowToggle && (
           <button

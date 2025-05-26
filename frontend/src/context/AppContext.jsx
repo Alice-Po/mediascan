@@ -50,15 +50,8 @@ export const AppProvider = ({ children }) => {
   } = collectionsHookResult;
 
   // Utilisation du hook de filtrage
-  const {
-    filters,
-    setFilters,
-    resetFilters,
-    filteredArticles,
-    filterByCollection,
-    filterBySource,
-    filterBySearch,
-  } = useArticles(articles, ownedCollections);
+  const { filters, setFilters, resetFilters, filteredArticles, filterBySource, filterBySearch } =
+    useArticles(articles, ownedCollections);
 
   // Toggle sidebar
   const toggleSidebar = useCallback(() => {
@@ -200,7 +193,6 @@ export const AppProvider = ({ children }) => {
     refreshArticles,
     isSidebarCollapsed,
     toggleSidebar,
-    filterByCollection,
     filterBySource,
     filterBySearch,
   };

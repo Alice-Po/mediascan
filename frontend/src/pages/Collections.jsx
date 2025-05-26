@@ -2,39 +2,81 @@ import React, { useEffect, useContext, useState } from 'react';
 import { CollectionsList } from '../components/collections';
 import { useCollections } from '../hooks/useCollections';
 import { AuthContext } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PublicCollectionsCatalog from '../components/collections/PublicCollectionsCatalog';
+import { useSnackbar, SNACKBAR_TYPES } from '../context/SnackbarContext';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 
 const Collections = () => {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const { ownedCollections, followedCollections, loading } = useCollections(user);
+  const { showSnackbar } = useSnackbar();
+  const {
+    ownedCollections,
+    followedCollections,
+    loading,
+    deleteCollection,
+    removeSourceFromCollection,
+  } = useCollections(user);
+
   const [showPublicCollectionsModal, setShowPublicCollectionsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(null);
 
-  // Nombre minimum de sources requises pour afficher une collection
-  const MIN_SOURCES_REQUIRED = 5;
-
-  // Ouvrir la modal des collections publiques
-  const handleOpenPublicCollections = () => {
-    setShowPublicCollectionsModal(true);
+  // Configuration des actions disponibles
+  const actionConfig = {
+    view: true,
+    edit: true,
+    delete: true,
+    share: true,
   };
 
-  // Fermer la modal des collections publiques
-  const handleClosePublicCollections = () => {
-    setShowPublicCollectionsModal(false);
+  // Callbacks pour les collections
+  const handleCollectionClick = (collection) => {
+    navigate(`/collections/${collection._id}`);
   };
 
-  // Gérer les changements de statut de suivi
-  const handleFollowStatusChange = async (collectionId, isFollowing) => {
-    // Ici, tu pourrais éventuellement rafraîchir les collections si besoin
-    // Mais le hook useCollections gère déjà la synchronisation
+  const handleDeleteClick = (collection) => {
+    setSelectedCollection(collection);
+    setShowDeleteModal(true);
+  };
+
+  const handleShareClick = (collection) => {
+    setSelectedCollection(collection);
+    setShowShareModal(true);
+  };
+
+  const handleSourceRemove = async (collectionId, sourceId) => {
+    try {
+      await removeSourceFromCollection(collectionId, sourceId);
+      showSnackbar('Source supprimée avec succès', SNACKBAR_TYPES.SUCCESS);
+    } catch (error) {
+      console.error('Error removing source:', error);
+      showSnackbar('Erreur lors de la suppression de la source', SNACKBAR_TYPES.ERROR);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedCollection) return;
+
+    try {
+      await deleteCollection(selectedCollection._id);
+      showSnackbar('Collection supprimée avec succès', SNACKBAR_TYPES.SUCCESS);
+    } catch (error) {
+      console.error('Error deleting collection:', error);
+      showSnackbar('Erreur lors de la suppression de la collection', SNACKBAR_TYPES.ERROR);
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedCollection(null);
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4">
-      {/* Header responsive */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-8 gap-3 sm:gap-0">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Mes Collections</h1>
-
         <div className="flex flex-wrap gap-2">
           <Link
             to="/collections/new"
@@ -43,7 +85,7 @@ const Collections = () => {
             Nouvelle collection
           </Link>
           <button
-            onClick={handleOpenPublicCollections}
+            onClick={() => setShowPublicCollectionsModal(true)}
             className="flex-1 sm:flex-auto text-center px-3 py-2 bg-indigo-500 text-white text-sm sm:text-base rounded hover:bg-indigo-600 transition"
           >
             Explorer les collections
@@ -51,25 +93,43 @@ const Collections = () => {
         </div>
       </div>
 
-      {/* Affichage des collections de l'utilisateur */}
+      {/* Collections personnelles */}
       <div className="bg-white rounded-lg shadow-sm mb-8">
         {loading ? (
           <div className="p-4 flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <CollectionsList collections={ownedCollections} />
+          <CollectionsList
+            collections={ownedCollections}
+            actionConfig={actionConfig}
+            onCollectionClick={handleCollectionClick}
+            onDelete={handleDeleteClick}
+            onShare={handleShareClick}
+            onSourceRemove={handleSourceRemove}
+            currentUserId={user?._id}
+          />
         )}
       </div>
 
-      {/* Affichage des collections publiques suivies */}
+      {/* Collections suivies */}
       <div className="bg-white rounded-lg shadow-sm mb-8">
         {loading ? (
           <div className="p-4 flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         ) : followedCollections && followedCollections.length > 0 ? (
-          <CollectionsList collections={followedCollections} />
+          <>
+            <h2 className="text-lg font-medium text-gray-900 mb-4 px-3">Collections suivies</h2>
+            <CollectionsList
+              collections={followedCollections}
+              actionConfig={{ ...actionConfig, delete: false }} // Pas de suppression pour les collections suivies
+              onCollectionClick={handleCollectionClick}
+              onShare={handleShareClick}
+              onSourceRemove={handleSourceRemove}
+              currentUserId={user?._id}
+            />
+          </>
         ) : (
           <div className="p-4 text-gray-500 italic">
             Vous ne suivez aucune collection publique pour le moment.
@@ -77,12 +137,36 @@ const Collections = () => {
         )}
       </div>
 
+      {/* Modales */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer la collection"
+        itemName={selectedCollection?.name}
+        confirmButtonText="Supprimer"
+        cancelButtonText="Annuler"
+      />
+
+      <ConfirmationModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        onConfirm={() => setShowShareModal(false)}
+        title="Partager la collection"
+        message="Le système de partage de collections sera bientôt disponible !"
+        itemName={selectedCollection?.name}
+        confirmButtonText="D'accord"
+        cancelButtonText="Fermer"
+        confirmButtonClass="bg-blue-600 text-white hover:bg-blue-700"
+      />
+
       {/* Catalogue de collections publiques */}
       <PublicCollectionsCatalog
         isOpen={showPublicCollectionsModal}
-        onClose={handleClosePublicCollections}
-        minSourcesRequired={MIN_SOURCES_REQUIRED}
-        onFollowStatusChange={handleFollowStatusChange}
+        onClose={() => setShowPublicCollectionsModal(false)}
+        minSourcesRequired={5}
+        onFollowStatusChange={() => {}} // Géré par le hook useCollections
       />
     </div>
   );
