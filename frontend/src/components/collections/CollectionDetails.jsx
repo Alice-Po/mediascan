@@ -5,13 +5,15 @@ import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
-import SourceDetailsModal from '../sources/SourceDetailsModal';
+import SourceDetails from '../sources/SourceDetails';
 import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '../common/icons';
 import SourceCatalogModal from '../sources/SourceCatalogModal';
 import CollectionAvatar from './CollectionAvatar';
 import ArticleList from '../articles/ArticleList';
 import { useArticles } from '../../hooks/useArticles';
 import Accordion from '../common/Accordion';
+import SourceItem from '../sources/SourceItem';
+import Modal from '../common/Modal';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -72,6 +74,7 @@ const CollectionDetailComponent = ({
 
   // Gestion des actions
   const handleSourceClick = (source) => {
+    console.log('[handleSourceClick] Source cliquée :', source);
     setSelectedSource(source);
     setShowSourceModal(true);
   };
@@ -302,46 +305,21 @@ const CollectionDetailComponent = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-1">
-              {collection.sources.map((source) => (
-                <div
-                  key={source._id}
-                  className="p-3 border border-gray-200 rounded-md flex items-center cursor-pointer"
-                  onClick={() => handleSourceClick(source)}
-                >
-                  <div
-                    className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center overflow-hidden mr-3 flex-shrink-0"
-                    style={{
-                      backgroundImage: source.faviconUrl ? `url(${source.faviconUrl})` : 'none',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                  >
-                    {!source.faviconUrl && (
-                      <span className="text-gray-500 text-xs">
-                        {source.name.substring(0, 1).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{source.name}</h3>
-                    <p className="text-xs text-gray-500 truncate">{source.url}</p>
-                  </div>
-
-                  {/* Bouton de suppression (visible uniquement pour le propriétaire) */}
-                  {isUserOwner && onRemoveSource && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveSource(source._id);
-                      }}
-                      className="ml-2 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100"
-                      title="Retirer de la collection"
-                    >
-                      <XIcon className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
-              ))}
+              {collection.sources.map((source, idx) => {
+                console.log('[CollectionDetails] Source affichée dans la liste :', source);
+                return (
+                  <SourceItem
+                    key={source._id}
+                    source={source}
+                    onDelete={
+                      isUserOwner && onRemoveSource
+                        ? () => handleRemoveSource(source._id)
+                        : undefined
+                    }
+                    onClick={handleSourceClick}
+                  />
+                );
+              })}
             </div>
           )}
         </Accordion>
@@ -359,11 +337,17 @@ const CollectionDetailComponent = ({
 
       {/* Modales */}
       {selectedSource && (
-        <SourceDetailsModal
-          isOpen={showSourceModal}
-          onClose={handleCloseSourceModal}
-          source={selectedSource}
-        />
+        <>
+          {console.log('[Modal] selectedSource :', selectedSource)}
+          <Modal
+            isOpen={showSourceModal}
+            onClose={handleCloseSourceModal}
+            title={selectedSource.name}
+            size="md"
+          >
+            <SourceDetailsModal source={selectedSource} />
+          </Modal>
+        </>
       )}
 
       <ConfirmationModal

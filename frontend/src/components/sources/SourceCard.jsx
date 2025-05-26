@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SourceDetailsModal from './SourceDetailsModal';
+import SourceDetails from './SourceDetails';
 import Badge from '../common/Badge';
 import { InfoIcon, PlusIcon } from '../common/icons';
 
@@ -183,11 +183,15 @@ const SourceCard = ({
       </div>
 
       {/* Modal de détails */}
-      <SourceDetailsModal
+      {/* Modal de la source */}
+      <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        source={source}
-      />
+        title={sourceDetails.name}
+        size="md"
+      >
+        <SourceDetails source={source} />
+      </Modal>
     </>
   );
 };

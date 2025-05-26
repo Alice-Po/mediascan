@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { trackEvent } from '../../api/analyticsApi';
-import SourceDetailsModal from '../sources/SourceDetailsModal';
+import SourceDetails from '../sources/SourceDetails';
 import { fetchSourceById } from '../../api/sourcesApi';
 import { BookmarkIcon, ShareIcon } from '../common/icons';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import { formatRelativeTime } from '../../utils/timeUtils';
-
+import Modal from '../common/Modal';
 /**
  * Composant d'affichage d'un article
  * @param {Object} article - Données de l'article
@@ -220,17 +220,14 @@ const ArticleCard = ({ article, onSave, onShare }) => {
       </div>
 
       {/* Modal de la source */}
-      <SourceDetailsModal
+      <Modal
         isOpen={isSourceModalOpen}
         onClose={() => setIsSourceModalOpen(false)}
-        source={
-          sourceDetails || {
-            name: article.sourceName,
-            faviconUrl: article.sourceFavicon,
-            _id: article.sourceId._id,
-          }
-        }
-      />
+        title={sourceDetails.name}
+        size="md"
+      >
+        <SourceDetails source={sourceDetails} />
+      </Modal>
     </>
   );
 };
