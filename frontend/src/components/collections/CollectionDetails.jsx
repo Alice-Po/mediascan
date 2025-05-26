@@ -210,12 +210,12 @@ const CollectionDetails = ({
           </button>
         )}
 
-        {/* Bouton Suivre/Suivi (si collection publique et non propriétaire) */}
+        {/* Bouton Suivre/Arrêter de suivre (si collection publique et non propriétaire) */}
         {collection.isPublic && !isUserOwner && onFollowToggle && (
           <button
             className={`flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
               isFollowing
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                 : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
             }`}
             onClick={onFollowToggle}
@@ -226,7 +226,7 @@ const CollectionDetails = ({
             ) : (
               <CheckIcon className="w-4 h-4 mr-1" />
             )}
-            {isFollowing ? 'Suivi' : 'Suivre'}
+            {isFollowing ? 'Arrêter de suivre' : 'Suivre'}
           </button>
         )}
 

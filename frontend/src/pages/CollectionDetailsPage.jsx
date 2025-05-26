@@ -12,9 +12,14 @@ const CollectionDetailsPage = () => {
     removeSourceFromCollection,
     deleteCollection,
     addSourceToCollection,
+    checkIfFollowing,
+    followCollection,
+    unfollowCollection,
   } = useCollections();
   const [collection, setCollection] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -22,6 +27,9 @@ const CollectionDetailsPage = () => {
         setLoading(true);
         const data = await loadCollectionById(id);
         setCollection(data);
+        // Initialiser le statut de suivi
+        const following = await checkIfFollowing(id);
+        setIsFollowing(following);
       } catch (error) {
         console.error('Error fetching collection:', error);
       } finally {
@@ -32,7 +40,7 @@ const CollectionDetailsPage = () => {
     if (id) {
       fetchCollection();
     }
-  }, [id, loadCollectionById]);
+  }, [id, loadCollectionById, checkIfFollowing]);
 
   const handleRemoveSource = async (sourceId) => {
     try {
@@ -76,6 +84,24 @@ const CollectionDetailsPage = () => {
     navigate(`/app?collection=${id}`);
   };
 
+  // Implémentation du suivi/désabonnement
+  const handleFollowToggle = async () => {
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await unfollowCollection(id);
+        setIsFollowing(false);
+      } else {
+        await followCollection(id);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      // Optionnel : gestion d'erreur
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-10">
@@ -109,6 +135,9 @@ const CollectionDetailsPage = () => {
           onRemoveSource={handleRemoveSource}
           onAddSource={handleAddSource}
           onBrowseArticles={handleBrowseArticles}
+          onFollowToggle={handleFollowToggle}
+          isFollowing={isFollowing}
+          followLoading={followLoading}
         />
       </div>
     </div>
