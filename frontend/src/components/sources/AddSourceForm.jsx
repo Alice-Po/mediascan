@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import RssHelpModal from './RssHelpModal';
 import PremiumBanner from '../premium/PremiumBanner';
-import { SimpleSourceItem } from './SourceItem';
+import SourceItem from './SourceItem';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 import TagInputForm from '../common/TagInputForm';
 import ArticlePreview from '../articles/ArticlePreview';
