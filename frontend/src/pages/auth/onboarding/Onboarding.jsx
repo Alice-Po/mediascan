@@ -32,7 +32,7 @@ const Onboarding = () => {
     4: false, // PublicCollections requiert au moins une collection suivie
     5: false, // CreateCollection requiert la création d'une collection
     6: true, // UpcomingFeatures est toujours valide
-    7: true, // Conclusion est toujours valide
+    // 7: true, // Conclusion est toujours valide
   });
 
   // Vérifier si l'étape actuelle est valide
@@ -111,7 +111,7 @@ const Onboarding = () => {
       return;
     }
 
-    if (step === 7) {
+    if (step === 6) {
       await completeOnboardingProcess();
     } else {
       setStep((prev) => prev + 1);
@@ -130,7 +130,7 @@ const Onboarding = () => {
   };
 
   const renderStep = () => {
-    if (loading && step < 7) {
+    if (loading && step < 6) {
       return (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -158,19 +158,19 @@ const Onboarding = () => {
             user={user}
           />
         );
+      // case 5:
+      //   return (
+      //     <OnboardingCreateCollection
+      //       allSources={allSources}
+      //       onValidationChange={(isValid) => handleStepValidation(5, isValid)}
+      //     />
+      //   );
       case 5:
         return (
-          <OnboardingCreateCollection
-            allSources={allSources}
-            onValidationChange={(isValid) => handleStepValidation(5, isValid)}
-          />
+          <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(5, isValid)} />
         );
       case 6:
-        return (
-          <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(6, isValid)} />
-        );
-      case 7:
-        return <Conclusion onValidationChange={(isValid) => handleStepValidation(7, isValid)} />;
+        return <Conclusion onValidationChange={(isValid) => handleStepValidation(6, isValid)} />;
       default:
         return null;
     }

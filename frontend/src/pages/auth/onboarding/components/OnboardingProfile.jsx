@@ -140,17 +140,24 @@ const OnboardingProfile = ({ onValidationChange }) => {
           Les sources, c'est bien beau, mais...
         </h2>
         <p className="text-gray-600 mb-4">
-          Nous, ce qui nous intéresse vraiment, ce sont les compilations de sources faites par des
+          Ce qui nous intéresse vraiment, ce sont les compilations de sources faites par des
           curateurs. Des humains en qui on peut avoir confiance. Pas des algorithmes qui poussent du
           contenu généré par IA ou des articles écrits par des bots pour maximiser les clics et la
           pub.
         </p>
         <p className="text-gray-600 mb-4">
-          On veut du contenu sur des thématiques précises, éditorialisé par des humains. Pour
+          Nous voulons du contenu sur des thématiques précises, éditorialisé par des humains afin de
           remettre en lumière ces petits bouts du web encore écrits par des humains. Parce que oui,
           ça existe encore !
         </p>
-        <p className="text-gray-600 font-medium">Alors, dis-nous en plus sur qui tu es.</p>
+        <p className="text-gray-600 font-medium">
+          Pour ces raisons, nous aimerions en savoir plus sur vous.{' '}
+        </p>
+        <br />
+        <p className="text-gray-600 mb-4">
+          NB : Tant que vous ne partagerez pas publiquement de collection, votre profil ne sera pas
+          accessible.
+        </p>
       </div>
 
       {profileSaved ? (
@@ -163,6 +170,9 @@ const OnboardingProfile = ({ onValidationChange }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Avatar */}
             <div className="flex flex-col items-center">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Votre avatar
+              </label>
               <div className="relative w-24 h-24 mb-4">
                 {avatarPreview ? (
                   <img
@@ -290,8 +300,7 @@ const OnboardingProfile = ({ onValidationChange }) => {
           </form>
           <div className="mt-8 text-center text-gray-500 text-sm">
             <strong>À venir :</strong> Nous réfléchissons à une solution forte et radicale pour
-            garantir que nos utilisateurs sont bien des humains (et pas des bots). Cette étape
-            importante arrivera un peu plus tard dans l'évolution de MédiaScan.
+            garantir que nos utilisateurs sont bien des humains (et pas des bots).
           </div>
         </>
       )}
