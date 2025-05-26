@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCollections } from '../hooks/useCollections';
-import CollectionDetails from '../components/collections/CollectionDetails';
-import { DeletableSourceItem } from '../components/sources/SourceItem';
+import SourceItem from '../components/sources/SourceItem';
 
-const CollectionDetail = () => {
+const CollectionDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const {
@@ -124,7 +123,7 @@ const CollectionDetail = () => {
           ) : (
             <div className="space-y-4">
               {collection.sources.map((source) => (
-                <DeletableSourceItem
+                <SourceItem
                   key={source._id}
                   source={source}
                   onDelete={() => handleRemoveSource(source._id)}
@@ -138,4 +137,4 @@ const CollectionDetail = () => {
   );
 };
 
-export default CollectionDetail;
+export default CollectionDetailsPage;
