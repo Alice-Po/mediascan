@@ -59,7 +59,7 @@ const SourcesList = ({
         <SourceItem
           key={source._id}
           source={source}
-          onClick={onSourceClick}
+          onInfo={onSourceClick}
           onAddToCollection={showAddToCollectionAction ? onAddToCollection : undefined}
           onDelete={showDeleteAction ? () => handleDeleteClick(source) : undefined}
         />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCollections } from '../hooks/useCollections';
-import CollectionDetailComponent from '../components/collections/CollectionDetailComponent';
+import CollectionDetails from '../components/collections/CollectionDetails';
 import { DeletableSourceItem } from '../components/sources/SourceItem';
 
 const CollectionDetail = () => {
@@ -102,7 +102,7 @@ const CollectionDetail = () => {
   return (
     <div className="py-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6">
-        <CollectionDetailComponent
+        <CollectionDetail
           collection={collection}
           onEdit={handleEditCollection}
           onDelete={handleDeleteCollection}

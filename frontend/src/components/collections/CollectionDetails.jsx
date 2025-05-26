@@ -12,7 +12,6 @@ import CollectionAvatar from './CollectionAvatar';
 import ArticleList from '../articles/ArticleList';
 import { useArticles } from '../../hooks/useArticles';
 import Accordion from '../common/Accordion';
-import SourceItem from '../sources/SourceItem';
 import Modal from '../common/Modal';
 import SourcesList from '../sources/SourcesList';
 
@@ -20,7 +19,7 @@ import SourcesList from '../sources/SourcesList';
  * Composant réutilisable pour afficher les détails d'une collection
  * Peut être utilisé à la fois dans une modal et dans une page complète
  */
-const CollectionDetailComponent = ({
+const CollectionDetails = ({
   collection,
   isOwner,
   isFollowing = false,
@@ -365,4 +364,4 @@ const CollectionDetailComponent = ({
   );
 };
 
-export default CollectionDetailComponent;
+export default CollectionDetails;

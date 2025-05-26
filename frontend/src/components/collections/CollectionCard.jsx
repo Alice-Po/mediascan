@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CollectionDetailsModal from './CollectionDetailsModal';
+import CollectionDetails from './CollectionDetails';
 import CollectionAvatar from './CollectionAvatar';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 
@@ -36,6 +36,7 @@ const CollectionCard = ({
 
   const handleViewDetails = () => {
     if (onViewDetails) {
+      console.log('[CollectionCard] onViewDetails', collection);
       onViewDetails(collection);
     } else {
       // Si aucune fonction onViewDetails n'est fournie, naviguer vers la page détaillée
