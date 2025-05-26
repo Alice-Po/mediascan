@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { generateColorFromId, generateFollowersFromId } from '../../utils/colorUtils';
+import { generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
 import { AuthContext } from '../../context/AuthContext';
 import { useDefaultCollection } from '../../context/DefaultCollectionContext';
@@ -14,7 +14,7 @@ import {
   TrashIcon,
   StarIcon,
 } from './../common/icons';
-import CollectionDetailsModal from './CollectionDetailsModal';
+import CollectionDetails from './CollectionDetails';
 import CollectionAvatar from './CollectionAvatar';
 /**
  * Composant réutilisable pour afficher un élément de collection
@@ -67,6 +67,8 @@ const CollectionItem = ({
         try {
           const fetchedCollection = await loadCollectionById(collectionId);
           console.log('la collection est chargée', fetchedCollection);
+
+          console.log('la collection et ses sourc e', fetchedCollection.sources);
           setCollection(fetchedCollection);
         } catch (error) {
           console.error('Erreur lors du chargement de la collection:', error);
@@ -388,7 +390,7 @@ const CollectionItem = ({
 
       {/* Modal de détails de la collection */}
       {showDetailsModal && (
-        <CollectionDetailsModal
+        <CollectionDetails
           collectionId={collection._id}
           isOpen={showDetailsModal}
           onClose={handleCloseModal}

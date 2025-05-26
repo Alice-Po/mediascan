@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import CollectionDetailsModal from './CollectionDetailsModal';
+import CollectionDetails from './CollectionDetails';
 import CollectionCard from './CollectionCard';
 import { useCollections } from '../../hooks/useCollections';
 
@@ -204,7 +204,7 @@ const PublicCollectionsCatalog = ({
 
       {/* Modal de détails d'une collection */}
       {selectedCollection && (
-        <CollectionDetailsModal
+        <CollectionDetails
           collectionId={selectedCollection._id}
           externalCollection={selectedCollection}
           isOpen={showDetailModal}
