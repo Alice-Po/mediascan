@@ -7,7 +7,7 @@ import PublicCollectionsCatalog from '../components/collections/PublicCollection
 
 const Collections = () => {
   const { user } = useContext(AuthContext);
-  const { ownedCollections, loading } = useCollections(user);
+  const { ownedCollections, followedCollections, loading } = useCollections(user);
   const [showPublicCollectionsModal, setShowPublicCollectionsModal] = useState(false);
 
   // Nombre minimum de sources requises pour afficher une collection
@@ -52,13 +52,28 @@ const Collections = () => {
       </div>
 
       {/* Affichage des collections de l'utilisateur */}
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-white rounded-lg shadow-sm mb-8">
         {loading ? (
           <div className="p-4 flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
           <CollectionsList collections={ownedCollections} />
+        )}
+      </div>
+
+      {/* Affichage des collections publiques suivies */}
+      <div className="bg-white rounded-lg shadow-sm mb-8">
+        {loading ? (
+          <div className="p-4 flex justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
+          </div>
+        ) : followedCollections && followedCollections.length > 0 ? (
+          <CollectionsList collections={followedCollections} />
+        ) : (
+          <div className="p-4 text-gray-500 italic">
+            Vous ne suivez aucune collection publique pour le moment.
+          </div>
         )}
       </div>
 
