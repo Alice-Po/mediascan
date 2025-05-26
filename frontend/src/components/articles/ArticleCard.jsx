@@ -222,8 +222,11 @@ const ArticleCard = ({ article, onSave, onShare }) => {
       {/* Modal de la source */}
       <Modal
         isOpen={isSourceModalOpen}
-        onClose={() => setIsSourceModalOpen(false)}
-        title={sourceDetails.name}
+        onClose={() => {
+          setIsSourceModalOpen(false);
+          setSourceDetails(null);
+        }}
+        title={sourceDetails && sourceDetails.name}
         size="md"
       >
         <SourceDetails source={sourceDetails} />

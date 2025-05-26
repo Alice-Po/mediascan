@@ -51,11 +51,14 @@ export const useArticles = ({
           ...(filters.collection && { collection: filters.collection }),
           ...(filters.searchTerm && { searchTerm: filters.searchTerm }),
         };
+        console.log("[useArticles] Paramètres envoyés à l'API:", params);
         const response = await fetchArticlesFn(params);
+        console.log("[useArticles] Réponse de l'API:", response);
         setArticles(response.articles);
         setHasMore(response.hasMore);
         setPage(1);
       } catch (err) {
+        console.error('[useArticles] Erreur lors du chargement des articles:', err);
         setError(err.message || 'Erreur lors du chargement des articles');
       } finally {
         setLoading(false);

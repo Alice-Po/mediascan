@@ -49,7 +49,6 @@ const CollectionDetails = ({
 
   // Configurer les filtres pour le feed d'articles
   const collectionFilters = {
-    collection: collection?._id,
     sources: collection?.sources?.map((source) => source._id) || [],
   };
 
@@ -298,7 +297,7 @@ const CollectionDetails = ({
 
       {/* Liste des sources - conditionnelle */}
       {withSourcesList && collection.sources && (
-        <Accordion title={`Sources (${collection.sources.length || 0})`} defaultOpen={true}>
+        <Accordion title={`Sources (${collection.sources.length || 0})`} defaultOpen={false}>
           {collection.sources.length === 0 ? (
             <div className="text-center p-6 bg-gray-50 rounded-md">
               <p className="text-gray-500">Cette collection ne contient aucune source</p>
