@@ -11,8 +11,9 @@ import { useNavigate } from 'react-router-dom';
  * @param {Object} props.collection - La collection à afficher
  */
 const FilterCollectionItem = ({ collection }) => {
-  const { filters, setFilters, toggleSidebar, allSources, userSources } = useContext(AppContext);
+  const { filters, setFilters, toggleSidebar, userSources } = useContext(AppContext);
   const { defaultCollection, isDefaultCollection } = useDefaultCollection();
+  const { user } = useContext(AuthContext);
 
   const navigate = useNavigate();
 

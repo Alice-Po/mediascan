@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useCallback, useState, useContext } from 'react';
+import React, { useEffect, useRef, useCallback, useContext } from 'react';
 import ArticleCard from './ArticleCard';
 import { useSavedArticles } from '../../context/SavedArticlesContext';
-import { useCollections } from '../../hooks/useCollections';
+import { AppContext } from '../../context/AppContext';
 import { useArticles } from '../../hooks/useArticles';
 import { fetchArticles } from '../../api/articlesApi';
 import { AuthContext } from '../../context/AuthContext';
@@ -13,15 +13,14 @@ import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
  * @param {Object} props
  * @param {Object} props.filters - Filtres à appliquer au feed (optionnel, fourni par le parent)
  */
-const ArticleList = ({ filters: parentFilters }) => {
-  // Récupérer les collections de l'utilisateur
+const ArticleList = ({ filters }) => {
+  // Récupérer les collections pertinentes pour le filtrage
+  const { allCollections } = useContext(AppContext);
   const { user } = useContext(AuthContext);
-  const { ownedCollections } = useCollections(user);
   const { saveArticle, unsaveArticle } = useSavedArticles();
   const { showSnackbar } = useSnackbar();
 
   // Utiliser le hook généraliste pour les articles, en injectant les filtres du parent
-  const [filters, setFilters] = useState(parentFilters);
   const {
     articles,
     loading,
@@ -32,15 +31,14 @@ const ArticleList = ({ filters: parentFilters }) => {
     setFilters: setHookFilters,
   } = useArticles({
     fetchArticlesFn: fetchArticles,
-    collections: ownedCollections,
+    collections: allCollections,
     options: { pageSize: 20, initialFilters: filters },
   });
 
   // Synchroniser les filtres du parent avec le hook si la prop change
   useEffect(() => {
-    setFilters(parentFilters);
-    setHookFilters(parentFilters);
-  }, [parentFilters, setHookFilters]);
+    setHookFilters(filters);
+  }, [filters, setHookFilters]);
 
   // Référence pour l'observateur d'intersection
   const observer = useRef();

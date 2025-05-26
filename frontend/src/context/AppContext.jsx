@@ -37,6 +37,8 @@ export const AppProvider = ({ children }) => {
   const collectionsHookResult = useCollections(user);
   const {
     ownedCollections,
+    followedCollections,
+    allFollowedAndOwnedCollections,
     loading: collectionsLoading,
     error: collectionsError,
     createCollection,
@@ -179,7 +181,9 @@ export const AppProvider = ({ children }) => {
     error,
     setArticles,
     updateArticle,
-    collections: ownedCollections,
+    ownedCollections,
+    followedCollections,
+    allCollections: allFollowedAndOwnedCollections,
     loadingCollections: collectionsLoading,
     collectionsError,
     createCollection,

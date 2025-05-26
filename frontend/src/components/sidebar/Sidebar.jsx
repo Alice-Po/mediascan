@@ -34,7 +34,7 @@ const Accordion = ({ title, children, defaultOpen = false }) => {
  * Composant de filtres pour les articles
  */
 const Sidebar = () => {
-  const { filters, setFilters, userSources, collections, isSidebarCollapsed, toggleSidebar } =
+  const { filters, setFilters, allCollections, isSidebarCollapsed, toggleSidebar } =
     useContext(AppContext);
   const { user } = useContext(AuthContext);
   const { defaultCollection } = useDefaultCollection();
@@ -43,9 +43,9 @@ const Sidebar = () => {
 
   // Trier les collections
   const sortedCollections = useMemo(() => {
-    if (!collections) return [];
+    if (!allCollections) return [];
 
-    return [...collections].sort((a, b) => {
+    return [...allCollections].sort((a, b) => {
       // La collection par défaut en premier
       if (defaultCollection) {
         if (a._id === defaultCollection._id) return -1;
@@ -59,7 +59,7 @@ const Sidebar = () => {
       // Enfin, trier par nom
       return a.name.localeCompare(b.name);
     });
-  }, [collections, defaultCollection, user?._id]);
+  }, [allCollections, defaultCollection, user?._id]);
 
   // Désactiver le scroll du body quand la sidebar mobile est ouverte
   useEffect(() => {
