@@ -14,6 +14,7 @@ import { useArticles } from '../../hooks/useArticles';
 import Accordion from '../common/Accordion';
 import SourceItem from '../sources/SourceItem';
 import Modal from '../common/Modal';
+import SourcesList from '../sources/SourcesList';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -304,23 +305,12 @@ const CollectionDetailComponent = ({
               <p className="text-gray-500">Cette collection ne contient aucune source</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-1">
-              {collection.sources.map((source, idx) => {
-                console.log('[CollectionDetails] Source affichée dans la liste :', source);
-                return (
-                  <SourceItem
-                    key={source._id}
-                    source={source}
-                    onDelete={
-                      isUserOwner && onRemoveSource
-                        ? () => handleRemoveSource(source._id)
-                        : undefined
-                    }
-                    onClick={handleSourceClick}
-                  />
-                );
-              })}
-            </div>
+            <SourcesList
+              sources={collection.sources}
+              onSourceClick={handleSourceClick}
+              onSourceDelete={isUserOwner && onRemoveSource ? handleRemoveSource : undefined}
+              showDeleteAction={isUserOwner && !!onRemoveSource}
+            />
           )}
         </Accordion>
       )}
