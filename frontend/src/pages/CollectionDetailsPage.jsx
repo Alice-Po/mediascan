@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCollections } from '../hooks/useCollections';
 import SourceItem from '../components/sources/SourceItem';
+import CollectionDetails from '../components/collections/CollectionDetails';
 
 const CollectionDetailsPage = () => {
   const { id } = useParams();
@@ -101,37 +102,14 @@ const CollectionDetailsPage = () => {
   return (
     <div className="py-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6">
-        <CollectionDetail
+        <CollectionDetails
           collection={collection}
           onEdit={handleEditCollection}
           onDelete={handleDeleteCollection}
           onRemoveSource={handleRemoveSource}
           onAddSource={handleAddSource}
           onBrowseArticles={handleBrowseArticles}
-          withSourcesList={false}
         />
-
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Sources dans cette collection ({collection.sources.length})
-          </h2>
-
-          {collection.sources.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-              <p className="text-gray-600">Cette collection ne contient pas encore de sources.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {collection.sources.map((source) => (
-                <SourceItem
-                  key={source._id}
-                  source={source}
-                  onDelete={() => handleRemoveSource(source._id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

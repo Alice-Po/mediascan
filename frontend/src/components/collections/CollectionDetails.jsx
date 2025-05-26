@@ -30,7 +30,6 @@ const CollectionDetails = ({
   onDelete,
   onEdit,
   onBrowseArticles,
-  withSourcesList = true,
   layoutType = 'full', // 'full' ou 'compact'
   isOnboarding = false, // Nouvelle prop pour indiquer le contexte d'onboarding
 }) => {
@@ -296,7 +295,7 @@ const CollectionDetails = ({
       )}
 
       {/* Liste des sources - conditionnelle */}
-      {withSourcesList && collection.sources && (
+      {collection.sources && (
         <Accordion title={`Sources (${collection.sources.length || 0})`} defaultOpen={false}>
           {collection.sources.length === 0 ? (
             <div className="text-center p-6 bg-gray-50 rounded-md">
@@ -314,7 +313,7 @@ const CollectionDetails = ({
       )}
 
       {/* Section du feed d'articles */}
-      {withSourcesList && collection.sources && collection.sources.length > 0 && (
+      {collection.sources && collection.sources.length > 0 && (
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-4">Aperçu du flux</h2>
           <div className="bg-white rounded-lg shadow-sm p-4">
