@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CollectionDetails from './CollectionDetails';
 import CollectionAvatar from './CollectionAvatar';
 import { generateFollowersFromId } from '../../utils/colorUtils';
+import { useCollections } from '../../hooks/useCollections';
 
 /**
  * Composant pour afficher une carte de collection publique
@@ -17,7 +18,8 @@ import { generateFollowersFromId } from '../../utils/colorUtils';
  * @param {boolean} showFull - Affiche le texte complet (titre et description) sans troncature
  */
 const CollectionCard = ({
-  collection,
+  collectionId,
+  collection: initialCollection,
   isFollowed = false,
   isLoading = false,
   onViewDetails,
@@ -28,6 +30,21 @@ const CollectionCard = ({
 }) => {
   const navigate = useNavigate();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { loadCollectionById } = useCollections();
+  const [collection, setCollection] = useState(initialCollection);
+
+  useEffect(() => {
+    const loadFullCollection = async () => {
+      try {
+        const fullCollection = await loadCollectionById(collectionId);
+        setCollection(fullCollection);
+      } catch (error) {
+        console.error('Erreur lors du chargement des détails de la collection:', error);
+      }
+    };
+
+    loadFullCollection();
+  }, [collectionId, loadCollectionById]);
 
   // Éviter les erreurs si l'objet collection est incomplet
   if (!collection || !collection._id) {
@@ -37,6 +54,12 @@ const CollectionCard = ({
   const handleViewDetails = () => {
     if (onViewDetails) {
       console.log('[CollectionCard] onViewDetails', collection);
+      // Log détaillé des sources
+      if (collection.sources) {
+        collection.sources.forEach((src, idx) => {
+          console.log(`[CollectionCard] Source #${idx}:`, src);
+        });
+      }
       onViewDetails(collection);
     } else {
       // Si aucune fonction onViewDetails n'est fournie, naviguer vers la page détaillée

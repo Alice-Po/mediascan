@@ -32,7 +32,6 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
   // Vérifier si l'étape est valide (au moins une collection suivie)
   const hasFollowedCollections = useCallback(() => {
     const hasFollowed = Object.values(followStatus).some((status) => status === true);
-
     return hasFollowed;
   }, [followStatus]);
 
@@ -40,8 +39,6 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
   useEffect(() => {
     if (onValidationChange) {
       const isCurrentlyValid = hasFollowedCollections();
-
-      // Seulement mettre à jour si la valeur a changé
       if (isCurrentlyValid !== lastValidationValue.current) {
         lastValidationValue.current = isCurrentlyValid;
         onValidationChange(isCurrentlyValid);
@@ -56,7 +53,6 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
         return;
       }
 
-      // Vérifier le statut de suivi pour chaque collection filtrée
       const statusObj = {};
       for (const collection of publicCollections) {
         try {
@@ -76,52 +72,43 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
     loadFollowStatus();
   }, [publicCollections, checkIfFollowing]);
 
-  // Gérer le suivi d'une collection
   const handleFollowToggle = async (collectionId) => {
     try {
       setFollowLoading((prev) => ({ ...prev, [collectionId]: true }));
 
       if (followStatus[collectionId]) {
-        // Si déjà suivi, désabonner
         await unfollowCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: false }));
       } else {
-        // Sinon, suivre
         await followCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: true }));
       }
     } catch (err) {
       console.error('Erreur lors du changement de statut de suivi:', err);
-      // Afficher une notification d'erreur si nécessaire
     } finally {
       setFollowLoading((prev) => ({ ...prev, [collectionId]: false }));
     }
   };
 
-  // Gérer l'ouverture de la modale de détails
   const handleViewDetails = (collection) => {
     setSelectedCollection(collection);
     setShowModal(true);
   };
 
-  // Fermer la modale
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
-  // Gérer le changement de statut de suivi depuis la modale
   const handleFollowFromModal = (collectionId, isFollowing) => {
     setFollowStatus((prev) => ({ ...prev, [collectionId]: isFollowing }));
   };
 
-  // Filtrer les collections avec au moins 5 sources
   const filteredCollections = publicCollections.filter(
     (collection) => (collection.sources?.length || 0) >= MIN_SOURCES_REQUIRED
   );
 
   return (
     <div className="space-y-6 sm:space-y-8" id="public-collections-container">
-      {/* En-tête avec animation */}
       <div className="text-center relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 sm:p-8 text-white shadow-lg">
         <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
         <div className="relative z-10">
@@ -135,17 +122,14 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
           <div className="mt-4 flex justify-center space-x-2"></div>
         </div>
 
-        {/* Éléments décoratifs */}
         <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-purple-500 rounded-full opacity-50 blur-xl"></div>
         <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-500 rounded-full opacity-50 blur-xl"></div>
       </div>
 
-      {/* Message d'instruction si aucune collection n'est suivie */}
       {!isLoading && !hasFollowedCollections() && (
         <WarningBanner message='Pour continuer, veuillez suivre au moins une collection publique. Cliquez sur le bouton "Suivre" d&apos;une collection qui vous intéresse.' />
       )}
 
-      {/* Collections populaires disponibles */}
       <div className="bg-white p-5 rounded-lg shadow-sm">
         <h3 className="font-semibold text-gray-900 mb-4 text-lg text-center">
           Commencer à suivre une collection publique
@@ -176,6 +160,7 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
             {filteredCollections.map((collection) => (
               <CollectionCard
                 key={collection._id}
+                collectionId={collection._id}
                 collection={collection}
                 isFollowed={followStatus[collection._id]}
                 isLoading={followLoading[collection._id]}
@@ -188,7 +173,6 @@ const OnboardingPublicCollections = ({ onValidationChange, user }) => {
         )}
       </div>
 
-      {/* Modale de détail de collection */}
       {selectedCollection && (
         <Modal
           isOpen={showModal}
