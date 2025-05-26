@@ -132,6 +132,10 @@ if (config.mode !== 'development') {
   });
 }
 
+// Servir les fichiers uploads (avatars) en statique
+const uploadsPath = path.join(process.cwd(), 'uploads');
+app.use('/uploads', express.static(uploadsPath));
+
 // Gestion des erreurs avec plus de détails en développement
 app.use((err, req, res, next) => {
   console.error(err.stack);

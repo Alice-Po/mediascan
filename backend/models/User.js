@@ -1,6 +1,19 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// Sous-schéma pour les liens sociaux
+const SocialLinkSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+      match: [/^https?:\/\//, "L'URL doit commencer par http:// ou https://"],
+    },
+  },
+  { _id: false }
+);
+
 const UserSchema = new mongoose.Schema(
   {
     email: {
@@ -19,6 +32,27 @@ const UserSchema = new mongoose.Schema(
     name: {
       type: String,
       trim: true,
+    },
+    avatar: {
+      type: Buffer,
+      description: "Données binaires de l'avatar de l'utilisateur",
+      default: null,
+    },
+    avatarType: {
+      type: String,
+      description: "Type MIME de l'avatar (ex: image/png)",
+      default: null,
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'La biographie ne peut pas dépasser 500 caractères'],
+      description: "Biographie de l'utilisateur",
+    },
+    socialLinks: {
+      type: [SocialLinkSchema],
+      default: [],
+      description: "Liste des liens sociaux de l'utilisateur",
     },
     defaultCollection: {
       type: mongoose.Schema.Types.ObjectId,

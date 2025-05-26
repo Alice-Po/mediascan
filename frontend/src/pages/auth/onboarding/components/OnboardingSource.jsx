@@ -18,14 +18,14 @@ const OnboardingSource = ({ onValidationChange }) => {
   const [showCatalog, setShowCatalog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const [hasAddedSource, setHasAddedSource] = useState(false);
+  const [hasAddedSource, setHasAddedSource] = useState(true);
 
   // Mettre à jour la validation de l'étape
   useEffect(() => {
     if (onValidationChange) {
-      onValidationChange(hasAddedSource);
+      onValidationChange?.(hasAddedSource);
     }
-  }, [hasAddedSource, onValidationChange]);
+  }, [hasAddedSource]);
 
   const sources = [
     {

@@ -5,6 +5,9 @@ import config from '../config/env.js';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { sendVerificationEmail } from '../services/emailService.js';
+import path from 'path';
+import sharp from 'sharp';
+import { compressAndResizeImage } from '../utils/imageUtils.js';
 
 // Génération du token JWT
 const generateToken = (id) => {
@@ -273,26 +276,49 @@ export const getProfile = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
   try {
-    const { name, interests } = req.body;
+    const { name, bio, socialLinks } = req.body;
+    const userId = req.user.id;
 
-    // Mise à jour des informations de l'utilisateur
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        name: name || req.user.name,
-        interests: interests || req.user.interests,
-      },
-      { new: true }
-    ).select('-password');
+    // Validation des données
+    if (!name) {
+      return res.status(400).json({ message: 'Le nom est requis' });
+    }
 
-    res.status(200).json({
-      success: true,
-      message: 'Profil mis à jour avec succès',
-      user: updatedUser,
-    });
+    // Validation des liens sociaux
+    if (socialLinks && !Array.isArray(socialLinks)) {
+      return res.status(400).json({ message: 'Les liens sociaux doivent être un tableau' });
+    }
+
+    if (socialLinks) {
+      for (const link of socialLinks) {
+        if (!link.url || !link.url.startsWith('http')) {
+          return res.status(400).json({
+            message: 'Chaque lien social doit être une URL valide commençant par http',
+          });
+        }
+      }
+    }
+
+    // Mise à jour du profil (on ignore le champ avatar)
+    const updateFields = {
+      name,
+      bio,
+      socialLinks: socialLinks || [],
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {
+      new: true,
+      runValidators: true,
+    }).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    res.json(updatedUser);
   } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error);
     res.status(500).json({
-      success: false,
       message: 'Erreur lors de la mise à jour du profil',
       error: error.message,
     });
@@ -529,5 +555,62 @@ export const verifyEmail = async (req, res) => {
       stack: error.stack,
     });
     res.status(500).json({ message: "Erreur lors de la vérification de l'email" });
+  }
+};
+
+// Contrôleur pour l'upload d'avatar (compression et stockage en base)
+export const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      console.log('[Avatar] Aucun fichier envoyé');
+      return res.status(400).json({ message: 'Aucun fichier envoyé' });
+    }
+    // Utiliser l'utilitaire pour compresser et redimensionner
+    let outputBuffer;
+    try {
+      outputBuffer = await compressAndResizeImage(req.file.buffer);
+    } catch (err) {
+      console.log('[Avatar] Erreur de compression:', err.message);
+      return res.status(400).json({ message: err.message });
+    }
+    console.log('[Avatar] Buffer uploadé, taille:', outputBuffer.length);
+    // Stocker dans le document utilisateur
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        avatar: outputBuffer,
+        avatarType: 'image/jpeg',
+      },
+      { new: true }
+    );
+    if (!user) {
+      console.log("[Avatar] Utilisateur non trouvé lors de l'upload");
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Erreur upload avatar:', error);
+    res.status(500).json({ message: "Erreur lors de l'upload de l'avatar" });
+  }
+};
+
+// Endpoint pour servir l'avatar d'un utilisateur
+export const getUserAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('avatar avatarType');
+    if (!user) {
+      console.log('[Avatar] Utilisateur non trouvé lors de la récupération');
+      return res.status(404).send('Avatar non trouvé');
+    }
+    if (!user.avatar || !user.avatar.length) {
+      console.log('[Avatar] Pas de buffer à servir pour user', req.params.id);
+      return res.status(404).send('Avatar non trouvé');
+    }
+    console.log('[Avatar] Buffer servi, taille:', user.avatar.length);
+    res.set('Content-Type', user.avatarType || 'image/jpeg');
+    res.send(user.avatar);
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'avatar:", error);
+    res.status(500).send("Erreur lors de la récupération de l'avatar");
   }
 };

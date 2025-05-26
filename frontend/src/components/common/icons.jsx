@@ -626,3 +626,23 @@ export const DocumentTextIcon = ({ className }) => (
     />
   </svg>
 );
+
+// Icône utilisateur générique (avatar)
+export const UserIcon = ({ className }) => (
+  <svg
+    className={className || 'w-12 h-12'}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
+    <path
+      d="M4 20c0-2.21 3.582-4 8-4s8 1.79 8 4"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

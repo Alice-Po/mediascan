@@ -6,11 +6,14 @@ import { completeOnboarding } from '../../../api/authApi';
 
 import Step1Introduction from './components/Introduction';
 import OnboardingCreateCollection from './components/OnboardingCreateCollection';
+import OnboardingPublicCollections from './components/OnboardingPublicCollections';
 import AddSourcesToCollection from './components/AddSourcesToCollection';
 import UpcomingFeatures from './components/UpcomingFeatures';
 import Conclusion from './components/Conclusion';
 import OnboardingSource from './components/OnboardingSource';
+import OnboardingProfile from './components/OnboardingProfile';
 import { useCallback } from 'react';
+
 const Onboarding = () => {
   const { user, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -25,10 +28,11 @@ const Onboarding = () => {
   const [stepValidation, setStepValidation] = useState({
     1: true, // Introduction est toujours valide
     2: true, // OnboardingSource est toujours valide
-    3: false, // PublicCollections requiert au moins une collection suivie
-    4: false, // CreateCollection requiert la création d'une collection
-    5: true, // UpcomingFeatures est toujours valide
-    6: true, // Conclusion est toujours valide
+    3: false, // OnboardingProfile requiert au moins un nom
+    4: false, // PublicCollections requiert au moins une collection suivie
+    5: false, // CreateCollection requiert la création d'une collection
+    6: true, // UpcomingFeatures est toujours valide
+    7: true, // Conclusion est toujours valide
   });
 
   // Vérifier si l'étape actuelle est valide
@@ -107,7 +111,7 @@ const Onboarding = () => {
       return;
     }
 
-    if (step === 6) {
+    if (step === 7) {
       await completeOnboardingProcess();
     } else {
       setStep((prev) => prev + 1);
@@ -126,8 +130,7 @@ const Onboarding = () => {
   };
 
   const renderStep = () => {
-    // No need for special loading handling for Conclusion component
-    if (loading && step < 6) {
+    if (loading && step < 7) {
       return (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -146,23 +149,27 @@ const Onboarding = () => {
         );
       case 3:
         return (
-          <OnboardingPublicCollections
-            onValidationChange={(isValid) => handleStepValidation(3, isValid)}
-          />
+          <OnboardingProfile onValidationChange={(isValid) => handleStepValidation(3, isValid)} />
         );
       case 4:
         return (
-          <OnboardingCreateCollection
-            allSources={allSources}
+          <OnboardingPublicCollections
             onValidationChange={(isValid) => handleStepValidation(4, isValid)}
           />
         );
       case 5:
         return (
-          <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(5, isValid)} />
+          <OnboardingCreateCollection
+            allSources={allSources}
+            onValidationChange={(isValid) => handleStepValidation(5, isValid)}
+          />
         );
       case 6:
-        return <Conclusion onValidationChange={(isValid) => handleStepValidation(6, isValid)} />;
+        return (
+          <UpcomingFeatures onValidationChange={(isValid) => handleStepValidation(6, isValid)} />
+        );
+      case 7:
+        return <Conclusion onValidationChange={(isValid) => handleStepValidation(7, isValid)} />;
       default:
         return null;
     }
@@ -186,7 +193,7 @@ const Onboarding = () => {
 
           {/* Indicateur d'étapes */}
           <div className="flex justify-center mt-4 space-x-2">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <div
                 key={i}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
@@ -225,7 +232,7 @@ const Onboarding = () => {
               } ${step === 1 ? 'ml-auto' : ''}`}
               disabled={loading || !isCurrentStepValid()}
             >
-              {step === 6 ? 'Terminer' : step === 1 ? 'Commencer' : 'Suivant'}
+              {step === 7 ? 'Terminer' : step === 1 ? 'Commencer' : 'Suivant'}
             </button>
           </div>
         </div>

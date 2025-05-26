@@ -85,14 +85,15 @@ export const getUserProfile = async () => {
 
 /**
  * Mise à jour des données utilisateur
- * @param {Object} userData - Nouvelles données utilisateur
+ * @param {Object} profileData - Nouvelles données utilisateur
  * @returns {Promise} Données utilisateur mises à jour
  */
-export const updateUserProfile = async (userData) => {
+export const updateUserProfile = async (profileData) => {
   try {
-    const response = await api.put('/auth/profile', userData);
+    const response = await api.put('/auth/profile', profileData);
     return response.data;
   } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error);
     throw error;
   }
 };
@@ -137,4 +138,22 @@ export const updateDefaultCollection = async (collectionId) => {
     console.error('Erreur lors de la mise à jour de la collection par défaut:', error);
     throw error;
   }
+};
+
+/**
+ * Upload de l'avatar utilisateur (fichier image)
+ * @param {File} file - Fichier image à uploader
+ * @param {string} token - Token d'authentification
+ * @returns {Promise} Résultat de l'upload
+ */
+export const uploadUserAvatar = async (file, token) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  const response = await api.post('/auth/upload/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
 };
