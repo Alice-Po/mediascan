@@ -44,28 +44,8 @@ const PublicCollectionsCatalog = ({
     try {
       setPublicCollectionsLoading(true);
       setPublicCollectionsError(null);
-
-      // Charger les collections publiques via le hook
       await loadPublicCollections(minSourcesRequired);
-
-      // Vérifier le statut de suivi pour chaque collection
-      const statusObj = {};
-      const loadingObj = {};
-
-      for (const collection of publicCollections) {
-        try {
-          statusObj[collection._id] = await checkIfFollowing(collection._id);
-        } catch (error) {
-          console.error('Erreur lors de la vérification du statut de suivi:', error);
-          statusObj[collection._id] = false;
-        }
-        loadingObj[collection._id] = false;
-      }
-
-      setFollowStatus(statusObj);
-      setFollowLoading(loadingObj);
     } catch (error) {
-      console.error('Erreur lors du chargement des collections publiques:', error);
       setPublicCollectionsError(
         'Une erreur est survenue lors du chargement des collections publiques.'
       );
@@ -73,6 +53,24 @@ const PublicCollectionsCatalog = ({
       setPublicCollectionsLoading(false);
     }
   };
+
+  // Initialiser le statut de suivi pour chaque collection quand publicCollections change
+  useEffect(() => {
+    if (publicCollections && publicCollections.length > 0) {
+      const initFollowStatus = async () => {
+        const statusObj = {};
+        for (const collection of publicCollections) {
+          try {
+            statusObj[collection._id] = await checkIfFollowing(collection._id);
+          } catch {
+            statusObj[collection._id] = false;
+          }
+        }
+        setFollowStatus(statusObj);
+      };
+      initFollowStatus();
+    }
+  }, [publicCollections]);
 
   // Gérer le clic sur "Voir les détails"
   const handleViewDetails = (collection) => {
@@ -83,10 +81,8 @@ const PublicCollectionsCatalog = ({
   // Gérer le suivi/non-suivi d'une collection
   const handleFollowToggle = async (collectionId) => {
     if (!user) return;
-
+    setFollowLoading((prev) => ({ ...prev, [collectionId]: true }));
     try {
-      setFollowLoading((prev) => ({ ...prev, [collectionId]: true }));
-
       if (followStatus[collectionId]) {
         await unfollowCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: false }));
@@ -94,12 +90,11 @@ const PublicCollectionsCatalog = ({
         await followCollection(collectionId);
         setFollowStatus((prev) => ({ ...prev, [collectionId]: true }));
       }
-
       if (onFollowStatusChange) {
         onFollowStatusChange(collectionId, !followStatus[collectionId]);
       }
     } catch (error) {
-      console.error('Erreur lors du changement de statut de suivi:', error);
+      // Optionnel : gestion d'erreur
     } finally {
       setFollowLoading((prev) => ({ ...prev, [collectionId]: false }));
     }
@@ -196,7 +191,7 @@ const PublicCollectionsCatalog = ({
                   isFollowed={followStatus[collection._id]}
                   isLoading={followLoading[collection._id]}
                   onViewDetails={handleViewDetails}
-                  onFollowToggle={handleFollowToggle}
+                  onFollowToggle={() => handleFollowToggle(collection._id)}
                 />
               ))}
             </div>
