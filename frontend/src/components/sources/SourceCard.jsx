@@ -4,6 +4,7 @@ import SourceDetails from './SourceDetails';
 import Badge from '../common/Badge';
 import { InfoIcon, PlusIcon } from '../common/icons';
 import Modal from '../common/Modal';
+import Avatar from '../common/Avatar';
 
 // Fonction pour obtenir le label traduit du type de financement
 const getFundingTypeLabel = (type) => {
@@ -51,87 +52,47 @@ const SourceCard = ({
         className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer overflow-hidden flex flex-col h-full"
         onClick={handleCardClick}
       >
-        {/* Header with image/logo */}
-        <div className="relative h-24 bg-gray-100 overflow-hidden">
-          {source.imageUrl ? (
-            <img
-              src={source.imageUrl}
-              alt={source.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          ) : (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: 'black' }}
-            >
-              {source.faviconUrl && faviconLoaded ? (
-                <img
-                  src={source.faviconUrl}
-                  alt={`Logo ${source.name}`}
-                  className="w-20 h-20 object-contain p-1"
-                  onLoad={() => {
-                    console.log('SourceCard - favicon loaded:', source.faviconUrl);
-                    setFaviconLoaded(true);
-                  }}
-                  onError={(e) => {
-                    console.log('SourceCard - favicon error:', source.faviconUrl);
-                    e.target.style.display = 'none';
-                    setFaviconLoaded(false);
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-3xl font-bold tracking-tight" style={{ color: 'white' }}>
-                    {initials || source.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Badge "Dans la collection" si c'est le cas */}
-          {isActive && (
-            <div className="absolute top-1 right-1">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Dans la collection
-              </span>
-            </div>
-          )}
+        {/* Header compact avec Avatar */}
+        <div className="flex items-center gap-2 p-2 border-b border-gray-100 bg-gray-50">
+          <Avatar
+            userId={source._id}
+            className="w-10 h-10"
+            size={40}
+            // Pour un fallback sur favicon ou imageUrl, on peut adapter Avatar ou ajouter une prop custom
+            src={source.imageUrl || source.faviconUrl}
+            alt={source.name}
+          />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-medium text-gray-900 truncate mb-0.5">{source.name}</h3>
+            {source.website && (
+              <a
+                href={source.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                {source.website.replace(/^https?:\/\/(www\.)?/, '')}
+              </a>
+            )}
+          </div>
         </div>
 
-        {/* Content - réduction du padding */}
-        <div className="p-2.5 flex-grow flex flex-col">
-          <h3 className="text-base font-medium text-gray-900 mb-1">{source.name}</h3>
-
-          {/* Site web */}
-          {source.website && (
-            <a
-              href={source.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline mb-1 inline-block"
-            >
-              {source.website.replace(/^https?:\/\/(www\.)?/, '')}
-            </a>
-          )}
-
+        {/* Content compact */}
+        <div className="p-2 flex-grow flex flex-col gap-1">
           {/* Description réduite */}
-          <p className="text-xs text-gray-500 mb-2 flex-grow line-clamp-2">{shortDescription}</p>
+          <p className="text-xs text-gray-500 mb-1 line-clamp-2">{shortDescription}</p>
 
           {/* Funding details */}
           {source.funding && source.funding.details && (
-            <div className="mb-2 text-xs text-gray-600">
+            <div className="mb-1 text-xs text-gray-600">
               <span className="font-medium">Financement:</span>{' '}
               <span className="line-clamp-1">{source.funding.details}</span>
             </div>
           )}
 
           {/* Tags - simplification */}
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1 mb-1">
             {source.orientations &&
               source.orientations.length > 0 &&
               source.orientations.map((orientation, index) => (
@@ -152,8 +113,8 @@ const SourceCard = ({
             )}
           </div>
 
-          {/* Actions - rangées en ligne */}
-          <div className="flex justify-between items-center mt-auto pt-1.5 border-t border-gray-100">
+          {/* Actions - compact */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-auto pt-1 border-t border-gray-100 gap-2">
             {/* Ajouter à une collection */}
             {onAddToCollection && !isActive && enableAddSourceToCollectionAction && (
               <button
@@ -161,10 +122,11 @@ const SourceCard = ({
                   e.stopPropagation();
                   onAddToCollection(source);
                 }}
-                className="text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded hover:bg-indigo-50"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-semibold text-sm mt-2 sm:mt-0"
                 title="Ajouter à une collection"
               >
                 <PlusIcon className="h-4 w-4" />
+                <span>Ajouter</span>
               </button>
             )}
 
@@ -184,7 +146,6 @@ const SourceCard = ({
       </div>
 
       {/* Modal de détails */}
-      {/* Modal de la source */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
