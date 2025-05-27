@@ -7,7 +7,7 @@ import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetails from '../sources/SourceDetails';
 import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '../common/icons';
-import SourceCatalogModal from '../sources/SourceCatalogModal';
+import SourceCatalog from '../sources/SourceCatalog';
 import CollectionAvatar from './CollectionAvatar';
 import ArticleList from '../articles/ArticleList';
 import { useArticles } from '../../hooks/useArticles';
@@ -276,7 +276,7 @@ const CollectionDetails = ({
       {isUserOwner && showSourceCatalog && (
         <div className="mb-6 p-4 border border-gray-200 rounded-lg">
           <h3 className="text-lg font-medium mb-4">Catalogue de sources</h3>
-          <SourceCatalogModal
+          <SourceCatalog
             onAddToCollection={handleAddToCollection}
             collectionSources={collection.sources || []}
             userCollections={[]}

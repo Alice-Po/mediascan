@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useCollections } from '../../../../hooks/useCollections';
-import SourceCatalogModal from '../../../../components/sources/SourceCatalogModal';
+import SourceCatalog from '../../../../components/sources/SourceCatalog';
 
 const AddSourcesToCollection = ({ onValidationChange }) => {
   const { user } = useCollect(UserContext);
@@ -245,7 +245,7 @@ const AddSourcesToCollection = ({ onValidationChange }) => {
             <p className="text-sm text-gray-600 mb-4">
               Cliquez sur le bouton "+" pour ajouter une source à votre collection.
             </p>
-            <SourceCatalogModal
+            <SourceCatalog
               onAddToCollection={handleAddToCollection}
               collectionSources={collectionSourcesObjects}
               userCollections={collections}

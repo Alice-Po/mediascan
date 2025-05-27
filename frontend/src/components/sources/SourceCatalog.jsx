@@ -7,8 +7,7 @@ import SourceCard from './SourceCard';
  * Composant qui affiche un catalogue de toutes les sources disponibles
  * avec la possibilité de les ajouter à une collection
  */
-const SourceCatalogModal = ({
-  isOpen,
+const SourceCatalog = ({
   onClose,
   onAddToCollection,
   collectionSources = [], // Sources déjà dans la collection
@@ -23,7 +22,6 @@ const SourceCatalogModal = ({
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    if (!isOpen) return;
     const loadSources = async () => {
       try {
         setLoading(true);
@@ -42,7 +40,7 @@ const SourceCatalogModal = ({
       }
     };
     loadSources();
-  }, [isOpen]);
+  }, []);
 
   const reloadSources = async () => {
     try {
@@ -94,8 +92,6 @@ const SourceCatalogModal = ({
       setFormErrors(error.response?.data?.errors || {});
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-black/30">
@@ -301,4 +297,4 @@ const SourceCatalogModal = ({
   );
 };
 
-export default SourceCatalogModal;
+export default SourceCatalog;

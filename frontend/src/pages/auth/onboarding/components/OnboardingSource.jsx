@@ -9,7 +9,7 @@ import {
 } from '../../../../components/common/icons';
 import RssHelpModal from '../../../../components/sources/RssHelpModal';
 import AddSourceForm from '../../../../components/sources/AddSourceForm';
-import SourceCatalogModal from '../../../../components/sources/SourceCatalogModal';
+import SourceCatalog from '../../../../components/sources/SourceCatalog';
 import { createSource } from '../../../../api/sourcesApi';
 
 const OnboardingSource = ({ onValidationChange }) => {
@@ -207,7 +207,7 @@ const OnboardingSource = ({ onValidationChange }) => {
       )}
 
       {showCatalog && (
-        <SourceCatalogModal
+        <SourceCatalog
           isOpen={showCatalog}
           onClose={() => setShowCatalog(false)}
           isOnboarding={true}

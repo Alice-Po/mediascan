@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import SourceDetails from './SourceDetails';
 import Badge from '../common/Badge';
 import { InfoIcon, PlusIcon } from '../common/icons';
+import Modal from '../common/Modal';
 
 // Fonction pour obtenir le label traduit du type de financement
 const getFundingTypeLabel = (type) => {
@@ -187,7 +188,7 @@ const SourceCard = ({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={sourceDetails.name}
+        title={source.name}
         size="md"
       >
         <SourceDetails source={source} />

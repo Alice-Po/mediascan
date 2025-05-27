@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useImperativeHandle, forwardRef
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
-import SourceCatalogModal from '../sources/SourceCatalogModal';
+import SourceCatalog from '../sources/SourceCatalog';
 import Modal from '../common/Modal';
 import { useCollections } from '../../hooks/useCollections';
 
@@ -41,7 +41,7 @@ const CollectionForm = forwardRef(
     });
 
     const [selectedSources, setSelectedSources] = useState([]);
-    const [showSourceCatalogModal, setShowSourceCatalogModal] = useState(false);
+    const [showSourceCatalog, setShowSourceCatalog] = useState(false);
 
     // Exposer des méthodes pour le parent via useImperativeHandle et ref
     useImperativeHandle(ref, () => ({
@@ -224,12 +224,12 @@ const CollectionForm = forwardRef(
 
     // Ouvrir la modale du catalogue de sources
     const openSourceCatalog = () => {
-      setShowSourceCatalogModal(true);
+      setShowSourceCatalog(true);
     };
 
     // Fermer la modale du catalogue de sources
     const closeSourceCatalog = () => {
-      setShowSourceCatalogModal(false);
+      setShowSourceCatalog(false);
     };
 
     if (loading || loadingCollections) {
@@ -487,13 +487,13 @@ const CollectionForm = forwardRef(
 
         {/* Modale pour le catalogue de sources */}
         <Modal
-          isOpen={showSourceCatalogModal}
+          isOpen={showSourceCatalog}
           onClose={closeSourceCatalog}
           title="Catalogue de sources"
           size="2xl"
         >
           <div className="p-2">
-            <SourceCatalogModal
+            <SourceCatalog
               onAddToCollection={handleAddSource}
               collectionSources={selectedSources}
               userCollections={collections}
