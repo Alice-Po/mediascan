@@ -1,8 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, deleteAccount } from '../api/authApi';
+import { getUserProfile, updateUserProfile, deleteAccount, uploadUserAvatar } from '../api/authApi';
 import { resetAnalytics } from '../api/analyticsApi';
 import UserAnalytics from '../components/analytics/UserAnalytics';
+import Avatar from '../components/common/Avatar';
 
 /**
  * Page de profil utilisateur
@@ -14,14 +15,23 @@ const Profile = () => {
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    bio: user?.bio || '',
     interests: user?.interests || [],
+    socialLinks: user?.socialLinks || [{ url: '' }],
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
 
+  // State pour l'avatar
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarLoaded, setAvatarLoaded] = useState(true);
+  const [avatarKey, setAvatarKey] = useState(Date.now());
+
   // Séparer les états d'édition
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
 
   // State pour les confirmations
@@ -32,6 +42,8 @@ const Profile = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  const passwordFormRef = useRef(null);
 
   // Ajouter un useEffect pour gérer le timer du message
   useEffect(() => {
@@ -57,7 +69,9 @@ const Profile = () => {
         setProfileData({
           name: userData.name || '',
           email: userData.email || '',
+          bio: userData.bio || '',
           interests: userData.interests || [],
+          socialLinks: userData.socialLinks || [{ url: '' }],
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
@@ -87,6 +101,54 @@ const Profile = () => {
         ...errors,
         [name]: null,
       });
+    }
+  };
+
+  // Gérer les changements des liens sociaux
+  const handleSocialLinkChange = (index, value) => {
+    const newLinks = [...profileData.socialLinks];
+    newLinks[index] = { url: value };
+    setProfileData((prev) => ({
+      ...prev,
+      socialLinks: newLinks,
+    }));
+  };
+
+  // Ajouter un lien social
+  const addSocialLink = () => {
+    setProfileData((prev) => ({
+      ...prev,
+      socialLinks: [...prev.socialLinks, { url: '' }],
+    }));
+  };
+
+  // Supprimer un lien social
+  const removeSocialLink = (index) => {
+    setProfileData((prev) => ({
+      ...prev,
+      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Gestion de l'upload d'avatar
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    setErrors((prev) => ({ ...prev, avatar: undefined }));
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarLoaded(true);
+    try {
+      await uploadUserAvatar(file, localStorage.getItem('token'));
+      setAvatarPreview(null);
+      setAvatarLoaded(false);
+      setAvatarKey(Date.now());
+      setMessage({ type: 'success', text: 'Avatar mis à jour avec succès !' });
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, avatar: "Erreur lors de l'upload de l'avatar" }));
+      setMessage({ type: 'error', text: "Erreur lors de l'upload de l'avatar" });
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -137,10 +199,21 @@ const Profile = () => {
     setMessage(null);
 
     try {
+      // Filtrer les liens sociaux vides ou invalides
+      const filteredLinks = profileData.socialLinks
+        .map((link) => ({ url: link.url.trim() }))
+        .filter((link) => link.url && link.url.startsWith('http'));
+
       const updateData = {
         name: profileData.name,
+        bio: profileData.bio,
         interests: profileData.interests,
       };
+
+      // N'inclure les liens sociaux que s'il y en a
+      if (filteredLinks.length > 0) {
+        updateData.socialLinks = filteredLinks;
+      }
 
       if (profileData.newPassword) {
         updateData.currentPassword = profileData.currentPassword;
@@ -196,6 +269,15 @@ const Profile = () => {
     await logout();
   };
 
+  // Fonction pour gérer l'ouverture du formulaire de mot de passe
+  const handleOpenPasswordForm = () => {
+    setIsEditingPassword(true);
+    // Scroll vers le formulaire après un court délai pour laisser le temps au DOM de se mettre à jour
+    setTimeout(() => {
+      passwordFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   // Afficher un message de chargement
   if (loading && !profileData.name) {
     return (
@@ -221,41 +303,96 @@ const Profile = () => {
 
         {/* Profil utilisateur */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <h2 className="text-lg font-medium text-gray-800">Profil</h2>
-            {!isEditingProfile && (
-              <button
-                onClick={() => setIsEditingProfile(true)}
-                className="text-sm text-primary hover:text-primary-dark"
-              >
-                Modifier
-              </button>
-            )}
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {!isEditingProfile && (
+                <>
+                  <button
+                    onClick={() => setIsEditingProfile(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={handleOpenPasswordForm}
+                    className="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    Changer le mot de passe
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
+              {/* Avatar */}
+              <div className="flex flex-col items-center">
+                <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-2">
+                  Votre avatar
+                </label>
+                <div className="relative w-24 h-24 mb-4">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="Aperçu avatar"
+                      className="w-full h-full rounded-full object-cover border-2 border-blue-400"
+                    />
+                  ) : (
+                    <Avatar
+                      key={avatarKey}
+                      userId={user?._id}
+                      size={96}
+                      cacheBust={avatarKey}
+                      onLoad={() => {
+                        setAvatarLoaded(true);
+                      }}
+                      onError={() => {
+                        setAvatarLoaded(true);
+                      }}
+                      style={{ display: avatarLoaded ? 'block' : 'none' }}
+                    />
+                  )}
+                  {(avatarUploading || !avatarLoaded) && !avatarPreview && (
+                    <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-full">
+                      <span className="text-xs text-gray-600">Chargement...</span>
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  id="avatar"
+                  accept="image/*"
+                  onChange={handleAvatarFileChange}
+                  className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={avatarUploading}
+                />
+                {errors.avatar && <div className="text-red-600 text-sm mt-1">{errors.avatar}</div>}
+              </div>
+
               {/* Nom */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Nom ou pseudo
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={profileData.name}
-                  onChange={handleChange}
-                  disabled={!isEditingProfile}
-                  className={`w-full px-3 py-2 border ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md ${
-                    !isEditingProfile ? 'bg-gray-50' : 'bg-white'
-                  } focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                />
+                {isEditingProfile ? (
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${
+                      errors.name ? 'border-red-300' : 'border-gray-300'
+                    } rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  />
+                ) : (
+                  <div className="w-full px-3 py-2 text-gray-900">{profileData.name}</div>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
-                  Ce nom sera utilisé pour personnaliser votre expérience (accueil, modération des
-                  sources, partage de contenu). Un pseudo est parfaitement acceptable.
+                  Ce nom sera visible quand vous partagerez des collections publiques. Nous vous
+                  encourageons à mettre votre véritable identité.
                 </p>
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
@@ -265,85 +402,72 @@ const Profile = () => {
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={profileData.email}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-                />
+                <div className="w-full px-3 py-2 text-gray-900">{profileData.email}</div>
                 <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié.</p>
               </div>
 
-              {/* Section de changement de mot de passe (visibles uniquement en mode édition) */}
+              {/* Bio */}
+              <div>
+                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
+                {isEditingProfile ? (
+                  <textarea
+                    id="bio"
+                    name="bio"
+                    value={profileData.bio}
+                    onChange={handleChange}
+                    rows={4}
+                    maxLength={500}
+                    className={`w-full px-3 py-2 border ${
+                      errors.bio ? 'border-red-300' : 'border-gray-300'
+                    } rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                    placeholder="Parlez-nous de vous, de vos centres d'intérêt, de ce qui vous pousse à vous informer..."
+                  />
+                ) : (
+                  <div className="w-full px-3 py-2 text-gray-900 whitespace-pre-wrap">
+                    {profileData.bio}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {profileData.bio.length}/500 caractères
+                </p>
+                {errors.bio && <p className="text-red-500 text-xs mt-1">{errors.bio}</p>}
+              </div>
+
+              {/* Liens sociaux */}
               {isEditingProfile && (
-                <div className="space-y-4">
-                  <div className="mb-3">
-                    <label
-                      htmlFor="currentPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Mot de passe actuel
-                    </label>
-                    <input
-                      type="password"
-                      id="currentPassword"
-                      name="currentPassword"
-                      value={profileData.currentPassword}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border ${
-                        errors.currentPassword ? 'border-red-300' : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    />
-                    {errors.currentPassword && (
-                      <p className="text-red-500 text-xs mt-1">{errors.currentPassword}</p>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <label
-                      htmlFor="newPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Nouveau mot de passe
-                    </label>
-                    <input
-                      type="password"
-                      id="newPassword"
-                      name="newPassword"
-                      value={profileData.newPassword}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border ${
-                        errors.newPassword ? 'border-red-300' : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    />
-                    {errors.newPassword && (
-                      <p className="text-red-500 text-xs mt-1">{errors.newPassword}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Confirmer le nouveau mot de passe
-                    </label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={profileData.confirmPassword}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border ${
-                        errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-                    />
-                    {errors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                    )}
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Vos liens sociaux
+                  </label>
+                  {profileData.socialLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={(e) => handleSocialLinkChange(index, e.target.value)}
+                        placeholder="URL de votre profil social"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeSocialLink(index)}
+                          className="px-3 py-2 text-red-600 hover:text-red-800"
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addSocialLink}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    + Ajouter un lien social
+                  </button>
                 </div>
               )}
 
@@ -361,8 +485,8 @@ const Profile = () => {
                   <button
                     type="submit"
                     className={`px-4 py-2 rounded-md text-white ${
-                      loading ? 'bg-primary-light' : 'bg-primary hover:bg-primary-dark'
-                    }`}
+                      loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                     disabled={loading}
                   >
                     {loading ? (
@@ -375,6 +499,113 @@ const Profile = () => {
             </div>
           </form>
         </div>
+
+        {/* Formulaire de changement de mot de passe */}
+        {isEditingPassword && (
+          <div ref={passwordFormRef} className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-800">Modifier le mot de passe</h3>
+              <button
+                onClick={() => setIsEditingPassword(false)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Annuler
+              </button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="currentPassword"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Mot de passe actuel
+                  </label>
+                  <input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={profileData.currentPassword}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${
+                      errors.currentPassword ? 'border-red-300' : 'border-gray-300'
+                    } rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  />
+                  {errors.currentPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.currentPassword}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="newPassword"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Nouveau mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    value={profileData.newPassword}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${
+                      errors.newPassword ? 'border-red-300' : 'border-gray-300'
+                    } rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  />
+                  {errors.newPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.newPassword}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Confirmer le nouveau mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={profileData.confirmPassword}
+                    onChange={handleChange}
+                    className={`w-full px-3 py-2 border ${
+                      errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    } rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPassword(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    disabled={loading}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className={`px-4 py-2 rounded-md text-white ${
+                      loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></span>
+                    ) : null}
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Section statistiques */}
         {/* <div className="mb-8">
