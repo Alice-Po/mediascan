@@ -84,7 +84,6 @@ const CollectionForm = forwardRef(
       const fetchCollection = async () => {
         if (isEditMode) {
           try {
-            setLoading(true);
             const collection = await fetchCollectionById(id);
             setFormData({
               name: collection.name || '',
@@ -98,11 +97,8 @@ const CollectionForm = forwardRef(
               setSelectedSources(collection.sources);
             }
           } catch (err) {
-            setError('Impossible de charger la collection');
             console.error(err);
             if (onError) onError('Impossible de charger la collection');
-          } finally {
-            setLoading(false);
           }
         }
       };
@@ -135,19 +131,14 @@ const CollectionForm = forwardRef(
     // Soumettre le formulaire
     const handleSubmit = async (e) => {
       e.preventDefault();
-
       // Validation de base
       if (!formData.name.trim()) {
         const errorMsg = 'Le nom de la collection est requis';
-        setError(errorMsg);
         if (onError) onError(errorMsg);
         return;
       }
 
       try {
-        setLoading(true);
-        setError(null);
-
         // Données à envoyer
         const collectionData = {
           ...formData,
@@ -162,11 +153,6 @@ const CollectionForm = forwardRef(
 
           // En mode édition, mettre à jour les sources si nécessaire
           if (selectedSources.length > 0) {
-            // Cette partie varie selon votre API - voici une approche possible:
-            // Vous pourriez avoir besoin de synchroniser les sources sélectionnées
-            // avec le backend d'une manière spécifique à votre application
-
-            // Exemple: pour chaque source non présente dans la collection originale
             for (const source of selectedSources) {
               if (
                 !savedCollection.sources ||
@@ -175,12 +161,8 @@ const CollectionForm = forwardRef(
                 await addSourceToCollection(savedCollection._id, source._id);
               }
             }
-
-            // Note: il faudrait aussi gérer la suppression des sources désélectionnées
-            // si votre API le permet
           }
 
-          // Afficher une notification de succès pour la mise à jour
           showSnackbar('Collection mise à jour avec succès', SNACKBAR_TYPES.SUCCESS);
 
           if (onSuccess) {
@@ -191,14 +173,12 @@ const CollectionForm = forwardRef(
         } else {
           savedCollection = await createCollection(collectionData);
 
-          // En mode création, ajouter les sources sélectionnées
           if (selectedSources.length > 0) {
             for (const source of selectedSources) {
               await addSourceToCollection(savedCollection._id, source._id);
             }
           }
 
-          // Afficher une notification de succès pour la création
           showSnackbar('Collection créée avec succès', SNACKBAR_TYPES.SUCCESS);
 
           if (onSuccess) {
@@ -212,13 +192,9 @@ const CollectionForm = forwardRef(
           ? 'Erreur lors de la mise à jour de la collection'
           : 'Erreur lors de la création de la collection';
 
-        setError(errorMsg);
         if (onError) onError(errorMsg);
-        // Afficher une notification d'erreur
         showSnackbar(errorMsg, SNACKBAR_TYPES.ERROR);
         console.error(err);
-      } finally {
-        setLoading(false);
       }
     };
 
