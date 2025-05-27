@@ -19,7 +19,7 @@ import TermsOfService from '../pages/TermsOfService';
 import Funding from '../pages/Funding';
 import LandingPage from '../pages/LandingPage';
 import Collections from '../pages/Collections';
-import CollectionForm from '../pages/CollectionForm';
+import CollectionFormPage from '../pages/CollectionFormPage';
 import CollectionDetailsPage from '../pages/CollectionDetailsPage';
 // import ForgotPassword from '../pages/auth/ForgotPassword';
 
@@ -48,8 +48,8 @@ const AppRoutes = () => {
         <Route element={<MainLayout />}>
           <Route path="/app" element={<Dashboard />} />
           <Route path="/collections" element={<Collections />} />
-          <Route path="/collections/new" element={<CollectionForm />} />
-          <Route path="/collections/edit/:id" element={<CollectionForm />} />
+          <Route path="/collections/new" element={<CollectionFormPage />} />
+          <Route path="/collections/edit/:id" element={<CollectionFormPage />} />
           <Route path="/collections/:id" element={<CollectionDetailsPage />} />
           <Route path="/profile" element={<Profile />} />
         </Route>

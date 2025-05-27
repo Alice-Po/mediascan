@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCollections } from '../hooks/useCollections';
-import { CollectionForm as CollectionFormComponent } from '../components/collections';
+import CollectionForm from '../components/collections/CollectionForm';
 
-const CollectionForm = () => {
+const CollectionFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { loadCollectionById, createCollection, updateCollection } = useCollections();
@@ -60,7 +60,7 @@ const CollectionForm = () => {
         {id ? 'Modifier la collection' : 'Créer une nouvelle collection'}
       </h1>
 
-      <CollectionFormComponent
+      <CollectionForm
         initialData={collection}
         onSubmit={handleSubmit}
         onCancel={() => navigate(id ? `/collections/${id}` : '/collections')}
@@ -70,4 +70,4 @@ const CollectionForm = () => {
   );
 };
 
-export default CollectionForm;
+export default CollectionFormPage;
