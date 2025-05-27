@@ -277,9 +277,9 @@ const CollectionDetails = ({
         <div className="mb-6 p-4 border border-gray-200 rounded-lg">
           <h3 className="text-lg font-medium mb-4">Catalogue de sources</h3>
           <SourceCatalog
-            onAddToCollection={handleAddToCollection}
-            collectionSources={collection.sources || []}
-            userCollections={[]}
+            collectionId={collection._id}
+            onClose={() => setShowSourceCatalog(false)}
+            isOnboarding={false}
           />
         </div>
       )}

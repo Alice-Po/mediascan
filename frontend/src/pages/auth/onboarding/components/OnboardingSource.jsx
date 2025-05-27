@@ -10,7 +10,7 @@ import {
 import RssHelpModal from '../../../../components/sources/RssHelpModal';
 import AddSourceForm from '../../../../components/sources/AddSourceForm';
 import SourceCatalog from '../../../../components/sources/SourceCatalog';
-import { createSource } from '../../../../api/sourcesApi';
+import { useSources } from '../../../../hooks/useSources';
 
 const OnboardingSource = ({ onValidationChange }) => {
   const [showRssHelp, setShowRssHelp] = useState(false);
@@ -19,6 +19,7 @@ const OnboardingSource = ({ onValidationChange }) => {
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [hasAddedSource, setHasAddedSource] = useState(true);
+  const { createSource } = useSources();
 
   // Mettre à jour la validation de l'étape
   useEffect(() => {

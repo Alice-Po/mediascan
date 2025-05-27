@@ -5,9 +5,7 @@ import { fetchAllSources } from '../../../api/sourcesApi';
 import { completeOnboarding } from '../../../api/authApi';
 
 import Step1Introduction from './components/Introduction';
-import OnboardingCreateCollection from './components/OnboardingCreateCollection';
 import OnboardingPublicCollections from './components/OnboardingPublicCollections';
-import AddSourcesToCollection from './components/AddSourcesToCollection';
 import UpcomingFeatures from './components/UpcomingFeatures';
 import Conclusion from './components/Conclusion';
 import OnboardingSource from './components/OnboardingSource';

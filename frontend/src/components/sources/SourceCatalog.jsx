@@ -1,63 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { fetchAllSources, createSource } from '../../api/sourcesApi';
+import { useCollections } from '../../hooks/useCollections';
+import { useSources } from '../../hooks/useSources';
 import AddSourceForm from './AddSourceForm';
 import SourceCard from './SourceCard';
 
 /**
- * Composant qui affiche un catalogue de toutes les sources disponibles
- * avec la possibilité de les ajouter à une collection
+ * Composant SourceCatalog - Affiche un catalogue de sources avec possibilité de recherche et d'ajout
+ *
+ * @component
+ * @param {Object} props - Les propriétés du composant
+ * @param {string} [props.collectionId] - ID de la collection courante (optionnel)
+ * @param {Function} props.onClose - Callback pour fermer le catalogue
+ * @param {boolean} [props.isOnboarding=false] - Indique si le catalogue est utilisé dans le contexte d'onboarding
+ *
+ * @example
+ * <SourceCatalog
+ *   collectionId="123"
+ *   onClose={() => {}}
+ *   isOnboarding={false}
+ * />
  */
-const SourceCatalog = ({
-  onClose,
-  onAddToCollection,
-  collectionSources = [], // Sources déjà dans la collection
-  userCollections = [], // Collections de l'utilisateur
-  isOnboarding = false, // Nouvelle prop pour le contexte d'onboarding
-}) => {
-  const [sources, setSources] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const SourceCatalog = ({ collectionId, onClose, isOnboarding = false }) => {
+  // Hooks pour la gestion des collections et des sources
+  const {
+    loadCollectionById,
+    addSourceToCollection,
+    removeSourceFromCollection,
+    loadOwnedCollections,
+    error,
+    loading,
+    currentCollection,
+    ownedCollections,
+  } = useCollections();
+
+  const { allSources, loadAllSources, loading: loadingSources, error: errorSources } = useSources();
+
+  // États locaux
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddSourceModal, setShowAddSourceModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
+  // État local pour le chargement par source (Set pour performance)
+  const [loadingSourceIds, setLoadingSourceIds] = useState(new Set());
+
+  // Effets pour le chargement initial des données
   useEffect(() => {
-    const loadSources = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetchAllSources();
-        const sourceData = response.data || response;
-        if (!Array.isArray(sourceData)) {
-          setError('Format de données invalide reçu du serveur');
-          return;
-        }
-        setSources(sourceData);
-      } catch (err) {
-        setError('Impossible de charger le catalogue des sources. Veuillez réessayer plus tard.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSources();
-  }, []);
+    loadAllSources();
+  }, [loadAllSources]);
 
-  const reloadSources = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchAllSources();
-      const sourceData = response.data || response;
-      if (!Array.isArray(sourceData)) return;
-      setSources(sourceData);
-    } catch (err) {
-      // Optionally handle error
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (collectionId) {
+      loadCollectionById(collectionId);
     }
-  };
+  }, [collectionId, loadCollectionById]);
 
+  useEffect(() => {
+    loadOwnedCollections();
+  }, [loadOwnedCollections]);
+
+  /**
+   * Filtre les sources en fonction du terme de recherche
+   * @returns {Array} Liste des sources filtrées
+   */
   const filteredSources = searchTerm
-    ? sources.filter(
+    ? allSources.filter(
         (source) =>
           source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           source.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,58 +71,69 @@ const SourceCatalog = ({
             category.toLowerCase().includes(searchTerm.toLowerCase())
           )
       )
-    : sources;
+    : allSources;
 
-  const isSourceInCollection = (sourceId) => {
-    return collectionSources.some(
-      (source) => (typeof source === 'string' ? source : source._id) === sourceId
-    );
-  };
-
-  const handleAddToCollection = (source) => {
-    if (onAddToCollection) {
-      onAddToCollection(source);
-    }
-  };
-
-  const handleSubmitSource = async (sourceData) => {
+  /**
+   * Gère l'ajout ou le retrait d'une source dans la collection
+   * @param {Object} source - La source à ajouter/retirer
+   * @param {boolean} isActive - Indique si la source est déjà dans la collection
+   */
+  const handleToggleSourceInCollection = async (source, isActive) => {
+    if (!collectionId) return;
+    setLoadingSourceIds((prev) => new Set(prev).add(source._id));
     try {
-      const response = await createSource(sourceData);
-      if (!response.success) {
-        throw new Error(response.message || 'Erreur lors de la création de la source');
+      if (isActive) {
+        await removeSourceFromCollection(collectionId, source._id);
+      } else {
+        await addSourceToCollection(collectionId, source._id);
       }
-      setShowAddSourceModal(false);
-      setFormErrors({});
-      await reloadSources();
-    } catch (error) {
-      setFormErrors(error.response?.data?.errors || {});
+      // Rafraîchir la collection après modification
+      await loadCollectionById(collectionId);
+    } finally {
+      setLoadingSourceIds((prev) => {
+        const next = new Set(prev);
+        next.delete(source._id);
+        return next;
+      });
     }
+  };
+
+  /**
+   * Vérifie si une source est présente dans la collection courante
+   * @param {string} sourceId - ID de la source à vérifier
+   * @returns {boolean} True si la source est dans la collection
+   */
+  const isSourceInCollection = (sourceId) => {
+    return currentCollection?.sources?.some((s) => s && s._id === sourceId);
+  };
+
+  /**
+   * Gère l'ajout d'une nouvelle source au catalogue
+   * @param {Object} sourceData - Données de la nouvelle source
+   */
+  const handleSubmitSource = async (sourceData) => {
+    // TODO: Implémenter la logique d'ajout d'une nouvelle source
+    console.log("Ajout d'une nouvelle source:", sourceData);
   };
 
   return (
     <div className="p-2 sm:p-4">
-      {/* Afficher un indicateur de chargement */}
+      {/* Indicateur de chargement */}
       {loading && (
         <div className="flex justify-center items-center p-4 sm:p-8">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
 
-      {/* Afficher un message d'erreur */}
+      {/* Message d'erreur */}
       {error && (
         <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-600 text-sm sm:text-base">{error}</p>
-          <button
-            className="mt-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
-            onClick={() => window.location.reload()}
-          >
-            Réessayer
-          </button>
         </div>
       )}
 
-      {/* Afficher un message si aucune source n'est disponible */}
-      {!loading && !error && sources.length === 0 && (
+      {/* Message si aucune source n'est disponible */}
+      {!loading && !error && allSources.length === 0 && (
         <div className="p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-lg text-center">
           <p className="text-gray-600 text-sm sm:text-base">
             Aucune source disponible dans le catalogue.
@@ -124,7 +141,7 @@ const SourceCatalog = ({
         </div>
       )}
 
-      {/* Recherche et ajout de source */}
+      {/* Barre de recherche et bouton d'ajout */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <div className="relative w-full sm:w-2/3">
           <input
@@ -188,6 +205,7 @@ const SourceCatalog = ({
         </button>
       </div>
 
+      {/* Compteur de résultats */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
         <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-0">
           {filteredSources.length}{' '}
@@ -196,27 +214,29 @@ const SourceCatalog = ({
         </p>
       </div>
 
-      {/* Liste des sources */}
+      {/* Grille des sources */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-2 sm:px-0">
         {filteredSources.map((source) => {
-          const isInCollection = isSourceInCollection(source._id);
+          const isActive = isSourceInCollection(source._id);
+          const loading = loadingSourceIds.has(source._id);
           return (
             <div
               key={source._id}
-              className={`relative ${isInCollection ? 'border-2 border-blue-500 rounded-lg' : ''}`}
+              className={`relative ${isActive ? 'border-2 border-blue-500 rounded-lg' : ''}`}
             >
               <SourceCard
                 source={source}
-                onAddToCollection={() => handleAddToCollection(source)}
-                isActive={isInCollection}
+                onToggleSourceInCollection={handleToggleSourceInCollection}
+                isActive={isActive}
                 enableAddSourceToCollectionAction={!isOnboarding}
+                loading={loading}
               />
             </div>
           );
         })}
       </div>
 
-      {/* Message si aucun résultat */}
+      {/* Message si aucun résultat de recherche */}
       {filteredSources.length === 0 && searchTerm && (
         <div className="p-4 sm:p-8 bg-gray-50 border border-gray-200 rounded-lg text-center my-4 sm:my-8 mx-2 sm:mx-0">
           <p className="text-gray-600 mb-2 text-sm sm:text-base">
@@ -231,7 +251,7 @@ const SourceCatalog = ({
         </div>
       )}
 
-      {/* Modale pour le formulaire d'ajout de source */}
+      {/* Modale d'ajout de source */}
       {showAddSourceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 backdrop-blur-sm bg-white/30 animate-fadeIn">
           <div className="bg-white rounded-lg w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-auto m-2 sm:m-0">
@@ -258,7 +278,7 @@ const SourceCatalog = ({
                 onCancel={() => setShowAddSourceModal(false)}
                 formErrors={formErrors}
                 loading={false}
-                collections={userCollections}
+                collections={ownedCollections}
                 hideCollectionSection={isOnboarding}
               />
             </div>

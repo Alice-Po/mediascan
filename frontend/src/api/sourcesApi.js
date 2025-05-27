@@ -1,8 +1,12 @@
 import api from './index';
 
 /**
- * Récupérer toutes les sources disponibles
- * @returns {Promise} Liste de toutes les sources disponibles
+ * Récupère la liste complète des sources disponibles dans le système
+ * @returns {Promise<{data: Array<Source>, success: boolean}>} Liste des sources et statut de la requête
+ * @throws {Error} Si la requête échoue
+ * @example
+ * const sources = await fetchAllSources();
+ * console.log(sources.data); // [{ id: '1', name: 'Source 1', ... }, ...]
  */
 export const fetchAllSources = async () => {
   try {
@@ -15,11 +19,22 @@ export const fetchAllSources = async () => {
 };
 
 /**
- * Créer une source personnalisée et l'ajouter à une collection
- * @param {Object} sourceData - Données de la source à ajouter
- * @returns {Promise} Statut de la création
+ * Crée une nouvelle source personnalisée dans le système
+ * @param {Object} sourceData - Données de la source à créer
+ * @param {string} sourceData.name - Nom de la source
+ * @param {string} sourceData.url - URL du flux RSS
+ * @param {string} [sourceData.description] - Description optionnelle de la source
+ * @param {string[]} [sourceData.categories] - Catégories optionnelles de la source
+ * @returns {Promise<{success: boolean, data: Source, message?: string}>} Résultat de la création
+ * @throws {Error} Si la création échoue ou si les données sont invalides
+ * @example
+ * const newSource = await apiCreateSource({
+ *   name: 'Mon Blog',
+ *   url: 'https://monblog.com/rss',
+ *   description: 'Mon blog personnel'
+ * });
  */
-export const createSource = async (sourceData) => {
+export const apiCreateSource = async (sourceData) => {
   try {
     const response = await api.post('/sources', sourceData);
     if (!response.data.success) {
@@ -36,11 +51,14 @@ export const createSource = async (sourceData) => {
 };
 
 /**
- * Supprimer une source personnalisée
- * @param {string} sourceId - ID de la source
- * @returns {Promise} Statut de la suppression
+ * Supprime une source existante du système
+ * @param {string} sourceId - Identifiant unique de la source à supprimer
+ * @returns {Promise<{success: boolean, message: string}>} Résultat de la suppression
+ * @throws {Error} Si la suppression échoue ou si la source n'existe pas
+ * @example
+ * await apiDeleteSource('123');
  */
-export const deleteSource = async (sourceId) => {
+export const apiDeleteSource = async (sourceId) => {
   try {
     const response = await api.delete(`/sources/${sourceId}`);
     return response.data;
@@ -49,6 +67,15 @@ export const deleteSource = async (sourceId) => {
   }
 };
 
+/**
+ * Récupère les détails d'une source spécifique par son ID
+ * @param {string} sourceId - Identifiant unique de la source
+ * @returns {Promise<Source>} Détails de la source
+ * @throws {Error} Si la source n'existe pas ou si la requête échoue
+ * @example
+ * const source = await fetchSourceById('123');
+ * console.log(source.name); // 'Nom de la source'
+ */
 export const fetchSourceById = async (sourceId) => {
   try {
     const response = await api.get(`/sources/${sourceId}`);
@@ -59,6 +86,14 @@ export const fetchSourceById = async (sourceId) => {
   }
 };
 
+/**
+ * Récupère toutes les sources associées aux collections de l'utilisateur connecté
+ * @returns {Promise<Array<Source>>} Liste des sources des collections de l'utilisateur
+ * @throws {Error} Si l'utilisateur n'est pas connecté ou si la requête échoue
+ * @example
+ * const userSources = await fetchSourcesFromUserCollections();
+ * console.log(userSources); // [{ id: '1', name: 'Source 1', ... }, ...]
+ */
 export const fetchSourcesFromUserCollections = async () => {
   try {
     const response = await api.get('/sources/user-collections');
@@ -70,9 +105,14 @@ export const fetchSourcesFromUserCollections = async () => {
 };
 
 /**
- * Vérifier si une source existe déjà en base par son URL
- * @param {string} url - L'URL du flux à vérifier
- * @returns {Promise<{exists: boolean, source?: object, error?: string}>}
+ * Vérifie si une source existe déjà dans le système en se basant sur son URL
+ * @param {string} url - URL du flux à vérifier
+ * @returns {Promise<{exists: boolean, source?: Source, error?: string}>} Résultat de la vérification
+ * @example
+ * const { exists, source } = await checkSourceExists('https://monblog.com/rss');
+ * if (exists) {
+ *   console.log('Source déjà existante:', source);
+ * }
  */
 export const checkSourceExists = async (url) => {
   try {
@@ -87,9 +127,14 @@ export const checkSourceExists = async (url) => {
 };
 
 /**
- * Vérifie la validité d'un flux RSS via l'API backend
- * @param {string} url - L'URL du flux RSS à vérifier
- * @returns {Promise<{valid: boolean, data?: object, error?: string}>}
+ * Vérifie la validité d'un flux RSS en le testant via l'API backend
+ * @param {string} url - URL du flux RSS à vérifier
+ * @returns {Promise<{valid: boolean, data?: Object, error?: string}>} Résultat de la validation
+ * @example
+ * const { valid, data } = await checkRssFluxIsValid('https://monblog.com/rss');
+ * if (valid) {
+ *   console.log('Flux RSS valide:', data);
+ * }
  */
 export const checkRssFluxIsValid = async (url) => {
   try {

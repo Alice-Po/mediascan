@@ -237,19 +237,25 @@ export function useCollections(user, setGlobalError) {
   const addSourceToCollection = useCallback(
     async (collectionId, sourceId) => {
       try {
-        const updatedCollection = await apiAddSourceToCollection(collectionId, sourceId);
-        setOwnedCollections((prev) =>
-          prev.map((c) => (c.id === collectionId ? updatedCollection : c))
-        );
+        setLoading(true);
+        const result = await apiAddSourceToCollection(collectionId, sourceId);
+        // Mettre à jour la collection courante si c'est celle qui est modifiée
+        if (currentCollection?._id === collectionId) {
+          setCurrentCollection((prev) => ({
+            ...prev,
+            sources: [...(prev.sources || []), result.source],
+          }));
+        }
         setError(null);
-        return updatedCollection;
-      } catch (error) {
-        console.error('Error adding source to collection:', error);
-        handleError("Impossible d'ajouter la source à la collection", error);
-        throw error;
+        return result;
+      } catch (err) {
+        handleError("Impossible d'ajouter la source à la collection", err);
+        throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [handleError]
+    [currentCollection, handleError]
   );
 
   /**
@@ -258,19 +264,24 @@ export function useCollections(user, setGlobalError) {
   const removeSourceFromCollection = useCallback(
     async (collectionId, sourceId) => {
       try {
-        const updatedCollection = await apiRemoveSourceFromCollection(collectionId, sourceId);
-        setOwnedCollections((prev) =>
-          prev.map((c) => (c.id === collectionId ? updatedCollection : c))
-        );
+        setLoading(true);
+        await apiRemoveSourceFromCollection(collectionId, sourceId);
+        // Mettre à jour la collection courante si c'est celle qui est modifiée
+        if (currentCollection?._id === collectionId) {
+          setCurrentCollection((prev) => ({
+            ...prev,
+            sources: prev.sources.filter((s) => s._id !== sourceId),
+          }));
+        }
         setError(null);
-        return updatedCollection;
-      } catch (error) {
-        console.error('Error removing source from collection:', error);
-        handleError('Impossible de retirer la source de la collection', error);
-        throw error;
+      } catch (err) {
+        handleError('Impossible de retirer la source de la collection', err);
+        throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [handleError]
+    [currentCollection, handleError]
   );
 
   const followCollection = useCallback(
