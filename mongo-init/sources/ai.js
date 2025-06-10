@@ -102,30 +102,6 @@ const sources = [
     status: 'active',
   },
   {
-    name: 'El Jj (YouTube)',
-    url: 'https://www.youtube.com/channel/UCt9N_6z2I1XsOBs4vT7t1jQ',
-    rssUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCt9N_6z2I1XsOBs4vT7t1jQ',
-    faviconUrl: 'https://www.youtube.com/favicon.ico',
-    description:
-      "Chaîne YouTube française vulgarisant l'IA et ses implications sociétales, avec un ton accessible et engagé.",
-    funding: {
-      type: 'independent',
-      details: 'YouTube, sponsors',
-    },
-    orientations: ['artificial-intelligence', 'awareness'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: 'MIT Technology Review - AI',
     url: 'https://www.technologyreview.com/topic/artificial-intelligence/',
     rssUrl: 'https://www.technologyreview.com/feed/',
@@ -176,7 +152,7 @@ const sources = [
   {
     name: 'AI Weekly',
     url: 'https://aiweekly.co/',
-    rssUrl: 'https://aiweekly.co/feed.xml',
+    rssUrl: 'https://aiweekly.co/issues.rss',
     faviconUrl: 'https://aiweekly.co/favicon.ico',
     description:
       'Newsletter internationale hebdomadaire résumant les actualités, recherches et outils en intelligence artificielle.',
@@ -200,7 +176,7 @@ const sources = [
   {
     name: 'Google AI Blog',
     url: 'https://blog.google/technology/ai/',
-    rssUrl: 'https://blog.google/technology/ai/feed/',
+    rssUrl: 'https://blog.google/rss',
     faviconUrl: 'https://blog.google/favicon.ico',
     description:
       "Blog officiel de Google sur l'IA. Annonces, recherches et applications pratiques des avancées en intelligence artificielle.",
@@ -269,54 +245,7 @@ const sources = [
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'The AI Podcast (NVIDIA)',
-    url: 'https://blogs.nvidia.com/ai-podcast/',
-    rssUrl: 'https://feeds.feedburner.com/nvidiaaipodcast',
-    faviconUrl: 'https://blogs.nvidia.com/favicon.ico',
-    description:
-      "Podcast de NVIDIA sur l'IA, avec des interviews d'experts et des discussions sur les applications pratiques.",
-    funding: {
-      type: 'private',
-      details: 'NVIDIA',
-    },
-    orientations: ['artificial-intelligence', 'podcast'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'DataFramed',
-    url: 'https://www.dataframed.io/',
-    rssUrl: 'https://www.dataframed.io/feed/podcast/',
-    faviconUrl: 'https://www.dataframed.io/favicon.ico',
-    description:
-      "Podcast de DataCamp axé sur la science des données et l'IA. Interviews avec des experts et discussions sur les tendances.",
-    funding: {
-      type: 'private',
-      details: 'DataCamp',
-    },
-    orientations: ['artificial-intelligence', 'data-science', 'podcast'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'r/MachineLearning',
     url: 'https://www.reddit.com/r/MachineLearning/',
