@@ -16,18 +16,6 @@ const getFundingTypeLabel = (type) => {
 };
 
 /**
- * Récupère la première orientation d'une source
- * @param {Object} source - La source
- * @returns {string} La première orientation ou undefined
- */
-const getFirstOrientation = (source) => {
-  if (source.orientations && Array.isArray(source.orientations) && source.orientations.length > 0) {
-    return source.orientations[0];
-  }
-  return undefined;
-};
-
-/**
  * Composant générique pour afficher une source avec actions conditionnelles
  * @param {Object} props
  * @param {Object} props.source - Objet source à afficher
@@ -37,9 +25,6 @@ const getFirstOrientation = (source) => {
  * @param {Function} [props.onEnable] - Callback pour activer la source
  */
 const SourceItem = ({ source, onInfo, onDelete, onAddToCollection, onEnable }) => {
-  // Récupérer l'orientation principale
-  const primaryOrientation = getFirstOrientation(source);
-
   // S'assurer que la description existe et est une chaîne
   const description = source.description || '';
   const words = description.split(' ');
@@ -113,15 +98,21 @@ const SourceItem = ({ source, onInfo, onDelete, onAddToCollection, onEnable }) =
             </div>
           )}
 
-          {/* Tags et orientation en version mobile */}
+          {/* Tags et orientations en version mobile */}
           <div className="flex flex-wrap gap-2 sm:hidden mt-2">
-            {primaryOrientation && <Badge text={primaryOrientation} />}
+            {source.orientations &&
+              source.orientations.map((orientation, index) => (
+                <Badge key={index} text={orientation} />
+              ))}
           </div>
         </div>
 
-        {/* Tags et orientation en version desktop */}
+        {/* Tags et orientations en version desktop */}
         <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
-          {primaryOrientation && <Badge text={primaryOrientation} />}
+          {source.orientations &&
+            source.orientations.map((orientation, index) => (
+              <Badge key={index} text={orientation} />
+            ))}
         </div>
       </div>
 
