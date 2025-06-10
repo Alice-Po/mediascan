@@ -304,7 +304,8 @@ export function useCollections(user, setGlobalError) {
     async (collectionId) => {
       try {
         await apiUnfollowCollection(collectionId);
-        setOwnedCollections((prev) => prev.filter((c) => c.id !== collectionId));
+        setFollowedCollections((prev) => prev.filter((c) => c._id !== collectionId));
+        setAllFollowedAndOwnedCollections((prev) => prev.filter((c) => c._id !== collectionId));
         setError(null);
       } catch (error) {
         console.error('Error unfollowing collection:', error);

@@ -218,7 +218,7 @@ const CollectionDetails = ({
                 ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                 : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
             }`}
-            onClick={onFollowToggle}
+            onClick={() => onFollowToggle(collection._id)}
             disabled={followLoading}
           >
             {followLoading ? (

@@ -209,10 +209,12 @@ const PublicCollectionsCatalog = ({
         {selectedCollection && (
           <CollectionDetails
             collection={selectedCollection}
-            onFollow={handleFollowFromDetails}
-            followStatus={followStatus[selectedCollection?._id]}
-            isFollowLoading={followLoading[selectedCollection?._id]}
-            standalone={true}
+            isOwner={false}
+            isFollowing={followStatus[selectedCollection._id]}
+            followLoading={followLoading[selectedCollection._id]}
+            onFollowToggle={handleFollowToggle}
+            onBrowseArticles={handleCloseDetailModal}
+            layoutType="compact"
           />
         )}
       </Modal>
