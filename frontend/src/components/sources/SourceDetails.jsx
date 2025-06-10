@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Badge from '../common/Badge';
+import ArticleList from '../articles/ArticleList';
+import { InfoIcon } from '../common/icons';
+import Modal from '../common/Modal';
 
 const SourceDetailsModal = ({ source }) => {
+  const [showModeratorInfo, setShowModeratorInfo] = useState(false);
+
   if (!source) return null;
+
+  // Créer les filtres pour ArticleList basés sur la source
+  const filters = {
+    sources: source._id ? [source._id] : [],
+  };
 
   return (
     <div className="w-full">
-      {/* En-tête */}
+      {/* En-tête avec helper */}
       <div className="flex items-center gap-4 mb-6">
         {/* Favicon/Logo */}
         <div className="flex-shrink-0">
@@ -29,8 +39,43 @@ const SourceDetailsModal = ({ source }) => {
             {source.name.charAt(0).toUpperCase()}
           </div>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900">{source.name}</h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-gray-900">{source.name}</h3>
+            <button
+              onClick={() => setShowModeratorInfo(true)}
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              title="Qui décrit les sources ?"
+            >
+              <InfoIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Modal d'information sur la modération */}
+      <Modal
+        isOpen={showModeratorInfo}
+        onClose={() => setShowModeratorInfo(false)}
+        title="Qui décrit les sources ?"
+        size="md"
+      >
+        <div className="space-y-4 text-gray-600">
+          <p>
+            Actuellement, les descriptions et informations des sources sont renseignées par les
+            contributeurs qui ajoutent les sources à la plateforme.
+          </p>
+          <p>
+            À terme, nous souhaitons mettre en place un système de modération communautaire
+            permettant à tous les utilisateurs de contribuer à l'amélioration des descriptions, à la
+            vérification des informations et à la qualification des sources.
+          </p>
+          <p>
+            Cette approche collaborative permettra d'assurer une plus grande transparence et une
+            meilleure qualité des informations sur les sources.
+          </p>
+        </div>
+      </Modal>
 
       {/* Orientations */}
       {source.orientations && source.orientations.length > 0 && (
@@ -76,7 +121,7 @@ const SourceDetailsModal = ({ source }) => {
       )}
 
       {/* URLs */}
-      <div>
+      <div className="mb-6">
         <h3 className="text-sm font-medium text-gray-500">URLs</h3>
         <div className="mt-1 space-y-1">
           <p className="text-sm">
@@ -101,6 +146,14 @@ const SourceDetailsModal = ({ source }) => {
               {source.rssUrl}
             </a>
           </p>
+        </div>
+      </div>
+
+      {/* Articles de la source */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-500 mb-4">Articles récents</h3>
+        <div className="mt-2">
+          <ArticleList filters={filters} pageSize={10} />
         </div>
       </div>
     </div>

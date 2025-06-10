@@ -6,17 +6,6 @@ import { formatRelativeTime } from '../../utils/timeUtils';
 const ArticlePreview = ({ article, onSave, onShare, onVisit }) => {
   return (
     <div className="flex flex-col space-y-4">
-      {/* Image de l'article si disponible */}
-      {article.image && (
-        <div className="w-full relative h-64">
-          <img
-            src={article.image}
-            alt={article.title}
-            className="object-cover w-full h-full rounded-lg"
-          />
-        </div>
-      )}
-
       <div className="space-y-4">
         {/* En-tête avec source et date */}
         <div className="flex items-center gap-2 text-sm text-gray-600">
