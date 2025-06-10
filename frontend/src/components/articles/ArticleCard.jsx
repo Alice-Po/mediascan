@@ -19,7 +19,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
 
   // Gérer le clic sur le bouton de sauvegarde
   const handleSaveClick = (e) => {
-    console.log('Save button clicked', e); // Ajouter ce log
     e.stopPropagation(); // Empêcher la navigation vers l'article
     if (onSave && article && article._id) {
       onSave(article._id);
@@ -64,7 +63,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
             .trim();
           orientation = JSON.parse(cleanStr);
         } catch (parseError) {
-          console.warn("Erreur de parsing de l'orientation:", parseError);
           orientation = {
             political: 'non-spécifié',
           };
@@ -80,11 +78,6 @@ const ArticleCard = ({ article, onSave, onShare }) => {
           category: article.categories?.[0],
           timestamp: new Date(),
         },
-      });
-
-      console.log('Article click tracked:', {
-        articleId: article._id,
-        orientation: orientation,
       });
 
       // Ouvrir l'article dans un nouvel onglet
@@ -121,6 +114,11 @@ const ArticleCard = ({ article, onSave, onShare }) => {
       console.error('Erreur lors de la récupération des détails de la source:', error);
     }
   };
+
+  if (!article || !article.title) {
+    console.warn('[ArticleCard] Article invalide:', article);
+    return null;
+  }
 
   return (
     <>

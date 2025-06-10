@@ -12,8 +12,9 @@ import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
  * Composant d'affichage de la liste des articles avec scroll infini
  * @param {Object} props
  * @param {Object} props.filters - Filtres à appliquer au feed (optionnel, fourni par le parent)
+ * @param {number} props.pageSize - Nombre d'articles par page (optionnel, défaut: 20)
  */
-const ArticleList = ({ filters }) => {
+const ArticleList = ({ filters, pageSize = 20 }) => {
   // Récupérer les collections pertinentes pour le filtrage
   const { allCollections } = useContext(AppContext);
   const { user } = useContext(AuthContext);
@@ -32,7 +33,7 @@ const ArticleList = ({ filters }) => {
   } = useArticles({
     fetchArticlesFn: fetchArticles,
     collections: allCollections,
-    options: { pageSize: 20, initialFilters: filters },
+    options: { pageSize, initialFilters: filters },
   });
 
   // Synchroniser les filtres du parent avec le hook si la prop change
@@ -137,17 +138,19 @@ const ArticleList = ({ filters }) => {
   return (
     <div className="article-list -mx-3 sm:mx-0">
       {/* Liste des articles ou état vide */}
-      {articles.length > 0
-        ? articles.map((article, index) => (
-            <div
-              ref={index === articles.length - 1 ? lastArticleRef : null}
-              key={article._id}
-              className="mb-3 last:mb-0"
-            >
-              <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
-            </div>
-          ))
-        : !loading && <EmptyState />}
+      {articles.length > 0 ? (
+        articles.map((article, index) => (
+          <div
+            ref={index === articles.length - 1 ? lastArticleRef : null}
+            key={article._id}
+            className="mb-3 last:mb-0"
+          >
+            <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
+          </div>
+        ))
+      ) : !loading ? (
+        <EmptyState />
+      ) : null}
 
       {/* Affichage des états */}
       {error && renderError()}

@@ -10,7 +10,6 @@ import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '
 import SourcesCatalog from '../sources/SourcesCatalog';
 import CollectionAvatar from './CollectionAvatar';
 import ArticleList from '../articles/ArticleList';
-import { useArticles } from '../../hooks/useArticles';
 import Accordion from '../common/Accordion';
 import Modal from '../common/Modal';
 import SourcesList from '../sources/SourcesList';
@@ -50,22 +49,8 @@ const CollectionDetails = ({
   // Configurer les filtres pour le feed d'articles
   const collectionFilters = {
     sources: collection?.sources?.map((source) => source._id) || [],
+    collection: collection?._id,
   };
-
-  // Utiliser le hook useArticles pour le feed
-  const {
-    articles,
-    loading: articlesLoading,
-    error: articlesError,
-    hasMore,
-    loadMore,
-  } = useArticles({
-    collections: [collection],
-    options: {
-      initialFilters: collectionFilters,
-      pageSize: 10, // Limiter à 10 articles pour l'aperçu
-    },
-  });
 
   const isUserOwner = collection.createdBy && user._id && collection.createdBy._id === user._id;
   const isDefault = isDefaultCollection(collection._id);
@@ -73,7 +58,6 @@ const CollectionDetails = ({
 
   // Gestion des actions
   const handleSourceClick = (source) => {
-    console.log('[handleSourceClick] Source cliquée :', source);
     setSelectedSource(source);
     setShowSourceModal(true);
   };
@@ -333,24 +317,21 @@ const CollectionDetails = ({
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-4">Aperçu du flux</h2>
           <div className="bg-white rounded-lg shadow-sm p-4">
-            <ArticleList filters={collectionFilters} />
+            <ArticleList filters={collectionFilters} pageSize={10} />
           </div>
         </div>
       )}
 
       {/* Modales */}
       {selectedSource && (
-        <>
-          {console.log('[Modal] selectedSource :', selectedSource)}
-          <Modal
-            isOpen={showSourceModal}
-            onClose={handleCloseSourceModal}
-            title={selectedSource.name}
-            size="md"
-          >
-            <SourceDetails source={selectedSource} />
-          </Modal>
-        </>
+        <Modal
+          isOpen={showSourceModal}
+          onClose={handleCloseSourceModal}
+          title={selectedSource.name}
+          size="md"
+        >
+          <SourceDetails source={selectedSource} />
+        </Modal>
       )}
 
       <ConfirmationModal

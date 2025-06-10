@@ -1,58 +1,34 @@
 import Article from '../models/Article.js';
 import User from '../models/User.js';
 import Analytics from '../models/Analytics.js';
+import Collection from '../models/Collection.js';
 
-// @desc    Récupérer les articles (avec filtres)
-// @route   GET /api/articles
-// @access  Private
+/**
+ * @desc    Récupère les articles avec filtres et pagination
+ * @route   GET /api/articles
+ * @access  Private
+ * @param   {Object} req.query.page - Numéro de la page (défaut: 1)
+ * @param   {Object} req.query.limit - Nombre d'articles par page (défaut: 20)
+ * @param   {Object} req.query.sources - Liste des IDs de sources séparés par des virgules
+ * @param   {Object} req.query.collection - ID de la collection pour filtrer les sources
+ * @returns {Object} Articles paginés avec flag isSaved et métadonnées
+ */
 export const getArticles = async (req, res) => {
   try {
-    const { page = 1, limit = 20, sources } = req.query;
-    const userId = req.user._id;
+    const { page = 1, limit = 20, sources, collection } = req.query;
+    const user = req.user;
 
-    // Récupérer l'utilisateur avec ses collections et collections suivies
-    const user = await User.findById(userId)
-      .populate('collections')
-      .populate('followedCollections')
-      .select('collections followedCollections savedArticles');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Utilisateur non trouvé',
-      });
-    }
-
-    // Récupérer toutes les sources disponibles pour l'utilisateur depuis ses collections
-    let userSourceIds = new Set();
-
-    // Ajouter les sources des collections propres à l'utilisateur
-    if (user.collections && user.collections.length > 0) {
-      for (const collection of user.collections) {
-        if (collection.sources && collection.sources.length > 0) {
-          for (const sourceId of collection.sources) {
-            userSourceIds.add(sourceId.toString());
-          }
-        }
-      }
-    }
-
-    // Ajouter les sources des collections suivies par l'utilisateur
-    if (user.followedCollections && user.followedCollections.length > 0) {
-      for (const collection of user.followedCollections) {
-        if (collection.sources && collection.sources.length > 0) {
-          for (const sourceId of collection.sources) {
-            userSourceIds.add(sourceId.toString());
-          }
-        }
-      }
-    }
-
-    // Convertir le Set en tableau
-    const availableSourceIds = Array.from(userSourceIds);
-
-    // Construire la requête
+    // Construire la requête de base
     const query = {};
+
+    // Si une collection est spécifiée, obtenir ses sources
+    let availableSourceIds = [];
+    if (collection) {
+      const userCollection = await Collection.findById(collection).populate('sources');
+      if (userCollection) {
+        availableSourceIds = userCollection.sources.map((source) => source._id.toString());
+      }
+    }
 
     // Filtrer par sources spécifiées
     if (sources && sources.length) {
@@ -60,30 +36,20 @@ export const getArticles = async (req, res) => {
       const validSourceIds = sources
         .split(',')
         .filter((id) => id && id.trim().length === 24)
-        .filter((id) => availableSourceIds.includes(id)); // Ne garder que les sources disponibles
+        .filter((id) => !collection || availableSourceIds.includes(id));
 
       if (validSourceIds.length > 0) {
         query.sourceId = { $in: validSourceIds };
       } else {
-        // Si aucune source valide après filtrage, retourner un tableau vide
         return res.json({
           articles: [],
           hasMore: false,
           total: 0,
         });
       }
-    } else {
-      // Si aucune source n'est spécifiée, utiliser toutes les sources disponibles
-      if (availableSourceIds.length) {
-        query.sourceId = { $in: availableSourceIds };
-      } else {
-        // Si l'utilisateur n'a aucune source disponible, retourner un tableau vide
-        return res.json({
-          articles: [],
-          hasMore: false,
-          total: 0,
-        });
-      }
+    } else if (collection && availableSourceIds.length > 0) {
+      // Si aucune source n'est spécifiée mais qu'une collection est fournie
+      query.sourceId = { $in: availableSourceIds };
     }
 
     // Récupérer les articles
@@ -99,13 +65,15 @@ export const getArticles = async (req, res) => {
       isSaved: user.savedArticles.includes(article._id),
     }));
 
+    const total = await Article.countDocuments(query);
+
     res.json({
       articles,
       hasMore: articles.length === parseInt(limit),
-      total: await Article.countDocuments(query),
+      total,
     });
   } catch (error) {
-    console.error('Error in getArticles:', error);
+    console.error('[getArticles] Erreur:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération des articles',
@@ -114,9 +82,13 @@ export const getArticles = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les détails d'un article
-// @route   GET /api/articles/:id
-// @access  Private
+/**
+ * @desc    Récupère les détails d'un article spécifique
+ * @route   GET /api/articles/:id
+ * @access  Private
+ * @param   {string} req.params.id - ID de l'article à récupérer
+ * @returns {Object} Article avec les détails de sa source
+ */
 export const getArticleById = async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -144,9 +116,14 @@ export const getArticleById = async (req, res) => {
   }
 };
 
-// @desc    Marquer un article comme lu
-// @route   POST /api/articles/:id/read
-// @access  Private
+/**
+ * @desc    Marque un article comme lu et enregistre l'analytique
+ * @route   POST /api/articles/:id/read
+ * @access  Private
+ * @param   {string} req.params.id - ID de l'article à marquer
+ * @param   {Object} req.user - Utilisateur authentifié
+ * @returns {Object} Message de confirmation
+ */
 export const markArticleAsRead = async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -208,15 +185,18 @@ export const markArticleAsRead = async (req, res) => {
   }
 };
 
-// @desc    Sauvegarder un article
-// @route   POST /api/articles/:id/save
-// @access  Private
+/**
+ * @desc    Sauvegarde un article dans les favoris de l'utilisateur
+ * @route   POST /api/articles/:id/save
+ * @access  Private
+ * @param   {string} req.params.id - ID de l'article à sauvegarder
+ * @param   {Object} req.user - Utilisateur authentifié
+ * @returns {Object} Statut de sauvegarde avec articleId
+ */
 export const saveArticle = async (req, res) => {
   try {
     const articleId = req.params.id;
     const userId = req.user._id;
-
-    console.log('Saving article:', { articleId, userId }); // Debug log
 
     // Vérifier que l'article existe
     const article = await Article.findById(articleId);
@@ -233,10 +213,8 @@ export const saveArticle = async (req, res) => {
       {
         $addToSet: { savedArticles: articleId },
       },
-      { new: true } // Pour retourner le document mis à jour
+      { new: true }
     );
-
-    console.log('Updated user:', updatedUser); // Debug log
 
     // Mettre à jour les interactions de l'article
     await Article.findByIdAndUpdate(articleId, {
@@ -267,9 +245,14 @@ export const saveArticle = async (req, res) => {
   }
 };
 
-// @desc    Désauvegarder un article
-// @route   DELETE /api/articles/:id/save
-// @access  Private
+/**
+ * @desc    Retire un article des favoris de l'utilisateur
+ * @route   DELETE /api/articles/:id/save
+ * @access  Private
+ * @param   {string} req.params.id - ID de l'article à retirer
+ * @param   {Object} req.user - Utilisateur authentifié
+ * @returns {Object} Statut de désauvegarde avec articleId
+ */
 export const unsaveArticle = async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -308,9 +291,13 @@ export const unsaveArticle = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les articles sauvegardés par l'utilisateur
-// @route   GET /api/articles/saved
-// @access  Private
+/**
+ * @desc    Récupère tous les articles sauvegardés par l'utilisateur
+ * @route   GET /api/articles/saved
+ * @access  Private
+ * @param   {Object} req.user - Utilisateur authentifié
+ * @returns {Object} Liste des articles sauvegardés avec métadonnées
+ */
 export const getSavedArticles = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -355,7 +342,11 @@ export const getSavedArticles = async (req, res) => {
   }
 };
 
-// Fonction pour créer ou mettre à jour des articles en masse
+/**
+ * @desc    Crée ou met à jour plusieurs articles en une seule opération
+ * @param   {Array} articles - Liste des articles à créer/mettre à jour
+ * @returns {Object} Résultat de l'opération bulk
+ */
 export const createOrUpdateArticles = async (articles) => {
   try {
     const bulkOps = articles.map((article) => ({
@@ -375,16 +366,14 @@ export const createOrUpdateArticles = async (articles) => {
   }
 };
 
-// Utilisation dans la fonction de création/mise à jour d'article
+/**
+ * @desc    Crée ou met à jour un article avec les données de sa source
+ * @param   {Object} articleData - Données de l'article
+ * @param   {Object} source - Source de l'article avec ses métadonnées
+ * @returns {Object} Article créé ou mis à jour
+ */
 const createOrUpdateArticle = async (articleData, source) => {
   try {
-    console.log('Creating/Updating article with source data:', {
-      sourceId: source._id,
-      sourceName: source.name,
-      sourceOrientation: source.orientation,
-      articleTitle: articleData.title,
-    });
-
     // Préparer les données de l'article
     const article = {
       ...articleData,
@@ -397,16 +386,10 @@ const createOrUpdateArticle = async (articleData, source) => {
 
     // Utiliser updateOne avec upsert
     const result = await Article.updateOne(
-      { link: article.link }, // Critère de recherche
-      { $set: article }, // Données à mettre à jour/insérer
-      { upsert: true } // Créer si n'existe pas
+      { link: article.link },
+      { $set: article },
+      { upsert: true }
     );
-
-    console.log('Article created/updated:', {
-      matched: result.matchedCount,
-      modified: result.modifiedCount,
-      upserted: result.upsertedId,
-    });
 
     return article;
   } catch (error) {

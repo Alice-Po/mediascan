@@ -108,7 +108,6 @@ export function useCollections(user, setGlobalError) {
       setLoading(true);
       const publicData = await fetchPublicCollections();
       setPublicCollections(publicData);
-      console.log('publicData', publicData);
       setError(null);
       return publicData;
     } catch (err) {
@@ -159,7 +158,6 @@ export function useCollections(user, setGlobalError) {
       try {
         setLoading(true);
         const collection = await fetchCollectionById(collectionId);
-        console.log('[useCollections] loadCollectionById API response:', collection);
         setCurrentCollection(collection);
         setError(null);
         return collection;
@@ -344,11 +342,6 @@ export function useCollections(user, setGlobalError) {
       setCurrentCollection(null);
     }
   }, [user, loadAllCollections]);
-
-  // Loguer à chaque update de currentCollection
-  useEffect(() => {
-    console.log('[useCollections] currentCollection updated:', currentCollection);
-  }, [currentCollection]);
 
   // Exposer toutes les fonctionnalités et états
   return {

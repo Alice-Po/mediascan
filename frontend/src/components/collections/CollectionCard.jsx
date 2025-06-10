@@ -53,13 +53,6 @@ const CollectionCard = ({
 
   const handleViewDetails = () => {
     if (onViewDetails) {
-      console.log('[CollectionCard] onViewDetails', collection);
-      // Log détaillé des sources
-      if (collection.sources) {
-        collection.sources.forEach((src, idx) => {
-          console.log(`[CollectionCard] Source #${idx}:`, src);
-        });
-      }
       onViewDetails(collection);
     } else {
       // Si aucune fonction onViewDetails n'est fournie, naviguer vers la page détaillée

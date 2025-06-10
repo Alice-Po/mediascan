@@ -47,12 +47,12 @@ export const useArticles = ({
         const params = {
           page: 1,
           limit: pageSize,
-          ...(filters.sources.length > 0 && { sources: filters.sources.join(',') }),
+          ...(filters.sources?.length > 0 && { sources: filters.sources.join(',') }),
           ...(filters.collection && { collection: filters.collection }),
           ...(filters.searchTerm && { searchTerm: filters.searchTerm }),
         };
         const response = await fetchArticlesFn(params);
-        setArticles(response.articles);
+        setArticles(response.articles || []);
         setHasMore(response.hasMore);
         setPage(1);
       } catch (err) {
@@ -92,62 +92,23 @@ export const useArticles = ({
     }
   }, [loading, hasMore, page, filters, pageSize, fetchArticlesFn, articles]);
 
-  // Filtrage local (en plus du backend, pour la recherche locale ou logique avancée)
-  const filteredArticles = useMemo(() => {
-    return articles.filter((article) => {
-      // Filtre par collection
-      if (filters.collection) {
-        const collection = collections.find((c) => c._id === filters.collection);
-        if (!collection) return false;
-        // Filtre par source spécifique
-        if (filters.sources.length === 1) {
-          return article.sourceId._id === filters.sources[0];
-        }
-        // Filtre par toutes les sources de la collection
-        const collectionSources = Array.isArray(collection.sources)
-          ? collection.sources.map((s) => (typeof s === 'string' ? s : s._id))
-          : [];
-        return collectionSources.includes(article.sourceId._id);
-      }
-      // Filtre par sources sélectionnées
-      if (filters.sources.length > 0) {
-        return filters.sources.includes(article.sourceId._id);
-      }
-      // Filtre par recherche
-      if (filters.searchTerm) {
-        const searchTermLower = filters.searchTerm.toLowerCase();
-        return (
-          article.title?.toLowerCase().includes(searchTermLower) ||
-          article.contentSnippet?.toLowerCase().includes(searchTermLower)
-        );
-      }
-      return true;
-    });
-  }, [articles, filters, collections]);
+  // Mise à jour d'un article dans la liste locale
+  const updateArticle = useCallback((articleId, updates) => {
+    setArticles((prev) => prev.map((a) => (a._id === articleId ? { ...a, ...updates } : a)));
+  }, []);
 
   // Reset des filtres
   const resetFilters = useCallback(() => {
     setFilters(options.initialFilters || initialFilters);
   }, [options.initialFilters]);
 
-  // Mise à jour d'un article dans la liste locale
-  const updateArticle = useCallback((articleId, updates) => {
-    setArticles((prev) => prev.map((a) => (a._id === articleId ? { ...a, ...updates } : a)));
-  }, []);
-
-  // Refresh (recharger tous les articles)
-  const refresh = useCallback(() => {
-    loadArticles(true);
-  }, [loadArticles]);
-
   // Recharger les articles au montage ou quand les filtres changent
   useEffect(() => {
     loadArticles(true);
-    // eslint-disable-next-line
-  }, [filters]);
+  }, [filters, loadArticles]);
 
   return {
-    articles: filteredArticles,
+    articles,
     filters,
     setFilters,
     resetFilters,
@@ -155,7 +116,6 @@ export const useArticles = ({
     error,
     hasMore,
     loadMore,
-    refresh,
     updateArticle,
     setArticles, // pour usage avancé
   };
