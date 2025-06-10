@@ -7,6 +7,7 @@ import { DefaultCollectionProvider } from './context/DefaultCollectionContext';
 import AppRoutes from './routes/index';
 import { SnackbarProvider } from './context/SnackbarContext';
 import Snackbar from './components/common/Snackbar';
+import { CollectionProvider } from './context/CollectionContext';
 
 function App() {
   return (
@@ -16,8 +17,10 @@ function App() {
           <DefaultCollectionProvider>
             <Router>
               <SnackbarProvider>
-                <AppRoutes />
-                <Snackbar />
+                <CollectionProvider>
+                  <AppRoutes />
+                  <Snackbar />
+                </CollectionProvider>
               </SnackbarProvider>
             </Router>
           </DefaultCollectionProvider>

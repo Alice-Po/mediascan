@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useContext, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useContext, forwardRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppContext } from '../../context/AppContext';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
-import SourceCatalog from '../sources/SourceCatalog';
+import SourcesCatalog from '../sources/SourcesCatalog';
 import Modal from '../common/Modal';
+import { useCollectionContext } from '../../context/CollectionContext';
 import { useCollections } from '../../hooks/useCollections';
+import SourcesList from '../sources/SourcesList';
 
 /**
  * Composant pour créer ou modifier une collection
@@ -18,19 +19,24 @@ import { useCollections } from '../../hooks/useCollections';
  */
 const CollectionForm = forwardRef(
   ({ isOnboarding = false, onSuccess, onError, setFormRef, hideNavigation = false }, ref) => {
-    const { id } = useParams();
     const navigate = useNavigate();
-    const isEditMode = Boolean(id);
     const { showSnackbar } = useSnackbar();
 
     const {
-      collections,
-      loadingCollections,
-      sources: userSources,
-    } = useContext(AppContext) || { collections: [], loadingCollections: false, sources: [] };
+      loading,
+      error,
+      currentCollection,
+      createCollection,
+      updateCollection,
+      addSourceToCollection,
+      removeSourceFromCollection,
+      loadCollectionById,
+    } = useCollectionContext();
 
-    const { loading, error, createCollection, updateCollection, addSourceToCollection } =
-      useCollections();
+    // Ajout : état pour gérer l'étape du formulaire
+    const [step, setStep] = useState(1);
+    // Ajout : état pour ouvrir/fermer la modale catalogue
+    const [showSourcesCatalog, setShowSourcesCatalog] = useState(false);
 
     // État local pour le formulaire
     const [formData, setFormData] = useState({
@@ -40,71 +46,17 @@ const CollectionForm = forwardRef(
       isPublic: false,
     });
 
-    const [selectedSources, setSelectedSources] = useState([]);
-    const [showSourceCatalog, setShowSourceCatalog] = useState(false);
-
-    // Exposer des méthodes pour le parent via useImperativeHandle et ref
-    useImperativeHandle(ref, () => ({
-      applySuggestion: (suggestion) => {
-        setFormData((prev) => ({
-          ...prev,
-          name: suggestion.name || '',
-          description: suggestion.description || '',
-        }));
-      },
-      getFormData: () => formData,
-      resetForm: () => {
-        setFormData({
-          name: '',
-          description: '',
-          imageUrl: '',
-          isPublic: false,
-        });
-        setSelectedSources([]);
-      },
-    }));
-
-    // Passer la référence au parent si nécessaire
-    useEffect(() => {
-      if (setFormRef && typeof setFormRef === 'function') {
-        setFormRef({
-          applySuggestion: (suggestion) => {
-            setFormData((prev) => ({
-              ...prev,
-              name: suggestion.name || '',
-              description: suggestion.description || '',
-            }));
-          },
-        });
-      }
-    }, [setFormRef]);
-
     // Charger les données de la collection si en mode édition
     useEffect(() => {
-      const fetchCollection = async () => {
-        if (isEditMode) {
-          try {
-            const collection = await fetchCollectionById(id);
-            setFormData({
-              name: collection.name || '',
-              description: collection.description || '',
-              imageUrl: collection.imageUrl || '',
-              isPublic: collection.isPublic || false,
-            });
-
-            // Stocker les sources de la collection pour la sélection
-            if (collection.sources && Array.isArray(collection.sources)) {
-              setSelectedSources(collection.sources);
-            }
-          } catch (err) {
-            console.error(err);
-            if (onError) onError('Impossible de charger la collection');
-          }
-        }
-      };
-
-      fetchCollection();
-    }, [id, isEditMode]);
+      if (currentCollection) {
+        setFormData({
+          name: currentCollection.name || '',
+          description: currentCollection.description || '',
+          imageUrl: currentCollection.imageUrl || '',
+          isPublic: currentCollection.isPublic || false,
+        });
+      }
+    }, [currentCollection]);
 
     // Gérer les changements dans les champs du formulaire
     const handleChange = (e) => {
@@ -115,100 +67,82 @@ const CollectionForm = forwardRef(
       }));
     };
 
-    // Ajouter une source à la collection (pendant l'édition)
-    const handleAddSource = async (source) => {
-      // Vérifier si la source n'est pas déjà dans la sélection
-      if (!selectedSources.some((s) => s._id === source._id)) {
-        setSelectedSources((prev) => [...prev, source]);
+    // Retirer une source de la sélection
+    const handleRemoveSource = async (source) => {
+      try {
+        await removeSourceFromCollection(currentCollection._id, source._id);
+        showSnackbar('Source retirée de la collection', SNACKBAR_TYPES.SUCCESS);
+      } catch (err) {
+        showSnackbar('Erreur lors du retrait de la source', SNACKBAR_TYPES.ERROR);
       }
     };
 
-    // Retirer une source de la sélection
-    const handleRemoveSource = (sourceId) => {
-      setSelectedSources((prev) => prev.filter((source) => source._id !== sourceId));
-    };
-
-    // Soumettre le formulaire
-    const handleSubmit = async (e) => {
+    // Soumettre l'étape 1 (création ou édition)
+    const handleStep1Submit = async (e) => {
       e.preventDefault();
-      // Validation de base
       if (!formData.name.trim()) {
         const errorMsg = 'Le nom de la collection est requis';
         if (onError) onError(errorMsg);
         return;
       }
-
       try {
-        // Données à envoyer
-        const collectionData = {
-          ...formData,
-          // Les sources seront gérées séparément après la création/mise à jour
-        };
-
-        // Créer ou mettre à jour la collection
         let savedCollection;
-
-        if (isEditMode) {
-          savedCollection = await updateCollection(id, collectionData);
-
-          // En mode édition, mettre à jour les sources si nécessaire
-          if (selectedSources.length > 0) {
-            for (const source of selectedSources) {
-              if (
-                !savedCollection.sources ||
-                !savedCollection.sources.some((s) => s._id === source._id)
-              ) {
-                await addSourceToCollection(savedCollection._id, source._id);
-              }
-            }
-          }
-
+        if (currentCollection && currentCollection._id) {
+          savedCollection = await updateCollection(currentCollection._id, formData);
           showSnackbar('Collection mise à jour avec succès', SNACKBAR_TYPES.SUCCESS);
-
-          if (onSuccess) {
-            onSuccess(savedCollection);
-          } else {
-            navigate(`/collections/${id}`);
-          }
         } else {
-          savedCollection = await createCollection(collectionData);
-
-          if (selectedSources.length > 0) {
-            for (const source of selectedSources) {
-              await addSourceToCollection(savedCollection._id, source._id);
-            }
-          }
-
+          savedCollection = await createCollection(formData);
           showSnackbar('Collection créée avec succès', SNACKBAR_TYPES.SUCCESS);
-
-          if (onSuccess) {
-            onSuccess(savedCollection);
-          } else {
-            navigate(`/collections/${savedCollection._id}`);
-          }
         }
+        setStep(2);
       } catch (err) {
-        const errorMsg = isEditMode
-          ? 'Erreur lors de la mise à jour de la collection'
-          : 'Erreur lors de la création de la collection';
-
+        const errorMsg =
+          currentCollection && currentCollection._id
+            ? 'Erreur lors de la mise à jour de la collection'
+            : 'Erreur lors de la création de la collection';
         if (onError) onError(errorMsg);
         showSnackbar(errorMsg, SNACKBAR_TYPES.ERROR);
         console.error(err);
       }
     };
 
-    // Ouvrir la modale du catalogue de sources
-    const openSourceCatalog = () => {
-      setShowSourceCatalog(true);
+    // Navigation entre étapes
+    const goToStep1 = () => setStep(1);
+    const goToStep2 = () => setStep(2);
+
+    // Handler pour ouvrir/fermer la modale catalogue
+    const openSourcesCatalog = () => setShowSourcesCatalog(true);
+    const closeSourcesCatalog = async () => {
+      setShowSourcesCatalog(false);
+      if (currentCollection?._id) {
+        await loadCollectionById(currentCollection._id);
+      }
     };
 
-    // Fermer la modale du catalogue de sources
-    const closeSourceCatalog = () => {
-      setShowSourceCatalog(false);
+    // Handler pour sauvegarder les infos de la collection à l'étape 2
+    const handleUpdateInfos = async (e) => {
+      e.preventDefault();
+      try {
+        await updateCollection(currentCollection._id, formData);
+        showSnackbar('Infos de la collection mises à jour', SNACKBAR_TYPES.SUCCESS);
+      } catch (err) {
+        showSnackbar('Erreur lors de la mise à jour des infos', SNACKBAR_TYPES.ERROR);
+      }
     };
 
-    if (loading || loadingCollections) {
+    // Handler pour la validation finale (redirige ou callback)
+    const handleFinalSubmit = () => {
+      let shouldRedirect = true;
+      if (onSuccess) {
+        const result = onSuccess(currentCollection);
+        if (result === false) shouldRedirect = false;
+      }
+      if (shouldRedirect && currentCollection?._id) {
+        navigate(`/collections/${currentCollection._id}`);
+      }
+    };
+
+    if (loading) {
       return (
         <div className="p-6 flex justify-center">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
@@ -216,84 +150,144 @@ const CollectionForm = forwardRef(
       );
     }
 
-    return (
-      <div className={isOnboarding ? '' : 'max-w-4xl mx-auto px-4 sm:px-0'}>
-        <div className={isOnboarding ? '' : 'bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6'}>
-          {!isOnboarding && (
-            <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-              {isEditMode ? 'Modifier la collection' : 'Créer une nouvelle collection'}
-            </h1>
-          )}
-
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <div className="mb-3 sm:mb-4">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nom de la collection*
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                required
-                placeholder="Ex: Actualités Tech, Cuisine Méditerranéenne, etc."
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Un titre clair aide les autres utilisateurs à comprendre le contenu de votre
-                collection.
-              </p>
-            </div>
-
-            <div className="mb-3 sm:mb-4">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                placeholder="Décrivez le thème, les sujets ou les types de contenu que vous souhaitez rassembler dans cette collection..."
-              ></textarea>
-              <p className="mt-1 text-sm text-gray-500">
-                Une description détaillée aide les autres utilisateurs à comprendre l'objet de votre
-                collection.
-              </p>
-            </div>
-
-            {/* Encadré dédié aux fonctionnalités IA */}
-            <div className="mb-6 p-4 border border-blue-200 rounded-lg bg-blue-50">
-              <div className="flex items-start space-x-3">
-                <img src="/bot.svg" alt="IA" className="w-8 h-8 mt-1" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-blue-900 mb-2">
-                    Suggestions IA (Bientôt disponible)
-                  </h3>
-                  <p className="text-sm text-blue-700 mb-3">
-                    Une description précise de votre collection permettra à notre IA de vous
-                    suggérer des sources et articles pertinents. Ces suggestions seront basées sur
-                    le titre et la description de votre collection.
-                  </p>
-                  <div className="bg-white p-3 rounded-md border border-blue-100">
-                    <p className="text-sm text-blue-800">
-                      <span className="font-medium">💡 Important :</span> Les suggestions IA seront
-                      toujours activables ou désactivables selon vos préférences. Vous garderez le
-                      contrôle sur l'utilisation de l'IA dans votre expérience.
-                    </p>
-                  </div>
-                </div>
+    // Rendu étape 1 : formulaire infos collection
+    if (step === 1) {
+      return (
+        <div className={isOnboarding ? '' : 'max-w-4xl mx-auto px-4 sm:px-0'}>
+          <div className={isOnboarding ? '' : 'bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6'}>
+            {!isOnboarding && (
+              <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+                {currentCollection && currentCollection._id
+                  ? 'Modifier la collection'
+                  : 'Créer une nouvelle collection'}
+              </h1>
+            )}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>
+            )}
+            <form onSubmit={handleStep1Submit} className="space-y-3 sm:space-y-4">
+              <div className="mb-3 sm:mb-4">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom de la collection*
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  required
+                  placeholder="Ex: Actualités Tech, Cuisine Méditerranéenne, etc."
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Un titre clair aide les autres utilisateurs à comprendre le contenu de votre
+                  collection.
+                </p>
               </div>
-            </div>
+              <div className="mb-3 sm:mb-4">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  placeholder="Décrivez le thème, les sujets ou les types de contenu que vous souhaitez rassembler dans cette collection..."
+                ></textarea>
+                <p className="mt-1 text-sm text-gray-500">
+                  Une description détaillée aide les autres utilisateurs à comprendre l'objet de
+                  votre collection.
+                </p>
+              </div>
+              <div className="mb-3 sm:mb-6">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isPublic"
+                    name="isPublic"
+                    checked={formData.isPublic}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
+                    Collection publique
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 ml-6">
+                  Les collections publiques peuvent être visibles et suivies par d'autres
+                  utilisateurs
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4 mt-6">
+                {step === 2 && (
+                  <button
+                    type="button"
+                    onClick={goToStep1}
+                    className="order-2 sm:order-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 w-full sm:w-auto"
+                  >
+                    Précédent
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="order-1 sm:order-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 w-full sm:w-auto"
+                >
+                  {currentCollection && currentCollection._id
+                    ? 'Enregistrer et passer aux sources'
+                    : 'Créer et passer aux sources'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
 
-            <div className="mb-3 sm:mb-6">
+    // Rendu étape 2 : édition infos + gestion sources
+    if (step === 2 && currentCollection && currentCollection._id) {
+      return (
+        <div className={isOnboarding ? '' : 'max-w-4xl mx-auto px-4 sm:px-0'}>
+          <div className={isOnboarding ? '' : 'bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6'}>
+            <h2 className="text-xl font-bold mb-4">Gérer la collection</h2>
+            {/* Formulaire infos collection (inline) */}
+            <form onSubmit={handleUpdateInfos} className="space-y-3 sm:space-y-4 mb-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom de la collection*
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows="2"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                ></textarea>
+              </div>
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -307,177 +301,64 @@ const CollectionForm = forwardRef(
                   Collection publique
                 </label>
               </div>
-              <p className="text-xs text-gray-500 mt-1 ml-6">
-                Les collections publiques peuvent être visibles et suivies par d'autres utilisateurs
-              </p>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 w-full sm:w-auto"
+              >
+                Sauvegarder les infos
+              </button>
+            </form>
+
+            {/* Bouton pour ouvrir le catalogue de sources */}
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <h3 className="text-lg font-medium">Sources de la collection</h3>
+              <button
+                type="button"
+                onClick={openSourcesCatalog}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium"
+              >
+                Ajouter des sources
+              </button>
             </div>
 
-            {/* Section des sources sélectionnées */}
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
-                <h2 className="text-lg font-medium text-gray-900">Sources sélectionnées</h2>
-                {selectedSources.length === 0 ? (
-                  ''
-                ) : (
-                  <button
-                    type="button"
-                    onClick={openSourceCatalog}
-                    className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 text-sm w-full sm:w-auto"
-                  >
-                    Parcourir le catalogue de sources
-                  </button>
-                )}
-              </div>
-
-              {selectedSources.length === 0 ? (
-                <div className="p-6 bg-gray-50 rounded-md text-center">
-                  <div className="mb-4">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">
-                    Aucune source sélectionnée
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Commencez à enrichir votre collection en ajoutant des sources pertinentes.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={openSourceCatalog}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <svg
-                      className="-ml-1 mr-2 h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Parcourir le catalogue
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto p-2">
-                  {selectedSources.map((source) => (
-                    <div
-                      key={source._id}
-                      className="flex items-center p-3 border border-gray-200 rounded-md"
-                    >
-                      <div
-                        className="w-8 h-8 rounded flex items-center justify-center overflow-hidden mr-3 flex-shrink-0"
-                        style={{
-                          backgroundImage: source.faviconUrl ? `url(${source.faviconUrl})` : 'none',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundColor: !source.faviconUrl ? '#f3f4f6' : undefined,
-                        }}
-                      >
-                        {!source.faviconUrl && (
-                          <span className="text-gray-500 text-xs">
-                            {source.name.substring(0, 1).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
-                          {source.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 truncate">{source.url}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSource(source._id)}
-                        className="ml-2 p-1 text-gray-400 hover:text-red-500"
-                        title="Retirer de la sélection"
-                        aria-label={`Retirer ${source.name} de la sélection`}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Boutons de navigation */}
-            {!hideNavigation && (
-              <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4">
-                <button
-                  type="button"
-                  onClick={() => navigate(-1)}
-                  className="order-2 sm:order-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 w-full sm:w-auto"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="order-1 sm:order-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 w-full sm:w-auto"
-                >
-                  {isEditMode ? 'Mettre à jour' : 'Créer'}
-                </button>
-              </div>
-            )}
-
-            {hideNavigation && (
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 w-full sm:w-auto"
-                >
-                  {isEditMode ? 'Mettre à jour' : 'Créer'}
-                </button>
-              </div>
-            )}
-          </form>
-        </div>
-
-        {/* Modale pour le catalogue de sources */}
-        <Modal
-          isOpen={showSourceCatalog}
-          onClose={closeSourceCatalog}
-          title="Catalogue de sources"
-          size="2xl"
-        >
-          <div className="p-2">
-            <SourceCatalog
-              onAddToCollection={handleAddSource}
-              collectionSources={selectedSources}
-              userCollections={collections}
+            {/* Liste des sources déjà ajoutées */}
+            <SourcesList
+              sources={currentCollection.sources || []}
+              onSourceDelete={handleRemoveSource}
+              showDeleteAction={true}
+              showAddToCollectionAction={true}
             />
+
+            {/* Modale catalogue de sources */}
+            <Modal
+              isOpen={showSourcesCatalog}
+              onClose={closeSourcesCatalog}
+              title="Catalogue de sources"
+              size="2xl"
+            >
+              <SourcesCatalog
+                collectionId={currentCollection._id}
+                onClose={closeSourcesCatalog}
+                isOnboarding={isOnboarding}
+              />
+            </Modal>
+
+            {/* Bouton de validation final sticky (mobile-friendly) */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t p-4 pb-16 flex justify-end sm:static sm:p-0 sm:border-0">
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 text-lg font-semibold shadow-md"
+              >
+                Terminer
+              </button>
+            </div>
           </div>
-        </Modal>
-      </div>
-    );
+        </div>
+      );
+    }
+
+    return null;
   }
 );
 

@@ -159,6 +159,7 @@ export function useCollections(user, setGlobalError) {
       try {
         setLoading(true);
         const collection = await fetchCollectionById(collectionId);
+        console.log('[useCollections] loadCollectionById API response:', collection);
         setCurrentCollection(collection);
         setError(null);
         return collection;
@@ -239,6 +240,7 @@ export function useCollections(user, setGlobalError) {
       try {
         setLoading(true);
         const result = await apiAddSourceToCollection(collectionId, sourceId);
+        console.log('[useCollections] addSourceToCollection API response:', result);
         // Mettre à jour la collection courante si c'est celle qui est modifiée
         if (currentCollection?._id === collectionId) {
           setCurrentCollection((prev) => ({
@@ -342,6 +344,11 @@ export function useCollections(user, setGlobalError) {
       setCurrentCollection(null);
     }
   }, [user, loadAllCollections]);
+
+  // Loguer à chaque update de currentCollection
+  useEffect(() => {
+    console.log('[useCollections] currentCollection updated:', currentCollection);
+  }, [currentCollection]);
 
   // Exposer toutes les fonctionnalités et états
   return {

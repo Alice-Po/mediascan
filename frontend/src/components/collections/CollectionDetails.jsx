@@ -7,7 +7,7 @@ import { generateFollowersFromId } from '../../utils/colorUtils';
 import ConfirmationModal from '../common/ConfirmationModal';
 import SourceDetails from '../sources/SourceDetails';
 import { CollectionShareIcon, CheckIcon, AddSourceIcon, XIcon, StarIcon } from '../common/icons';
-import SourceCatalog from '../sources/SourceCatalog';
+import SourcesCatalog from '../sources/SourcesCatalog';
 import CollectionAvatar from './CollectionAvatar';
 import ArticleList from '../articles/ArticleList';
 import { useArticles } from '../../hooks/useArticles';
@@ -43,7 +43,7 @@ const CollectionDetails = ({
   const [showSourceModal, setShowSourceModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showSourceCatalog, setShowSourceCatalog] = useState(false);
+  const [showSourcesCatalog, setShowSourcesCatalog] = useState(false);
   const [defaultSettingLoading] = useState(false);
 
   // Configurer les filtres pour le feed d'articles
@@ -223,11 +223,11 @@ const CollectionDetails = ({
         {/* Bouton pour ajouter des sources (uniquement si propriétaire) */}
         {isUserOwner && (
           <button
-            onClick={() => setShowSourceCatalog(!showSourceCatalog)}
+            onClick={() => setShowSourcesCatalog(!showSourcesCatalog)}
             className="px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium flex items-center"
           >
             <AddSourceIcon className="w-4 h-4 mr-1.5" />
-            {showSourceCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
+            {showSourcesCatalog ? 'Masquer le catalogue' : 'Ajouter des sources'}
           </button>
         )}
 
@@ -272,13 +272,13 @@ const CollectionDetails = ({
         )}
       </div>
 
-      {/* Catalogue de sources (affiché uniquement si propriétaire et si showSourceCatalog est true) */}
-      {isUserOwner && showSourceCatalog && (
+      {/* Catalogue de sources (affiché uniquement si propriétaire et si showSourcesCatalog est true) */}
+      {isUserOwner && showSourcesCatalog && (
         <div className="mb-6 p-4 border border-gray-200 rounded-lg">
           <h3 className="text-lg font-medium mb-4">Catalogue de sources</h3>
-          <SourceCatalog
+          <SourcesCatalog
             collectionId={collection._id}
-            onClose={() => setShowSourceCatalog(false)}
+            onClose={() => setShowSourcesCatalog(false)}
             isOnboarding={false}
           />
         </div>

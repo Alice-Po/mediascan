@@ -5,7 +5,7 @@ import AddSourceForm from './AddSourceForm';
 import SourceCard from './SourceCard';
 
 /**
- * Composant SourceCatalog - Affiche un catalogue de sources avec possibilité de recherche et d'ajout
+ * Composant SourcesCatalog - Affiche un catalogue de sources avec possibilité de recherche et d'ajout
  *
  * @component
  * @param {Object} props - Les propriétés du composant
@@ -14,13 +14,13 @@ import SourceCard from './SourceCard';
  * @param {boolean} [props.isOnboarding=false] - Indique si le catalogue est utilisé dans le contexte d'onboarding
  *
  * @example
- * <SourceCatalog
+ * <SourcesCatalog
  *   collectionId="123"
  *   onClose={() => {}}
  *   isOnboarding={false}
  * />
  */
-const SourceCatalog = ({ collectionId, onClose, isOnboarding = false }) => {
+const SourcesCatalog = ({ collectionId, onClose, isOnboarding = false }) => {
   // Hooks pour la gestion des collections et des sources
   const {
     loadCollectionById,
@@ -289,4 +289,4 @@ const SourceCatalog = ({ collectionId, onClose, isOnboarding = false }) => {
   );
 };
 
-export default SourceCatalog;
+export default SourcesCatalog;
