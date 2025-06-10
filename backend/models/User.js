@@ -34,14 +34,17 @@ const UserSchema = new mongoose.Schema(
       trim: true,
     },
     avatar: {
-      type: Buffer,
-      description: "Données binaires de l'avatar de l'utilisateur",
+      type: mongoose.Schema.Types.Mixed,
+      description:
+        "Données de l'avatar de l'utilisateur (Buffer pour upload direct ou String pour URL)",
       default: null,
     },
     avatarType: {
       type: String,
-      description: "Type MIME de l'avatar (ex: image/png)",
-      default: null,
+      enum: ['buffer', 'url'],
+      description:
+        "Type de l'avatar : 'buffer' pour les uploads directs, 'url' pour les placeholders",
+      default: 'url',
     },
     bio: {
       type: String,

@@ -5,6 +5,13 @@ import CompleteCoverageExample from './CompleteCoverageExample';
 const UpcomingFeatures = ({ onValidationChange }) => {
   const [activeAccordion, setActiveAccordion] = useState('');
 
+  // Signaler que cette étape est toujours valide
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(true);
+    }
+  }, [onValidationChange]);
+
   // Toggle pour activer/désactiver un accordéon
   const toggleAccordion = (accordionId) => {
     setActiveAccordion(accordionId === activeAccordion ? null : accordionId);

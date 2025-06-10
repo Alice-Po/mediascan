@@ -18,7 +18,7 @@ const OnboardingSource = ({ onValidationChange }) => {
   const [showCatalog, setShowCatalog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const [hasAddedSource, setHasAddedSource] = useState(true);
+  const [hasAddedSource, setHasAddedSource] = useState(false);
   const { createSource } = useSources();
 
   // Mettre à jour la validation de l'étape
@@ -35,11 +35,11 @@ const OnboardingSource = ({ onValidationChange }) => {
       description: "Suivez l'actualité de vos journaux et magazines préférés en temps réel",
     },
 
-    {
-      icon: GlobeIcon,
-      title: 'Réseaux sociaux',
-      description: 'Ne manquez plus les publications importantes de vos comptes favoris',
-    },
+    // {
+    //   icon: GlobeIcon,
+    //   title: 'Réseaux sociaux',
+    //   description: 'Ne manquez plus les publications importantes de vos comptes favoris',
+    // },
     {
       icon: LightningIcon,
       title: 'Chaînes vidéo',

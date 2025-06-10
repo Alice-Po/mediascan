@@ -14,6 +14,7 @@ import { useArticles } from '../../hooks/useArticles';
 import Accordion from '../common/Accordion';
 import Modal from '../common/Modal';
 import SourcesList from '../sources/SourcesList';
+import Avatar from '../common/Avatar';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -174,7 +175,32 @@ const CollectionDetails = ({
             )}
 
             <div className="flex flex-wrap items-center mt-1">
-              <span className="text-sm text-gray-500">Par {creatorName}</span>
+              <div className="flex items-center">
+                <Avatar
+                  userId={
+                    !isUserOwner
+                      ? collection.createdBy?._id || collection.creator?._id || collection.user?._id
+                      : user?._id
+                  }
+                  size={20}
+                  className="mr-2"
+                  avatarUrl={
+                    !isUserOwner
+                      ? collection.createdBy?.avatar ||
+                        collection.creator?.avatar ||
+                        collection.user?.avatar
+                      : user?.avatar
+                  }
+                  avatarType={
+                    !isUserOwner
+                      ? collection.createdBy?.avatarType ||
+                        collection.creator?.avatarType ||
+                        collection.user?.avatarType
+                      : user?.avatarType
+                  }
+                />
+                <span className="text-sm text-gray-500">Par {creatorName}</span>
+              </div>
               <span className="mx-2">•</span>
               <span className="text-sm text-gray-500">
                 {collection.sources?.length || 0} sources

@@ -7,13 +7,29 @@ import { UserIcon } from './icons';
  * @param {string} [className] - Classes CSS optionnelles
  * @param {number} [size] - Taille en pixels (par défaut 48)
  * @param {string|number} [cacheBust] - Paramètre pour forcer le rafraîchissement de l'image
+ * @param {string} [avatarUrl] - URL directe de l'avatar (pour les placeholders)
+ * @param {string} [avatarType] - Type d'avatar ('buffer' ou 'url')
  */
-const Avatar = ({ userId, className = '', size = 48, cacheBust, ...props }) => {
+const Avatar = ({
+  userId,
+  className = '',
+  size = 48,
+  cacheBust,
+  avatarUrl,
+  avatarType,
+  ...props
+}) => {
   const [error, setError] = useState(false);
-  const src = userId
-    ? `/api/auth/user/${userId}/avatar${cacheBust ? `?t=${cacheBust}` : ''}`
-    : undefined;
-  if (!userId || error) {
+
+  // Si on a une URL directe et le type est 'url', on l'utilise
+  const src =
+    avatarUrl && avatarType === 'url'
+      ? avatarUrl
+      : userId
+      ? `/api/auth/user/${userId}/avatar${cacheBust ? `?t=${cacheBust}` : ''}`
+      : undefined;
+
+  if (!src || error) {
     return (
       <span
         className={`inline-block rounded-full bg-gray-200 ${className}`}
@@ -30,6 +46,7 @@ const Avatar = ({ userId, className = '', size = 48, cacheBust, ...props }) => {
       </span>
     );
   }
+
   return (
     <img
       src={src}

@@ -579,7 +579,7 @@ export const uploadAvatar = async (req, res) => {
       req.user._id,
       {
         avatar: outputBuffer,
-        avatarType: 'image/jpeg',
+        avatarType: 'buffer',
       },
       { new: true }
     );
@@ -602,13 +602,28 @@ export const getUserAvatar = async (req, res) => {
       console.log('[Avatar] Utilisateur non trouvé lors de la récupération');
       return res.status(404).send('Avatar non trouvé');
     }
-    if (!user.avatar || !user.avatar.length) {
-      console.log('[Avatar] Pas de buffer à servir pour user', req.params.id);
+
+    // Si pas d'avatar du tout
+    if (!user.avatar) {
+      console.log("[Avatar] Pas d'avatar pour user", req.params.id);
       return res.status(404).send('Avatar non trouvé');
     }
-    console.log('[Avatar] Buffer servi, taille:', user.avatar.length);
-    res.set('Content-Type', user.avatarType || 'image/jpeg');
-    res.send(user.avatar);
+
+    // Si c'est une URL (placeholder)
+    if (user.avatarType === 'url') {
+      return res.redirect(user.avatar);
+    }
+
+    // Si c'est un buffer
+    if (user.avatarType === 'buffer' && user.avatar.length) {
+      console.log('[Avatar] Buffer servi, taille:', user.avatar.length);
+      res.set('Content-Type', 'image/jpeg');
+      return res.send(user.avatar);
+    }
+
+    // Cas non géré
+    console.log('[Avatar] Format non géré pour user', req.params.id);
+    return res.status(404).send('Avatar non trouvé');
   } catch (error) {
     console.error("Erreur lors de la récupération de l'avatar:", error);
     res.status(500).send("Erreur lors de la récupération de l'avatar");

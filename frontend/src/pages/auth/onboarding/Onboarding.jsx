@@ -28,9 +28,8 @@ const Onboarding = () => {
     2: true, // OnboardingSource est toujours valide
     3: false, // OnboardingProfile requiert au moins un nom
     4: false, // PublicCollections requiert au moins une collection suivie
-    5: false, // CreateCollection requiert la création d'une collection
-    6: true, // UpcomingFeatures est toujours valide
-    // 7: true, // Conclusion est toujours valide
+    5: true, // UpcomingFeatures est toujours valide
+    6: true, // Conclusion est toujours valide
   });
 
   // Vérifier si l'étape actuelle est valide
@@ -142,9 +141,7 @@ const Onboarding = () => {
           <Step1Introduction onValidationChange={(isValid) => handleStepValidation(1, isValid)} />
         );
       case 2:
-        return (
-          <OnboardingSource onValidationChange={(isValid) => handleStepValidation(2, isValid)} />
-        );
+        return <OnboardingSource />;
       case 3:
         return (
           <OnboardingProfile onValidationChange={(isValid) => handleStepValidation(3, isValid)} />

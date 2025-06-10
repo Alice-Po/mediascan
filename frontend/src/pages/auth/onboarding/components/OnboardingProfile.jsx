@@ -186,6 +186,8 @@ const OnboardingProfile = ({ onValidationChange }) => {
                     userId={user?._id}
                     size={96}
                     cacheBust={avatarKey}
+                    avatarUrl={user?.avatar}
+                    avatarType={user?.avatarType}
                     onLoad={() => {
                       setAvatarLoaded(true);
                     }}
