@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { trackEvent } from '../../api/analyticsApi';
 import SourceDetails from '../sources/SourceDetails';
+import ArticlePreview from './ArticlePreview';
 import { fetchSourceById } from '../../api/sourcesApi';
 import { BookmarkIcon, ShareIcon } from '../common/icons';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
@@ -14,6 +15,7 @@ import Modal from '../common/Modal';
  */
 const ArticleCard = ({ article, onSave, onShare }) => {
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [sourceDetails, setSourceDetails] = useState(null);
   const { showSnackbar } = useSnackbar();
 
@@ -48,14 +50,18 @@ const ArticleCard = ({ article, onSave, onShare }) => {
     }
   };
 
-  const handleClick = async (e) => {
+  const handleArticleClick = (e) => {
+    e.preventDefault();
+    setIsPreviewModalOpen(true);
+  };
+
+  const handleVisitSite = async () => {
     try {
       // S'assurer que l'orientation est un objet
       let orientation = article.orientation;
 
       if (typeof orientation === 'string') {
         try {
-          // Nettoyer la chaîne avant de la parser
           const cleanStr = orientation
             .replace(/\n/g, '')
             .replace(/\\n/g, '')
@@ -82,6 +88,7 @@ const ArticleCard = ({ article, onSave, onShare }) => {
 
       // Ouvrir l'article dans un nouvel onglet
       window.open(article.link, '_blank');
+      setIsPreviewModalOpen(false);
     } catch (error) {
       console.error('Error tracking article click:', error);
     }
@@ -124,7 +131,7 @@ const ArticleCard = ({ article, onSave, onShare }) => {
     <>
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-4">
         <div
-          onClick={handleClick}
+          onClick={handleArticleClick}
           className="flex flex-col sm:flex-row cursor-pointer overflow-hidden"
         >
           {/* Image de l'article */}
@@ -228,6 +235,21 @@ const ArticleCard = ({ article, onSave, onShare }) => {
         size="md"
       >
         <SourceDetails source={sourceDetails} />
+      </Modal>
+
+      {/* Modal de prévisualisation de l'article */}
+      <Modal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        title="Article"
+        size="xl"
+      >
+        <ArticlePreview
+          article={article}
+          onSave={handleSaveClick}
+          onShare={handleShareClick}
+          onVisit={handleVisitSite}
+        />
       </Modal>
     </>
   );
