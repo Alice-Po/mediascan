@@ -649,7 +649,7 @@ export const UserIcon = ({ className }) => (
 
 // Icône de lien externe
 export const ExternalLinkIcon = ({ className }) => (
-  <svg className={className || 'w-5 h-5'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg className={className || 'w-5 h-5'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"

@@ -13,7 +13,7 @@ import ArticleList from '../articles/ArticleList';
 import Accordion from '../common/Accordion';
 import Modal from '../common/Modal';
 import SourcesList from '../sources/SourcesList';
-import Avatar from '../common/Avatar';
+import UserItem from '../users/UserItem';
 
 /**
  * Composant réutilisable pour afficher les détails d'une collection
@@ -52,7 +52,8 @@ const CollectionDetails = ({
     collection: collection?._id,
   };
 
-  const isUserOwner = collection.createdBy && user._id && collection.createdBy._id === user._id;
+  // Utiliser la prop isOwner au lieu de faire la comparaison
+  const isUserOwner = isOwner;
   const isDefault = isDefaultCollection(collection._id);
   const canSetAsDefault = isUserOwner || isFollowing;
 
@@ -159,32 +160,12 @@ const CollectionDetails = ({
             )}
 
             <div className="flex flex-wrap items-center mt-1">
-              <div className="flex items-center">
-                <Avatar
-                  userId={
-                    !isUserOwner
-                      ? collection.createdBy?._id || collection.creator?._id || collection.user?._id
-                      : user?._id
-                  }
-                  size={20}
-                  className="mr-2"
-                  avatarUrl={
-                    !isUserOwner
-                      ? collection.createdBy?.avatar ||
-                        collection.creator?.avatar ||
-                        collection.user?.avatar
-                      : user?.avatar
-                  }
-                  avatarType={
-                    !isUserOwner
-                      ? collection.createdBy?.avatarType ||
-                        collection.creator?.avatarType ||
-                        collection.user?.avatarType
-                      : user?.avatarType
-                  }
-                />
-                <span className="text-sm text-gray-500">Par {creatorName}</span>
-              </div>
+              <UserItem
+                userId={collection.createdBy?._id}
+                userName={creatorName}
+                avatarUrl={collection.createdBy?.avatar}
+                avatarType={collection.createdBy?.avatarType}
+              />
               <span className="mx-2">•</span>
               <span className="text-sm text-gray-500">
                 {collection.sources?.length || 0} sources

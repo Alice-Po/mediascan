@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CollectionDetails from './CollectionDetails';
 import CollectionAvatar from './CollectionAvatar';
-import Avatar from '../common/Avatar';
+import UserItem from '../users/UserItem';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
 
@@ -85,16 +85,13 @@ const CollectionCard = ({
             </h4>
             <div className="flex flex-wrap items-center text-sm text-gray-600 gap-2">
               <div className="flex items-center min-w-0">
-                <Avatar
+                <UserItem
                   userId={collection.createdBy?._id}
-                  size={20}
-                  className="mr-2 flex-shrink-0"
+                  userName={collection.createdBy?.username}
                   avatarUrl={collection.createdBy?.avatar}
                   avatarType={collection.createdBy?.avatarType}
+                  className="flex-shrink-0"
                 />
-                <span className={`${showFull ? '' : 'truncate'} max-w-[150px]`}>
-                  Par {collection.createdBy?.username || 'Utilisateur anonyme'}
-                </span>
               </div>
               <span className="flex-shrink-0">•</span>
               <span className="flex-shrink-0">{collection.sources?.length || 0} sources</span>
