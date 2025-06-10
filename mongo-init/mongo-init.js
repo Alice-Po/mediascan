@@ -10,7 +10,7 @@ db.createCollection('analytics');
 db.createCollection('collections');
 
 // Fonction pour créer un utilisateur thématique
-function createThematicUser(theme, displayName) {
+function createThematicUser(theme, displayName, bio) {
   const email = `${theme.toLowerCase()}@mediascan.app`;
   try {
     const avatarUrl = `https://avatar.iran.liara.run/public/girl?username=${theme.toLowerCase()}`;
@@ -28,7 +28,7 @@ function createThematicUser(theme, displayName) {
       socialLinks: [],
       createdAt: new Date(),
       updatedAt: new Date(),
-      bio: `Curateur de la collection ${displayName}`,
+      bio: `${bio}`,
       name: displayName,
       role: 'curator',
     });
@@ -41,11 +41,27 @@ function createThematicUser(theme, displayName) {
 }
 
 // Création des utilisateurs thématiques
-const aiUser = createThematicUser('ai', 'Caroline Tolken');
-const cyberUser = createThematicUser('cybersecurity', 'Bénédicte Laffite');
-const ecoUser = createThematicUser('ecology', 'Sophie Gaspard');
-const industryUser = createThematicUser('industry', 'Emma Girelles');
-const geopoliticsUser = createThematicUser('geopolitics', 'Claudine Duchêne');
+const aiUser = createThematicUser('ai', 'Caroline Tolken', 'Chercheuse en IA');
+const cyberUser = createThematicUser(
+  'cybersecurity',
+  'Bénédicte Laffite',
+  'Journaliste en cybersécurité'
+);
+const ecoUser = createThematicUser(
+  'ecology',
+  'Sophie Gaspard',
+  'Scientifique spécialisée sur les écosystèmes aquatiques'
+);
+const industryUser = createThematicUser(
+  'industry',
+  'Emma Girelles',
+  "Doctorante sur l'industrie française"
+);
+const geopoliticsUser = createThematicUser(
+  'geopolitics',
+  'Claudine Duchêne',
+  'Conseillère ministérielle en géopolitique'
+);
 
 // Création de l'utilisateur système Médiascan
 const systemUser = db.users.insertOne({
@@ -58,14 +74,15 @@ const systemUser = db.users.insertOne({
   avatarType: 'url',
   createdAt: new Date(),
   updatedAt: new Date(),
+  bio: '',
 });
 
 // Import des sources thématiques
 load('mongo-init/sources/ai.js');
-// load('mongo-init/sources/cybersecurity.js');
-// load('mongo-init/sources/ecology.js');
-// load('mongo-init/sources/industry.js');
-// load('mongo-init/sources/geopolitics.js');
+load('mongo-init/sources/cybersecurity.js');
+load('mongo-init/sources/ecology.js');
+load('mongo-init/sources/industry.js');
+load('mongo-init/sources/geopolitics.js');
 
 // Création des index pour optimiser les requêtes
 db.sources.createIndex({ name: 1 }, { unique: true });
