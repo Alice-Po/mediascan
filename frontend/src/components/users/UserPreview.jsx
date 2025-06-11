@@ -10,18 +10,10 @@ import { formatRelativeTime } from '../../utils/timeUtils';
  * @param {Object} props.user - Données de l'utilisateur
  * @param {boolean} props.isOpen - État d'ouverture de la modal
  * @param {Function} props.onClose - Fonction de fermeture de la modal
- * @param {boolean} props.showSavedArticles - Indique si les articles sauvegardés doivent être affichés
  * @param {boolean} props.loading - Indique si les données sont en cours de chargement
  * @param {node} props.children - Contenu supplémentaire à afficher
  */
-const UserPreview = ({
-  user,
-  isOpen,
-  onClose,
-  showSavedArticles = true,
-  loading = false,
-  children,
-}) => {
+const UserPreview = ({ user, isOpen, onClose, loading = false, children }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Profil utilisateur">
       <div className="space-y-6">
@@ -60,12 +52,6 @@ const UserPreview = ({
                 <div className="text-2xl font-bold">{user.collectionsCount || 0}</div>
                 <div className="text-sm text-gray-500">Collections</div>
               </div>
-              {showSavedArticles && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{user.savedArticlesCount || 0}</div>
-                  <div className="text-sm text-gray-500">Articles sauvegardés</div>
-                </div>
-              )}
             </div>
 
             {/* Contenu supplémentaire (collections publiques) */}
@@ -94,7 +80,6 @@ UserPreview.propTypes = {
   }),
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  showSavedArticles: PropTypes.bool,
   loading: PropTypes.bool,
   children: PropTypes.node,
 };

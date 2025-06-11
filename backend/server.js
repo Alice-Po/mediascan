@@ -23,7 +23,6 @@ import sourceRoutes from './routes/sourceRoutes.js';
 import articleRoutes from './routes/articleRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import collectionRoutes from './routes/collectionRoutes.js';
-import userRoutes from './routes/userRoutes.js';
 
 // Variable pour stocker la connexion MongoDB
 let mongoConnection;
@@ -105,7 +104,6 @@ app.use('/api/sources', sourceRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/collections', collectionRoutes);
-app.use('/api/users', userRoutes);
 
 // Route de test API uniquement en développement
 if (config.mode === 'development') {

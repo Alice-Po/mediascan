@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '../common/Avatar';
 import UserPreview from './UserPreview';
-import { useUser } from '../../hooks/useUser';
+import CollectionItem from '../collections/CollectionItem';
+import CollectionDetails from '../collections/CollectionDetails';
+import Modal from '../common/Modal';
+import { fetchUserPublicCollections } from '../../api/collectionsApi';
+import { formatRelativeTime } from '../../utils/timeUtils';
 
 /**
  * Composant pour afficher un utilisateur avec son avatar et gérer l'affichage du preview
@@ -15,36 +19,43 @@ import { useUser } from '../../hooks/useUser';
  */
 const UserItem = ({ userId, userName, avatarUrl, avatarType, className = '' }) => {
   const [showPreview, setShowPreview] = useState(false);
-  const [publicCollections, setPublicCollections] = useState([]);
-  const { user, loading, error, loadUserDetails, loadUserPublicCollections } = useUser(userId);
-
-  // Charger les détails utilisateur quand on ouvre le preview
-  useEffect(() => {
-    if (showPreview) {
-      loadUserDetails();
-    }
-  }, [showPreview, loadUserDetails]);
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   // Charger les collections publiques quand on ouvre le preview
   useEffect(() => {
     const loadCollections = async () => {
-      if (showPreview && user) {
-        const collections = await loadUserPublicCollections();
-        setPublicCollections(collections);
+      if (showPreview) {
+        try {
+          setLoading(true);
+          const userCollections = await fetchUserPublicCollections(userId);
+          setCollections(userCollections);
+        } catch (err) {
+          console.error('Erreur lors du chargement des collections:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
       }
     };
     loadCollections();
-  }, [showPreview, user, loadUserPublicCollections]);
+  }, [showPreview, userId]);
 
   const handleClick = (e) => {
     e.preventDefault();
     setShowPreview(true);
   };
 
-  // Utiliser les données initiales si disponibles, sinon utiliser les données chargées
-  const displayName = userName || user?.username || 'Utilisateur anonyme';
-  const displayAvatarUrl = avatarUrl || user?.avatar;
-  const displayAvatarType = avatarType || user?.avatarType;
+  const handleCollectionClick = (collection) => {
+    setSelectedCollection(collection);
+    setShowCollectionModal(true);
+  };
+
+  // Les informations de l'utilisateur viennent de la première collection
+  const userInfo = collections[0]?.createdBy || {};
 
   return (
     <>
@@ -56,32 +67,68 @@ const UserItem = ({ userId, userName, avatarUrl, avatarType, className = '' }) =
           userId={userId}
           size={20}
           className="mr-2"
-          avatarUrl={displayAvatarUrl}
-          avatarType={displayAvatarType}
+          avatarUrl={avatarUrl || userInfo.avatar}
+          avatarType={avatarType || userInfo.avatarType}
         />
-        <span className="text-sm text-gray-500 group-hover:text-gray-700">{displayName}</span>
+        <span className="text-sm text-gray-500 group-hover:text-gray-700">
+          {userName || userInfo.username || 'Utilisateur anonyme'}
+        </span>
       </button>
 
       <UserPreview
-        user={user}
+        user={{
+          ...userInfo,
+          _id: userId,
+          username: userName || userInfo.username,
+          avatar: avatarUrl || userInfo.avatar,
+          avatarType: avatarType || userInfo.avatarType,
+        }}
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
         loading={loading}
         showSavedArticles={true}
       >
-        {publicCollections.length > 0 && (
+        {collections.length > 0 && (
           <div className="mt-4">
             <h3 className="text-sm font-medium text-gray-500 mb-2">Collections publiques</h3>
             <div className="space-y-2">
-              {publicCollections.map((collection) => (
-                <div key={collection._id} className="p-2 bg-gray-50 rounded-lg text-sm">
-                  {collection.name}
-                </div>
+              {collections.map((collection) => (
+                <CollectionItem
+                  key={collection._id}
+                  collection={collection}
+                  currentUserId={userId}
+                  showActionButtons={true}
+                  actionConfig={{ view: true, edit: false, delete: false, share: true }}
+                  onClick={() => handleCollectionClick(collection)}
+                />
               ))}
             </div>
           </div>
         )}
       </UserPreview>
+
+      {/* Modal pour les détails de la collection */}
+      <Modal
+        isOpen={showCollectionModal}
+        onClose={() => setShowCollectionModal(false)}
+        title="Détails de la collection"
+        size="xl"
+      >
+        {selectedCollection && (
+          <CollectionDetails
+            collection={{
+              ...selectedCollection,
+              createdBy: {
+                ...selectedCollection.createdBy,
+                username:
+                  userName || selectedCollection.createdBy?.username || 'Utilisateur anonyme',
+              },
+            }}
+            isOwner={false}
+            layoutType="compact"
+          />
+        )}
+      </Modal>
     </>
   );
 };

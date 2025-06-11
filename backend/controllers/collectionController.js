@@ -29,14 +29,23 @@ export const getUserCollections = async (req, res) => {
 
 // @desc    Récupérer toutes les collections publiques
 // @route   GET /api/collections/public
+// @route   GET /api/collections/user/:userId/public
 // @access  Private
 export const getPublicCollections = async (req, res) => {
   try {
-    const collections = await Collection.find({ isPublic: true })
+    // Construire le filtre de base
+    const filter = { isPublic: true };
+
+    // Si un userId est spécifié, l'ajouter au filtre
+    if (req.params.userId) {
+      filter.userId = req.params.userId;
+    }
+
+    const collections = await Collection.find(filter)
       .populate('sources', 'name url faviconUrl')
-      .populate('userId', 'username') // Pour afficher le nom du créateur
+      .populate('userId', 'username bio createdAt avatar avatarType') // Ajout des champs nécessaires
       .sort({ updatedAt: -1 })
-      .limit(10); // Limiter à 10 collections pour l'affichage dans l'onboarding
+      .limit(req.params.userId ? 0 : 10); // Ne pas limiter si on cherche pour un utilisateur spécifique
 
     res.status(200).json({
       success: true,

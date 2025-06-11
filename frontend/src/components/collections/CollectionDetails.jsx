@@ -118,16 +118,7 @@ const CollectionDetails = ({
   if (!collection) return null;
 
   // Obtenir le nom du créateur
-  let creatorName = 'Utilisateur anonyme';
-  if (isUserOwner) {
-    creatorName = 'vous';
-  } else if (collection.createdBy?.username) {
-    creatorName = collection.createdBy.username;
-  } else if (collection.creator?.username) {
-    creatorName = collection.creator.username;
-  } else if (collection.user?.username) {
-    creatorName = collection.user.username;
-  }
+  const creatorName = collection.createdBy?.username || 'Utilisateur anonyme';
 
   return (
     <div className={`collection-details ${layoutType === 'compact' ? 'compact' : ''}`}>

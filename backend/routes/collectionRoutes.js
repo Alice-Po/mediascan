@@ -23,6 +23,9 @@ router.use(protect);
 // Route pour les collections publiques
 router.get('/public', getPublicCollections);
 
+// Route pour les collections publiques d'un utilisateur spécifique
+router.get('/user/:userId/public', getPublicCollections);
+
 // Route pour les collections suivies
 router.get('/followed', getFollowedCollections);
 

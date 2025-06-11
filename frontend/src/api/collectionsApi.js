@@ -196,3 +196,22 @@ export const fetchFollowedCollections = async () => {
     throw error;
   }
 };
+
+/**
+ * Récupérer toutes les collections publiques d'un utilisateur spécifique
+ * @param {string} userId - ID de l'utilisateur
+ * @returns {Promise} Liste des collections publiques de l'utilisateur
+ */
+export const fetchUserPublicCollections = async (userId) => {
+  try {
+    const response = await api.get(`/collections/user/${userId}/public`);
+    return response.data.data;
+  } catch (error) {
+    console.error(
+      'API: Error fetching user public collections:',
+      error.response?.status,
+      error.response?.data?.message || error.message
+    );
+    throw error;
+  }
+};
