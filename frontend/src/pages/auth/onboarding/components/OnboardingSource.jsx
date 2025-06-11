@@ -11,6 +11,7 @@ import RssHelpModal from '../../../../components/sources/RssHelpModal';
 import AddSourceForm from '../../../../components/sources/AddSourceForm';
 import SourcesCatalog from '../../../../components/sources/SourcesCatalog';
 import { useSources } from '../../../../hooks/useSources';
+import FAQ from '../../../../components/common/FAQ';
 
 const OnboardingSource = ({ onValidationChange }) => {
   const [showRssHelp, setShowRssHelp] = useState(false);
@@ -100,7 +101,7 @@ const OnboardingSource = ({ onValidationChange }) => {
           Où puis-je trouver des flux qui m'intéressent ?
         </h3>
         <p className="text-gray-700 mb-4">
-          Le moyen le plus simple est d'installer une extension pour dxétecter les flux rss, vous
+          Le moyen le plus simple est d'installer une extension pour détecter les flux rss, vous
           rendre sur la page web d'un flux qui vous intéresse et récupérer l'adresse du flux qui
           vous intéresse.
         </p>
@@ -137,22 +138,45 @@ const OnboardingSource = ({ onValidationChange }) => {
         </div>
       </div>
 
-      {/* Liste des types de sources */}
-      <h3 className="font-medium text-gray-900 mb-3 text-base sm:text-lg">
-        Voici les types de flux que nous supportons pour l'instant :
-      </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {sources.map((source, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-2 p-2 rounded-lg bg-white border border-gray-100 hover:border-blue-200 transition-colors"
-          >
-            <source.icon className="w-4 h-4 text-blue-600 shrink-0" />
-            <span className="text-sm font-medium text-gray-700">{source.title}</span>
-          </div>
-        ))}
-      </div>
-      <p className="text-gray-700 mb-4">L'intégration des newsletters arrivent prochainement ! </p>
+      {/* FAQ RSS */}
+      <FAQ
+        title="À propos des flux RSS"
+        items={[
+          {
+            question: 'Quels types de flux peut ainsi être agrégés ?',
+            answer: (
+              <>
+                <p className="text-gray-700 mb-4">
+                  Actualités, blogs, podcasts, documentation technique, réseaux sociaux, offre
+                  d'emploi, données météo, flux financiers, alertes légales, données météo, forum...
+                </p>
+                <p className="text-gray-700">
+                  L'intégration des newsletters arrivent prochainement !
+                </p>
+              </>
+            ),
+          },
+          {
+            question: 'Est ce que tout les sites web ou application peuvent être agrégés ?',
+            answer: (
+              <>
+                <p className="text-gray-700 mb-4">
+                  La présence d'un flux RSS dépend principalement de la stratégie commerciale du
+                  site - les plateformes qui monétisent via la publicité ou les données utilisateurs
+                  (comme Facebook, Instagram) évitent volontairement le RSS car cela contournerait
+                  leurs revenus. À l'inverse, les blogs, sites d'actualité et plateformes axées
+                  contenu l'adoptent pour fidéliser leur audience. La plupart des technologies de
+                  création de contenu l'implémente par défaut comme wordpress. Enfin, c'est souvent
+                  une question de priorité - beaucoup de sites pourraient techniquement proposer du
+                  RSS mais ne le font pas par méconnaissance de l'intérêt utilisateur ou par manque
+                  de ressources dédiées.
+                </p>
+              </>
+            ),
+          },
+        ]}
+        className="mt-8"
+      />
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm">

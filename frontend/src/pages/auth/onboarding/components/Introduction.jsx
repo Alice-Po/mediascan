@@ -13,8 +13,8 @@ const Step1Introduction = ({ onValidationChange }) => {
     <div className="space-y-6 sm:space-y-8">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-          On vous propose un petit tour d'horizon pour commencer la configuration de votre premier
-          fils d'actualité
+          On vous propose un petit tour d'horizon pour comprendre le principe de notre agrégateur
+          d'actualités
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
           Tout d'abord, un grand <strong>MERCI</strong> à vous de faire partie de nos premiers
