@@ -45,15 +45,6 @@ const UserPreview = ({ user, isOpen, onClose, loading = false, children }) => {
                 <p className="text-gray-700">{user.bio}</p>
               </div>
             )}
-
-            {/* Statistiques */}
-            <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-gray-200">
-              <div className="text-center">
-                <div className="text-2xl font-bold">{user.collectionsCount || 0}</div>
-                <div className="text-sm text-gray-500">Collections</div>
-              </div>
-            </div>
-
             {/* Contenu supplémentaire (collections publiques) */}
             {children}
           </>
