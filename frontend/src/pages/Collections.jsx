@@ -2,6 +2,7 @@ import React, { useEffect, useContext, useState } from 'react';
 import { CollectionsList } from '../components/collections';
 import { useCollections } from '../hooks/useCollections';
 import { AuthContext } from '../context/AuthContext';
+import { useDefaultCollection } from '../context/DefaultCollectionContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicCollectionsCatalog from '../components/collections/PublicCollectionsCatalog';
 import { useSnackbar, SNACKBAR_TYPES } from '../context/SnackbarContext';
@@ -11,6 +12,7 @@ const Collections = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { showSnackbar } = useSnackbar();
+  const { defaultCollection, setAsDefault } = useDefaultCollection();
   const {
     ownedCollections,
     followedCollections,
@@ -72,6 +74,27 @@ const Collections = () => {
     }
   };
 
+  // Callback pour gérer le changement de collection par défaut
+  const handleDefaultCollectionChange = async (collectionId) => {
+    try {
+      const success = await setAsDefault(collectionId);
+      if (success) {
+        showSnackbar('Collection par défaut mise à jour', SNACKBAR_TYPES.SUCCESS);
+      } else {
+        showSnackbar(
+          'Erreur lors de la mise à jour de la collection par défaut',
+          SNACKBAR_TYPES.ERROR
+        );
+      }
+    } catch (error) {
+      console.error('Error setting default collection:', error);
+      showSnackbar(
+        'Erreur lors de la mise à jour de la collection par défaut',
+        SNACKBAR_TYPES.ERROR
+      );
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-4">
       {/* Header */}
@@ -108,6 +131,8 @@ const Collections = () => {
             onShare={handleShareClick}
             onSourceRemove={handleSourceRemove}
             currentUserId={user?._id}
+            defaultCollection={defaultCollection}
+            onDefaultChange={handleDefaultCollectionChange}
           />
         )}
       </div>
@@ -128,6 +153,8 @@ const Collections = () => {
               onShare={handleShareClick}
               onSourceRemove={handleSourceRemove}
               currentUserId={user?._id}
+              defaultCollection={defaultCollection}
+              onDefaultChange={handleDefaultCollectionChange}
             />
           </>
         ) : (

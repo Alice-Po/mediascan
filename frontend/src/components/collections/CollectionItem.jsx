@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { generateFollowersFromId } from '../../utils/colorUtils';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import {
   GlobeIcon,
   LockIcon,
@@ -13,6 +14,7 @@ import {
   ProfileIcon,
 } from './../common/icons';
 import CollectionAvatar from './CollectionAvatar';
+import Avatar from '../common/Avatar';
 
 /**
  * Composant réutilisable pour afficher un élément de collection
@@ -24,6 +26,7 @@ import CollectionAvatar from './CollectionAvatar';
  * @param {Function} props.onDelete - Fonction appelée quand le bouton supprimer est cliqué
  * @param {Function} props.onShare - Fonction appelée quand le bouton partager est cliqué
  * @param {Function} props.onSourceRemove - Fonction appelée quand une source est supprimée
+ * @param {Function} props.onDefaultChange - Fonction appelée quand la collection est définie par défaut
  * @param {string} props.currentUserId - ID de l'utilisateur actuel
  * @param {boolean} props.showActionButtons - Afficher ou non les boutons d'action
  * @param {Object} props.actionConfig - Configuration des boutons d'action à afficher
@@ -36,11 +39,15 @@ const CollectionItem = ({
   onDelete,
   onShare,
   onSourceRemove,
+  onDefaultChange,
   currentUserId,
   showActionButtons = true,
   actionConfig = { view: true, edit: true, delete: true, share: true },
   isOnboarding = false,
 }) => {
+  const { isDefaultCollection } = useDefaultCollection();
+  const isDefault = isDefaultCollection(collection._id);
+
   // Déterminer si c'est une collection suivie (n'appartient pas à l'utilisateur)
   const isFollowed =
     collection.isFollowed || (collection.userId !== currentUserId && collection.isPublic);
@@ -77,6 +84,13 @@ const CollectionItem = ({
     if (onClick) onClick(collection);
   };
 
+  const handleSetDefaultClick = async (e) => {
+    e.stopPropagation();
+    if (onDefaultChange) {
+      onDefaultChange(collection._id);
+    }
+  };
+
   return (
     <div
       className={`p-3 hover:bg-gray-50 cursor-pointer transition ${
@@ -89,9 +103,20 @@ const CollectionItem = ({
         <CollectionAvatar collection={collection} size="md" className="mr-3" />
 
         <div className="flex-1 min-w-0 overflow-hidden">
-          {/* Première ligne: titre et badges */}
+          {/* Première ligne: titre, badges et étoile */}
           <div className="flex items-center flex-wrap">
             <h3 className="font-medium text-gray-900 truncate mr-2">{collection.name}</h3>
+            <button
+              onClick={handleSetDefaultClick}
+              className="mr-2 focus:outline-none"
+              title={isDefault ? 'Collection par défaut' : 'Définir comme collection par défaut'}
+            >
+              <StarIcon
+                className={`h-5 w-5 transition-colors ${
+                  isDefault ? 'text-yellow-400 fill-current' : 'text-gray-400 hover:text-yellow-400'
+                }`}
+              />
+            </button>
             {collection.isPublic ? (
               <span className="inline-flex items-center">
                 <GlobeIcon />
@@ -119,11 +144,13 @@ const CollectionItem = ({
           <div className="flex flex-wrap text-xs text-gray-500 w-full items-center mt-1">
             {/* Avatar du créateur */}
             <span className="flex items-center mr-2">
-              {collection.createdBy?.avatarUrl ? (
-                <img
-                  src={collection.createdBy.avatarUrl}
-                  alt={collection.createdBy.username || 'Créateur'}
-                  className="w-6 h-6 rounded-full object-cover border border-gray-200 mr-1"
+              {collection.createdBy?.avatar ? (
+                <Avatar
+                  userId={collection.createdBy._id}
+                  avatarUrl={collection.createdBy.avatar}
+                  avatarType={collection.createdBy.avatarType}
+                  size={24}
+                  className="mr-1"
                 />
               ) : (
                 <ProfileIcon className="w-6 h-6 text-gray-400 mr-1" />
@@ -227,6 +254,7 @@ CollectionItem.propTypes = {
   onDelete: PropTypes.func,
   onShare: PropTypes.func,
   onSourceRemove: PropTypes.func,
+  onDefaultChange: PropTypes.func,
   currentUserId: PropTypes.string,
   showActionButtons: PropTypes.bool,
   actionConfig: PropTypes.shape({

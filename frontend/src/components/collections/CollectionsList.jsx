@@ -12,6 +12,7 @@ import CollectionItem from './CollectionItem';
  * @param {Function} props.onDelete - Callback pour la suppression
  * @param {Function} props.onShare - Callback pour le partage
  * @param {Function} props.onSourceRemove - Callback pour la suppression d'une source
+ * @param {Function} props.onDefaultChange - Callback pour le changement de collection par défaut
  * @param {string} props.currentUserId - ID de l'utilisateur courant
  * @param {boolean} props.isOnboarding - Indique si le composant est utilisé dans l'onboarding
  */
@@ -22,6 +23,7 @@ const CollectionsList = ({
   onDelete,
   onShare,
   onSourceRemove,
+  onDefaultChange,
   currentUserId,
   isOnboarding = false,
 }) => {
@@ -44,6 +46,7 @@ const CollectionsList = ({
             onDelete={onDelete}
             onShare={onShare}
             onSourceRemove={onSourceRemove}
+            onDefaultChange={onDefaultChange}
             currentUserId={currentUserId}
             showActionButtons={true}
             actionConfig={actionConfig}
@@ -67,6 +70,7 @@ CollectionsList.propTypes = {
   onDelete: PropTypes.func,
   onShare: PropTypes.func,
   onSourceRemove: PropTypes.func,
+  onDefaultChange: PropTypes.func,
   currentUserId: PropTypes.string,
   isOnboarding: PropTypes.bool,
 };
