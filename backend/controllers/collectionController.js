@@ -134,7 +134,7 @@ export const getCollectionById = async (req, res) => {
         path: 'sources',
         select: 'name url rssUrl faviconUrl description orientations funding categories',
       })
-      .populate('userId', 'username'); // Populer les informations de l'utilisateur créateur
+      .populate('userId', 'username bio createdAt avatar avatarType'); // Populer les informations de l'utilisateur créateur
 
     if (!collection) {
       return res.status(404).json({
@@ -595,7 +595,7 @@ export const getFollowedCollections = async (req, res) => {
       _id: { $in: user.followedCollections },
     })
       .populate('sources', 'name url faviconUrl')
-      .populate('userId', 'username'); // Ajout du populate pour le créateur
+      .populate('userId', 'username bio createdAt avatar avatarType'); // Ajout des champs nécessaires pour l'avatar
 
     res.status(200).json({
       success: true,
