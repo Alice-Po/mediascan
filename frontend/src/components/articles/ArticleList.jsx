@@ -17,7 +17,6 @@ import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
  * @param {number} props.pageSize - Nombre d'articles par page (optionnel, défaut: 20)
  */
 const ArticleList = ({ filters, pageSize = 20 }) => {
-  // Récupérer les collections pertinentes pour le filtrage
   const { allCollections } = useContext(AppContext);
   const { user } = useContext(AuthContext);
   const { saveArticle, unsaveArticle } = useSavedArticles();
@@ -32,28 +31,58 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
   const activeCollectionId = filters?.collection || defaultCollection?._id;
   const activeCollection = allCollections?.find((c) => c._id === activeCollectionId);
 
-  // Utiliser le hook généraliste pour les articles, en injectant les filtres du parent
-  const {
-    articles,
-    loading,
-    error,
-    hasMore,
-    loadMore,
-    updateArticle,
-    setFilters: setHookFilters,
-  } = useArticles({
+  // Utiliser le hook généraliste pour les articles
+  const { articles, loading, error, hasMore, loadMore, updateArticle } = useArticles({
     fetchArticlesFn: fetchArticles,
     collections: allCollections,
-    options: { pageSize, initialFilters: filters },
+    options: {
+      pageSize,
+      initialFilters: filters,
+    },
   });
-
-  // Synchroniser les filtres du parent avec le hook si la prop change
-  useEffect(() => {
-    setHookFilters(filters);
-  }, [filters, setHookFilters]);
 
   // Référence pour l'observateur d'intersection
   const observer = useRef();
+  const loadingRef = useRef(loading);
+
+  // Mettre à jour la ref de loading quand loading change
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  // Callback pour l'observateur d'intersection (infinite scroll)
+  const lastArticleRef = useCallback(
+    (node) => {
+      if (loadingRef.current || !node) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
+            loadMore().catch(console.error);
+          }
+        },
+        {
+          root: null,
+          rootMargin: '100px',
+          threshold: 0.1,
+        }
+      );
+
+      observer.current.observe(node);
+    },
+    [hasMore, loadMore]
+  );
+
+  // Nettoyer l'observer
+  useEffect(() => {
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
 
   // Fonction pour gérer le partage d'un article
   const handleShare = (url) => {
@@ -86,70 +115,16 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
         showSnackbar('Article sauvegardé avec succès', SNACKBAR_TYPES.SUCCESS);
       }
 
-      // Mettre à jour l'état de l'article dans le hook
       updateArticle(articleId, { isSaved: !article.isSaved });
     } catch (error) {
       console.error("Erreur lors de la sauvegarde de l'article:", error);
     }
   };
 
-  // Callback pour l'observateur d'intersection (infinite scroll)
-  const lastArticleRef = useCallback(
-    (node) => {
-      if (loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && hasMore) {
-            try {
-              loadMore();
-            } catch (error) {
-              // L'erreur est déjà gérée dans le hook
-            }
-          }
-        },
-        {
-          root: null,
-          rootMargin: '100px',
-          threshold: 0.1,
-        }
-      );
-      if (node) observer.current.observe(node);
-    },
-    [loading, hasMore, loadMore]
-  );
-
-  useEffect(() => {
-    return () => {
-      if (observer.current) {
-        observer.current.disconnect();
-      }
-    };
-  }, []);
-
-  // Affichage du message d'erreur
-  const renderError = () => {
-    return (
-      <div className="flex justify-center py-4">
-        <div className="text-red-500">{error}</div>
-      </div>
-    );
-  };
-
-  // Affichage du message de fin de liste
-  const renderEndOfList = () => {
-    if (!hasMore && articles.length > 0) {
-      return (
-        <div className="text-center py-6 text-gray-500">Vous avez atteint la fin de la liste</div>
-      );
-    }
-    return null;
-  };
-
   // Si nous sommes sur /app sans paramètres d'URL et sans filtres stockés
   const isOnDashboardWithoutParams = window.location.pathname === '/app' && !window.location.search;
 
-  if (loading) {
+  if (loading && articles.length === 0) {
     return (
       <div className="flex justify-center py-4">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
@@ -161,7 +136,6 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
     return <NoCollectionChosen />;
   }
 
-  // Si une collection est active (explicite ou par défaut) et qu'elle est vide
   if (activeCollectionId && !loading && articles.length === 0) {
     return (
       <EmptyState
@@ -174,7 +148,6 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
 
   return (
     <div className="article-list -mx-3 sm:mx-0">
-      {/* Liste des articles */}
       {articles.map((article, index) => (
         <div
           ref={index === articles.length - 1 ? lastArticleRef : null}
@@ -185,14 +158,21 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
         </div>
       ))}
 
-      {/* Affichage des états */}
-      {error && renderError()}
+      {error && (
+        <div className="flex justify-center py-4">
+          <div className="text-red-500">{error}</div>
+        </div>
+      )}
+
       {loading && (
         <div className="flex justify-center py-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
         </div>
       )}
-      {!loading && renderEndOfList()}
+
+      {!loading && !hasMore && articles.length > 0 && (
+        <div className="text-center py-6 text-gray-500">Vous avez atteint la fin de la liste</div>
+      )}
     </div>
   );
 };

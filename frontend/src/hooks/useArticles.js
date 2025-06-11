@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchArticles as defaultFetchArticles } from '../api/articlesApi';
 
 // État initial des filtres
@@ -20,19 +20,6 @@ export const useArticles = ({
   collections = [],
   options = {},
 } = {}) => {
-  // Filtres (avec persistance)
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem('articleFilters');
-    const initialFiltersValue = savedFilters
-      ? JSON.parse(savedFilters)
-      : options.initialFilters || initialFilters;
-    return initialFiltersValue;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('articleFilters', JSON.stringify(filters));
-  }, [filters]);
-
   // Articles, pagination, loading, erreur, hasMore
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,21 +28,47 @@ export const useArticles = ({
   const [hasMore, setHasMore] = useState(true);
   const pageSize = options.pageSize || 20;
 
+  // Filtres (avec persistance)
+  const [internalFilters, setInternalFilters] = useState(() => {
+    // Si des filtres initiaux sont fournis, les utiliser
+    if (options.initialFilters) {
+      return options.initialFilters;
+    }
+    // Sinon, essayer de charger depuis le localStorage
+    const savedFilters = localStorage.getItem('articleFilters');
+    return savedFilters ? JSON.parse(savedFilters) : initialFilters;
+  });
+
+  // Utiliser les filtres des props s'ils existent, sinon utiliser les filtres internes
+  const filters = options.initialFilters || internalFilters;
+
+  // Sauvegarder les filtres dans le localStorage uniquement si ce sont les filtres internes
+  useEffect(() => {
+    if (!options.initialFilters) {
+      localStorage.setItem('articleFilters', JSON.stringify(internalFilters));
+    }
+  }, [internalFilters, options.initialFilters]);
+
   // Charger les articles (initial ou refresh)
   const loadArticles = useCallback(
     async (reset = false) => {
-      if (!filters.collection) {
-        // Si pas de collection, ne pas charger les articles
-        setArticles([]);
-        setLoading(false);
+      // Ne pas charger si pas de collection et qu'on n'est pas en mode reset
+      if (!filters.collection && !reset) {
         return;
+      }
+
+      // Si reset, réinitialiser la page et les articles
+      if (reset) {
+        setPage(1);
+        setArticles([]);
       }
 
       setLoading(true);
       setError(null);
+
       try {
         const params = {
-          page: 1,
+          page: reset ? 1 : page,
           limit: pageSize,
           ...(filters.sources?.length > 0 && { sources: filters.sources.join(',') }),
           ...(filters.collection && { collection: filters.collection }),
@@ -64,70 +77,62 @@ export const useArticles = ({
 
         const response = await fetchArticlesFn(params);
 
-        setArticles(response.articles || []);
+        if (reset) {
+          setArticles(response.articles || []);
+        } else {
+          const existingIds = articles.map((a) => a._id);
+          const newArticles = (response.articles || []).filter((a) => !existingIds.includes(a._id));
+          setArticles((prev) => [...prev, ...newArticles]);
+        }
+
         setHasMore(response.hasMore);
-        setPage(1);
+        if (!reset) {
+          setPage((prev) => prev + 1);
+        }
       } catch (err) {
         setError(err.message || 'Erreur lors du chargement des articles');
       } finally {
         setLoading(false);
       }
     },
-    [fetchArticlesFn, filters, pageSize]
+    [fetchArticlesFn, filters, pageSize, page, articles]
   );
 
-  // Scroll infini : charger plus d'articles
-  const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const nextPage = page + 1;
-      const params = {
-        page: nextPage,
-        limit: pageSize,
-        ...(filters.sources.length > 0 && { sources: filters.sources.join(',') }),
-        ...(filters.collection && { collection: filters.collection }),
-        ...(filters.searchTerm && { searchTerm: filters.searchTerm }),
-      };
-      const response = await fetchArticlesFn(params);
-      const existingIds = articles.map((a) => a._id);
-      const uniqueNewArticles = response.articles.filter((a) => !existingIds.includes(a._id));
-      setArticles((prev) => [...prev, ...uniqueNewArticles]);
-      setHasMore(response.hasMore);
-      setPage(nextPage);
-    } catch (err) {
-      setError(err.message || "Erreur lors du chargement de plus d'articles");
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, hasMore, page, filters, pageSize, fetchArticlesFn, articles]);
+  // Recharger les articles quand les filtres changent
+  useEffect(() => {
+    const shouldReset = true;
+    loadArticles(shouldReset);
+  }, [
+    filters.collection,
+    filters.searchTerm,
+    // Ajouter sources ici car nous voulons recharger quand les sources changent dans CollectionDetails/SourceDetails
+    filters.sources?.join(','),
+  ]);
 
   // Mise à jour d'un article dans la liste locale
   const updateArticle = useCallback((articleId, updates) => {
     setArticles((prev) => prev.map((a) => (a._id === articleId ? { ...a, ...updates } : a)));
   }, []);
 
-  // Reset des filtres
+  // Reset des filtres (uniquement pour les filtres internes)
   const resetFilters = useCallback(() => {
-    setFilters(options.initialFilters || initialFilters);
+    if (!options.initialFilters) {
+      setInternalFilters(initialFilters);
+    }
+    setPage(1);
+    setArticles([]);
+    setHasMore(true);
   }, [options.initialFilters]);
-
-  // Recharger les articles au montage ou quand les filtres changent
-  useEffect(() => {
-    loadArticles(true);
-  }, [filters, loadArticles]);
 
   return {
     articles,
-    filters,
-    setFilters,
-    resetFilters,
+    filters: options.initialFilters || internalFilters,
+    setFilters: options.initialFilters ? undefined : setInternalFilters,
+    resetFilters: options.initialFilters ? undefined : resetFilters,
     loading,
     error,
     hasMore,
-    loadMore,
+    loadMore: () => loadArticles(false),
     updateArticle,
-    setArticles, // pour usage avancé
   };
 };
