@@ -16,7 +16,7 @@
         "preview:server:win": "set NODE_ENV=preview&& node backend/server.js",
         "preview": "concurrently \"npm run preview:server\" \"npm run preview --prefix frontend\"",
         "start": "npm run start --prefix backend",
-        "render-build": "npm run install:all && npm run build"
+        "render-build": "npm run install:all && npm run build && cd backend && npm run render-postbuild"
     },
     "dependencies": {
         "bcryptjs": "^3.0.2",
@@ -31,5 +31,8 @@
     "devDependencies": {
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     }
 }

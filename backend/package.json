@@ -9,7 +9,8 @@
         "build": "echo 'Build completed'",
         "test": "NODE_ENV=test vitest run",
         "test:watch": "NODE_ENV=test vitest",
-        "test:coverage": "NODE_ENV=test vitest run --coverage"
+        "test:coverage": "NODE_ENV=test vitest run --coverage",
+        "render-postbuild": "apt-get update && apt-get install -y libvips-dev"
     },
     "dependencies": {
         "bcryptjs": "^3.0.2",
@@ -20,7 +21,9 @@
         "mongoose": "^8.13.1",
         "multer": "^2.0.0",
         "node-cron": "^3.0.3",
-        "rss-parser": "^3.13.0"
+        "rss-parser": "^3.13.0",
+        "sharp": "^0.33.2",
+        "nodemailer": "^6.10.1"
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^1.3.1",
@@ -28,5 +31,8 @@
         "nodemon": "^3.1.9",
         "supertest": "^6.3.4",
         "vitest": "^1.3.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     }
 }
