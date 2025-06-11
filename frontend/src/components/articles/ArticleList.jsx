@@ -5,7 +5,9 @@ import { AppContext } from '../../context/AppContext';
 import { useArticles } from '../../hooks/useArticles';
 import { fetchArticles } from '../../api/articlesApi';
 import { AuthContext } from '../../context/AuthContext';
+import { useDefaultCollection } from '../../context/DefaultCollectionContext';
 import EmptyState from './EmptyState';
+import NoCollectionChosen from './NoCollectionChosen';
 import { useSnackbar, SNACKBAR_TYPES } from '../../context/SnackbarContext';
 
 /**
@@ -20,6 +22,15 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
   const { user } = useContext(AuthContext);
   const { saveArticle, unsaveArticle } = useSavedArticles();
   const { showSnackbar } = useSnackbar();
+  const { defaultCollection } = useDefaultCollection();
+
+  // Vérifier si des filtres existent dans le localStorage
+  const savedFilters = localStorage.getItem('articleFilters');
+  const hasStoredFilters = !!savedFilters;
+
+  // Déterminer la collection active
+  const activeCollectionId = filters?.collection || defaultCollection?._id;
+  const activeCollection = allCollections?.find((c) => c._id === activeCollectionId);
 
   // Utiliser le hook généraliste pour les articles, en injectant les filtres du parent
   const {
@@ -135,22 +146,44 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
     return null;
   };
 
+  // Si nous sommes sur /app sans paramètres d'URL et sans filtres stockés
+  const isOnDashboardWithoutParams = window.location.pathname === '/app' && !window.location.search;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isOnDashboardWithoutParams && !hasStoredFilters && !activeCollectionId) {
+    return <NoCollectionChosen />;
+  }
+
+  // Si une collection est active (explicite ou par défaut) et qu'elle est vide
+  if (activeCollectionId && !loading && articles.length === 0) {
+    return (
+      <EmptyState
+        collectionName={activeCollection?.name}
+        collectionId={activeCollection?._id}
+        isDefaultCollection={activeCollection?._id === defaultCollection?._id}
+      />
+    );
+  }
+
   return (
     <div className="article-list -mx-3 sm:mx-0">
-      {/* Liste des articles ou état vide */}
-      {articles.length > 0 ? (
-        articles.map((article, index) => (
-          <div
-            ref={index === articles.length - 1 ? lastArticleRef : null}
-            key={article._id}
-            className="mb-3 last:mb-0"
-          >
-            <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
-          </div>
-        ))
-      ) : !loading ? (
-        <EmptyState />
-      ) : null}
+      {/* Liste des articles */}
+      {articles.map((article, index) => (
+        <div
+          ref={index === articles.length - 1 ? lastArticleRef : null}
+          key={article._id}
+          className="mb-3 last:mb-0"
+        >
+          <ArticleCard article={article} onSave={handleSave} onShare={handleShare} />
+        </div>
+      ))}
 
       {/* Affichage des états */}
       {error && renderError()}

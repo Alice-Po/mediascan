@@ -28,6 +28,15 @@ export const getArticles = async (req, res) => {
       if (userCollection) {
         availableSourceIds = userCollection.sources.map((source) => source._id.toString());
       }
+
+      // Si la collection est spécifiée mais vide, retourner un tableau vide
+      if (availableSourceIds.length === 0) {
+        return res.json({
+          articles: [],
+          hasMore: false,
+          total: 0,
+        });
+      }
     }
 
     // Filtrer par sources spécifiées

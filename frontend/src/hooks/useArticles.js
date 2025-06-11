@@ -23,7 +23,10 @@ export const useArticles = ({
   // Filtres (avec persistance)
   const [filters, setFilters] = useState(() => {
     const savedFilters = localStorage.getItem('articleFilters');
-    return savedFilters ? JSON.parse(savedFilters) : options.initialFilters || initialFilters;
+    const initialFiltersValue = savedFilters
+      ? JSON.parse(savedFilters)
+      : options.initialFilters || initialFilters;
+    return initialFiltersValue;
   });
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export const useArticles = ({
 
   // Articles, pagination, loading, erreur, hasMore
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -41,6 +44,13 @@ export const useArticles = ({
   // Charger les articles (initial ou refresh)
   const loadArticles = useCallback(
     async (reset = false) => {
+      if (!filters.collection) {
+        // Si pas de collection, ne pas charger les articles
+        setArticles([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
@@ -51,12 +61,13 @@ export const useArticles = ({
           ...(filters.collection && { collection: filters.collection }),
           ...(filters.searchTerm && { searchTerm: filters.searchTerm }),
         };
+
         const response = await fetchArticlesFn(params);
+
         setArticles(response.articles || []);
         setHasMore(response.hasMore);
         setPage(1);
       } catch (err) {
-        console.error('[useArticles] Erreur lors du chargement des articles:', err);
         setError(err.message || 'Erreur lors du chargement des articles');
       } finally {
         setLoading(false);
