@@ -2,7 +2,7 @@
 
 // Création de la collection Industrie
 const industryCollection = db.collections.insertOne({
-  name: 'Industrie',
+  name: 'Industrie [Demo]',
   description:
     "Sources d'actualités sur l'industrie, l'innovation et les transformations technologiques",
   userId: industryUser.insertedId,
@@ -30,7 +30,7 @@ const sources = [
   {
     name: "L'Usine Nouvelle",
     url: 'https://www.usinenouvelle.com/',
-    rssUrl: 'https://www.usinenouvelle.com/rss/actualite.xml',
+    rssUrl: 'https://www.usinenouvelle.com/rss/',
     faviconUrl: 'https://www.usinenouvelle.com/favicon.ico',
     description:
       "Média français de référence sur l'actualité industrielle. Couverture des secteurs, innovations technologiques et stratégies d'entreprises.",
@@ -44,30 +44,6 @@ const sources = [
     addedDate: new Date('2024-12-25'),
     collectionId: industryCollection.insertedId,
     createdBy: systemUser._id,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Industries et Technologies',
-    url: 'https://www.industrie-techno.com/',
-    rssUrl: 'https://www.industrie-techno.com/rss',
-    faviconUrl: 'https://www.industrie-techno.com/favicon.ico',
-    description:
-      "Magazine technique sur l'innovation industrielle. Articles sur les nouvelles technologies et procédés industriels.",
-    funding: {
-      type: 'private',
-      details: 'Groupe Infopro Digital',
-    },
-    orientations: ['industry', 'technology'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
     fetchStatus: {
       success: true,
       message: '',
@@ -150,57 +126,9 @@ const sources = [
     status: 'active',
   },
   {
-    name: 'Process Alimentaire',
-    url: 'https://www.processalimentaire.com/',
-    rssUrl: 'https://www.processalimentaire.com/rss',
-    faviconUrl: 'https://www.processalimentaire.com/favicon.ico',
-    description:
-      "Magazine sur l'industrie agroalimentaire. Actualités techniques et économiques du secteur alimentaire.",
-    funding: {
-      type: 'private',
-      details: 'Groupe de presse professionnelle',
-    },
-    orientations: ['industry', 'food'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Industrie Pharma',
-    url: 'https://www.industrie.com/pharma/',
-    rssUrl: 'https://www.industrie.com/pharma/rss',
-    faviconUrl: 'https://www.industrie.com/pharma/favicon.ico',
-    description:
-      "Actualités de l'industrie pharmaceutique. Informations sur la production, la R&D et les réglementations du secteur.",
-    funding: {
-      type: 'private',
-      details: 'Groupe de presse spécialisée',
-    },
-    orientations: ['industry', 'pharmaceutical'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: "La Tribune de l'Industrie",
-    url: 'https://www.latribune.fr/entreprises-finance/industrie',
-    rssUrl: 'https://www.latribune.fr/rss/industrie.xml',
+    url: 'https://www.latribune.fr/Entreprises-secteurs.html',
+    rssUrl: 'https://www.latribune.fr/rss/rubriques/entreprises.html',
     faviconUrl: 'https://www.latribune.fr/favicon.ico',
     description:
       'Section industrie de La Tribune. Analyses économiques et stratégiques des secteurs industriels.',
@@ -247,8 +175,8 @@ const sources = [
   },
   {
     name: 'Industrie du Futur',
-    url: 'https://www.industrie-dufutur.org/',
-    rssUrl: 'https://www.industrie-dufutur.org/feed/',
+    url: 'http://www.industrie-dufutur.org/',
+    rssUrl: 'http://www.industrie-dufutur.org/feed',
     faviconUrl: 'https://www.industrie-dufutur.org/favicon.ico',
     description:
       "Alliance pour l'Industrie du Futur. Actualités et ressources sur la transformation numérique de l'industrie.",
@@ -295,8 +223,8 @@ const sources = [
   },
   {
     name: 'Plastiques & Caoutchoucs Magazine',
-    url: 'https://www.plastiques-caoutchoucs.com/',
-    rssUrl: 'https://www.plastiques-caoutchoucs.com/spip.php?page=backend',
+    url: 'https://www.usinenouvelle.com/plasturgie/',
+    rssUrl: 'https://www.usinenouvelle.com/rss/plasturgie/',
     faviconUrl: 'https://www.plastiques-caoutchoucs.com/favicon.ico',
     description:
       "Magazine spécialisé dans l'industrie des plastiques et caoutchoucs. Actualités techniques et économiques du secteur.",
@@ -377,30 +305,6 @@ const sources = [
       details: 'Groupe de presse technique',
     },
     orientations: ['industry', 'instrumentation'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Energie Plus',
-    url: 'https://www.energie-plus.com/',
-    rssUrl: 'https://www.energie-plus.com/rss',
-    faviconUrl: 'https://www.energie-plus.com/favicon.ico',
-    description:
-      "Magazine sur l'énergie dans l'industrie. Actualités et solutions techniques pour l'efficacité énergétique.",
-    funding: {
-      type: 'private',
-      details: 'Presse professionnelle spécialisée',
-    },
-    orientations: ['industry', 'energy'],
     defaultEnabled: true,
     isUserAdded: false,
     addedDate: new Date('2024-12-25'),

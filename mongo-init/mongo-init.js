@@ -10,10 +10,11 @@ db.createCollection('analytics');
 db.createCollection('collections');
 
 // Fonction pour créer un utilisateur thématique
-function createThematicUser(theme, displayName, bio) {
-  const email = `${theme.toLowerCase()}@mediascan.app`;
+function createThematicUser(theme, displayName, bio, emailCustom, urlAvatar) {
+  const email = emailCustom || `${theme.toLowerCase()}@mediascan.app`;
   try {
-    const avatarUrl = `https://avatar.iran.liara.run/public/girl?username=${theme.toLowerCase()}`;
+    const avatarUrl =
+      urlAvatar || `https://avatar.iran.liara.run/public/girl?username=${theme.toLowerCase()}`;
     const user = db.users.insertOne({
       email: email,
       username: displayName,
@@ -41,25 +42,32 @@ function createThematicUser(theme, displayName, bio) {
 }
 
 // Création des utilisateurs thématiques
-const aiUser = createThematicUser('ai', 'Caroline Tolken', 'Chercheuse en IA');
+const aiUser = createThematicUser('ai', 'Caroline Tolken [Demo]', 'Chercheuse en IA');
 const cyberUser = createThematicUser(
   'cybersecurity',
-  'Bénédicte Laffite',
+  'Bénédicte Laffite [Demo]',
   'Journaliste en cybersécurité'
+);
+const webUser = createThematicUser(
+  'web',
+  'Alice Poggioli',
+  'Entrepreneuse web',
+  'alpog@ik.me',
+  'https://www.alicepoggioli.fr/_astro/_alice-poggioli-comp.DDy5gSTJ_ZROOdi.webp'
 );
 const ecoUser = createThematicUser(
   'ecology',
-  'Sophie Gaspard',
+  'Sophie Gaspard [Demo]',
   'Scientifique spécialisée sur les écosystèmes aquatiques'
 );
 const industryUser = createThematicUser(
   'industry',
-  'Emma Girelles',
+  'Emma Girelles [Demo]',
   "Doctorante sur l'industrie française"
 );
 const geopoliticsUser = createThematicUser(
   'geopolitics',
-  'Claudine Duchêne',
+  'Claudine Duchêne [Demo]',
   'Conseillère ministérielle en géopolitique'
 );
 
@@ -83,6 +91,7 @@ load('mongo-init/sources/cybersecurity.js');
 load('mongo-init/sources/ecology.js');
 load('mongo-init/sources/industry.js');
 load('mongo-init/sources/geopolitics.js');
+load('mongo-init/sources/web.js');
 
 // Création des index pour optimiser les requêtes
 db.sources.createIndex({ name: 1 }, { unique: true });

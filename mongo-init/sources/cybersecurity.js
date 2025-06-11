@@ -2,7 +2,7 @@
 
 // Création de la collection Cybersécurité
 const cyberCollection = db.collections.insertOne({
-  name: 'Cybersécurité',
+  name: 'Cybersécurité [Demo]',
   description:
     "Sources d'actualités sur la cybersécurité, la sécurité informatique et la protection des données",
   userId: cyberUser.insertedId,
@@ -28,33 +28,9 @@ db.users.updateOne(
 // Insertion des sources
 const sources = [
   {
-    name: 'ANSSI - Actualités',
-    url: 'https://www.ssi.gouv.fr/actualite/',
-    rssUrl: 'https://www.ssi.gouv.fr/feed/actualite/',
-    faviconUrl: 'https://www.ssi.gouv.fr/favicon.ico',
-    description:
-      "Actualités de l'Agence Nationale de la Sécurité des Systèmes d'Information, autorité française en cybersécurité.",
-    funding: {
-      type: 'public',
-      details: 'Gouvernement français',
-    },
-    orientations: ['cybersecurity', 'government'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: 'Le Blog de Zythom',
-    url: 'https://www.zythom.com/',
-    rssUrl: 'https://www.zythom.com/feed/',
+    url: 'https://zythom.fr/',
+    rssUrl: 'https://zythom.fr/feed/',
     faviconUrl: 'https://www.zythom.com/favicon.ico',
     description: "Blog d'un expert français en investigation numérique et cybersécurité.",
     funding: {
@@ -85,29 +61,6 @@ const sources = [
       details: 'Média indépendant',
     },
     orientations: ['cybersecurity', 'privacy'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Les Assises de la Sécurité',
-    url: 'https://www.lesassisesdelasecurite.com/',
-    rssUrl: 'https://www.lesassisesdelasecurite.com/feed/',
-    faviconUrl: 'https://www.lesassisesdelasecurite.com/favicon.ico',
-    description: 'Actualités et comptes-rendus du principal événement français de cybersécurité.',
-    funding: {
-      type: 'private',
-      details: 'Groupe WEYOU Group',
-    },
-    orientations: ['cybersecurity', 'conference'],
     defaultEnabled: true,
     isUserAdded: false,
     addedDate: new Date('2024-12-25'),
@@ -245,36 +198,11 @@ const sources = [
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'IT-Connect',
-    url: 'https://www.it-connect.fr/',
-    rssUrl: 'https://www.it-connect.fr/feed/',
-    faviconUrl: 'https://www.it-connect.fr/favicon.ico',
-    description:
-      'Site communautaire français dédié aux professionnels IT avec une forte section cybersécurité. Tutoriels et actualités techniques.',
-    funding: {
-      type: 'community',
-      details: 'Site communautaire avec publicité',
-    },
-    orientations: ['cybersecurity', 'tech-educational'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'Cookie connecté (YouTube)',
     url: 'https://www.youtube.com/channel/UC6-DD1wLBrWf2VFOJ8fUqhQ',
-    rssUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UC6-DD1wLBrWf2VFOJ8fUqhQ',
+    rssUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UC5cs06DgLFeyLIF_II7lWCQ',
     faviconUrl: 'https://www.youtube.com/favicon.ico',
     description:
       'Chaîne YouTube française de vulgarisation en cybersécurité. Explications accessibles des concepts et actualités cyber.',
@@ -297,59 +225,6 @@ const sources = [
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'Underscore_ (YouTube)',
-    url: 'https://www.youtube.com/channel/UCp1yNZacNojEe4fhNL6NLQg',
-    rssUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCp1yNZacNojEe4fhNL6NLQg',
-    faviconUrl: 'https://www.youtube.com/favicon.ico',
-    description:
-      'Chaîne YouTube française traitant de cybersécurité, hacking éthique et culture numérique avec un angle technique.',
-    funding: {
-      type: 'independent',
-      details: 'YouTube, sponsors',
-    },
-    orientations: ['cybersecurity', 'hacking'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Cyrus North (YouTube)',
-    url: 'https://www.youtube.com/channel/UCkKXCZHCDI4dW1HZqb0XPPA',
-    rssUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCkKXCZHCDI4dW1HZqb0XPPA',
-    faviconUrl: 'https://www.youtube.com/favicon.ico',
-    description:
-      'Chaîne YouTube française sur la sécurité informatique et la sensibilisation aux risques numériques pour le grand public.',
-    funding: {
-      type: 'independent',
-      details: 'YouTube, sponsors',
-    },
-    orientations: ['cybersecurity', 'awareness'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-
   {
     name: 'Schneier on Security',
     url: 'https://www.schneier.com/',
@@ -379,7 +254,7 @@ const sources = [
   {
     name: 'The Hacker News',
     url: 'https://thehackernews.com/',
-    rssUrl: 'https://thehackernews.com/feeds/posts/default',
+    rssUrl: 'https://feeds.feedburner.com/TheHackersNews',
     faviconUrl: 'https://thehackernews.com/favicon.ico',
     description:
       'Publication internationale de référence en cybersécurité. Actualités, analyses et alertes sur les menaces informatiques.',
@@ -455,110 +330,6 @@ const sources = [
     status: 'active',
   },
   {
-    name: 'Sécurité Informatique Podcast',
-    url: 'https://securite-informatique.fr/',
-    rssUrl: 'https://securite-informatique.fr/feed/podcast/',
-    faviconUrl: 'https://securite-informatique.fr/favicon.ico',
-    description:
-      'Podcast français sur la sécurité informatique, destiné aux professionnels et passionnés de cybersécurité.',
-    funding: {
-      type: 'independent',
-      details: 'Podcast indépendant',
-    },
-    orientations: ['cybersecurity', 'podcast'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'CyberMatin',
-    url: 'https://www.cybermatin.com/',
-    rssUrl: 'https://www.cybermatin.com/feed/',
-    faviconUrl: 'https://www.cybermatin.com/favicon.ico',
-    description:
-      "Newsletter quotidienne française résumant l'actualité cybersécurité. Synthèse des événements importants du secteur.",
-    funding: {
-      type: 'private',
-      details: 'Newsletter payante',
-    },
-    orientations: ['cybersecurity', 'newsletter'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Stormshield Blog',
-    url: 'https://www.stormshield.com/fr/blog/',
-    rssUrl: 'https://www.stormshield.com/fr/blog/feed/',
-    faviconUrl: 'https://www.stormshield.com/favicon.ico',
-    description:
-      "Blog de l'éditeur français Stormshield. Articles techniques et analyses sur la cybersécurité d'entreprise.",
-    funding: {
-      type: 'private',
-      details: 'Entreprise française de cybersécurité',
-    },
-    orientations: ['cybersecurity', 'enterprise'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Orange Cyberdefense Blog',
-    url: 'https://www.orangecyberdefense.com/fr/insights/blog',
-    rssUrl: 'https://www.orangecyberdefense.com/fr/insights/blog/feed/',
-    faviconUrl: 'https://www.orangecyberdefense.com/favicon.ico',
-    description:
-      "Blog d'Orange Cyberdefense, filiale sécurité d'Orange. Analyses de menaces et retours d'expérience.",
-    funding: {
-      type: 'private',
-      details: 'Orange (groupe télécoms français)',
-    },
-    orientations: ['cybersecurity', 'threat-intelligence'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    collectionId: cyberCollection.insertedId,
-    createdBy: cyberUser.insertedId,
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: 'r/cybersecurity',
     url: 'https://www.reddit.com/r/cybersecurity/',
     rssUrl: 'https://www.reddit.com/r/cybersecurity/.rss',
@@ -613,7 +384,7 @@ const sources = [
   {
     name: 'ENISA',
     url: 'https://www.enisa.europa.eu/',
-    rssUrl: 'https://www.enisa.europa.eu/rss/news',
+    rssUrl: 'https://www.enisa.europa.eu/rss.xml',
     faviconUrl: 'https://www.enisa.europa.eu/favicon.ico',
     description:
       "Agence européenne chargée de la sécurité des réseaux et de l'information. Rapports et recommandations officielles.",
@@ -662,57 +433,11 @@ const sources = [
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'Dark Reading',
-    url: 'https://www.darkreading.com/',
-    rssUrl: 'https://www.darkreading.com/rss.xml',
-    faviconUrl: 'https://www.darkreading.com/favicon.ico',
-    description: 'Média professionnel couvrant les dernières menaces et tendances en sécurité.',
-    funding: {
-      type: 'private',
-      details: 'Informa Tech',
-    },
-    orientations: ['cybersecurity', 'enterprise'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
-    name: 'Sécurité Informatique - Le Monde Informatique',
-    url: 'https://www.lemondeinformatique.fr/t/securite/',
-    rssUrl: 'https://www.lemondeinformatique.fr/rss/securite.xml',
-    faviconUrl: 'https://www.lemondeinformatique.fr/favicon.ico',
-    description:
-      "Actualités sécurité du principal média français dédié aux professionnels de l'informatique.",
-    funding: {
-      type: 'private',
-      details: 'Groupe IDG',
-    },
-    orientations: ['cybersecurity', 'enterprise'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'Journal du Net - Sécurité',
     url: 'https://www.journaldunet.com/securite/',
-    rssUrl: 'https://www.journaldunet.com/rss/securite.xml',
+    rssUrl: 'https://www.journaldunet.com/rss.xml',
     faviconUrl: 'https://www.journaldunet.com/favicon.ico',
     description:
       'Section sécurité du Journal du Net, média français orienté business et technologies.',

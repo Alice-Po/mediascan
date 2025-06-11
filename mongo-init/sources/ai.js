@@ -2,7 +2,7 @@
 
 // Création de la collection IA
 const aiCollection = db.collections.insertOne({
-  name: "Veille sur l'intelligence Artificielle",
+  name: 'Intelligence Artificielle [Demo]',
   description:
     "Sources d'actualités sur l'intelligence artificielle, la recherche et les innovations en IA",
   userId: aiUser.insertedId,
@@ -100,36 +100,12 @@ const sources = [
     status: 'active',
   },
   {
-    name: 'Silicone - Intelligence Artificielle',
-    url: 'https://www.silicone.fr/tag/intelligence-artificielle/',
-    rssUrl: 'https://www.silicone.fr/feed/',
-    faviconUrl: 'https://www.silicone.fr/favicon.ico',
-    description:
-      "Actualités et analyses sur l'IA par Silicone, média français spécialisé dans les technologies et l'innovation.",
-    funding: {
-      type: 'private',
-      details: 'Groupe Unique Heritage Media',
-    },
-    orientations: ['artificial-intelligence', 'tech-news'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: "L'Informaticien - Intelligence Artificielle",
-    url: 'https://www.linformaticien.com/t/intelligence-artificielle',
-    rssUrl: 'https://www.linformaticien.com/rss/actualites',
+    url: 'https://www.linformaticien.com/component/tags/tag/mistral-ai.html',
+    rssUrl: 'https://www.linformaticien.com/component/tags/tag/mistral-ai.feed?type=rss',
     faviconUrl: 'https://www.linformaticien.com/favicon.ico',
     description:
-      "Actualités professionnelles sur l'IA par L'Informaticien, média français destiné aux professionnels de l'IT.",
+      "Actualités professionnelles sur Mistral IA par L'Informaticien, média français destiné aux professionnels de l'IT.",
     funding: {
       type: 'private',
       details: 'Groupe Tests et Evaluations',
@@ -147,30 +123,7 @@ const sources = [
     updatedAt: new Date(),
     status: 'active',
   },
-  {
-    name: 'France IA',
-    url: 'https://france-ia.com/',
-    rssUrl: 'https://france-ia.com/feed/',
-    faviconUrl: 'https://france-ia.com/favicon.ico',
-    description:
-      "Communauté française dédiée à l'intelligence artificielle, avec des actualités, événements et ressources sur l'écosystème IA en France.",
-    funding: {
-      type: 'community',
-      details: 'Association France IA',
-    },
-    orientations: ['artificial-intelligence', 'community'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
+
   {
     name: 'Pixees - Intelligence Artificielle',
     url: 'https://pixees.fr/category/intelligence-artificielle/',
@@ -198,7 +151,7 @@ const sources = [
   {
     name: 'Usine Digitale - IA',
     url: 'https://www.usine-digitale.fr/intelligence-artificielle/',
-    rssUrl: 'https://www.usine-digitale.fr/rss/intelligence-artificielle',
+    rssUrl: 'https://www.usine-digitale.fr/intelligence-artificielle/rss',
     faviconUrl: 'https://www.usine-digitale.fr/favicon.ico',
     description:
       "Section IA de l'Usine Digitale, média français dédié aux transformations numériques. Actualités sur les applications industrielles et innovations en IA.",
@@ -342,30 +295,6 @@ const sources = [
     status: 'active',
   },
   {
-    name: 'Google AI Blog',
-    url: 'https://blog.google/technology/ai/',
-    rssUrl: 'https://blog.google/rss',
-    faviconUrl: 'https://blog.google/favicon.ico',
-    description:
-      "Blog officiel de Google sur l'IA. Annonces, recherches et applications pratiques des avancées en intelligence artificielle.",
-    funding: {
-      type: 'private',
-      details: 'Google',
-    },
-    orientations: ['artificial-intelligence', 'research'],
-    defaultEnabled: true,
-    isUserAdded: false,
-    addedDate: new Date('2024-12-25'),
-    fetchStatus: {
-      success: true,
-      message: '',
-      timestamp: new Date(),
-    },
-    lastFetched: new Date(),
-    updatedAt: new Date(),
-    status: 'active',
-  },
-  {
     name: 'DeepMind Blog',
     url: 'https://www.deepmind.com/blog',
     rssUrl: 'https://www.deepmind.com/blog/rss.xml',
@@ -474,6 +403,78 @@ const sources = [
       details: 'Financement par dons et subventions',
     },
     orientations: ['artificial-intelligence', 'ethics'],
+    defaultEnabled: true,
+    isUserAdded: false,
+    addedDate: new Date('2024-12-25'),
+    fetchStatus: {
+      success: true,
+      message: '',
+      timestamp: new Date(),
+    },
+    lastFetched: new Date(),
+    updatedAt: new Date(),
+    status: 'active',
+  },
+  {
+    name: 'Palisade Research',
+    url: 'https://palisaderesearch.org',
+    rssUrl: 'https://palisaderesearch.org/feed.xml',
+    faviconUrl: 'https://palisaderesearch.org/favicon.ico',
+    description:
+      "Organisation de recherche spécialisée dans l'étude des capacités offensives des systèmes d'IA et leurs implications pour la sécurité.",
+    funding: {
+      type: 'research',
+      details: 'Organisation de recherche indépendante',
+    },
+    orientations: ['artificial-intelligence', 'security', 'research'],
+    defaultEnabled: true,
+    isUserAdded: false,
+    addedDate: new Date('2024-12-25'),
+    fetchStatus: {
+      success: true,
+      message: '',
+      timestamp: new Date(),
+    },
+    lastFetched: new Date(),
+    updatedAt: new Date(),
+    status: 'active',
+  },
+  {
+    name: 'Développez.com - IA',
+    url: 'https://intelligence-artificielle.developpez.com',
+    rssUrl: 'https://intelligence-artificielle.developpez.com/rss.php',
+    faviconUrl: 'https://www.developpez.com/favicon.ico',
+    description:
+      "Section Intelligence Artificielle de Développez.com, communauté francophone de développeurs. Actualités techniques, tutoriels et discussions sur l'IA.",
+    funding: {
+      type: 'community',
+      details: 'Communauté de développeurs avec publicité',
+    },
+    orientations: ['artificial-intelligence', 'technical', 'development'],
+    defaultEnabled: true,
+    isUserAdded: false,
+    addedDate: new Date('2024-12-25'),
+    fetchStatus: {
+      success: true,
+      message: '',
+      timestamp: new Date(),
+    },
+    lastFetched: new Date(),
+    updatedAt: new Date(),
+    status: 'active',
+  },
+  {
+    name: 'Pause IA',
+    url: 'https://pauseia.substack.com',
+    rssUrl: 'https://pauseia.substack.com/feed',
+    faviconUrl: 'https://substack.com/favicon.ico',
+    description:
+      "Newsletter francophone dédiée à l'intelligence artificielle. Analyses approfondies et réflexions sur les avancées et enjeux de l'IA.",
+    funding: {
+      type: 'independent',
+      details: 'Newsletter indépendante sur Substack',
+    },
+    orientations: ['artificial-intelligence', 'analysis', 'newsletter'],
     defaultEnabled: true,
     isUserAdded: false,
     addedDate: new Date('2024-12-25'),
