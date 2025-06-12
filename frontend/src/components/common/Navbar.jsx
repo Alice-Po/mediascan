@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { AppContext } from '../../context/AppContext';
 import {
@@ -15,6 +15,9 @@ const Navbar = () => {
   const { logout } = useContext(AuthContext);
   const { isSidebarCollapsed, toggleSidebar } = useContext(AppContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isDashboard = location.pathname === '/app';
 
   const handleLogout = async () => {
     try {
@@ -94,17 +97,21 @@ const Navbar = () => {
       {/* Navigation mobile */}
       <nav className="md:hidden fixed inset-x-0 bottom-0 bg-white shadow-t z-50">
         <div className="grid grid-cols-5">
-          {/* Bouton Toggle Sidebar */}
-          <button
-            onClick={toggleSidebar}
-            className="flex flex-col items-center justify-center py-2 text-gray-500 hover:text-primary"
-            aria-label={isSidebarCollapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
-          >
-            <div className="h-6 w-6">
-              <SidebarToggleIcon collapsed={isSidebarCollapsed} />
-            </div>
-            <span className="text-xs mt-1">Menu</span>
-          </button>
+          {/* Bouton Toggle Sidebar - uniquement visible sur le dashboard */}
+          {isDashboard ? (
+            <button
+              onClick={toggleSidebar}
+              className="flex flex-col items-center justify-center py-2 text-gray-500 hover:text-primary"
+              aria-label={isSidebarCollapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
+            >
+              <div className="h-6 w-6">
+                <SidebarToggleIcon collapsed={isSidebarCollapsed} />
+              </div>
+              <span className="text-xs mt-1">Menu</span>
+            </button>
+          ) : (
+            <div /> // Espace vide pour maintenir la grille
+          )}
 
           {/* Bouton Collections */}
           <NavLink
