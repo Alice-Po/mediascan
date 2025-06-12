@@ -93,40 +93,46 @@ const CollectionItem = ({
 
   return (
     <div
-      className={`p-3 hover:bg-gray-50 cursor-pointer transition ${
+      className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
         isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
       }`}
       onClick={handleItemClick}
     >
-      <div className="flex">
-        {/* Avatar de la collection */}
-        <CollectionAvatar collection={collection} size="md" className="mr-3" />
+      <div className="flex flex-col space-y-3">
+        {/* En-tête avec avatar et informations principales */}
+        <div className="flex items-start">
+          <CollectionAvatar collection={collection} size="md" className="mr-3 flex-shrink-0" />
 
-        <div className="flex-1 min-w-0 overflow-hidden">
-          {/* Première ligne: titre, badges et étoile */}
-          <div className="flex items-center flex-wrap">
-            <h3 className="font-medium text-gray-900 truncate mr-2">{collection.name}</h3>
-            <button
-              onClick={handleSetDefaultClick}
-              className="mr-2 focus:outline-none"
-              title={isDefault ? 'Collection par défaut' : 'Définir comme collection par défaut'}
-            >
-              <StarIcon
-                className={`h-5 w-5 transition-colors ${
-                  isDefault ? 'text-yellow-400 fill-current' : 'text-gray-400 hover:text-yellow-400'
-                }`}
-              />
-            </button>
-            {collection.isPublic ? (
-              <span className="inline-flex items-center">
-                <GlobeIcon />
-              </span>
-            ) : (
-              <span className="inline-flex items-center">
-                <LockIcon />
-              </span>
-            )}
-            <div className="flex flex-wrap gap-1 ml-1">
+          <div className="flex-1 min-w-0">
+            {/* Titre et badges */}
+            <div className="flex items-center flex-wrap gap-2">
+              <h3 className="font-medium text-gray-900 truncate">{collection.name}</h3>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleSetDefaultClick}
+                  className="focus:outline-none"
+                  title={
+                    isDefault ? 'Collection par défaut' : 'Définir comme collection par défaut'
+                  }
+                >
+                  <StarIcon
+                    className={`h-5 w-5 transition-colors ${
+                      isDefault
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-400 hover:text-yellow-400'
+                    }`}
+                  />
+                </button>
+                {collection.isPublic ? (
+                  <GlobeIcon className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <LockIcon className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Badges de statut */}
+            <div className="flex flex-wrap gap-1 mt-1">
               {isFollowed && (
                 <span className="text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
                   Suivie
@@ -139,103 +145,91 @@ const CollectionItem = ({
               )}
             </div>
           </div>
+        </div>
 
-          {/* Seconde ligne: Créateur et métadonnées */}
-          <div className="flex flex-wrap text-xs text-gray-500 w-full items-center mt-1">
-            {/* Avatar du créateur */}
-            <span className="flex items-center mr-2">
-              {collection.createdBy?.avatar ? (
-                <Avatar
-                  userId={collection.createdBy._id}
-                  avatarUrl={collection.createdBy.avatar}
-                  avatarType={collection.createdBy.avatarType}
-                  size={24}
-                  className="mr-1"
-                />
-              ) : (
-                <ProfileIcon className="w-6 h-6 text-gray-400 mr-1" />
-              )}
-              <span className="font-semibold text-gray-800 text-sm">
-                {collection.userId === currentUserId
-                  ? 'vous'
-                  : collection.createdBy?.username || 'Utilisateur anonyme'}
-              </span>
-            </span>
-            <span className="mx-1 flex-shrink-0">•</span>
-            <span className="flex-shrink-0">
-              {collection.sources?.length || 0} source
-              {collection.sources?.length !== 1 ? 's' : ''}
-            </span>
-            {/* Nombre de suiveurs pour les collections publiques */}
-            {collection.isPublic && (
-              <>
-                <span className="mx-1 flex-shrink-0">•</span>
-                <span className="truncate flex-shrink-0">
-                  {generateFollowersFromId(collection._id)} suiveurs
-                </span>
-              </>
+        {/* Informations du créateur et métadonnées */}
+        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <span className="flex items-center">
+            {collection.createdBy?.avatar ? (
+              <Avatar
+                userId={collection.createdBy._id}
+                avatarUrl={collection.createdBy.avatar}
+                avatarType={collection.createdBy.avatarType}
+                size={24}
+                className="mr-1"
+              />
+            ) : (
+              <ProfileIcon className="w-6 h-6 text-gray-400 mr-1" />
             )}
-          </div>
-
-          {/* Description sur une ligne distincte avec plus d'espace */}
-          {collection.description && (
-            <p className="text-xs text-gray-700 mt-2 sm:max-w-none overflow-hidden">
-              {/* Sur mobile: afficher plus de texte, sur desktop: garder compact */}
-              <span className="sm:hidden">
-                {collection.description.length > 100
-                  ? `${collection.description.substring(0, 100)}...`
-                  : collection.description}
-              </span>
-              <span className="hidden sm:inline truncate">{collection.description}</span>
-            </p>
+            <span className="font-semibold text-gray-800 text-sm">
+              {collection.userId === currentUserId
+                ? 'vous'
+                : collection.createdBy?.username || 'Utilisateur anonyme'}
+            </span>
+          </span>
+          <span className="flex items-center">
+            <span className="mx-1">•</span>
+            {collection.sources?.length || 0} source{collection.sources?.length !== 1 ? 's' : ''}
+          </span>
+          {collection.isPublic && (
+            <span className="flex items-center">
+              <span className="mx-1">•</span>
+              {generateFollowersFromId(collection._id)} suiveurs
+            </span>
           )}
         </div>
 
+        {/* Description */}
+        {collection.description && (
+          <p className="text-sm text-gray-700 line-clamp-2">{collection.description}</p>
+        )}
+
         {/* Boutons d'action */}
         {showActionButtons && (
-          <div className="flex flex-shrink-0 space-x-1 ml-2">
-            {/* Bouton Voir (pour toutes les collections) */}
+          <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
             {actionConfig.view && (
               <button
-                className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                className="text-gray-500 hover:text-gray-700 p-1.5 rounded hover:bg-gray-100 inline-flex items-center"
                 onClick={handleViewClick}
                 title="Voir les détails de la collection"
               >
                 <ViewIcon className="h-5 w-5" />
+                <span className="ml-1 text-sm">Voir</span>
               </button>
             )}
 
-            {/* Bouton Partager (uniquement pour les collections publiques) */}
             {actionConfig.share && collection.isPublic && onShare && (
               <button
-                className="text-gray-400 hover:text-blue-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                className="text-gray-500 hover:text-blue-600 p-1.5 rounded hover:bg-gray-100 inline-flex items-center"
                 onClick={handleShareClick}
                 title="Partager cette collection"
               >
                 <CollectionShareIcon className="h-5 w-5" />
+                <span className="ml-1 text-sm">Partager</span>
               </button>
             )}
 
-            {/* Boutons Modifier et Supprimer (uniquement pour les collections de l'utilisateur) */}
             {canModify && (
               <>
                 {actionConfig.edit && !isOnboarding && (
                   <Link
                     to={`/collections/edit/${collection._id}`}
-                    className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                    className="text-gray-500 hover:text-gray-700 p-1.5 rounded hover:bg-gray-100 inline-flex items-center"
                     onClick={(e) => e.stopPropagation()}
                     title="Modifier cette collection"
                   >
                     <EditIcon className="h-5 w-5" />
+                    <span className="ml-1 text-sm">Modifier</span>
                   </Link>
                 )}
                 {actionConfig.delete && onDelete && (
                   <button
-                    className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100 inline-flex items-center justify-center"
+                    className="text-gray-500 hover:text-red-600 p-1.5 rounded hover:bg-gray-100 inline-flex items-center"
                     onClick={handleDeleteClick}
                     title="Supprimer cette collection"
                   >
                     <TrashIcon className="h-5 w-5" />
+                    <span className="ml-1 text-sm">Supprimer</span>
                   </button>
                 )}
               </>
