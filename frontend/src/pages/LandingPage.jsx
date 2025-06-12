@@ -45,18 +45,20 @@ const HeroSection = ({ isVisible, showScrollHint, scrollToContent }) => (
           Agrégateur d'actualités à curation humaine
         </h2>
 
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Médiascan est un agrégateur d'actualités français qui permet aux utilisateurs de créer des
-          collections personnalisées de sources d'information. Chaque utilisateur peut constituer
-          ses propres fils d'actualité en sélectionnant les sources qui correspondent à ses centres
-          d'intérêt.
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+          Médiascan est un agrégateur d'actualités <strong>français et open source</strong> qui
+          permet aux utilisateurs de créer des collections personnalisées de sources d'information.
         </p>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          La plateforme propose également des collections publiques créées par d'autres
-          utilisateurs, permettant de suivre des fils d'actualité éditorialisés par des personnes
-          reconnues dans leur domaine d'expertise.
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+          Chaque utilisateur peut constituer ses propres fils d'actualité en sélectionnant les
+          sources qui correspondent à ses centres d'intérêt.
         </p>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
+          La plateforme propose également des <strong>collections publiques</strong> créées par
+          d'autres utilisateurs, permettant de suivre des fils d'actualité{' '}
+          <strong>éditorialisés par des personnes reconnues dans leur domaine d'expertise</strong>.
+        </p>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
           Le service s'adresse principalement aux professionnels, tout en restant accessible aux
           passionnés et au grand public. L'interface privilégie la simplicité d'utilisation.
         </p>
