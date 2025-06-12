@@ -22,7 +22,7 @@ const Funding = () => {
     {
       question: "Comment fonctionnera concrètement le paiement à l'article ?",
       answer:
-        'Nous aimerions utiliser GNU Taler, solution libre de micro-paiement soutenu par NGI mais le sujet est toujours en cours de discussion.',
+        'Nous aimerions utiliser solution libre de micro-paiement mais le sujet est toujours en cours de discussion.',
     },
   ];
 
@@ -97,7 +97,7 @@ const Funding = () => {
         <section className="bg-white rounded-lg shadow-md p-8 mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">​👑​ Devenez membre d'honneur</h2>
           <p className="text-gray-700 text-lg mb-6">
-            Plus qu'un simple abonnement, une place à la table des décisions.
+            Plus qu'un simple abonnement, une place à la table des orientations stratégiques.
           </p>
           <p className="text-gray-700 mb-6">
             Pour 4,99€/mois, vous accéderez bientôt à toutes les fonctionnalités premium en
