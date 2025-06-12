@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CollectionDetails from './CollectionDetails';
 import CollectionAvatar from './CollectionAvatar';
 import UserItem from '../users/UserItem';
 import { generateFollowersFromId } from '../../utils/colorUtils';
 import { useCollections } from '../../hooks/useCollections';
+import { AuthContext } from '../../context/AuthContext';
 
 /**
  * Composant pour afficher une carte de collection publique
@@ -30,6 +31,7 @@ const CollectionCard = ({
   showFull = false,
 }) => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const { loadCollectionById } = useCollections();
   const [collection, setCollection] = useState(initialCollection);
@@ -73,6 +75,9 @@ const CollectionCard = ({
   const titleClass = `font-bold text-gray-900 text-lg ${showFull ? 'break-words' : 'truncate'}`;
   const descriptionClass = `text-gray-700 text-sm italic ${showFull ? '' : 'truncate'}`;
 
+  // Vérifier si l'utilisateur est le créateur
+  const isCreator = collection.userId?._id === user?._id;
+
   return (
     <>
       <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
@@ -87,7 +92,7 @@ const CollectionCard = ({
               <div className="flex items-center min-w-0">
                 <UserItem
                   userId={collection.createdBy?._id}
-                  userName={collection.createdBy?.username}
+                  userName={isCreator ? 'vous' : collection.createdBy?.username}
                   avatarUrl={collection.createdBy?.avatar}
                   avatarType={collection.createdBy?.avatarType}
                   className="flex-shrink-0"
@@ -122,36 +127,38 @@ const CollectionCard = ({
           >
             Avoir un aperçu
           </button>
-          <button
-            className={`flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isFollowed
-                ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-            }`}
-            onClick={() => onFollowToggle && onFollowToggle(collection._id)}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
-            ) : (
-              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                {isFollowed ? (
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                ) : (
-                  <path
-                    fillRule="evenodd"
-                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                )}
-              </svg>
-            )}
-            {isFollowed ? 'Suivi' : 'Suivre'}
-          </button>
+          {!isCreator && (
+            <button
+              className={`flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isFollowed
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+              }`}
+              onClick={() => onFollowToggle && onFollowToggle(collection._id)}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="h-4 w-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin mr-1"></span>
+              ) : (
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  {isFollowed ? (
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  ) : (
+                    <path
+                      fillRule="evenodd"
+                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  )}
+                </svg>
+              )}
+              {isFollowed ? 'Suivi' : 'Suivre'}
+            </button>
+          )}
         </div>
       </div>
     </>
