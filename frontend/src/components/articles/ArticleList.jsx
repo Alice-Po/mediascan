@@ -148,6 +148,17 @@ const ArticleList = ({ filters, pageSize = 20 }) => {
 
   return (
     <div className="article-list -mx-3 sm:mx-0">
+      {(filters?.collection || filters?.sources?.[0]) && (
+        <div className="bg-white/80 backdrop-blur-sm border-b text-sm py-2 px-3 sticky top-0 z-10">
+          <span className="text-gray-600">
+            {filters?.collection
+              ? activeCollection?.name
+              : allCollections
+                  ?.find((c) => c.sources?.some((s) => s._id === filters?.sources?.[0]))
+                  ?.sources?.find((s) => s._id === filters?.sources?.[0])?.name}
+          </span>
+        </div>
+      )}
       {articles.map((article, index) => (
         <div
           ref={index === articles.length - 1 ? lastArticleRef : null}
