@@ -44,23 +44,23 @@ const HeroSection = ({ isVisible, showScrollHint, scrollToContent }) => (
         <h2 className="text-2xl md:text-3xl text-blue-700 font-semibold mb-8 leading-relaxed">
           Agrégateur d'actualités à curation humaine
         </h2>
+        <h3 className="text-xl md:text-2xl text-gray-700 font-medium mb-6 leading-relaxed">
+          Prenez le contrôle de votre fil d'actualité
+        </h3>
 
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-          Médiascan est un agrégateur d'actualités <strong>français et open source</strong> qui
-          permet aux utilisateurs de créer des collections personnalisées de sources d'information.
-        </p>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-          Chaque utilisateur peut constituer ses propres fils d'actualité en sélectionnant les
-          sources qui correspondent à ses centres d'intérêt.
+          Construisez vos propres fils d'actualité en sélectionnant les sources qui correspondent à
+          vos centres d'intérêt pour suivre toute l'actualité qui vous intéressent, en un seul
+          endroit.
         </p>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
           La plateforme propose également des <strong>collections publiques</strong> créées par
           d'autres utilisateurs, permettant de suivre des fils d'actualité{' '}
           <strong>éditorialisés par des personnes reconnues dans leur domaine d'expertise</strong>.
         </p>
+
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed mb-4">
-          Le service s'adresse principalement aux professionnels, tout en restant accessible aux
-          passionnés et au grand public. L'interface privilégie la simplicité d'utilisation.
+          Médiascan est <strong>français et open source</strong>
         </p>
 
         <div className="mt-12 flex flex-wrap justify-center gap-6">
@@ -102,7 +102,7 @@ const HeroSection = ({ isVisible, showScrollHint, scrollToContent }) => (
 const FrustrationsSection = () => (
   <div className="bg-gradient-to-br from-red-50 to-red-100/50 rounded-xl p-8 shadow-lg transform hover:shadow-xl transition-all duration-300">
     <h3 className="text-2xl font-semibold text-gray-900 mb-8 leading-tight">
-      Vous aussi, vous en avez marre de...
+      Vous en avez marre de...
     </h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div className="flex gap-4 items-start">
@@ -166,39 +166,77 @@ const FrustrationsSection = () => (
 
 // Notre Approche Section Component
 const NotreApprocheSection = () => (
-  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-8 shadow-lg transform hover:shadow-xl transition-all duration-300">
-    <h2 className="text-2xl font-semibold text-gray-900 mb-8 leading-tight">
-      Notre approche : Des experts passionnés créent des sélections thématiques que vous pouvez
-      suivre.
+  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-8 shadow-lg">
+    <h2 className="text-3xl font-semibold text-center mb-12">
+      Notre approche : <span className="text-blue-600">Suivez toutes vos sources préférées</span> en
+      un seul endroit
     </h2>
-    <p className="text-gray-700 mb-8">Comme une playlist musicale, mais pour l'information.</p>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-      <div className="flex gap-4 items-start">
-        <div className="text-2xl flex-shrink-0">🎯</div>
-        <div>
-          <h4 className="font-medium text-gray-900">Curation humaine</h4>
-          <p className="text-gray-600">
-            Des journalistes, experts et passionnés sélectionnent les meilleures sources sur leur
-            domaine
-          </p>
+    <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+      <div className="space-y-6">
+        <div className="bg-white/60 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl">📱</span>
+            <div>
+              <h3 className="font-medium text-gray-900">Créer vos fils d'actualités sur mesure</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Personnalisez votre flux selon vos centres d'intérêt
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/60 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl">🤝</span>
+            <div>
+              <h3 className="font-medium text-gray-900">
+                Partager les avec vos collègue ou vos amis
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Créez une communauté autour de vos intérêts
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/60 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl">👥</span>
+            <div>
+              <h3 className="font-medium text-gray-900">Suivez ceux de personnes respectées</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Accédez à des contenus sélectionnés par des experts
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/60 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-2xl">⭐</span>
+            <div>
+              <h3 className="font-medium text-gray-900">
+                Devenez une personalité curatrice reconnue
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Partagez votre expertise et gagnez en visibilité
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-4 items-start">
-        <div className="text-2xl flex-shrink-0">🇫🇷</div>
-        <div>
-          <h4 className="font-medium text-gray-900">Français et indépendant</h4>
-          <p className="text-gray-600">Créé en France, financé par les utilisateurs</p>
-        </div>
-      </div>
-
-      <div className="flex gap-4 items-start">
-        <div className="text-2xl flex-shrink-0">🔓</div>
-        <div>
-          <h4 className="font-medium text-gray-900">Transparent et ouvert</h4>
-          <p className="text-gray-600">Code open source ouvert à la contribution.</p>
-        </div>
+      <div className="bg-white/40 rounded-xl overflow-hidden shadow-lg ">
+        <picture>
+          <source media="(min-width: 768px)" srcSet="illu-mediascan-desktop.png" />
+          <source media="(max-width: 767px)" srcSet="illu-mediascan-smartphone.png" />
+          <img
+            src="illu-mediascan-desktop.png"
+            alt="Interface Médiascan"
+            className="w-full object-contain rounded-lg transform hover:scale-105 transition-transform duration-300"
+          />
+        </picture>
       </div>
     </div>
   </div>
@@ -208,9 +246,6 @@ const NotreApprocheSection = () => (
 const CommentCaMarcheSection = () => (
   <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-8 shadow-lg transform hover:shadow-xl transition-all duration-300">
     <h2 className="text-2xl font-semibold text-gray-900 mb-8 leading-tight">Comment ça marche ?</h2>
-    <p className="text-gray-700 mb-8">
-      C'est aussi simple que de suivre une chaîne YouTube ou un compte Twitter
-    </p>
 
     <div className="space-y-12 mb-12">
       <div className="flex gap-6">
@@ -218,11 +253,19 @@ const CommentCaMarcheSection = () => (
           1
         </div>
         <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Explorez les sélections</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Découvrez et suivez les collections public de vos curateurs préférés
+          </h3>
           <p className="text-gray-600">
-            Découvrez les collections créées par des experts : "Tech éthique", "Climat sans
-            catastrophisme", "Économie décryptée"... Chaque collection rassemble articles,
-            newsletters, vidéos YouTube, comptes Twitter et podcasts sur un thème.
+            <strong>
+              Les collections sont des selections de sources qui génère un fils d'actualité
+              thématique
+            </strong>
+          </p>
+          <p className="text-gray-600">
+            Découvrez les collections créées par des personnes dont vous appréciez le regard et la
+            sélection autour d'une thématique: "Tech éthique", "Actualités positives", "Économie
+            décryptée"...
           </p>
         </div>
       </div>
@@ -233,10 +276,17 @@ const CommentCaMarcheSection = () => (
         </div>
         <div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Suivez les collections public de vos curateurs préférés
+            Créez vos propres collections
           </h3>
           <p className="text-gray-600">
-            Choisissez les collections des experts dont vous appréciez le regard et la sélection.
+            <strong>
+              Vous pouvez créer vos propres collections en sélectionnant les sources qui vous
+              intéressent
+            </strong>
+          </p>
+          <p className="text-gray-600">
+            Une source peut être un articles, newsletters, vidéos, comptes de réseaux sociaux ou
+            podcasts...
           </p>
         </div>
       </div>
@@ -248,8 +298,10 @@ const CommentCaMarcheSection = () => (
         <div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Plonger dans les sujets</h3>
           <p className="text-gray-600">
-            Plonger dans les fils d'actualité de vos curateurs de confiance. Changer de collection
-            selon votre envie, votre humeur, votre curiosité.
+            Selon si vous êtes au travail ou dans votre canapé, déprimé ou exalté, changer de
+            collection selon votre envie, votre humeur, votre curiosité. Vous avez les clefs pour
+            aller directement explorer le sujet qui vous intérésse en vous basant sur l'expertise
+            des autres.
           </p>
         </div>
       </div>
@@ -320,22 +372,6 @@ const CommentCaMarcheSection = () => (
         Si vous vous intéressez au sujet, vous n'avez qu'à suivre sa collection pour recevoir le
         meilleur de tous ces contenus dans un seul endroit, sans le bruit.
       </p>
-
-      {/* Illustration */}
-      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl overflow-hidden shadow-lg p-6">
-        <div className="max-w-4xl mx-auto">
-          <img
-            src="illu-mediascan-desktop.png"
-            alt="Interface Médiascan sur desktop"
-            className="w-full max-w-2xl mx-auto hidden md:block object-contain"
-          />
-          <img
-            src="illu-mediascan-smartphone.png"
-            alt="Interface Médiascan sur mobile"
-            className="w-full max-w-xs mx-auto md:hidden object-contain"
-          />
-        </div>
-      </div>
     </div>
   </div>
 );
@@ -353,8 +389,9 @@ const CreditsSection = () => (
           </h3>
           <p className="text-gray-600 leading-relaxed">
             Le modèle économique actuel de l'information en ligne pose question : multiplication des
-            abonnements, précarité des créateurs, course au clic... Nous réfléchissons à des
-            alternatives.
+            abonnements, précarité des créateurs, course au clic... L'accélération des usage des
+            agents conversationnelles unilisant l'ia accentue les difficultés financières des
+            créateurs. Nous réfléchissons à des alternatives.
           </p>
         </div>
       </div>
@@ -391,7 +428,12 @@ const CreditsSection = () => (
 // FAQ Items
 const FAQ_ITEMS = [
   {
-    question: 'Est-ce que Médiascan va mettre en place de la publicité sur sa version gratuite ?',
+    question: 'Comment est financé Médiascan ?',
+    answer:
+      "Nous allons mettre en place un abonnement payant pour avoir accés à certaines fonctionalités comme l'ajout de newsletter, les alertes ou les recherches  approfondies",
+  },
+  {
+    question: 'Est-ce que Médiascan va mettre en place de la publicité ?',
     answer:
       "Dans la version gratuit, il est possible que nous optons pour de la publicité. Ceci dit, vous ne trouverez jamais de publicité frauduleuse pour des panneaux solaires ou des appareils auditifs révolutionnaires sur notre plateforme, la régie publicitaire étant gouvernée par la communauté d'abonnés premium.",
   },
@@ -428,9 +470,9 @@ const WhyMediascan = () => (
         >
           une étude Reuters de 2023
         </a>
-        , plus de 65% des Français expriment leur méfiance envers les médias traditionnels, tandis
-        que les plateformes numériques continuent de promouvoir le contenu qui génère le plus
-        d'engagement, généralement le plus clivant.
+        , seulement 30% des Français disent faire confiance aux médias traditionnels, tandis que les
+        plateformes numériques continuent de promouvoir le contenu qui génère le plus d'engagement,
+        généralement le plus clivant.
       </p>
       <p className="text-gray-700 mb-6">
         Un nouveau défi émerge : de plus en plus de personnes se tournent vers les agents
@@ -445,12 +487,12 @@ const WhyMediascan = () => (
         </strong>
       </p>
       <p className="text-gray-700 mb-6">
-        Notre service fonctionne comme une{' '}
+        Le service fonctionne comme une{' '}
         <strong>bibliothèque de revues éditorialisée par des personnes</strong> en qui vous avez
         confiance. C'est plus qu'une façon de s'informer : c'est une invitation à s'étonner, à
-        élargir ses horizons, un divertissement qui augmente votre champ de perspectives. Nous
-        rendons accessible au plus grand nombre la configuration de ses flux d'information et la
-        découverte de sources pépites, habituellement réservées aux initiés ou aux professionnels.
+        élargir ses horizons, à ouvrir le champ de perspectives en rendant accessible au plus grand
+        nombre la découverte de sources pépites, habituellement réservées aux initiés ou aux
+        professionnels.
       </p>
     </div>
   </div>
@@ -461,9 +503,6 @@ const WhoWeAre = () => (
   <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-8 shadow-lg transform hover:shadow-xl transition-all duration-300">
     <div>
       <h2 className="text-2xl font-semibold text-gray-900 mb-8 leading-tight">Qui sommes-nous ?</h2>
-      <p className="text-gray-700 mb-6">
-        Médiascan est un projet français, open source, indépendant et collaboratif.
-      </p>
     </div>
 
     {/* Fondatrice section */}
@@ -590,7 +629,7 @@ const LandingPage = () => {
       <div className="w-full max-w-6xl mx-auto border-t border-blue-100 my-16"></div>
 
       {/* Main Content Sections */}
-      <div className="container mx-auto max-w-6xl px-4 space-y-20 py-16">
+      <div className="container mx-auto max-w-6xl px-4 space-y-20">
         <FrustrationsSection />
         <NotreApprocheSection />
         <CommentCaMarcheSection />
