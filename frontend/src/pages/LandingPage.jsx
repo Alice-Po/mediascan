@@ -42,15 +42,23 @@ const HeroSection = ({ isVisible, showScrollHint, scrollToContent }) => (
           Médiascan
         </h1>
         <h2 className="text-2xl md:text-3xl text-blue-700 font-semibold mb-8 leading-relaxed">
-          Pour retrouver le goût de s'informer
+          Agrégateur d'actualités à curation humaine
         </h2>
-        <h3 className="text-xl md:text-2xl text-gray-700 font-medium mb-6 leading-relaxed">
-          L'information de qualité, sélectionnée par des experts passionnés.
-        </h3>
+
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Fini les algorithmes opaques et la surinformation. Découvrez un agrégateur français
-          transparent où des curateurs humains sélectionnent pour vous les meilleures sources
-          d'information.
+          Médiascan est un agrégateur d'actualités français qui permet aux utilisateurs de créer des
+          collections personnalisées de sources d'information. Chaque utilisateur peut constituer
+          ses propres fils d'actualité en sélectionnant les sources qui correspondent à ses centres
+          d'intérêt.
+        </p>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          La plateforme propose également des collections publiques créées par d'autres
+          utilisateurs, permettant de suivre des fils d'actualité éditorialisés par des personnes
+          reconnues dans leur domaine d'expertise.
+        </p>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          Le service s'adresse principalement aux professionnels, tout en restant accessible aux
+          passionnés et au grand public. L'interface privilégie la simplicité d'utilisation.
         </p>
 
         <div className="mt-12 flex flex-wrap justify-center gap-6">
