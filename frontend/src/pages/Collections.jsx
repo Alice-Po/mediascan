@@ -103,15 +103,15 @@ const Collections = () => {
         <div className="flex flex-wrap gap-2">
           <Link
             to="/collections/new"
-            className="flex-1 sm:flex-auto text-center px-3 py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition"
+            className="inline-flex items-center justify-center flex-1 sm:flex-initial px-4 py-2 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition-colors min-h-[40px]"
           >
             Nouvelle collection
           </Link>
           <button
             onClick={() => setShowPublicCollectionsModal(true)}
-            className="flex-1 sm:flex-auto text-center px-3 py-2 bg-indigo-500 text-white text-sm sm:text-base rounded hover:bg-indigo-600 transition"
+            className="inline-flex items-center justify-center flex-1 sm:flex-initial px-4 py-2 bg-indigo-500 text-white text-sm sm:text-base rounded hover:bg-indigo-600 transition-colors min-h-[40px]"
           >
-            Explorer les collections
+            Explorer les collections publiques
           </button>
         </div>
       </div>
