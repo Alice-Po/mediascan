@@ -56,10 +56,6 @@ const CollectionFormPage = () => {
 
   return (
     <div className="py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {id ? 'Modifier la collection' : 'Créer une nouvelle collection'}
-      </h1>
-
       <CollectionForm
         initialData={collection}
         onSubmit={handleSubmit}
