@@ -52,8 +52,8 @@ const CollectionDetails = ({
     collection: collection?._id,
   };
 
-  // Utiliser la prop isOwner au lieu de faire la comparaison
-  const isUserOwner = isOwner;
+  // Déterminer si l'utilisateur est le propriétaire en comparant les IDs
+  const isUserOwner = collection.userId?._id === user?._id;
   const isDefault = isDefaultCollection(collection._id);
   const canSetAsDefault = isUserOwner || isFollowing;
 
