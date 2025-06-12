@@ -57,6 +57,7 @@ const CollectionFormPage = () => {
   return (
     <div className="py-6">
       <CollectionForm
+        collectionId={id}
         initialData={collection}
         onSubmit={handleSubmit}
         onCancel={() => navigate(id ? `/collections/${id}` : '/collections')}

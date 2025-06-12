@@ -10,7 +10,7 @@ import SourcesList from '../../sources/SourcesList';
 /**
  * Composant pour la modification d'une collection existante
  */
-const EditCollection = ({ collectionId, onSuccess, onError }) => {
+const EditCollection = ({ collectionId, onSuccess, onError, onSubmit, onCancel, isSubmitting }) => {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const { currentCollection, updateCollection, removeSourceFromCollection, loadCollectionById } =
@@ -70,12 +70,8 @@ const EditCollection = ({ collectionId, onSuccess, onError }) => {
     try {
       await updateCollection(collectionId, formData);
       showSnackbar('Collection mise à jour avec succès', SNACKBAR_TYPES.SUCCESS);
-
-      if (onSuccess) {
-        const result = onSuccess(currentCollection);
-        if (result !== false) {
-          navigate(`/collections/${collectionId}`);
-        }
+      if (onSubmit) {
+        onSubmit(formData);
       }
     } catch (err) {
       const errorMsg = 'Erreur lors de la mise à jour de la collection';
@@ -89,9 +85,22 @@ const EditCollection = ({ collectionId, onSuccess, onError }) => {
   const handleRemoveSource = async (source) => {
     try {
       await removeSourceFromCollection(collectionId, source._id);
+      // Recharger la collection pour mettre à jour la liste des sources
+      await loadCollectionById(collectionId);
       showSnackbar('Source retirée de la collection', SNACKBAR_TYPES.SUCCESS);
     } catch (err) {
       showSnackbar('Erreur lors du retrait de la source', SNACKBAR_TYPES.ERROR);
+    }
+  };
+
+  // Fonction pour gérer la fermeture du catalogue
+  const handleCloseCatalog = async () => {
+    setShowSourcesCatalog(false);
+    // Recharger la collection pour obtenir la liste mise à jour des sources
+    try {
+      await loadCollectionById(collectionId);
+    } catch (err) {
+      console.error('Erreur lors du rechargement de la collection:', err);
     }
   };
 
@@ -114,6 +123,8 @@ const EditCollection = ({ collectionId, onSuccess, onError }) => {
           onSubmit={handleSubmit}
           submitLabel="Enregistrer les modifications"
           error={error}
+          isSubmitting={isSubmitting}
+          onCancel={onCancel}
         />
 
         <div className="mt-8 pt-6 border-t">
@@ -137,14 +148,11 @@ const EditCollection = ({ collectionId, onSuccess, onError }) => {
 
           <Modal
             isOpen={showSourcesCatalog}
-            onClose={() => setShowSourcesCatalog(false)}
+            onClose={handleCloseCatalog}
             title="Catalogue de sources"
             size="2xl"
           >
-            <SourcesCatalog
-              collectionId={collectionId}
-              onClose={() => setShowSourcesCatalog(false)}
-            />
+            <SourcesCatalog collectionId={collectionId} onClose={handleCloseCatalog} />
           </Modal>
         </div>
       </div>
