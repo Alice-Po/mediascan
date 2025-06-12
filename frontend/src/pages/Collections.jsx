@@ -158,8 +158,14 @@ const Collections = () => {
             />
           </>
         ) : (
-          <div className="p-4 text-gray-500 italic">
-            Vous ne suivez aucune collection publique pour le moment.
+          <div className="p-4 text-gray-500">
+            <p className="italic mb-4">Vous ne suivez aucune collection publique pour le moment.</p>
+            <button
+              onClick={() => setShowPublicCollectionsModal(true)}
+              className="inline-flex items-center justify-center px-4 py-2 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600 transition-colors"
+            >
+              Explorer les collections publiques
+            </button>
           </div>
         )}
       </div>
