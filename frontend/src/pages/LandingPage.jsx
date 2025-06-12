@@ -217,7 +217,7 @@ const NotreApprocheSection = () => (
             <span className="text-2xl">⭐</span>
             <div>
               <h3 className="font-medium text-gray-900">
-                Devenez une personalité curatrice reconnue
+                Devenez une personnalité curatrice reconnue
               </h3>
               <p className="text-sm text-gray-600 mt-1">
                 Partagez votre expertise et gagnez en visibilité
@@ -227,7 +227,7 @@ const NotreApprocheSection = () => (
         </div>
       </div>
 
-      <div className="bg-white/40 rounded-xl overflow-hidden shadow-lg ">
+      {/* <div className="bg-white/40 rounded-xl overflow-hidden shadow-lg ">
         <picture>
           <source media="(min-width: 768px)" srcSet="illu-mediascan-desktop.png" />
           <source media="(max-width: 767px)" srcSet="illu-mediascan-smartphone.png" />
@@ -237,7 +237,7 @@ const NotreApprocheSection = () => (
             className="w-full object-contain rounded-lg transform hover:scale-105 transition-transform duration-300"
           />
         </picture>
-      </div>
+      </div> */}
     </div>
   </div>
 );
