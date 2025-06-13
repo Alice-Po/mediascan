@@ -47,9 +47,9 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <NavLink to="/app" className="flex items-center">
-              <div className="text-gray-800 w-8 h-8 mr-2">
+              {/* <div className="text-gray-800 w-8 h-8 mr-2">
                 <AntennaIcon />
-              </div>
+              </div> */}
               <span className="text-xl font-semibold text-gray-900">MédiaScan</span>
             </NavLink>
 
