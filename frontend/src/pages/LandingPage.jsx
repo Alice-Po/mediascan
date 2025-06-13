@@ -521,31 +521,29 @@ const WhoWeAre = () => (
         <div className="flex-1">
           <div className="space-y-6 text-gray-700 leading-relaxed">
             <p>
-              Je suis développeuse web, animatrice communautaire et créatrice de Médiascan. J'ai
-              fais trois années sur le terrain à faire de la médiation numérique dans le bocage
-              ornais. J'ai vu comment l'information transforme les gens - ou les laisse sur le
-              carreau.
+              Je suis développeuse web et animatrice communautaire. J'ai fais trois années sur le
+              terrain à faire de la médiation numérique dans le bocage ornais. J'ai vu comment
+              l'information transforme les gens - ou les laisse sur le carreau.
             </p>
             <p>
-              Chaque soir, je scroll l'actualité noyée dans un flux mainstream qui m'ennuie ou
-              m'agace. L'information de qualité se raréfie et cela m'angoisse.
-            </p>
-            <p>Comment pourrais-je rendre mes compétences utiles à cette problématique ?</p>
-            <p>
-              Je développe Médiascan de A à Z - design, code, stratégie - portée par la conviction
-              qu'il y a une place dans le marché francais pour un outil de veille à la fois sérieux,
-              souverain et grand public.
+              L'IA et les réseaux sociaux complexifient notre rapport à l'information : entre outils
+              professionnels inaccessibles et contenus gratuits de faible qualité, l'hygiène
+              informationnelle devient un luxe. Je crois pourtant qu'un public émergent acceptera de
+              payer modestement pour une information de qualité, curée humainement.
             </p>
             <p>
-              Médiascan est mon invitation à ne pas abandonner la compréhension du monde. À choisir
-              l'humilité plutôt que les certitudes. À accepter la complexité plutôt que les
-              simplifications toxiques.
+              Médiascan s'inscrit dans cette vision : construire ensemble un outil de veille qui
+              répond simplement au besoin d'être bien informé, avec franchise, intelligence
+              collective et indépendance.
             </p>
             <p>
-              Cela ne va pas changer le monde mais j'espère juste qu'il pourra offrir une petite
-              bouée à ceux qui, comme moi, refusent de se noyer dans le bruit ou de s'isoler sur la
-              rive.
+              Je recherche des partenariats pour faire évoluer Médiascan là où il sera le plus utile
+              et répondra à de vrais besoins utilisateurs. L'idée : créer quelque chose de si
+              pertinent que la validation du concept se confirme par l'engouement plutôt que par
+              l'effort commercial. Avec un souci de pragmatisme économique, ce projet open source
+              est ouvert à toutes collaborations. Contactez-moi par mail pour en discuter.
             </p>
+
             <p>
               <strong>Alice Poggioli</strong>
             </p>
